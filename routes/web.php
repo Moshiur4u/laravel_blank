@@ -5,8 +5,11 @@ use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\UserController;
 use Illuminate\Support\Facades\Route;
 
-Route::get('/', function () {
-    return view('welcome');
+// Route::get('/', function () {
+//     return view('welcome');
+// });
+Route::post('/', function () {
+    return view('frontend.loginpage.login');
 });
 Route::middleware(['auth','verified'])->group(function(){
 Route::get('/logout',[UserController::class,'logout'])->name('logout');
