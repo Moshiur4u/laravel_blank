@@ -120,6 +120,9 @@
                         <li>
                             <a href="javascript:;"><i class='bx bx-user-plus '></i>Create Customer</a>
                         </li>
+                        <li>
+                            <a href="javascript:;"><i class='bx bx-user-plus '></i>Customer Ledger</a>
+                        </li>
 
                     </ul>
                 </li>
