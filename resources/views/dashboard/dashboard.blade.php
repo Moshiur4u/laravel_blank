@@ -43,7 +43,7 @@
                     <img src="{{ asset('assets/images/logo-icon.png') }}" class="logo-icon" alt="logo icon">
                 </div>
                 <div>
-                    <h4 class="logo-text">TechTuner Software</h4>
+                    <h4 class="logo-text">myPOS Software</h4>
                 </div>
                 <div class="toggle-icon ms-auto"><i class='bx bx-arrow-back'></i>
                 </div>
@@ -166,7 +166,7 @@
                     <a class="has-arrow" href="javascript:;">
                         <div class="parent-icon"><i class='bx bx-message-square-edit'></i>
                         </div>
-                        <div class="menu-title">Forms</div>
+                        <div class="menu-title">Sale Reports</div>
                     </a>
                     <ul>
                         <li> <a href="form-elements.html"><i class='bx bx-radio-circle'></i>Form Elements</a>
@@ -198,7 +198,7 @@
                     <a class="has-arrow" href="javascript:;">
                         <div class="parent-icon"><i class="bx bx-grid-alt"></i>
                         </div>
-                        <div class="menu-title">Tables</div>
+                        <div class="menu-title">Store Reports</div>
                     </a>
                     <ul>
                         <li> <a href="table-basic-table.html"><i class='bx bx-radio-circle'></i>Basic Table</a>
@@ -603,7 +603,8 @@
                             <li><a class="dropdown-item d-flex align-items-center" href="javascript:;"><i
                                         class="bx bx-cog fs-5"></i><span>Settings</span></a>
                             </li>
-                            <li><a class="dropdown-item d-flex align-items-center" href="{{ route('dashboardbody') }}"><i
+                            <li><a class="dropdown-item d-flex align-items-center"
+                                    href="{{ route('dashboardbody') }}"><i
                                         class="bx bx-home-circle fs-5"></i><span>Dashboard</span></a>
                             </li>
 

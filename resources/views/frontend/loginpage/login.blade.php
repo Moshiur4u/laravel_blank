@@ -59,11 +59,13 @@
                                             alt="">
                                     </div>
                                     <div class="mb-4 text-center">
+                                        <h6 class="">Welcome to</h6>
                                         <h5 class="">My-POS</h5>
                                         <p class="mb-0">Please log in to your account</p>
                                     </div>
                                     <div class="form-body">
                                         <form action="{{ route('login') }}" class="row g-3" method="POST">
+                                            @csrf
                                             <div class="col-12">
                                                 <label for="inputEmailAddress" class="form-label">Email</label>
                                                 <input type="email" name="email" class="form-control"

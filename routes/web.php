@@ -8,7 +8,7 @@ use Illuminate\Support\Facades\Route;
 // Route::get('/', function () {
 //     return view('welcome');
 // });
-Route::post('/', function () {
+Route::get('/', function () {
     return view('frontend.loginpage.login');
 });
 Route::middleware(['auth','verified'])->group(function(){
