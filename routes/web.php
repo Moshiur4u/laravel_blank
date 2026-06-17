@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\DashboardConrtoller;
 use App\Http\Controllers\ProfileController;
+use App\Http\Controllers\RoleController;
 use App\Http\Controllers\UserController;
 use Illuminate\Support\Facades\Route;
 
@@ -13,6 +14,9 @@ Route::get('/', function () {
 });
 Route::middleware(['auth','verified'])->group(function(){
 Route::get('/logout',[UserController::class,'logout'])->name('logout');
+
+//roll-permission route work in here
+Route::get('/roles',[RoleController::class,'index'])->name('roles.index');
 });
 
 Route::middleware(['auth','verified'])->group(function(){
