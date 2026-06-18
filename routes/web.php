@@ -17,6 +17,8 @@ Route::get('/logout',[UserController::class,'logout'])->name('logout');
 
 //roll-permission route work in here
 Route::get('/roles',[RoleController::class,'index'])->name('roles.index');
+Route::get('/roles.create',[RoleController::class,'create'])->name('roles.create');
+Route::post('/roles.store',[RoleController::class,'store'])->name('roles.store');
 });
 
 Route::middleware(['auth','verified'])->group(function(){

@@ -153,11 +153,11 @@
                     </a>
                     <ul>
                         <li>
-                            <a href="javascript:;"><i class='bx bx-radio-circle'></i>All Roles</a>
+                            <a href="{{ route('roles.index') }}"><i class='bx bx-radio-circle'></i>All Roles</a>
                         </li>
 
                         <li>
-                            <a href="javascript:;"><i class='bx bx-radio-circle'></i>Create Role</a>
+                            <a href="{{ route('roles.create') }}"><i class='bx bx-radio-circle'></i>Create Role</a>
                         </li>
                     </ul>
                 </li>
