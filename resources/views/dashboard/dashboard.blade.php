@@ -20,6 +20,7 @@
     <link href="{{ asset('assets/css/bootstrap.min.css') }}" rel="stylesheet">
     <link href="{{ asset('assets/css/bootstrap-extended.css') }}" rel="stylesheet">
     <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500&display=swap" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css">
     <link href="{{ asset('assets/css/app.css') }}" rel="stylesheet">
     <link href="{{ asset('assets/css/icons.css') }}" rel="stylesheet">
     <!-- Theme Style CSS -->
@@ -52,7 +53,7 @@
             <ul class="metismenu" id="menu">
                 <li>
                     <a href="{{ route('dashboardbody') }}" class="">
-                        <div class="parent-icon"><i class='bx bx-home-alt'></i>
+                        <div class="parent-icon"><i class='bx bx-home-smile'></i>
                         </div>
                         <div class="menu-title">Dashboard</div>
                     </a>
@@ -61,7 +62,7 @@
                 <li class="menu-label">Regural Operation</li>
                 <li>
                     <a href="javascript:;" class="has-arrow">
-                        <div class="parent-icon"><i class='bx bx-home-alt'></i></div>
+                        <div class="parent-icon"><i class='bx bx-cart-alt'></i></div>
                         <div class="menu-title">Sales</div>
                     </a>
                     <ul>
@@ -91,7 +92,7 @@
                 </li>
                 <li>
                     <a href="javascript:;" class="has-arrow">
-                        <div class="parent-icon"><i class='bx bxl-product-hunt '></i>
+                        <div class="parent-icon"><i class='bx bx-store'></i>
                         </div>
                         <div class="menu-title">Product</div>
                     </a>
@@ -118,7 +119,7 @@
                         </li>
 
                         <li>
-                            <a href="javascript:;"><i class='bx bx-user-plus '></i>Create Customer</a>
+                            <a href="javascript:;"><i class='bx bx-user-plus'></i>Create Customer</a>
                         </li>
                         <li>
                             <a href="javascript:;"><i class='bx bx-list-ul'></i>Customer Ledger</a>
@@ -147,17 +148,17 @@
                 </li>
                 <li>
                     <a href="javascript:;" class="has-arrow">
-                        <div class="parent-icon"><i class='bx bx-cart'></i>
+                        <div class="parent-icon"><i class='bx bx-key'></i>
                         </div>
                         <div class="menu-title">Role and Permission</div>
                     </a>
                     <ul>
                         <li>
-                            <a href="{{ route('roles.index') }}"><i class='bx bx-radio-circle'></i>All Roles</a>
+                            <a href="{{ route('roles.index') }}"><i class='bx bxs-door-open'></i>All Roles</a>
                         </li>
 
                         <li>
-                            <a href="{{ route('roles.create') }}"><i class='bx bx-radio-circle'></i>Create Role</a>
+                            <a href="{{ route('roles.create') }}"><i class='bx bx-user-plus'></i>Create Role</a>
                         </li>
                     </ul>
                 </li>

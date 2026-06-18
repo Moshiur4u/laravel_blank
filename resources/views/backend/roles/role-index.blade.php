@@ -19,7 +19,7 @@
                 </div>
                 <div class="ms-auto">
                     <div class="btn-group">
-                        <a href="roles-create.html" class="btn btn-primary">Create Role</a>
+                        <a href="{{ route('roles.create') }}" class="btn btn-primary">Create Role</a>
                     </div>
                 </div>
             </div>
@@ -52,7 +52,10 @@
                                             </td>
                                             <td class="gap-2 d-flex">
                                                 <a href="roles-edit.html" class="btn btn-primary btn-small">edit</a>
-                                                <button type="submit" class="btn btn-danger btn-small">delete</button>
+                                                {{-- <button type="submit" class="btn btn-danger btn-small">delete</button> --}}
+                                                <a href="{{ route('roles.destroy', $role->id) }}"
+                                                    class="btn btn-danger btn-icon">Delete
+                                                </a>
                                             </td>
                                         </tr>
                                     @endforeach
@@ -62,8 +65,6 @@
                     </div>
                 </div>
             </div>
-
-
             <!-- end-content -->
         </div>
     </div>
