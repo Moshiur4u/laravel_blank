@@ -68,8 +68,11 @@ class PermissionSeederTable extends Seeder
                 'view-role-assignment'
         ];
         foreach ($permissions as $permission) {
+            //পারমিশন টেবিলে ডাটা ইন্সারট করার জন্য ২টা পদবতি ব্যবহার করা যায়।
+            //১ নং---
             Permission::firstOrCreate(['name'=> $permission]);
             // $permission = Permission::firstOrCreate([
+            // ২নং----
             // Permission::firstOrCreate([
             // 'name' => $permission,
             // 'guard_name' => 'web'
