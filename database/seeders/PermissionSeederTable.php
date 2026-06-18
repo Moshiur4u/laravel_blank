@@ -68,7 +68,13 @@ class PermissionSeederTable extends Seeder
                 'view-role-assignment'
         ];
         foreach ($permissions as $permission) {
-            Permission::create(['name'=> $permission]);
+            Permission::firstOrCreate(['name'=> $permission]);
+            // $permission = Permission::firstOrCreate([
+            // Permission::firstOrCreate([
+            // 'name' => $permission,
+            // 'guard_name' => 'web'
+            // ]);
+
         }
     }
 }
