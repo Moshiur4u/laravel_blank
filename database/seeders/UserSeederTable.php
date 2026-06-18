@@ -32,10 +32,13 @@ class UserSeederTable extends Seeder
         ]);
         // Now here we create role using spatie options
         $role = Role::create(['name'=>'admin']);
+
         // Here we call permissions model
         $permissions = Permission::pluck('id')->all();
+
         // New Syc with Permission and role
         $role->syncPermissions($permissions);
+
         // Assign role with variable Note: 2 Assign working at time thatWhy  we use syn function
         $supperAdmin->assignRole($role);
         $admin->syncRoles($role);
