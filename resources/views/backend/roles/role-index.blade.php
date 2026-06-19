@@ -48,10 +48,12 @@
                                             <td>
                                                 @foreach ($role->permissions as $permission)
                                                     <span class="badge bg-danger">{{ $permission->name }}</span>
+                                                    {{-- <br> --}}
                                                 @endforeach
                                             </td>
                                             <td class="gap-2 d-flex">
-                                                <a href="roles-edit.html" class="btn btn-primary btn-small">edit</a>
+                                                <a href="{{ route('roles.edit', $role->id) }}"
+                                                    class="btn btn-primary btn-small">edit</a>
                                                 {{-- <button type="submit" class="btn btn-danger btn-small">delete</button> --}}
                                                 <a href="{{ route('roles.destroy', $role->id) }}"
                                                     class="btn btn-danger btn-icon">Delete
@@ -67,6 +69,7 @@
             </div>
             <!-- end-content -->
         </div>
+
     </div>
     <!--end page wrapper -->
 @endsection
