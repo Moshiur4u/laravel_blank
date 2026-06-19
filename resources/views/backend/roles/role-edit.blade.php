@@ -13,13 +13,13 @@
                         <ol class="p-0 mb-0 breadcrumb">
                             <li class="breadcrumb-item"><a href="javascript:;"><i class="bx bx-home-alt"></i></a>
                             </li>
-                            <li class="breadcrumb-item active" aria-current="page">Create Role</li>
+                            <li class="breadcrumb-item active" aria-current="page">Update Role</li>
                         </ol>
                     </nav>
                 </div>
                 <div class="ms-auto">
                     <div class="btn-group">
-                        <a href="roles-index.html" class="btn btn-primary">All Roles</a>
+                        <a href="{{ route('roles.index') }}" class="btn btn-primary">All Roles</a>
                     </div>
                 </div>
             </div>
@@ -37,6 +37,9 @@
                                     <div class="col-sm-9">
                                         <input type="text" class="form-control" id="name" name="name"
                                             value="{{ $role->name }}" placeholder="Enter Your Role Name">
+                                        {{-- @error('name')
+                                            <div class="">{{ $message }}</div>
+                                        @enderror --}}
                                     </div>
                                 </div>
                                 <div class="mb-3 form-group">

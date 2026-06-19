@@ -78,7 +78,7 @@ class RoleController extends Controller
 
         $PermissionId = array_map('intval',($request->input('permission')));
         $role->syncPermissions($PermissionId);
-        // $flash()->successfull('Role Updated Seccessfully');
+        // flash()->successfull('Role Updated Seccessfully');
         return redirect()->route('roles.index');
 
 
@@ -90,6 +90,7 @@ class RoleController extends Controller
     public function destroy( $id)
     {
        Role::find($id)->delete();
+       sweetalert()->success('Role Delete Successfully.');
        return back();
     }
 }
