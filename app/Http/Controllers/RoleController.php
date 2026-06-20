@@ -39,7 +39,7 @@ class RoleController extends Controller
         $PermissionId = array_map('intval',($request->input('permission')));
         $role = Role::create(['name'=> $request->input('name')]);
         $role->syncPermissions($PermissionId);
-
+        flash()->success('Role Create successfully!');
         return redirect()->route('roles.index');
     }
 
@@ -78,7 +78,7 @@ class RoleController extends Controller
 
         $PermissionId = array_map('intval',($request->input('permission')));
         $role->syncPermissions($PermissionId);
-        // flash()->successfull('Role Updated Seccessfully');
+        flash()->success('Role Update successfully!');
         return redirect()->route('roles.index');
 
 

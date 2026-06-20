@@ -37,7 +37,9 @@
                                         <input type="text" class="form-control" id="name" name="name"
                                             value="" placeholder="Enter Your Role Name">
                                     </div>
-
+                                    @error('name')
+                                        <div class="text-danger">{{ $message }}</div>
+                                    @enderror
                                 </div>
                                 <div class="mb-3 form-group">
                                     @foreach ($permissions as $permission)
