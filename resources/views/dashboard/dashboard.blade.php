@@ -82,7 +82,7 @@
                     </a>
                     <ul>
                         <li>
-                            <a href="javascript:;"><i class='bx bx-food-menu'></i>All Category</a>
+                            <a href="{{ route('categor.index') }}"><i class='bx bx-food-menu'></i>All Category</a>
                         </li>
 
                         <li>

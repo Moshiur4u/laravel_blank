@@ -12,7 +12,8 @@ class ProductCategoryController extends Controller
      */
     public function index()
     {
-        //
+        $ProductCategories = ProductCategory::latest()->get();
+        return view('frontend.product.productCreate',compact('ProductCategories'));
     }
 
     /**
@@ -20,7 +21,8 @@ class ProductCategoryController extends Controller
      */
     public function create()
     {
-        //
+        $ProductCategories = ProductCategory::latest()->get();
+        return view('frontend.product.productCreate',compact('ProductCategories'));
     }
 
     /**

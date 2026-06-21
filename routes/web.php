@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\DashboardConrtoller;
+use App\Http\Controllers\ProductCategoryController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\RoleController;
 use App\Http\Controllers\UserController;
@@ -22,6 +23,11 @@ Route::post('/roles.store',[RoleController::class,'store'])->name('roles.store')
 Route::get('/roles/{id}/edit',[RoleController::class,'edit'])->name('roles.edit');
 Route::put('/roles/{id}/update',[RoleController::class,'update'])->name('roles.update');
 Route::get('/roles.destroy/{id}',[RoleController::class,'destroy'])->name('roles.destroy');
+});
+//product-
+Route::middleware(['auth','verified'])->group(function(){
+    route::get('/product/index',[ProductCategoryController::class,'index'])->name('categor.index');
+    route::get('/productCategory/create',[ProductCategoryController::class,'create'])->name('categor.create');
 });
 
 Route::middleware(['auth','verified'])->group(function(){
