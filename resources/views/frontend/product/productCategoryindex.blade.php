@@ -18,11 +18,13 @@
                 </div>
                 <div class="ms-auto">
                     <div class="btn-group">
-                        <a href="{{ route('categor.create') }}" class="btn btn-primary">Create Category</a>
+                        <a href="{{ route('category.create') }}" class="btn btn-primary">Create Category</a>
                     </div>
                 </div>
             </div>
             <!--end breadcrumb-->
+
+
             <h6 class="mb-0 text-uppercase">Role and Permissions</h6>
             <hr>
             <div class="card">
