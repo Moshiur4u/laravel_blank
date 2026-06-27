@@ -40,12 +40,12 @@
                                     </tr>
                                 </thead>
                                 <tbody>
-                                    @foreach ($ProductCategories as $key => $ProductCategory)
+                                    @foreach ($ProductCategories as $key => $Product_Category)
                                         <tr>
                                             <td>{{ $key + 1 }}</td>
-                                            <td>{{ $ProductCategory->category_name }} </td>
+                                            <td>{{ $Product_Category->category_name }} </td>
                                             <td class="gap-2 d-flex">
-                                                <a href="{{ route('category.edit', $ProductCategory->id) }}"
+                                                <a href="{{ route('category.edit', $Product_Category->id) }}"
                                                     class="btn btn-primary btn-small">edit</a>
                                                 {{-- <button type="submit" class="btn btn-danger btn-small">delete</button> --}}
                                                 <a href="#" class="btn btn-danger btn-icon">Delete

@@ -31,9 +31,7 @@
                             <h3 class="text-info">Update Categories.</h3>
                         </div>
                         <div class="card-body">
-                            <form action="#" method="PUT">
-                                @csrf
-                                @method('PUT')
+                            <form action="#" method="#">
                                 <div class="mb-3">
                                     <label for="#">Update Categories Name</label>
                                     <input type="text" name="name" value="#" class="form-control">
