@@ -31,10 +31,10 @@
                             <h3 class="text-info">Update Categories.</h3>
                         </div>
                         <div class="card-body">
-                            <form action="#" method="#">
+                            <form action="#" method="PUT">
                                 <div class="mb-3">
                                     <label for="#">Update Categories Name</label>
-                                    <input type="text" name="name" class="form-control">
+                                    <input type="text" name="name" value="#" class="form-control">
                                     @error('categories')
                                         <strong class="text-danger">{{ $message }}</strong>
                                     @enderror
@@ -70,7 +70,8 @@
                                                 <td>{{ $key + 1 }}</td>
                                                 <td>{{ $ProductCategory->category_name }} </td>
                                                 <td class="gap-2 d-flex">
-                                                    <a href="#" class="btn btn-primary btn-small">edit</a>
+                                                    <a href="{{ route('category.edit', $ProductCategory->id) }}"
+                                                        class="btn btn-primary btn-small">edit</a>
                                                     <a href="{{ route('category.destroy', $ProductCategory->id) }}"
                                                         class="btn btn-danger btn-icon">Delete
                                                     </a>

@@ -45,7 +45,8 @@
                                             <td>{{ $key + 1 }}</td>
                                             <td>{{ $ProductCategory->category_name }} </td>
                                             <td class="gap-2 d-flex">
-                                                <a href="#" class="btn btn-primary btn-small">edit</a>
+                                                <a href="{{ route('category.edit', $ProductCategory->id) }}"
+                                                    class="btn btn-primary btn-small">edit</a>
                                                 {{-- <button type="submit" class="btn btn-danger btn-small">delete</button> --}}
                                                 <a href="#" class="btn btn-danger btn-icon">Delete
                                                 </a>

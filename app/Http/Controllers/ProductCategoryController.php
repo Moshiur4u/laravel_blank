@@ -44,7 +44,7 @@ class ProductCategoryController extends Controller
     /**
      * Display the specified resource.
      */
-    public function show(ProductCategory $productCategory)
+    public function show()
     {
         //
     }
@@ -52,17 +52,26 @@ class ProductCategoryController extends Controller
     /**
      * Show the form for editing the specified resource.
      */
-    public function edit(ProductCategory $productCategory)
+    public function edit($id)
     {
-        //
+        $ProductCategory=ProductCategory::find($id);
+        return view('frontend.product.Categoryedit',compact('ProductCategory'));
     }
 
     /**
      * Update the specified resource in storage.
      */
-    public function update(Request $request, ProductCategory $productCategory)
+    public function update(Request $request,$id)
     {
-        //
+        $request->validate([
+            'category_name'=>'required'
+        ]);
+
+        $ProductCategory =ProductCategory::find($id);
+        $ProductCategory->category_name =$request->input('category_name');
+        $ProductCategory->save();
+        return redirect()->route('category.edit');
+        // return back();
     }
 
     /**
