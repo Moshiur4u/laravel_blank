@@ -2,7 +2,6 @@
 
 use App\Http\Controllers\DashboardConrtoller;
 use App\Http\Controllers\ProductCategoryController;
-use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\RoleController;
 use App\Http\Controllers\UserController;
 use Illuminate\Support\Facades\Route;
@@ -26,8 +25,12 @@ Route::get('/roles.destroy/{id}',[RoleController::class,'destroy'])->name('roles
 });
 //product-
 Route::middleware(['auth','verified'])->group(function(){
-    route::get('/product/index',[ProductCategoryController::class,'index'])->name('categor.index');
-    route::get('/productCategory/create',[ProductCategoryController::class,'create'])->name('categor.create');
+    route::get('/product/index',[ProductCategoryController::class,'index'])->name('category.index');
+    route::get('/productCategory/create',[ProductCategoryController::class,'create'])->name('category.create');
+    route::post('/productCategory/store',[ProductCategoryController::class,'store'])->name('category.store');
+    route::get('/productCategory/{id}',[ProductCategoryController::class,'edit'])->name('category.edit');
+    route::PUT('/productCategory/{id}/update',[ProductCategoryController::class,'update'])->name('category.update');
+    route::get('/productCategory/destroy/{id}',[ProductCategoryController::class,'destroy'])->name('category.destroy');
 });
 
 Route::middleware(['auth','verified'])->group(function(){

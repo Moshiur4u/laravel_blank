@@ -18,11 +18,13 @@
                 </div>
                 <div class="ms-auto">
                     <div class="btn-group">
-                        <a href="{{ route('categor.create') }}" class="btn btn-primary">Create Category</a>
+                        <a href="{{ route('category.create') }}" class="btn btn-primary">Create Category</a>
                     </div>
                 </div>
             </div>
             <!--end breadcrumb-->
+
+
             <h6 class="mb-0 text-uppercase">Role and Permissions</h6>
             <hr>
             <div class="card">
@@ -43,7 +45,8 @@
                                             <td>{{ $key + 1 }}</td>
                                             <td>{{ $ProductCategory->category_name }} </td>
                                             <td class="gap-2 d-flex">
-                                                <a href="#" class="btn btn-primary btn-small">edit</a>
+                                                <a href="{{ route('category.edit', $ProductCategory->id) }}"
+                                                    class="btn btn-primary btn-small">edit</a>
                                                 {{-- <button type="submit" class="btn btn-danger btn-small">delete</button> --}}
                                                 <a href="#" class="btn btn-danger btn-icon">Delete
                                                 </a>

@@ -82,11 +82,12 @@
                     </a>
                     <ul>
                         <li>
-                            <a href="{{ route('categor.index') }}"><i class='bx bx-food-menu'></i>All Category</a>
+                            <a href="{{ route('category.index') }}"><i class='bx bx-food-menu'></i>All Category</a>
                         </li>
 
                         <li>
-                            <a href="javascript:;"><i class=' bx bx-plus-medical'></i>Create Category</a>
+                            <a href="{{ route('category.create') }}"><i class=' bx bx-plus-medical'></i>Create
+                                Category</a>
                         </li>
 
                     </ul>

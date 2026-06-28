@@ -11,11 +11,11 @@
                             <h3 class="text-primary">Product Category Information.</h3>
                         </div>
                         <div class="card-body">
-                            <form action="#" method="POST">
+                            <form action="{{ route('category.store') }}" method="POST">
                                 @csrf
                                 <div class="mb-3">
                                     <label for="name"> Category Name</label>
-                                    <input type="text" name="name" class="form-control" value="#">
+                                    <input type="text" name="category_name" class="form-control" value="">
                                 </div>
                                 <div class="gap-2 mb-3 d-flex">
                                     <button class="btn btn-primary" type="submit"> Add Category</button>
@@ -24,7 +24,6 @@
                         </div>
                     </div>
                 </div>
-
                 {{--  here we start Image Update Options  --}}
                 <div class="col-lg-6">
                     <div class="card">
@@ -32,11 +31,10 @@
                             <h3 class="text-info">Update Categories.</h3>
                         </div>
                         <div class="card-body">
-                            <form action="#" method="POST" enctype="multipart/form-data">
-                                @csrf
+                            <form action="#" method="PUT">
                                 <div class="mb-3">
                                     <label for="#">Update Categories Name</label>
-                                    <input type="text" name="name" class="form-control">
+                                    <input type="text" name="name" value="#" class="form-control">
                                     @error('categories')
                                         <strong class="text-danger">{{ $message }}</strong>
                                     @enderror
@@ -49,8 +47,6 @@
                     </div>
                 </div>
             </div>
-
-
             {{--  here we start password Update fill  --}}
             <div class="col-lg-12">
                 <div class="card">
@@ -74,9 +70,10 @@
                                                 <td>{{ $key + 1 }}</td>
                                                 <td>{{ $ProductCategory->category_name }} </td>
                                                 <td class="gap-2 d-flex">
-                                                    <a href="#" class="btn btn-primary btn-small">edit</a>
-                                                    {{-- <button type="submit" class="btn btn-danger btn-small">delete</button> --}}
-                                                    <a href="#" class="btn btn-danger btn-icon">Delete
+                                                    <a href="{{ route('category.edit', $ProductCategory->id) }}"
+                                                        class="btn btn-primary btn-small">edit</a>
+                                                    <a href="{{ route('category.destroy', $ProductCategory->id) }}"
+                                                        class="btn btn-danger btn-icon">Delete
                                                     </a>
                                                 </td>
                                             </tr>
