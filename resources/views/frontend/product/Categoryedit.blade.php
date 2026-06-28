@@ -5,7 +5,7 @@
 
             <div class="row">
                 {{--  Here start User Info Update  --}}
-                <div class="col-lg-12">
+                <div class="col-lg-12 d-flex">
                     <div class="card">
                         <div class="card-header">
                             <h3 class="text-primary">Add Product Category Information.</h3>

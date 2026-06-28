@@ -5,7 +5,7 @@
 
             <div class="row">
                 {{--  Here start User Info Update  --}}
-                <div class="col-lg-6">
+                <div class="col-lg-12">
                     <div class="card">
                         <div class="card-header">
                             <h3 class="text-primary">Product Category Information.</h3>
@@ -25,16 +25,19 @@
                     </div>
                 </div>
                 {{--  here we start Image Update Options  --}}
-                <div class="col-lg-6">
+                {{-- <div class="col-lg-6">
                     <div class="card">
                         <div class="card-header">
                             <h3 class="text-info">Update Categories.</h3>
                         </div>
                         <div class="card-body">
-                            <form action="" method="POST">
+                            <form action="{{ route('category.update', $CategoryEdit->id) }}" method="POST">
+                                @csrf
+                                @method('PUT')
                                 <div class="mb-3">
                                     <label for="#">Update Categories Name</label>
-                                    <input type="text" name="name" value="" class="form-control">
+                                    <input type="text" name="name" value="{{ $CategoryEdit->category_name }}"
+                                        class="form-control">
                                     @error('categories')
                                         <strong class="text-danger">{{ $message }}</strong>
                                     @enderror
@@ -46,45 +49,45 @@
                         </div>
                     </div>
                 </div>
-            </div>
-            {{--  here we start password Update fill  --}}
-            <div class="col-lg-12">
-                <div class="card">
-                    <div class="text-center card-header">
-                        <h3 class="text-danger">Category List.</h3>
-                    </div>
-                    <div class="card-body">
-                        <div class="table-responsive">
-                            <div id="example_wrapper" class="dataTables_wrapper dt-bootstrap5">
-                                <table id="myTable" class="table display table-striped">
-                                    <thead>
-                                        <tr>
-                                            <th>No</th>
-                                            <th>Name</th>
-                                            <th>Action</th>
-                                        </tr>
-                                    </thead>
-                                    <tbody>
-                                        @foreach ($ProductCategories as $key => $ProCategory)
+            </div> --}}
+                {{--  here we start password Update fill  --}}
+                <div class="col-lg-12">
+                    <div class="card">
+                        <div class="text-center card-header">
+                            <h3 class="text-danger">Category List.</h3>
+                        </div>
+                        <div class="card-body">
+                            <div class="table-responsive">
+                                <div id="example_wrapper" class="dataTables_wrapper dt-bootstrap5">
+                                    <table id="myTable" class="table display table-striped">
+                                        <thead>
                                             <tr>
-                                                <td>{{ $key + 1 }}</td>
-                                                <td>{{ $ProCategory->category_name }} </td>
-                                                <td class="gap-2 d-flex">
-                                                    <a href="{{ route('category.edit', $ProCategory->id) }}"
-                                                        class="btn btn-primary btn-small">edit</a>
-                                                    <a href="{{ route('category.destroy', $ProCategory->id) }}"
-                                                        class="btn btn-danger btn-icon">Delete
-                                                    </a>
-                                                </td>
+                                                <th>No</th>
+                                                <th>Name</th>
+                                                <th>Action</th>
                                             </tr>
-                                        @endforeach
-                                    </tbody>
-                                </table>
+                                        </thead>
+                                        <tbody>
+                                            @foreach ($ProductCategories as $key => $ProCategory)
+                                                <tr>
+                                                    <td>{{ $key + 1 }}</td>
+                                                    <td>{{ $ProCategory->category_name }} </td>
+                                                    <td class="gap-2 d-flex">
+                                                        <a href="{{ route('category.edit', $ProCategory->id) }}"
+                                                            class="btn btn-primary btn-small">edit</a>
+                                                        <a href="{{ route('category.destroy', $ProCategory->id) }}"
+                                                            class="btn btn-danger btn-icon">Delete
+                                                        </a>
+                                                    </td>
+                                                </tr>
+                                            @endforeach
+                                        </tbody>
+                                    </table>
+                                </div>
                             </div>
                         </div>
                     </div>
                 </div>
             </div>
         </div>
-    </div>
-@endsection
+    @endsection
