@@ -23,8 +23,6 @@
                 </div>
             </div>
             <!--end breadcrumb-->
-
-
             <h6 class="mb-0 text-uppercase">Role and Permissions</h6>
             <hr>
             <div class="card">
@@ -40,12 +38,12 @@
                                     </tr>
                                 </thead>
                                 <tbody>
-                                    @foreach ($ProductCategories as $key => $ProductCategory)
+                                    @foreach ($ProductCategories as $key => $ProCategory)
                                         <tr>
                                             <td>{{ $key + 1 }}</td>
-                                            <td>{{ $ProductCategory->category_name }} </td>
+                                            <td>{{ $ProCategory->category_name }} </td>
                                             <td class="gap-2 d-flex">
-                                                <a href="{{ route('category.edit', $ProductCategory->id) }}"
+                                                <a href="{{ route('category.edit', $ProCategory->id) }}"
                                                     class="btn btn-primary btn-small">edit</a>
                                                 {{-- <button type="submit" class="btn btn-danger btn-small">delete</button> --}}
                                                 <a href="#" class="btn btn-danger btn-icon">Delete

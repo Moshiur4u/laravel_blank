@@ -31,7 +31,8 @@
                             <h3 class="text-info">Update Categories.</h3>
                         </div>
                         <div class="card-body">
-                            <form action="#" method="PUT">
+                            <form action="{{ route('category.update', $ProductCategory->id) }}" method="PUT">
+                                @csrf
                                 <div class="mb-3">
                                     <label for="#">Update Categories Name</label>
                                     <input type="text" name="name" value="#" class="form-control">
@@ -65,14 +66,14 @@
                                         </tr>
                                     </thead>
                                     <tbody>
-                                        @foreach ($ProductCategories as $key => $ProductCategory)
+                                        @foreach ($ProductCategories as $key => $ProCategory)
                                             <tr>
                                                 <td>{{ $key + 1 }}</td>
-                                                <td>{{ $ProductCategory->category_name }} </td>
+                                                <td>{{ $ProCategory->category_name }} </td>
                                                 <td class="gap-2 d-flex">
-                                                    <a href="{{ route('category.edit', $ProductCategory->id) }}"
+                                                    <a href="{{ route('category.edit', $ProCategory->id) }}"
                                                         class="btn btn-primary btn-small">edit</a>
-                                                    <a href="{{ route('category.destroy', $ProductCategory->id) }}"
+                                                    <a href="{{ route('category.destroy', $ProCategory->id) }}"
                                                         class="btn btn-danger btn-icon">Delete
                                                     </a>
                                                 </td>
