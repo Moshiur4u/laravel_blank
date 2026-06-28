@@ -8,13 +8,13 @@
                 <div class="col-lg-6">
                     <div class="card">
                         <div class="card-header">
-                            <h3 class="text-primary">Product Category Information.</h3>
+                            <h3 class="text-primary">Add Customer Information.</h3>
                         </div>
                         <div class="card-body">
                             <form action="#" method="POST">
                                 @csrf
                                 <div class="mb-3">
-                                    <label for="name"> Category Name</label>
+                                    <label for="name"> Customer Name</label>
                                     <input type="text" name="name" class="form-control" value="#">
                                 </div>
                                 <div class="gap-2 mb-3 d-flex">
@@ -29,7 +29,7 @@
                 <div class="col-lg-6">
                     <div class="card">
                         <div class="card-header">
-                            <h3 class="text-info">Update Categories.</h3>
+                            <h3 class="text-info">Invoice Details.</h3>
                         </div>
                         <div class="card-body">
                             <form action="#" method="POST" enctype="multipart/form-data">
@@ -55,7 +55,7 @@
             <div class="col-lg-12">
                 <div class="card">
                     <div class="text-center card-header">
-                        <h3 class="text-danger">Category List.</h3>
+                        <h3 class="text-danger">Product Details.</h3>
                     </div>
                     <div class="card-body">
                         <div class="table-responsive">
