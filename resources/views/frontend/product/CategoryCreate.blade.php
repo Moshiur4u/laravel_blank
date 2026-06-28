@@ -15,8 +15,7 @@
                                 @csrf
                                 <div class="mb-3">
                                     <label for="name"> Category Name</label>
-                                    <input type="text" name="category_name" class="form-control"
-                                        value="{{ }}">
+                                    <input type="text" name="category_name" class="form-control" value="">
                                 </div>
                                 <div class="gap-2 mb-3 d-flex ">
                                     <button class="btn btn-primary" type="submit"> Add Category</button>

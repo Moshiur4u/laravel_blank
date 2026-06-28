@@ -11,13 +11,13 @@
                             <h3 class="text-primary">Add Product Category Information.</h3>
                         </div>
                         <div class="card-body">
-                            <form action="{{ route('category.update', $ProductCategory->id) }}" method="PUT">
+                            <form action="{{ route('category.update', $PCategory->id) }}" method="put">
                                 @csrf
                                 @method('PUT')
                                 <div class="mb-3">
                                     <label for="name"> Category Name</label>
                                     <input type="text" name="category_name" class="form-control"
-                                        value="{{ $ProductCategory->category_name }}">
+                                        value="{{ $PCategory->category_name }}">
                                 </div>
                                 <div class="gap-2 mb-3 d-flex ">
                                     <button class="btn btn-primary" type="submit"> Update Category</button>

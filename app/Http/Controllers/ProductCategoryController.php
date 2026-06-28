@@ -54,8 +54,8 @@ class ProductCategoryController extends Controller
      */
     public function edit($id)
     {
-        $ProductCategory=ProductCategory::find($id);
-        return view('frontend.product.Categoryedit',compact('ProductCategory'));
+        $PCategory = ProductCategory::find($id);
+        return view('frontend.product.Categoryedit',compact('PCategory'));
     }
 
     /**
@@ -67,9 +67,9 @@ class ProductCategoryController extends Controller
             'category_name'=>'required'
         ]);
 
-        $ProductCategory =ProductCategory::find($id);
-        $ProductCategory->category_name =$request->input('category_name');
-        $ProductCategory->save();
+        $PCategory =ProductCategory::find($id);
+        $PCategory->category_name =$request->input('category_name');
+        $PCategory->save();
         return redirect()->route('category.edit');
         // return back();
     }

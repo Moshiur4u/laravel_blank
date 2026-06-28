@@ -32,6 +32,8 @@
                         </div>
                         <div class="card-body">
                             <form action="#" method="PUT">
+                                @csrf
+                                @method('PUT')
                                 <div class="mb-3">
                                     <label for="#">Update Categories Name</label>
                                     <input type="text" name="name" value="#" class="form-control">
