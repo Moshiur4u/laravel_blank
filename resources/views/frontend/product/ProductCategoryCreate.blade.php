@@ -31,10 +31,10 @@
                             <h3 class="text-info">Update Categories.</h3>
                         </div>
                         <div class="card-body">
-                            <form action="#" method="PUT">
+                            <form action="" method="POST">
                                 <div class="mb-3">
                                     <label for="#">Update Categories Name</label>
-                                    <input type="text" name="name" value="#" class="form-control">
+                                    <input type="text" name="name" value="" class="form-control">
                                     @error('categories')
                                         <strong class="text-danger">{{ $message }}</strong>
                                     @enderror

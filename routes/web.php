@@ -29,11 +29,7 @@ Route::middleware(['auth','verified'])->group(function(){
     route::get('/productCategory/create',[ProductCategoryController::class,'create'])->name('category.create');
     route::post('/productCategory/store',[ProductCategoryController::class,'store'])->name('category.store');
     route::get('/productCategory/{id}',[ProductCategoryController::class,'edit'])->name('category.edit');
-<<<<<<< HEAD
     route::put('/productCategory/{id}/update',[ProductCategoryController::class,'update'])->name('category.update');
-=======
-    route::PUT('/productCategory/{id}/update',[ProductCategoryController::class,'update'])->name('category.update');
->>>>>>> 3cb5804 (Category Update Controller)
     route::get('/productCategory/destroy/{id}',[ProductCategoryController::class,'destroy'])->name('category.destroy');
 });
 
