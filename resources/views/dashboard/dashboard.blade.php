@@ -78,7 +78,24 @@
                 <li>
                     <a href="javascript:;" class="has-arrow">
                         <div class="parent-icon"><i class="bx bx-customize "></i></div>
-                        <div class="menu-title">Category</div>
+                        <div class="menu-title">Brand</div>
+                    </a>
+                    <ul>
+                        <li>
+                            <a href="{{ route('category.index') }}"><i class='bx bx-food-menu'></i>All Category</a>
+                        </li>
+
+                        <li>
+                            <a href="{{ route('category.create') }}"><i class=' bx bx-plus-medical'></i>Create
+                                Category</a>
+                        </li>
+
+                    </ul>
+                </li>
+                <li>
+                    <a href="javascript:;" class="has-arrow">
+                        <div class="parent-icon"><i class="bx bx-customize "></i></div>
+                        <div class="menu-title">Categories</div>
                     </a>
                     <ul>
                         <li>
@@ -100,11 +117,11 @@
                     </a>
                     <ul>
                         <li>
-                            <a href=" "><i class='bx bx-food-menu'></i>All Product</a>
+                            <a href="#"><i class='bx bx-food-menu'></i>All Product</a>
                         </li>
 
                         <li>
-                            <a href=""><i class='bx bx-plus-medical'></i>Create
+                            <a href="#"><i class='bx bx-plus-medical'></i>Create
                                 Product</a>
                         </li>
                     </ul>

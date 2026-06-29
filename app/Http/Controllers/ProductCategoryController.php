@@ -15,7 +15,7 @@ class ProductCategoryController extends Controller
     {
         $ProductCategories = ProductCategory::latest()->get();
         // return view('frontend.product.productCategoryindex',compact('ProductCategories'));
-        return view('frontend.product.ProductCategoryCreate',compact('ProductCategories'));
+        return view('backend.Product.Category.productCategoryCreate',compact('ProductCategories'));
     }
 
     /**
@@ -24,7 +24,7 @@ class ProductCategoryController extends Controller
     public function create()
     {
         $ProductCategories = ProductCategory::latest()->get();
-        return view('frontend.product.ProductCategoryCreate',compact('ProductCategories'));
+        return view('backend.Product.Category.productCategoryCreate',compact('ProductCategories'));
         // return view('frontend.product.CategoryCreate');
     }
 
@@ -55,7 +55,7 @@ class ProductCategoryController extends Controller
     public function edit($id)
     {
         $CategoryEdit=ProductCategory::find($id);
-        return view('frontend.product.Categoryedit',compact('CategoryEdit'));
+        return view('backend.Product.Category.Categoryedit',compact('CategoryEdit'));
     }
 
     /**
