@@ -4,8 +4,8 @@
         <div class="page-content">
 
             <div class="row">
-                {{--  Here start User Info Update  --}}
-                <div class="col-lg-12">
+                {{--  Here start Category Store  --}}
+                <div class="col-lg-4">
                     <div class="card">
                         <div class="card-header">
                             <h3 class="text-primary">Product Category Information.</h3>
@@ -24,34 +24,8 @@
                         </div>
                     </div>
                 </div>
-                {{--  here we start Image Update Options  --}}
-                {{-- <div class="col-lg-6">
-                    <div class="card">
-                        <div class="card-header">
-                            <h3 class="text-info">Update Categories.</h3>
-                        </div>
-                        <div class="card-body">
-                            <form action="{{ route('category.update', $CategoryEdit->id) }}" method="POST">
-                                @csrf
-                                @method('PUT')
-                                <div class="mb-3">
-                                    <label for="#">Update Categories Name</label>
-                                    <input type="text" name="name" value="{{ $CategoryEdit->category_name }}"
-                                        class="form-control">
-                                    @error('categories')
-                                        <strong class="text-danger">{{ $message }}</strong>
-                                    @enderror
-                                </div>
-                                <div class="mb-3">
-                                    <button class="btn btn-info" type="submit"> Update Category</button>
-                                </div>
-                            </form>
-                        </div>
-                    </div>
-                </div>
-            </div> --}}
                 {{--  here we start password Update fill  --}}
-                <div class="col-lg-12">
+                <div class="col-lg-8">
                     <div class="card">
                         <div class="text-center card-header">
                             <h3 class="text-danger">Category List.</h3>

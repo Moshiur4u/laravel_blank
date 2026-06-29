@@ -100,11 +100,11 @@
                     </a>
                     <ul>
                         <li>
-                            <a href="{{ route('category.index') }}"><i class='bx bx-food-menu'></i>All Product</a>
+                            <a href=" "><i class='bx bx-food-menu'></i>All Product</a>
                         </li>
 
                         <li>
-                            <a href="{{ route('category.create') }}"><i class='bx bx-plus-medical'></i>Create
+                            <a href=""><i class='bx bx-plus-medical'></i>Create
                                 Product</a>
                         </li>
                     </ul>
