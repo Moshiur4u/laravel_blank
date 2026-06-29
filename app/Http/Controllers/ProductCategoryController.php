@@ -13,9 +13,8 @@ class ProductCategoryController extends Controller
      */
     public function index()
     {
-        $ProductCategories = ProductCategory::latest()->get();
-        // return view('frontend.product.productCategoryindex',compact('ProductCategories'));
-        return view('backend.Product.Category.productCategoryCreate',compact('ProductCategories'));
+
+        return view('backend.Product.Category.ProductCategoryCreate');
     }
 
     /**
@@ -24,8 +23,7 @@ class ProductCategoryController extends Controller
     public function create()
     {
         $ProductCategories = ProductCategory::latest()->get();
-        return view('backend.Product.Category.productCategoryCreate',compact('ProductCategories'));
-        // return view('frontend.product.CategoryCreate');
+        return view('backend.Product.Category.ProductCategoryCreate',compact('ProductCategories'));
     }
 
     /**
@@ -38,7 +36,7 @@ class ProductCategoryController extends Controller
             'category_name'=>'required'
         ]);
         ProductCategory::create(['category_name'=>$request->input('category_name')]);
-        return redirect()->route('category.index');
+        return redirect()->route('categories.index');
     }
 
     /**
@@ -72,7 +70,7 @@ class ProductCategoryController extends Controller
         // Method two
         // $ProductCategory->category_name =$request->input('category_name');
         // $ProductCategory->save();
-        return redirect()->route('category.index');
+        return redirect()->route('category.create');
         // return back();
     }
 

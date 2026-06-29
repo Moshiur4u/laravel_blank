@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\BrandController;
 use App\Http\Controllers\DashboardConrtoller;
 use App\Http\Controllers\ProductCategoryController;
 use App\Http\Controllers\RoleController;
@@ -31,6 +32,13 @@ Route::middleware(['auth','verified'])->group(function(){
     route::get('/productCategory/{id}',[ProductCategoryController::class,'edit'])->name('category.edit');
     route::put('/productCategory/{id}/update',[ProductCategoryController::class,'update'])->name('category.update');
     route::get('/productCategory/destroy/{id}',[ProductCategoryController::class,'destroy'])->name('category.destroy');
+});
+
+//Brand Route Start Here-----------
+Route::middleware(['auth','verified'])->group(function(){
+    route::get('/product/brand/index',[BrandController::class,'index'])->name('brand.index');
+    route::get('/product/brand/create',[BrandController::class,'create'])->name('brand.create');
+    route::Post('/product/brand/store',[BrandController::class,'store'])->name('brand.store');
 });
 
 Route::middleware(['auth','verified'])->group(function(){

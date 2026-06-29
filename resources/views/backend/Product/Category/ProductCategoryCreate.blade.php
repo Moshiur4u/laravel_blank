@@ -48,7 +48,7 @@
                                                     <td>{{ $ProCategory->category_name }} </td>
                                                     <td class="gap-2 d-flex">
                                                         <a href="{{ route('category.edit', $ProCategory->id) }}"
-                                                            class="btn btn-primary btn-small">edit</a>
+                                                            class="btn btn-primary btn-small">Edit</a>
                                                         <a href="{{ route('category.destroy', $ProCategory->id) }}"
                                                             class="btn btn-danger btn-icon">Delete
                                                         </a>
@@ -64,4 +64,5 @@
                 </div>
             </div>
         </div>
-    @endsection
+    </div>
+@endsection

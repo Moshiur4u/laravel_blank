@@ -12,7 +12,7 @@ class BrandController extends Controller
      */
     public function index()
     {
-        //
+        return view ('backend.Product.Brand.brandIndex');
     }
 
     /**
@@ -20,7 +20,7 @@ class BrandController extends Controller
      */
     public function create()
     {
-        //
+        return view ('backend.Product.Brand.createBrand');
     }
 
     /**
@@ -28,7 +28,11 @@ class BrandController extends Controller
      */
     public function store(Request $request)
     {
-        //
+        $request->validate([
+            'name'=> 'required|unique:brands,name'
+        ]);
+        $brandNames = Brand::create(['name'=>$request->input('name')] );
+        $brandNames->save();
     }
 
     /**
