@@ -8,7 +8,11 @@
                 <div class="col-lg-10">
                     <div class="card">
                         <div class="card-header">
-                            <h3 class="text-center text-primary">Brand List.</h3>
+                            <h3 class="text-center text-primary">Brand List</h3>
+                            <div class="gap-2 mb-3">
+                                <a href="{{ route('brand.create') }}" class="btn btn-primary float-end">
+                                    Add New</a>
+                            </div>
                         </div>
                         <div class="text-justify card-body">
                             <div class="table-responsive">

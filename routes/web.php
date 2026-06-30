@@ -3,6 +3,7 @@
 use App\Http\Controllers\BrandController;
 use App\Http\Controllers\DashboardConrtoller;
 use App\Http\Controllers\ProductCategoryController;
+use App\Http\Controllers\ProductController;
 use App\Http\Controllers\RoleController;
 use App\Http\Controllers\UserController;
 use Illuminate\Support\Facades\Route;
@@ -42,6 +43,11 @@ Route::middleware(['auth','verified'])->group(function(){
     route::get('/product/brand/{id}/edit',[BrandController::class,'edit'])->name('brand.edit');
     route::put('/product/brand/{id}/update',[BrandController::class,'update'])->name('brand.update');
     route::get('/product/brand/{id}/destroy',[BrandController::class,'destroy'])->name('brand.destroy');
+});
+Route::middleware(['auth','verified'])->group(function(){
+    route::get('/product/index',[ProductController::class,'index'])->name('product.index');
+    route::get('/product/create',[ProductController::class,'create'])->name('product.create');
+    route::get('/product/edit',[ProductController::class,'edit'])->name('product.edit');
 });
 
 Route::middleware(['auth','verified'])->group(function(){

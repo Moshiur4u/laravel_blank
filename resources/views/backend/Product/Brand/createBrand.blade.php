@@ -3,10 +3,14 @@
     <div class="page-wrapper">
         <div class="page-content">
             <div class="row">
-                <div class="col-lg-4">
+                <div class="col-lg-6">
                     <div class="card">
                         <div class="card-header">
                             <h3 class="text-primary">Add Product Brand.</h3>
+                            <div class="gap-2 mb-3">
+                                <a href="{{ route('brand.index') }}" class="btn btn-primary float-end">
+                                    BackToList</a>
+                            </div>
                         </div>
                         <div class="card-body">
                             <form action="{{ route('brand.store') }}" method="POST">
