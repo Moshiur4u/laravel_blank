@@ -6,7 +6,7 @@
                 <div class="col-lg-4">
                     <div class="card">
                         <div class="card-header">
-                            <h3 class="text-primary">Product Category Information.</h3>
+                            <h3 class="text-primary">Add Product Brand.</h3>
                         </div>
                         <div class="card-body">
                             <form action="{{ route('brand.store') }}" method="POST">

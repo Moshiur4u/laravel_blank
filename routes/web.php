@@ -39,6 +39,9 @@ Route::middleware(['auth','verified'])->group(function(){
     route::get('/product/brand/index',[BrandController::class,'index'])->name('brand.index');
     route::get('/product/brand/create',[BrandController::class,'create'])->name('brand.create');
     route::Post('/product/brand/store',[BrandController::class,'store'])->name('brand.store');
+    route::get('/product/brand/{id}/edit',[BrandController::class,'edit'])->name('brand.edit');
+    route::put('/product/brand/{id}/update',[BrandController::class,'update'])->name('brand.update');
+    route::get('/product/brand/{id}/destroy',[BrandController::class,'destroy'])->name('brand.destroy');
 });
 
 Route::middleware(['auth','verified'])->group(function(){

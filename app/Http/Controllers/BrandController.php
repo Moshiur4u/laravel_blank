@@ -12,7 +12,8 @@ class BrandController extends Controller
      */
     public function index()
     {
-        return view ('backend.Product.Brand.brandIndex');
+        $Brans = Brand::latest()->get();
+        return view ('backend.Product.Brand.brandIndex',compact('Brans'));
     }
 
     /**
@@ -21,6 +22,7 @@ class BrandController extends Controller
     public function create()
     {
         return view ('backend.Product.Brand.createBrand');
+
     }
 
     /**
@@ -33,6 +35,7 @@ class BrandController extends Controller
         ]);
         $brandNames = Brand::create(['name'=>$request->input('name')] );
         $brandNames->save();
+        return redirect()->route('brand.index');
     }
 
     /**
@@ -46,24 +49,37 @@ class BrandController extends Controller
     /**
      * Show the form for editing the specified resource.
      */
-    public function edit(Brand $brand)
+    public function edit($id)
     {
-        //
+        $brand = Brand::find($id);
+       return view ('backend.product.brand.editBrand',compact('brand'));
     }
 
     /**
      * Update the specified resource in storage.
      */
-    public function update(Request $request, Brand $brand)
+    public function update(Request $request, $id)
     {
-        //
+        $request->validate([
+            'name'=>'required|unique:brands,name'
+        ]);
+        $Brands = Brand::find($id);
+        // Brand::updated([
+        //     'name'=>$request->input('name'),
+        // ]);
+        $Brands->update($request->all());
+        flash()->success('Brand Successfully Update');
+        return redirect()->route('brand.index');
+
     }
 
     /**
      * Remove the specified resource from storage.
      */
-    public function destroy(Brand $brand)
+    public function destroy($id)
     {
-        //
+        Brand::find($id)->delete();
+        sweetalert()->success('Brand Delete Successfully.');
+        return redirect()->route('brand.index');
     }
 }

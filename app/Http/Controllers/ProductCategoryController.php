@@ -81,7 +81,7 @@ class ProductCategoryController extends Controller
     public function destroy($id)
     {
         ProductCategory::find($id)->delete();
-        sweetalert()->success('Role Delete Successfully.');
+        sweetalert()->success('Category Delete Successfully.');
        return back();
     }
 }
