@@ -14,7 +14,8 @@ class ProductCategoryController extends Controller
     public function index()
     {
 
-        return view('backend.Product.Category.ProductCategoryCreate');
+        $ProductCategories = ProductCategory::latest()->get();
+        return view('backend.Product.Category.ProductCategoryCreate',compact('ProductCategories'));
     }
 
     /**
