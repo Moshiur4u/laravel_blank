@@ -21,9 +21,9 @@
                                         <thead>
                                             <tr>
                                                 <th>No</th>
-                                                <th>Product Brand</th>
-                                                <th>Product Category</th>
                                                 <th>Product Name</th>
+                                                <th>Product Category</th>
+                                                <th>Product Brand</th>
                                                 <th>Price</th>
                                                 <th>Quantity</th>
                                                 <th>Image</th>
@@ -32,13 +32,13 @@
                                         </thead>
                                         <tbody>
                                             <tr>
-                                                <td>#</td>
-                                                <td>#</td>
-                                                <td>#</td>
-                                                <td>#</td>
-                                                <td>#</td>
-                                                <td>#</td>
-                                                <td>#</td>
+                                                <td></td>
+                                                <td></td>
+                                                <td></td>
+                                                <td></td>
+                                                <td></td>
+                                                <td></td>
+                                                <td></td>
                                                 <td class="gap-2 d-flex">
                                                     <a href="{{ route('product.edit') }}"
                                                         class="btn btn-primary btn-small">Edit</a>

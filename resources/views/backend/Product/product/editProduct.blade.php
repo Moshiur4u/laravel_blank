@@ -16,16 +16,16 @@
                             <form action="#" method="POST">
                                 @csrf
                                 <div class="mb-3">
-                                    <label for="name"> Product Brand</label>
-                                    <input type="text" name="productBrand" class="form-control" value="">
+                                    <label for="name">Product Name</label>
+                                    <input type="text" name="productName" class="form-control" value="">
                                 </div>
                                 <div class="mb-3">
                                     <label for="name">Product Category</label>
                                     <input type="text" name="productCategory" class="form-control" value="">
                                 </div>
                                 <div class="mb-3">
-                                    <label for="name">Product Name</label>
-                                    <input type="text" name="productName" class="form-control" value="">
+                                    <label for="name"> Product Brand</label>
+                                    <input type="text" name="productBrand" class="form-control" value="">
                                 </div>
                                 <div class="mb-3">
                                     <label for="name">Price</label>
