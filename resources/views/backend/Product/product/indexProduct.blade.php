@@ -31,21 +31,23 @@
                                             </tr>
                                         </thead>
                                         <tbody>
-                                            <tr>
-                                                <td></td>
-                                                <td></td>
-                                                <td></td>
-                                                <td></td>
-                                                <td></td>
-                                                <td></td>
-                                                <td></td>
-                                                <td class="gap-2 d-flex">
-                                                    <a href="{{ route('product.edit') }}"
-                                                        class="btn btn-primary btn-small">Edit</a>
-                                                    <a href="#" class="btn btn-danger btn-icon">Delete
-                                                    </a>
-                                                </td>
-                                            </tr>
+                                            @foreach ($products as $key => $product)
+                                                <tr>
+                                                    <td>{{ $key + 1 }}</td>
+                                                    <td>{{ $product->productName }}</td>
+                                                    <td></td>
+                                                    <td></td>
+                                                    <td></td>
+                                                    <td></td>
+                                                    <td></td>
+                                                    <td class="gap-2 d-flex">
+                                                        <a href="{{ route('product.edit') }}"
+                                                            class="btn btn-primary btn-small">Edit</a>
+                                                        <a href="#" class="btn btn-danger btn-icon">Delete
+                                                        </a>
+                                                    </td>
+                                                </tr>
+                                            @endforeach
                                         </tbody>
                                     </table>
                                 </div>

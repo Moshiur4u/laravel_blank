@@ -37,7 +37,7 @@ class ProductCategoryController extends Controller
             'category_name'=>'required'
         ]);
         ProductCategory::create(['category_name'=>$request->input('category_name')]);
-        return redirect()->route('categories.index');
+        return redirect()->route('category.create');
     }
 
     /**
