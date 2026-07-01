@@ -21,9 +21,9 @@
                                         <thead>
                                             <tr>
                                                 <th>No</th>
-                                                <th>Product Name</th>
-                                                <th>Product Category</th>
-                                                <th>Product Brand</th>
+                                                <th>Name</th>
+                                                <th>Category</th>
+                                                <th>Brand</th>
                                                 <th>Price</th>
                                                 <th>Quantity</th>
                                                 <th>Image</th>

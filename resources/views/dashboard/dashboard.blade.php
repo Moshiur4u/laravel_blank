@@ -77,6 +77,24 @@
 
                 <li>
                     <a href="javascript:;" class="has-arrow">
+                        <div class="parent-icon"><i class='bx bx-store'></i>
+                        </div>
+                        <div class="menu-title">Product</div>
+                    </a>
+                    <ul>
+                        <li>
+                            <a href="{{ route('product.index') }}"><i class='bx bx-food-menu'></i>All Product</a>
+                        </li>
+
+                        <li>
+                            <a href="#"><i class='bx bx-plus-medical'></i>Create
+                                Product</a>
+                        </li>
+                    </ul>
+                </li>
+
+                <li>
+                    <a href="javascript:;" class="has-arrow">
                         <div class="parent-icon"><i class="bx bx-customize "></i></div>
                         <div class="menu-title">Brand</div>
                     </a>
@@ -102,28 +120,11 @@
                             <a href="{{ route('category.create') }}"><i class='bx bx-food-menu'></i>All Category</a>
                         </li>
 
-                        <li>
-                            <a href="{{ route('category.create') }}"><i class=' bx bx-plus-medical'></i>Create
+                        {{-- <li>
+                            <a href="{{ route('category.index') }}"><i class=' bx bx-plus-medical'></i>Create
                                 Category</a>
-                        </li>
+                        </li> --}}
 
-                    </ul>
-                </li>
-                <li>
-                    <a href="javascript:;" class="has-arrow">
-                        <div class="parent-icon"><i class='bx bx-store'></i>
-                        </div>
-                        <div class="menu-title">Product</div>
-                    </a>
-                    <ul>
-                        <li>
-                            <a href="{{ route('product.index') }}"><i class='bx bx-food-menu'></i>All Product</a>
-                        </li>
-
-                        <li>
-                            <a href="#"><i class='bx bx-plus-medical'></i>Create
-                                Product</a>
-                        </li>
                     </ul>
                 </li>
                 <li>
