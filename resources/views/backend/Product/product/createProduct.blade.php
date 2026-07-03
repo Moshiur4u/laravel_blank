@@ -21,7 +21,7 @@
                                 </div>
                                 <div class="mb-3">
                                     <label for="category_id" class="col-sm-3 col-form-label">Select Category</label>
-                                    <select class="form-select" name="categories_id" id="category_id" required>
+                                    <select class="form-select" name="product_categorie_id" id="category_id" required>
                                         <option value="" selected disabled>Select Category</option>
                                         @foreach ($ProductCategories as $ProductCategory)
                                             <option value="{{ $ProductCategory->id }}">{{ $ProductCategory->category_name }}
@@ -31,7 +31,7 @@
                                 </div>
                                 <div class="mb-3">
                                     <label for="brand_id" class="col-sm-3 col-form-label">Select Brand</label>
-                                    <select class="form-select" name="brands_id" id="brand_id" required>
+                                    <select class="form-select" name="brand_id" id="brand_id" required>
                                         <option value="" selected disabled>Select Brand</option>
                                         @foreach ($brands as $brand)
                                             <option value="{{ $brand->id }}">{{ $brand->name }}
@@ -48,8 +48,9 @@
                                     <input type="number" name="quantity" class="form-control" value="">
                                 </div>
                                 <div class="mb-3">
-                                    <label for="name">Image</label>
-                                    <input type="file" name="image" class="form-control" value="">
+                                    <img id="preview" style="max-width:80px; margin-bottom: auto;" />
+                                    <input type="file" name="image" id="imageInput" class="form-control"
+                                        value="">
                                 </div>
                                 <div class="gap-2 mb-3 d-flex">
                                     <button class="btn btn-primary" type="submit"> Save</button>
@@ -61,4 +62,12 @@
             </div>
         </div>
     </div>
+    <script>
+        document.getElementById('imageInput').onchange = function(evt) {
+            const [file] = this.files;
+            if (file) {
+                document.getElementById('preview').src = URL.createObjectURL(file);
+            }
+        };
+    </script>
 @endsection

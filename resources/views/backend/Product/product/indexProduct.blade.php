@@ -31,14 +31,14 @@
                                             </tr>
                                         </thead>
                                         <tbody>
-                                            @foreach ($products as $key => $product)
+                                            @foreach ($Products as $key => $product)
                                                 <tr>
                                                     <td>{{ $key + 1 }}</td>
                                                     <td>{{ $product->productName }}</td>
-                                                    <td></td>
-                                                    <td></td>
-                                                    <td></td>
-                                                    <td></td>
+                                                    {{-- <td>{{ $product->productCategory->category_name }}</td> --}}
+                                                    <td>{{ $product->brand->name }}</td>
+                                                    <td>{{ $product->price }}</td>
+                                                    <td>{{ $product->quantity }}</td>
                                                     <td></td>
                                                     <td class="gap-2 d-flex">
                                                         <a href="{{ route('product.edit') }}"

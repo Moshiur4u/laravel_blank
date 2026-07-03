@@ -14,10 +14,8 @@ class ProductController extends Controller
      */
     public function index()
     {
-        $products = Product::all();
-        $ProductCategories = ProductCategory::all();
-        $brands = Brand::all();
-        return view('backend.Product.product.indexProduct',compact('products','ProductCategories','brands'));
+        $Products = Product::with('brand','ProductCategory')->get();
+        return view('backend.Product.product.indexProduct',compact('Products'));
     }
 
     /**
@@ -36,14 +34,21 @@ class ProductController extends Controller
     public function store(Request $request)
     {
         // dd($request->all());
-        $request->validate([
+       $validated = $request->validate([
             'productName'=>'required|unique:products,productName',
-            'categories_id'=>'required',
-            'brands_id'=>'required',
+            'product_categorie_id'=>'required',
+            'brand_id'=>'required',
             'price'=>'required',
-            'quantity'=>'required'
+            'quantity'=>'required',
+            'image' => 'nullable|image|mimes:jpg,jpeg,png|max:2048',
         ]);
-        Product::createOrFirst($request->all());
+         if ($request->hasFile('image')) {
+        $imageName = time().'.'.$request->image->extension();
+        $request->image->move(public_path('\productImage'), $imageName);
+        $validated['image'] = $imageName;
+    }
+        Product::createOrFirst($request->all($validated));
+        // Product::create($validated);
         return redirect()->route('product.index');
 
     }
