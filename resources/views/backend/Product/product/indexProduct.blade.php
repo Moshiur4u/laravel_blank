@@ -36,8 +36,8 @@
                                                     <td>{{ $key + 1 }}</td>
                                                     <td>{{ $product->productName }}</td>
                                                     {{-- <td>{{ $product->product_categorie_id }}</td> --}}
-                                                    {{-- <td>{{ $product->productCategory->category_name }}</td> --}}
-                                                    <td>{{ $product->productCategory->category_name ?? 'N/A' }}</td>
+                                                    <td>{{ $product->productCategory->category_name }}</td>
+                                                    {{-- <td>{{ $product->productCategory->category_name ?? 'N/A' }}</td> --}}
                                                     <td>{{ $product->brand->name }}</td>
                                                     <td>{{ $product->price }}</td>
                                                     <td>{{ $product->quantity }}</td>
