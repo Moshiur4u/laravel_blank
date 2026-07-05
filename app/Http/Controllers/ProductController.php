@@ -14,7 +14,7 @@ class ProductController extends Controller
      */
     public function index()
     {
-        $Products = Product::with('brand','ProductCategory')->get();
+        $Products = Product::with(['brand','productCategory'])->get();
         return view('backend.Product.product.indexProduct',compact('Products'));
     }
 
