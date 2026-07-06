@@ -1,4 +1,7 @@
 @extends('dashboard.dashboard')
+@section('title')
+    editProduct
+@endsection
 @section('content')
     <div class="page-wrapper">
         <div class="page-content">
@@ -6,7 +9,7 @@
                 <div class="col-lg-12">
                     <div class="card">
                         <div class="card-header">
-                            <h3 class="text-primary text-center">Product<sub class="text-info">Update</sub></h3>
+                            <h3 class="text-center text-primary">Product<sub class="text-info">Update</sub></h3>
                             <div class="gap-2 mb-3">
                                 <a href="{{ route('product.index') }}" class="btn btn-primary float-end">
                                     BackToList</a>

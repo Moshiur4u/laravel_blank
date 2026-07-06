@@ -1,4 +1,7 @@
 @extends('dashboard.dashboard')
+@section('title')
+    editBrand
+@endsection
 @section('content')
     <div class="page-content">
         <div class="page-wrapper">

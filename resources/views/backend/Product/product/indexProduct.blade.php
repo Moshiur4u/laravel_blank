@@ -1,4 +1,7 @@
 @extends('dashboard.dashboard')
+@section('title')
+    Product
+@endsection
 @section('content')
     <div class="page-wrapper">
         <div class="page-content">
