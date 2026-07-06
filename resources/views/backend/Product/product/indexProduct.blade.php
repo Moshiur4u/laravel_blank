@@ -46,7 +46,7 @@
                                                     <td>{{ $product->quantity }}</td>
                                                     <td></td>
                                                     <td class="gap-2 d-flex">
-                                                        <a href="{{ route('product.edit') }}"
+                                                        <a href="{{ route('product.edit', $product->id) }}"
                                                             class="btn btn-primary btn-small">Edit</a>
                                                         <a href="#" class="btn btn-danger btn-icon">Delete
                                                         </a>

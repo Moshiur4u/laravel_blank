@@ -64,9 +64,12 @@ class ProductController extends Controller
     /**
      * Show the form for editing the specified resource.
      */
-    public function edit(Product $product)
+    public function edit($id)
     {
-        return view('backend.Product.product.editProduct');
+        $product = Product::find($id);
+        $ProductCategories = ProductCategory::latest()->get();
+        $brand = Brand::latest()->get();
+        return view('backend.Product.product.editProduct',compact('product','ProductCategories','brand'));
     }
 
     /**
