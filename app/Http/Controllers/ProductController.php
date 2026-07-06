@@ -42,11 +42,12 @@ class ProductController extends Controller
             'unit'=>'required',
             'img_url' => 'nullable|image|mimes:jpg,jpeg,png|max:2048',
         ]);
-         if ($request->hasFile('image')) {
-        $imageName = time().'.'.$request->image->extension();
-        $request->image->move(public_path('\productImage'), $imageName);
-        $validated['image'] = $imageName;
-    }
+          // ছবি public ফোল্ডারে সেভ করা
+        $image = $request->file('image');
+        $imageName = time() . '_' . $image->getClientOriginalName();
+        $destinationPath = public_path('/uploads/products'); // public/uploads/products পাথ
+        $image->move($destinationPath, $imageName);
+
         Product::createOrFirst($request->all($validated));
         // Product::create($validated);
         return redirect()->route('product.index');
