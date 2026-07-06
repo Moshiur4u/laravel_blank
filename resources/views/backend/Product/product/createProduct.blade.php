@@ -48,11 +48,11 @@
                                 </div>
                                 <div class="mb-3">
                                     <label for="name">Quantity</label>
-                                    <input type="number" name="quantity" class="form-control" value="">
+                                    <input type="number" name="unit" class="form-control" value="">
                                 </div>
                                 <div class="mb-3">
                                     <img id="preview" style="max-width:80px; margin-bottom: auto;" />
-                                    <input type="file" name="image" id="imageInput" class="form-control"
+                                    <input type="file" name="img_url" id="imageInput" class="form-control"
                                         value="">
                                 </div>
                                 <div class="gap-2 mb-3 d-flex">

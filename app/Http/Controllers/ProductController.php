@@ -39,8 +39,8 @@ class ProductController extends Controller
             'product_categorie_id'=>'required',
             'brand_id'=>'required',
             'price'=>'required',
-            'quantity'=>'required',
-            'image' => 'nullable|image|mimes:jpg,jpeg,png|max:2048',
+            'unit'=>'required',
+            'img_url' => 'nullable|image|mimes:jpg,jpeg,png|max:2048',
         ]);
          if ($request->hasFile('image')) {
         $imageName = time().'.'.$request->image->extension();

@@ -87,7 +87,7 @@
                         </li>
 
                         <li>
-                            <a href="#"><i class='bx bx-plus-medical'></i>Create
+                            <a href="{{ route('product.create') }}"><i class='bx bx-plus-medical'></i>Create
                                 Product</a>
                         </li>
                     </ul>

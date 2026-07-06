@@ -17,8 +17,9 @@ return new class extends Migration
             $table->foreignId('product_categorie_id')->constrained()->cascadeOnDelete();
             $table->foreignId('brand_id')->constrained()->cascadeOnDelete();
             $table->decimal('price');
-            $table->integer('quantity');
-            $table->string('image')->nullable();
+            $table->string('unit',100);
+            $table->string('stock_unit',100)->default(0);
+            $table->string('img_url',100)->nullable();
 
             // $table->foreign('categories_id')->references('id')->on('ProductCategory')->onDelete('cascade');
             // $table->foreign('brands_id')->references('id')->on('brand')->onDelete('cascade');

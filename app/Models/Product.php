@@ -14,8 +14,9 @@ class Product extends Model
             'product_categorie_id',
             'brand_id',
             'price',
-            'quantity',
-            'image'
+            'unit',
+            'stock_unit',
+            'img_url'
     ];
     public function productCategory(){
         return $this->belongsTo(ProductCategory::class,'product_categorie_id');
