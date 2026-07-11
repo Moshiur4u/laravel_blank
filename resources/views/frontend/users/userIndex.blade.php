@@ -42,24 +42,27 @@
                                     </tr>
                                 </thead>
                                 <tbody>
-                                    <tr>
-                                        <td></td>
-                                        <td></td>
-                                        <td></td>
-                                        <td>
-                                            <span class="badge bg-danger">#</span>
-                                            {{-- <br> --}}
-                                        </td>
-                                        <td class="gap-2 d-flex">
+                                    @foreach ($Uers as $key => $User)
+                                        <tr>
+                                            <td>{{ $key + 1 }}</td>
+                                            <td>{{ $User->name }}</td>
+                                            <td>
+                                                @foreach ($User->roles as $roll)
+                                                    <span class="badge bg-danger">{{ $roll->name }}</span>
+                                                @endforeach
+                                            </td>
+                                            <td>{{ $User->email }}</td>
+                                            <td class="gap-2 d-flex">
 
-                                            <a href="" class="btn btn-primary btn-small">edit</a>
+                                                <a href="" class="btn btn-primary btn-small">edit</a>
 
-                                            {{-- <button type="submit" class="btn btn-danger btn-small">delete</button> --}}
+                                                {{-- <button type="submit" class="btn btn-danger btn-small">delete</button> --}}
 
-                                            <a href=" " class="btn btn-danger btn-icon">Delete
-                                            </a>
-                                        </td>
-                                    </tr>
+                                                <a href=" " class="btn btn-danger btn-icon">Delete
+                                                </a>
+                                            </td>
+                                        </tr>
+                                    @endforeach
                                 </tbody>
                             </table>
                         </div>
