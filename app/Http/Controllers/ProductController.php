@@ -52,6 +52,7 @@ class ProductController extends Controller
         // Product::create($validated);
         return redirect()->route('product.index');
 
+
     }
 
     /**
