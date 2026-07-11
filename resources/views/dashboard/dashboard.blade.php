@@ -158,7 +158,7 @@
                     <ul>
 
                         <li>
-                            <a href="#"><i class=' bx bx-id-card'></i>All Empolyee</a>
+                            <a href="{{ route('user.index') }}"><i class=' bx bx-id-card'></i>All Empolyee</a>
                         </li>
 
                         <li>
@@ -167,28 +167,22 @@
 
                     </ul>
                 </li>
-                @can('role-menu|view-role-list')
-                    <li>
-                        <a href="javascript:;" class="has-arrow">
-                            <div class="parent-icon"><i class='bx bx-key'></i>
-                            </div>
-                            <div class="menu-title">Role and Permission</div>
-                        </a>
-                        <ul>
-                            @can('role-menu|view-role-list')
-                                <li>
-                                    <a href="{{ route('roles.index') }}"><i class='bx bxs-door-open'></i>All Roles</a>
-                                </li>
-                            @endcan
-                            @can('create-role')
-                                <li>
-                                    <a href="{{ route('roles.create') }}"><i class='bx bx-user-plus'></i>Create Role</a>
-                                </li>
-                            @endcan
+                <li>
+                    <a href="javascript:;" class="has-arrow">
+                        <div class="parent-icon"><i class='bx bx-key'></i>
+                        </div>
+                        <div class="menu-title">Role and Permission</div>
+                    </a>
+                    <ul>
+                        <li>
+                            <a href="{{ route('roles.index') }}"><i class='bx bxs-door-open'></i>All Roles</a>
+                        </li>
+                        <li>
+                            <a href="{{ route('roles.create') }}"><i class='bx bx-user-plus'></i>Create Role</a>
+                        </li>
 
-                        </ul>
-                    </li>
-                @endcan
+                    </ul>
+                </li>
                 <li class="menu-label">Reports</li>
                 <li>
                     <a class="has-arrow" href="javascript:;">

@@ -52,18 +52,18 @@
                                                 @endforeach
                                             </td>
                                             <td class="gap-2 d-flex">
-                                                @can('edit-role-permissions')
-                                                    <a href="{{ route('roles.edit', $role->id) }}"
-                                                        class="btn btn-primary btn-small">edit</a>
-                                                @endcan
+
+                                                <a href="{{ route('roles.edit', $role->id) }}"
+                                                    class="btn btn-primary btn-small">edit</a>
+
                                                 {{-- <button type="submit" class="btn btn-danger btn-small">delete</button> --}}
-                                                @can('delete-role')
-                                                    <a href="{{ route('roles.destroy', $role->id) }}"
-                                                        class="btn btn-danger btn-icon">Delete
-                                                    </a>
-                                                @endcan
+
+                                                <a href="{{ route('roles.destroy', $role->id) }}"
+                                                    class="btn btn-danger btn-icon">Delete
+                                                </a>
                                             </td>
                                         </tr>
+                                    @endforeach
                                 </tbody>
                             </table>
                         </div>
@@ -71,9 +71,8 @@
                 </div>
             </div>
             <!-- end-content -->
-        @endcan
-    </div>
+        </div>
 
-</div>
-<!--end page wrapper -->
+    </div>
+    <!--end page wrapper -->
 @endsection
