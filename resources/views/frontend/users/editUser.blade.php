@@ -11,7 +11,7 @@
                 <div class="col-lg-8">
                     <div class="card">
                         <div class="card-header">
-                            <h3 class="text-primary">Update-User-Info</h3>
+                            <h3 class="text-center text-primary">Update-User-Info</h3>
                         </div>
                         <div class="card-body">
                             <form action=" " method="Post">
@@ -23,20 +23,36 @@
                                 </div>
 
                                 <div class="mb-3">
-                                    <label for="category_id" class="col-sm-3 col-form-label">Select Category</label>
-                                    <select class="form-select" name="product_categorie_id" id="category_id" required>
+                                    <label for="category_id" class="col-sm-3 col-form-label">Select Roles</label>
+                                    <select class="form-select" name="roles" id="category_id" required>
                                         <option value="" selected disabled>Select
-                                            Category
+                                            Role
                                         </option>
-                                        @foreach ($Users->roles as $role)
-                                            <option
-                                                value="{{ $role->name }}",{{ in_array($role->name, $userRole) ? 'selected' : '' }}>
+                                        @foreach ($Roles as $role)
+                                            <option value="{{ $role->name }}"
+                                                {{ in_array($role->name, $userRole) ? 'selected' : '' }}>
                                                 {{ $role->name }}</option>
                                         @endforeach
                                     </select>
                                 </div>
-                                <div class="gap-2 mb-3 d-flex ">
-                                    <button class="btn btn-primary" type="submit"> Update User</button>
+                                <div class="mb-3">
+                                    <label for="name"> User Email</label>
+                                    <input type="email" name="email" class="form-control" value="{{ $Users->email }}">
+                                </div>
+                                <div class="mb-3">
+                                    <label for="name"> Password</label>
+                                    <input type="number" name="password" class="form-control" value="">
+                                </div>
+                                <div class="mb-3">
+                                    <label for="name">Conform Password</label>
+                                    <input type="number" name="confarmPassword" class="form-control" value="">
+                                </div>
+                                <div class="mb-3">
+                                    <label for="name">Change Photo </label>
+                                    <input type="file" name="image" class="form-control" value="">
+                                </div>
+                                <div class="gap-2 mb-3 text-center ">
+                                    <button class="btn btn-primary" type="submit"> Update</button>
                                 </div>
                             </form>
                         </div>

@@ -48,9 +48,9 @@ class UserController extends Controller
     public function edit(string $id)
     {
         $Users = User::find($id);
-        $roles = Role::latest()->get();
-        $userRole = $Users->roles->pluck('name')->all();
-        return view('frontend.users.editUser',compact('Users','roles','userRole'));
+        $Roles = Role::latest()->get();
+        $userRole = $Users->Roles->pluck('name')->all();
+        return view('frontend.users.editUser',compact('Users','Roles','userRole'));
     }
 
     /**
