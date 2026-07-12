@@ -42,19 +42,20 @@
                                     </tr>
                                 </thead>
                                 <tbody>
-                                    @foreach ($Uers as $key => $User)
+                                    @foreach ($Users as $key => $User)
                                         <tr>
                                             <td>{{ $key + 1 }}</td>
                                             <td>{{ $User->name }}</td>
                                             <td>
-                                                @foreach ($User->roles as $roll)
-                                                    <span class="badge bg-danger">{{ $roll->name }}</span>
+                                                @foreach ($User->roles as $role)
+                                                    <span class="badge bg-danger">{{ $role->name }}</span>
                                                 @endforeach
                                             </td>
                                             <td>{{ $User->email }}</td>
                                             <td class="gap-2 d-flex">
 
-                                                <a href="" class="btn btn-primary btn-small">edit</a>
+                                                <a href="{{ route('user.edit', $User->id) }}"
+                                                    class="btn btn-primary btn-small">edit</a>
 
                                                 {{-- <button type="submit" class="btn btn-danger btn-small">delete</button> --}}
 

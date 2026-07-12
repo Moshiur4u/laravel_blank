@@ -36,8 +36,8 @@
                                     <tr>
                                         <th>No</th>
                                         <th>Name</th>
-                                        <th>Permissions</th>
                                         <th>Action</th>
+                                        <th>Permissions</th>
                                     </tr>
                                 </thead>
                                 <tbody>
@@ -45,12 +45,6 @@
                                         <tr>
                                             <td>{{ $key + 1 }}</td>
                                             <td>{{ $role->name }}</td>
-                                            <td>
-                                                @foreach ($role->permissions as $permission)
-                                                    <span class="badge bg-danger">{{ $permission->name }}</span>
-                                                    {{-- <br> --}}
-                                                @endforeach
-                                            </td>
                                             <td class="gap-2 d-flex">
 
                                                 <a href="{{ route('roles.edit', $role->id) }}"
@@ -61,6 +55,12 @@
                                                 <a href="{{ route('roles.destroy', $role->id) }}"
                                                     class="btn btn-danger btn-icon">Delete
                                                 </a>
+                                            </td>
+                                            <td>
+                                                @foreach ($role->permissions as $permission)
+                                                    <span class="badge bg-danger">{{ $permission->name }}</span>
+                                                    {{-- <br> --}}
+                                                @endforeach
                                             </td>
                                         </tr>
                                     @endforeach

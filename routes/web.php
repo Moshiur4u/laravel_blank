@@ -19,24 +19,25 @@ Route::get('/logout',[UserController::class,'logout'])->name('logout');
 
 Route::middleware(['auth','verified'])->group(function(){
 route::get('/user/index',[UserController::class,'index'])->name('user.index');
+route::get('/user/edit/{id}',[UserController::class,'edit'])->name('user.edit');
 });
 
 //roll-permission route work in here
-Route::get('/roles',[RoleController::class,'index'])->name('roles.index');
-Route::get('/roles.create',[RoleController::class,'create'])->name('roles.create');
-Route::post('/roles.store',[RoleController::class,'store'])->name('roles.store');
-Route::get('/roles/{id}/edit',[RoleController::class,'edit'])->name('roles.edit');
-Route::put('/roles/{id}/update',[RoleController::class,'update'])->name('roles.update');
-Route::get('/roles.destroy/{id}',[RoleController::class,'destroy'])->name('roles.destroy');
-});
-// //roll-permission route work in here
-// Route::get('/roles',[RoleController::class,'index'])->middleware('permission:role-menu|view-role-list')->name('roles.index');
-// Route::get('/roles.create',[RoleController::class,'create'])->middleware('permission:create-role')->name('roles.create');
-// Route::post('/roles.store',[RoleController::class,'store'])->middleware('permission:create-role')->name('roles.store');
-// Route::get('/roles/{id}/edit',[RoleController::class,'edit'])->middleware('permission:edit-role-permissions')->name('roles.edit');
-// Route::put('/roles/{id}/update',[RoleController::class,'update'])->middleware('permission:edit-role-permissions')->name('roles.update');
-// Route::get('/roles.destroy/{id}',[RoleController::class,'destroy'])->middleware('permission:delete-role')->name('roles.destroy');
+// Route::get('/roles',[RoleController::class,'index'])->name('roles.index');
+// Route::get('/roles.create',[RoleController::class,'create'])->name('roles.create');
+// Route::post('/roles.store',[RoleController::class,'store'])->name('roles.store');
+// Route::get('/roles/{id}/edit',[RoleController::class,'edit'])->name('roles.edit');
+// Route::put('/roles/{id}/update',[RoleController::class,'update'])->name('roles.update');
+// Route::get('/roles.destroy/{id}',[RoleController::class,'destroy'])->name('roles.destroy');
 // });
+//roll-permission route work in here
+Route::get('/roles',[RoleController::class,'index'])->middleware('permission:role-menu|view-role-list')->name('roles.index');
+Route::get('/roles.create',[RoleController::class,'create'])->middleware('permission:create-role')->name('roles.create');
+Route::post('/roles.store',[RoleController::class,'store'])->middleware('permission:create-role')->name('roles.store');
+Route::get('/roles/{id}/edit',[RoleController::class,'edit'])->middleware('permission:edit-role-permissions')->name('roles.edit');
+Route::put('/roles/{id}/update',[RoleController::class,'update'])->middleware('permission:edit-role-permissions')->name('roles.update');
+Route::get('/roles.destroy/{id}',[RoleController::class,'destroy'])->middleware('permission:delete-role')->name('roles.destroy');
+});
 //product-
 Route::middleware(['auth','verified'])->group(function(){
     route::get('/product/index',[ProductCategoryController::class,'index'])->name('category.index');
