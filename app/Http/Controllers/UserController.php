@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\User;
+use Hash;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Spatie\Permission\Models\Role;
@@ -23,7 +24,8 @@ class UserController extends Controller
      */
     public function create()
     {
-        //
+        $Roles = Role::latest()->get();
+        return view('frontend.users.addUser',compact('Roles'));
     }
 
     /**
@@ -58,7 +60,25 @@ class UserController extends Controller
      */
     public function update(Request $request, string $id)
     {
-        //
+        $request->validate([
+            'name' => 'required',
+            'roles'=>'required',
+            'email'=>'unique:users,email,'.$id,
+            'password'=>'nullable|same:confarmPassword'
+        ]);
+        // dd($request->all());
+        $Users = User::find($id);
+        $Users->update([
+            'name'=>$request->input('name'),
+            'email'=>$request->input('email'),
+        ]);
+        if($request->has('password')){
+            $Users->update([
+                'password'=>Hash::make($request->password)
+            ]);
+        };
+        $Users->syncRoles($request->roles);
+        return redirect()->route('user.index');
     }
 
     /**

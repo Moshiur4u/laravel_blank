@@ -14,7 +14,8 @@
                             <h3 class="text-center text-primary">Update-User-Info</h3>
                         </div>
                         <div class="card-body">
-                            <form action=" " method="Post">
+                            <form action="{{ route('user.update', $Users->id) }}" method="Post"
+                                enctype="multipart/form-data">
                                 @csrf
                                 @method('PUT')
                                 <div class="mb-3">

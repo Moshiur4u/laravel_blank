@@ -162,7 +162,7 @@
                         </li>
 
                         <li>
-                            <a href="#"><i class='bx bx-user-plus '></i>Create Empolyee</a>
+                            <a href="{{ route('user.create') }}"><i class='bx bx-user-plus '></i>Create Empolyee</a>
                         </li>
 
                     </ul>
