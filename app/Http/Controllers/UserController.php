@@ -7,6 +7,8 @@ use Hash;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Spatie\Permission\Models\Role;
+use Illuminate\Support\Facades\Storage;
+
 
 class UserController extends Controller
 {
@@ -33,7 +35,34 @@ class UserController extends Controller
      */
     public function store(Request $request)
     {
-        //
+        // dd($request->all());
+
+        $request->validate([
+            'name'=>'required',
+            'roles'=>'required',
+            'email'=>'required|unique:users,email',
+            'password'=>'required|same:confarmPassword',
+            'image' => 'required|image|mimes:jpeg,png,jpg,gif|max:1048',
+
+        ]);
+        if ($request->hasFile('image')) {
+        // ইমেজ স্টোর করা
+        $imageName = time() . '.' . $request->image->extension();
+
+        // পাবলিক ডিস্কে স্টোর
+        // $path = $request->file('image')->store('images', 'public');
+
+        // অথবা কাস্টম নাম দিয়ে স্টোর
+        $path = $request->file('image')->storeAs('users', $imageName, 'public');
+       $Users = User::create([
+            'name'=>$request->name,
+            'email'=>$request->email,
+            'password'=>Hash::make( $request->password),
+            'image'=>$imagePath,
+        ]);
+        $Users->assignRole($request->roles);
+        return redirect()->route('user.index');
+
     }
 
     /**
