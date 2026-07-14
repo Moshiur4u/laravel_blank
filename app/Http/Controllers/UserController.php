@@ -3,9 +3,9 @@
 namespace App\Http\Controllers;
 
 use App\Models\User;
-use Hash;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Hash;
 use Spatie\Permission\Models\Role;
 use Illuminate\Support\Facades\Storage;
 
@@ -45,25 +45,23 @@ class UserController extends Controller
             'image' => 'required|image|mimes:jpeg,png,jpg,gif|max:1048',
 
         ]);
+        $imagePath = null;
+        //ইমেজ হ্যান্ডলিং
         if ($request->hasFile('image')) {
-        // ইমেজ স্টোর করা
-        $imageName = time() . '.' . $request->image->extension();
-
-        // পাবলিক ডিস্কে স্টোর
-        // $path = $request->file('image')->store('images', 'public');
-
-        // অথবা কাস্টম নাম দিয়ে স্টোর
-        $path = $request->file('image')->storeAs('users', $imageName, 'public');
-       $Users = User::create([
+            $imageName = time() . '_' . $request->file('image')->getClientOriginalName();
+            $imagePath = $request->file('image')->storeAs('Users', $imageName, 'public');
+        }
+        $Users = User::create([
             'name'=>$request->name,
             'email'=>$request->email,
             'password'=>Hash::make( $request->password),
-            'image'=>$path,
+            'image'=>$imagePath,
         ]);
         $Users->assignRole($request->roles);
+        flash()->success('User Added successfully!');
         return redirect()->route('user.index');
 
-        }
+
     }
 
     /**

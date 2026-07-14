@@ -26,14 +26,6 @@ route::put('/user/update/{id}',[UserController::class,'update'])->name('user.upd
 });
 
 //roll-permission route work in here
-// Route::get('/roles',[RoleController::class,'index'])->name('roles.index');
-// Route::get('/roles.create',[RoleController::class,'create'])->name('roles.create');
-// Route::post('/roles.store',[RoleController::class,'store'])->name('roles.store');
-// Route::get('/roles/{id}/edit',[RoleController::class,'edit'])->name('roles.edit');
-// Route::put('/roles/{id}/update',[RoleController::class,'update'])->name('roles.update');
-// Route::get('/roles.destroy/{id}',[RoleController::class,'destroy'])->name('roles.destroy');
-// });
-//roll-permission route work in here
 Route::get('/roles',[RoleController::class,'index'])->middleware('permission:role-menu|view-role-list')->name('roles.index');
 Route::get('/roles.create',[RoleController::class,'create'])->middleware('permission:create-role')->name('roles.create');
 Route::post('/roles.store',[RoleController::class,'store'])->middleware('permission:create-role')->name('roles.store');
