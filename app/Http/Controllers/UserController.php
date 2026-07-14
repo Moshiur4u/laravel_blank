@@ -58,11 +58,12 @@ class UserController extends Controller
             'name'=>$request->name,
             'email'=>$request->email,
             'password'=>Hash::make( $request->password),
-            'image'=>$imagePath,
+            'image'=>$path,
         ]);
         $Users->assignRole($request->roles);
         return redirect()->route('user.index');
 
+        }
     }
 
     /**
