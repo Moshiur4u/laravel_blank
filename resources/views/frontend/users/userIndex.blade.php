@@ -36,7 +36,7 @@
                                     <tr>
                                         <th>No</th>
                                         <th>Name</th>
-                                        <th>Rolles</th>
+                                        <th>Roles</th>
                                         <th>Email</th>
                                         <th>Action</th>
                                     </tr>
