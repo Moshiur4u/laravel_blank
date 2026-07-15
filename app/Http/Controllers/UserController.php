@@ -3,9 +3,9 @@
 namespace App\Http\Controllers;
 
 use App\Models\User;
-use Hash;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Hash;
 use Spatie\Permission\Models\Role;
 use Illuminate\Support\Facades\Storage;
 
@@ -35,7 +35,7 @@ class UserController extends Controller
      */
     public function store(Request $request)
     {
-         {
+
         // dd($request->all());
 
         $request->validate([
@@ -61,8 +61,6 @@ class UserController extends Controller
         $Users->assignRole($request->roles);
         flash()->success('User Added successfully!');
         return redirect()->route('user.index');
-
-
     }
 
     /**

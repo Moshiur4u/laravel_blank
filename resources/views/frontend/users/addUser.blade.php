@@ -47,7 +47,9 @@
                                 </div>
                                 <div class="mb-3">
                                     <label for="name">Change Photo </label>
-                                    <input type="file" name="image" class="form-control" value="">
+                                    <input type="file" id="imageInput" name="image" class="form-control"
+                                        value="">
+                                    <img id="preview" style="max-width:200px; margin-top:10px;" />
                                 </div>
                                 {{-- <div class="mb-3">
                                     <label for="name" class="text-danger">User Status</label>
@@ -72,4 +74,12 @@
             </div>
         </div>
     </div>
+    <script>
+        document.getElementById('imageInput').onchange = function(evt) {
+            const [file] = this.files;
+            if (file) {
+                document.getElementById('preview').src = URL.createObjectURL(file);
+            }
+        };
+    </script>
 @endsection
