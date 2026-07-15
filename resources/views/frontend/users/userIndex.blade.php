@@ -36,6 +36,7 @@
                                     <tr>
                                         <th>No</th>
                                         <th>Name</th>
+                                        <th>Photo</th>
                                         <th>Roles</th>
                                         <th>Email</th>
                                         <th>Action</th>
@@ -46,6 +47,11 @@
                                         <tr>
                                             <td>{{ $key + 1 }}</td>
                                             <td>{{ $User->name }}</td>
+                                            <td>
+                                                <img src="{{ asset('storage/Users/' . $User->image) }}"alt="profile"
+                                                    width="50" height="50"
+                                                    style="object-fit: cover; border-radius: 50%;"
+                                                    onerror="this.src='{{ asset('default-avatar.png') }}'">
                                             <td>
                                                 @foreach ($User->roles as $role)
                                                     <span class="badge bg-danger">{{ $role->name }}</span>

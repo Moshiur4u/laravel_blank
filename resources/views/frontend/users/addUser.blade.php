@@ -20,6 +20,9 @@
                                 <div class="mb-3">
                                     <label for="name"> User Name</label>
                                     <input type="text" name="name" class="form-control" value="">
+                                    @error('photo')
+                                        <strong class="text-danger">{{ $message }}</strong>
+                                    @enderror
                                 </div>
 
                                 <div class="mb-3">
@@ -32,24 +35,39 @@
                                             <option value="{{ $role->name }}">{{ $role->name }}</option>
                                         @endforeach
                                     </select>
+                                    @error('roles')
+                                        <strong class="text-danger">{{ $message }}</strong>
+                                    @enderror
                                 </div>
                                 <div class="mb-3">
                                     <label for="name"> User Email</label>
                                     <input type="email" name="email" class="form-control" value="">
+                                    @error('email')
+                                        <strong class="text-danger">{{ $message }}</strong>
+                                    @enderror
                                 </div>
                                 <div class="mb-3">
                                     <label for="name"> Password</label>
                                     <input type="number" name="password" class="form-control" value="">
+                                    @error('password')
+                                        <strong class="text-danger">{{ $message }}</strong>
+                                    @enderror
                                 </div>
                                 <div class="mb-3">
                                     <label for="name">Conform Password</label>
                                     <input type="number" name="confarmPassword" class="form-control" value="">
+                                    @error('confarmPassword')
+                                        <strong class="text-danger">{{ $message }}</strong>
+                                    @enderror
                                 </div>
                                 <div class="mb-3">
                                     <label for="name">Change Photo </label>
                                     <input type="file" id="imageInput" name="image" class="form-control"
                                         value="">
                                     <img id="preview" style="max-width:200px; margin-top:10px;" />
+                                    @error('image')
+                                        <strong class="text-danger">{{ $message }}</strong>
+                                    @enderror
                                 </div>
                                 {{-- <div class="mb-3">
                                     <label for="name" class="text-danger">User Status</label>
