@@ -43,14 +43,20 @@ class UserController extends Controller
             'roles'=>'required',
             'email'=>'required|unique:users,email',
             'password'=>'required|same:confarmPassword',
-            'image' => 'required|image|mimes:jpeg,png,jpg,gif|max:1048',
+            'image' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:1048',
 
         ]);
         $imagePath = null;
         //ইমেজ হ্যান্ডলিং
         if ($request->hasFile('image')) {
-            $imageName = time() . '_' . $request->file('image')->getClientOriginalName();
-            $imagePath = $request->file('image')->storeAs('Users', $imageName, 'public');
+            $image = $request->image;
+            $extension = $image->extension();// Photo Rename As par user name
+            // $photo_name = Auth::User()->name.".".$extension;
+            $photo_name = $request->name.".".$extension;
+            $request->image->move(public_path('users'), $photo_name);
+            $imagePath = $photo_name;
+
+            // $imagePath = $request->file('image')->storeAs('Users', $imageName, 'public');
         }
         $Users = User::create([
             'name'=>$request->name,
@@ -112,7 +118,10 @@ class UserController extends Controller
      */
     public function destroy(string $id)
     {
-        //
+        $Users = User::find($id);
+        $delete_from = public_path('users/'.$Users->image );
+        unlink( $delete_from);
+        User::find($id)->delete();
     }
     public function logout(Request $request){
         Auth::guard('web')->logout();

@@ -23,6 +23,7 @@ route::get('/user/create',[UserController::class,'create'])->name('user.create')
 route::post('/user/store',[UserController::class,'store'])->name('user.store');
 route::get('/user/edit/{id}',[UserController::class,'edit'])->name('user.edit');
 route::put('/user/update/{id}',[UserController::class,'update'])->name('user.update');
+route::get('/user/destroy/{id}',[UserController::class,'destroy'])->name('user.destroy');
 });
 
 //roll-permission route work in here

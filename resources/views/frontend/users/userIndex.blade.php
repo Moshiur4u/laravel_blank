@@ -48,10 +48,16 @@
                                             <td>{{ $key + 1 }}</td>
                                             <td>{{ $User->name }}</td>
                                             <td>
-                                                <img src="{{ asset('storage/Users/' . $User->image) }}"alt="profile"
-                                                    width="50" height="50"
-                                                    style="object-fit: cover; border-radius: 50%;"
-                                                    onerror="this.src='{{ asset('default-avatar.png') }}'">
+                                                {{-- ইমেজ থাকলে তা দেখাবে, না থাকলে একটি ডিফল্ট ইমেজ দেখাবে --}}
+                                                @if ($User->image)
+                                                    <img src="{{ asset('users/' . $User->image) }}" alt="Photo"
+                                                        width="50" height="50"
+                                                        style="object-fit: cover; border-radius: 50%;">
+                                                @else
+                                                    <img src="{{ asset('default-avatar.png') }}" alt="Default Photo"
+                                                        width="50" height="50"
+                                                        style="object-fit: cover; border-radius: 50%;">
+                                                @endif
                                             <td>
                                                 @foreach ($User->roles as $role)
                                                     <span class="badge bg-danger">{{ $role->name }}</span>
@@ -65,7 +71,8 @@
 
                                                 {{-- <button type="submit" class="btn btn-danger btn-small">delete</button> --}}
 
-                                                <a href=" " class="btn btn-danger btn-icon">Delete
+                                                <a href="{{ route('user.destroy', $User->id) }}"
+                                                    class="btn btn-danger btn-icon">Delete
                                                 </a>
                                             </td>
                                         </tr>
