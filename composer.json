@@ -10,11 +10,13 @@
     "license": "MIT",
     "require": {
         "php": "^8.3",
+        "intervention/image": "^4.0",
         "laravel/framework": "^13.8",
         "laravel/tinker": "^3.0",
         "laravolt/avatar": "^6.5",
         "php-flasher/flasher-laravel": "^2.6",
         "php-flasher/flasher-sweetalert-laravel": "^2.6",
+        "remzikocak/laravel-gravatar": "^3.0",
         "spatie/laravel-permission": "^8.0"
     },
     "require-dev": {

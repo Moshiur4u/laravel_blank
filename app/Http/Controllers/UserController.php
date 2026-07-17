@@ -7,7 +7,6 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
 use Spatie\Permission\Models\Role;
-use Illuminate\Support\Facades\Storage;
 
 
 class UserController extends Controller
@@ -118,11 +117,16 @@ class UserController extends Controller
      */
     public function destroy(string $id)
     {
+
         $Users = User::find($id);
-        $delete_from = public_path('users/'.$Users->image );
-        unlink( $delete_from);
-        User::find($id)->delete();
+        if ($Users->image !==null) {
+            $delete_from = public_path('users/'.$Users->image );
+            unlink( $delete_from);
+        }
+         User::find($id)->delete();
+         return redirect()->route('user.index');
     }
+
     public function logout(Request $request){
         Auth::guard('web')->logout();
 

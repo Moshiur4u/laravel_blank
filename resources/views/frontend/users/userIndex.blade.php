@@ -54,9 +54,7 @@
                                                         width="50" height="50"
                                                         style="object-fit: cover; border-radius: 50%;">
                                                 @else
-                                                    <img src="{{ asset('default-avatar.png') }}" alt="Default Photo"
-                                                        width="50" height="50"
-                                                        style="object-fit: cover; border-radius: 50%;">
+                                                    <div class="w-5 h-5 rounded-full">{!! Avatar::create($User->name)->toSvg() !!}</div>
                                                 @endif
                                             <td>
                                                 @foreach ($User->roles as $role)
