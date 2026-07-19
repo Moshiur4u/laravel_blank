@@ -53,7 +53,7 @@
                                     <input type="file" name="image" class="form-control" value="">
                                 </div>
 
-                                <div class="mb-3">
+                                {{-- <div class="mb-3">
                                     <label for="name" class="text-danger">User Status</label>
                                     <select class="mb-3">
                                         <option type="nubmer" name="status" class="form-control" value="">Select
@@ -64,7 +64,7 @@
                                     </select>
                                     <label for="name" class="mb-10 text-danger">Remark</label>
                                     <textarea type="text" name="remark" class="form-control" value=""> </textarea>
-                                </div>
+                                </div> --}}
                                 <div class="gap-2 mb-3 text-center ">
                                     <button class="btn btn-primary" type="submit"> Update</button>
                                 </div>

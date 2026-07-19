@@ -2,10 +2,12 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Controllers\Controller;
 use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Storage;
 use Spatie\Permission\Models\Role;
 
 
@@ -92,21 +94,38 @@ class UserController extends Controller
      */    public function update(Request $request, string $id)
     {
         $request->validate([
-            'name' => 'required',
+            'name'=>'required',
             'roles'=>'required',
-            'email'=>'unique:users,email,'.$id,
-            'password'=>'nullable|same:confarmPassword'
+            'email'=>'required|unique:users,email',
+            'password'=>'required|same:confarmPassword',
+            'image' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:1048',
         ]);
         // dd($request->all());
+
         $Users = User::find($id);
+  // ইমেজ থাকলে আপডেট করুন
+    if ($request->hasFile('image')) {
+        // পুরানো ইমেজ থাকলে ডিলিট করুন
+        if ($Users->image !== null) {
+            Storage::disk('/Users')->delete($Users->image);
+        }
+        $extension = $image->extension();// Photo Rename As par user name
+            // $photo_name = Auth::User()->name.".".$extension;
+            $photo_name = $request->name.".".$extension;
+            $request->image->move(public_path('users'), $photo_name);
+            $imagePath = $photo_name;
+
         $Users->update([
             'name'=>$request->input('name'),
             'email'=>$request->input('email'),
+            'image'=>$request->input('image')
         ]);
+
         if($request->has('password')){
             $Users->update([
                 'password'=>Hash::make($request->password)
             ]);
+
         };
         $Users->syncRoles($request->roles);
         return redirect()->route('user.index');

@@ -48,14 +48,16 @@
                                             <td>{{ $key + 1 }}</td>
                                             <td>{{ $User->name }}</td>
                                             <td>
-                                                {{-- ইমেজ থাকলে তা দেখাবে, না থাকলে একটি ডিফল্ট ইমেজ দেখাবে --}}
                                                 @if ($User->image)
-                                                    <img src="{{ asset('users/' . $User->image) }}" alt="Photo"
-                                                        width="50" height="50"
-                                                        style="object-fit: cover; border-radius: 50%;">
+                                                    {{-- 1. <img src="{{ asset('storage/' . $User->image) }}"
+                                                        alt="{{ $User->name }}"> --}}
+                                                    <img src="{{ asset('Users/' . $User->image) }}"alt="{{ $User->name }}"
+                                                        class="img-thumbnail widgets-icons-2 msg-avatar">
                                                 @else
-                                                    <div class="w-5 h-5 rounded-full">{!! Avatar::create($User->name)->toSvg() !!}</div>
+                                                    <img src="{{ asset('Users/Users.png') }}"
+                                                        alt="{{ $User->name }}"class="img-thumbnail widgets-icons-2 msg-avatar" />
                                                 @endif
+
                                             <td>
                                                 @foreach ($User->roles as $role)
                                                     <span class="badge bg-danger">{{ $role->name }}</span>
