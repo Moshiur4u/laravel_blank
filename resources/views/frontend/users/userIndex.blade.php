@@ -49,8 +49,6 @@
                                             <td>{{ $User->name }}</td>
                                             <td>
                                                 @if ($User->image)
-                                                    {{-- 1. <img src="{{ asset('storage/' . $User->image) }}"
-                                                        alt="{{ $User->name }}"> --}}
                                                     <img src="{{ asset('Users/' . $User->image) }}"alt="{{ $User->name }}"
                                                         class="img-thumbnail widgets-icons-2 msg-avatar">
                                                 @else
