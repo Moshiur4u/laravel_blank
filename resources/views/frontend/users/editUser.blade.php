@@ -42,29 +42,19 @@
                                 </div>
                                 <div class="mb-3">
                                     <label for="name"> Password</label>
-                                    <input type="number" name="password" class="form-control" value="">
+                                    <input type="password" name="password" class="form-control" value="">
                                 </div>
                                 <div class="mb-3">
                                     <label for="name">Conform Password</label>
-                                    <input type="number" name="confarmPassword" class="form-control" value="">
+                                    <input type="password" name="confarmPassword" class="form-control" value="">
                                 </div>
                                 <div class="mb-3">
                                     <label for="name">Change Photo </label>
                                     <input type="file" name="image" class="form-control" value="">
+                                    @if ($Users->image)
+                                        <small class="text-muted">Current: {{ $Users->image }}</small>
+                                    @endif
                                 </div>
-
-                                {{-- <div class="mb-3">
-                                    <label for="name" class="text-danger">User Status</label>
-                                    <select class="mb-3">
-                                        <option type="nubmer" name="status" class="form-control" value="">Select
-                                            Status
-                                        </option>
-                                        <option>Active</option>
-                                        <option>inActive</option>
-                                    </select>
-                                    <label for="name" class="mb-10 text-danger">Remark</label>
-                                    <textarea type="text" name="remark" class="form-control" value=""> </textarea>
-                                </div> --}}
                                 <div class="gap-2 mb-3 text-center ">
                                     <button class="btn btn-primary" type="submit"> Update</button>
                                 </div>
