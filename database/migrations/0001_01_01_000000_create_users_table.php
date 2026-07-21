@@ -18,8 +18,8 @@ return new class extends Migration
             $table->timestamp('email_verified_at')->nullable();
             $table->string('password');
             $table->string('image')->nullable();
-            // table->integer('status')->default(0);
-            // $table->string('remark')->nullable();
+            $table->integer('status')->default(0);
+            $table->string('remark')->nullable();
             $table->rememberToken();
             $table->timestamps();
         });

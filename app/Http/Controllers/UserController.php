@@ -44,7 +44,7 @@ class UserController extends Controller
             'email' => 'required|unique:users,email',
             'password' => 'required|same:confarmPassword',
             'image' => 'required|image|mimes:jpeg,png,jpg,gif|max:1048',
-
+            'remark' => 'nullable',
         ]);
         $imagePath = null;
         // ইমেজ হ্যান্ডলিং
@@ -52,7 +52,7 @@ class UserController extends Controller
             $image = $request->image;
             $extension = $image->extension(); // Photo Rename As par user name
             // $photo_name = Auth::User()->name.".".$extension;
-            $photo_name = $request->name.'.'.$extension;
+            $photo_name = $request->name . '.' . $extension;
             $request->image->move(public_path('Users'), $photo_name);
             $imagePath = $photo_name;
 
@@ -63,6 +63,7 @@ class UserController extends Controller
             'email' => $request->email,
             'password' => Hash::make($request->password),
             'image' => $imagePath,
+            'remark' => $request->remark,
         ]);
         $Users->assignRole($request->roles);
         flash()->success('User Added successfully!');
@@ -99,9 +100,10 @@ class UserController extends Controller
         $request->validate([
             'name' => 'required|string|max:255',
             'roles' => 'required',
-            'email' => 'required|email|unique:users,email,'.$id, // বর্তমান ইউজারকে ইগনোর করবে
+            'email' => 'required|email|unique:users,email,' . $id, // বর্তমান ইউজারকে ইগনোর করবে
             'password' => 'nullable|same:confirmPassword|min:6', // nullable করা হলো
             'image' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048', // nullable করা হলো
+            'remark' => 'nullable',
         ]);
 
         $user = User::findOrFail($id);
@@ -109,6 +111,7 @@ class UserController extends Controller
         $updateData = [
             'name' => $request->input('name'),
             'email' => $request->input('email'),
+            'remark' => $request->input('remark'),
         ];
 
         // ২. ইমেজ আপডেট লজিক
@@ -121,7 +124,7 @@ class UserController extends Controller
             // }
             if ($user->image !== null) {
                 // যদি ইউজার ইমেজ থাকে, তবে পুরানো ইমেজ ডিলিট করবে
-                $delete_from = public_path('Users/'.$user->image);
+                $delete_from = public_path('Users/' . $user->image);
                 // পুরানো ইমেজ ডিলিট ইউজার ফোল্ডার থেকে  ইউজার -> ডাটাবেজ ইমেজ
                 unlink($delete_from);
                 // উনলিঙ্ক মানে ডিলিট
@@ -133,7 +136,7 @@ class UserController extends Controller
             // ফাইলের নামে স্পেস থাকলে সমস্যা হয়, তাই str_replace এবং time() ব্যবহার করা নিরাপদ
             // $photo_name = str_replace(' ', '_', $request->name).'_'.time().'.'.$extension;
             // শুধু রিক্যেস্ট থেকে নাম নিব
-            $photo_name = ($request->name).'.'.$extension;
+            $photo_name = ($request->name) . '.' . $extension;
             // ইউজার ফোল্ডারে ইমেজ সেভ হবে ও  ফোল্ডার নাম ইউজার
             $image->move(public_path('Users'), $photo_name);
 
@@ -155,6 +158,22 @@ class UserController extends Controller
         return redirect()->route('user.index')->with('success', 'User updated successfully!');
     }
 
+    public function userstatusupdate(string $status_id)
+    {
+        $user = User::find($status_id);
+        if ($user->status == 0) {
+            User::find($status_id)->update([
+                'status' => 1,
+            ]);
+        } else {
+            User::find($status_id)->update([
+                'status' => 0,
+            ]);
+        }
+
+        return redirect()->route('user.index');
+    }
+
     /**
      * Remove the specified resource from storage.
      */
@@ -163,7 +182,7 @@ class UserController extends Controller
 
         $Users = User::find($id);
         if ($Users->image !== null) {
-            $delete_from = public_path('users/'.$Users->image);
+            $delete_from = public_path('users/' . $Users->image);
             unlink($delete_from);
         }
         User::find($id)->delete();

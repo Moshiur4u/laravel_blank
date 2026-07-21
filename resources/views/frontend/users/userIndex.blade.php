@@ -38,6 +38,7 @@
                                         <th>Name</th>
                                         <th>Photo</th>
                                         <th>Roles</th>
+                                        <th>Status</th>
                                         <th>Email</th>
                                         <th>Action</th>
                                     </tr>
@@ -60,6 +61,11 @@
                                                 @foreach ($User->roles as $role)
                                                     <span class="badge bg-danger">{{ $role->name }}</span>
                                                 @endforeach
+                                            </td>
+                                            <td>
+                                                <a href="{{ route('user.statusupdate', $User->id) }}"
+                                                    class = "btn btn-{{ $User->status == 1 ? 'success' : 'danger' }}">
+                                                    {{ $User->status == 1 ? 'Active' : 'Inactive' }}</a>
                                             </td>
                                             <td>{{ $User->email }}</td>
                                             <td class="gap-2 d-flex">
