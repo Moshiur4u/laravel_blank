@@ -103,16 +103,23 @@ class UserController extends Controller
             'email' => 'required|email|unique:users,email,' . $id, // বর্তমান ইউজারকে ইগনোর করবে
             'password' => 'nullable|same:confirmPassword|min:6', // nullable করা হলো
             'image' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048', // nullable করা হলো
+            'status' => 'nullable',
             'remark' => 'nullable',
         ]);
-
+        // ডেটা আপডেট করার জন্য ইউজারকে খুজে বের করা হলো
         $user = User::findOrFail($id);
-
+        // ডেটা আপডেট করার জন্য ভেরিয়েবল তৈরি হলো
         $updateData = [
             'name' => $request->input('name'),
             'email' => $request->input('email'),
             'remark' => $request->input('remark'),
         ];
+        // স্ট্যাটাস আপডেট লজিক
+        if ($request->has('status')) {
+            $updateData['status'] = $request->input('status');
+        }else{
+            $updateData['status'] = 0;
+        }
 
         // ২. ইমেজ আপডেট লজিক
         if ($request->hasFile('image')) {

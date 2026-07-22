@@ -55,6 +55,17 @@
                                         <small class="text-muted">Current: {{ $Users->image }}</small>
                                     @endif
                                 </div>
+                                <div class="mb-3">
+                                    <label for="name"> Status</label>
+                                    <select class="form-select" name="status" id="status" required>
+                                        <option value="1" {{ $Users->status == 1 ? 'selected' : '' }}>Active</option>
+                                        <option value="0" {{ $Users->status == 0 ? 'selected' : '' }}>Inactive</option>
+                                    </select>
+                                </div>
+                                <div class="mb-3">
+                                    <label for="name"> Remark</label>
+                                    <textarea name="remark" class="form-control" value="">{{ $Users->remark }}</textarea>   
+                                </div>
                                 <div class="gap-2 mb-3 text-center ">
                                     <button class="btn btn-primary" type="submit"> Update</button>
                                 </div>

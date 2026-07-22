@@ -29,9 +29,8 @@ class User extends Authenticatable
         'password',
         'image',
         'remark',
+        'status',
     ];
-
-    protected $guarded = ['id'];
 
     protected function casts(): array
     {
