@@ -29,9 +29,12 @@
                                         <option value="" selected disabled>Select
                                             Role
                                         </option>
+                                        <!--ফর ইচ লুপ এর মাধ্যমে ব্লেডে রোলেগুলো দেখান হলো --> 
                                         @foreach ($Roles as $role)
+                                        <!-- in_array ফাংশন ব্যবহার করে আমরা চেক করব  যে ইউজারকে কোন রোল টি সিলেক্ট করা আছে কিনা -->
                                             <option value="{{ $role->name }}"
                                                 {{ in_array($role->name, $userRole) ? 'selected' : '' }}>
+                                                {{-- রোল-নাম দেখাব তাই নাম দিলাম --}}
                                                 {{ $role->name }}</option>
                                         @endforeach
                                     </select>
@@ -58,6 +61,12 @@
                                 <div class="mb-3">
                                     <label for="name"> Status</label>
                                     <select class="form-select" name="status" id="status" required>
+                                        <option value="" selected disabled>Select
+                                            Status
+                                        </option>
+                                        {{-- অপশন ভ্যালু ডাটাবেজ এ  সেভ হবে এ জন্য আলাদা করে value দিতে হয়েছে 
+                                            এবং {{ $Users->status == 1 ? 'selected' : '' }} 
+                                            দ্বারা চেক করা হয়েছে যে কোন অপশন টি সিলেক্ট করা আছে --}}
                                         <option value="1" {{ $Users->status == 1 ? 'selected' : '' }}>Active</option>
                                         <option value="0" {{ $Users->status == 0 ? 'selected' : '' }}>Inactive</option>
                                     </select>
