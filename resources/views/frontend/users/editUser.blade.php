@@ -54,8 +54,12 @@
                                 <div class="mb-3">
                                     <label for="name">Change Photo </label>
                                     <input type="file" name="image" class="form-control" value="">
+                                    <!-- এখানে  আমরা ইফ  কন্ডিশন লজিক ব্যবহার করে ব্লেডে ইমেজ নাম দেখাবো -->
                                     @if ($Users->image)
-                                        <small class="text-muted">Current: {{ $Users->image }}</small>
+                                        <small class="text-muted">Current: {{ $Users->image }}</small><br>
+                                        <!-- যদি ইমেজ আপলোড করা থাকে তাহলে ডিফল্ট ইমেজ দেখাবে -->
+                                        <img src="{{ asset('Users/' . $Users->image) }}" alt="{{ $Users->name }}"
+                                            class="img-thumbnail widgets-icons-2 msg-avatar">
                                     @endif
                                 </div>
                                 <div class="mb-3">

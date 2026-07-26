@@ -45,27 +45,31 @@
                                     </tr>
                                 </thead>
                                 <tbody>
+                                    <!-- এখানে আমরা ফর ইচ লুপ এর মাধ্যমে ইউজার দের নাম দেখাবো -->
                                     @foreach ($Users as $key => $User)
                                         <tr>
                                             <td>{{ $key + 1 }}</td>
                                             <td>{{ $User->name }}</td>
                                             <td>
+                                                <!-- এখানে আমরা ইফ  কন্ডিশন লজিক ব্যবহার করে ব্লেডে ইমেজ দেখাবো -->
                                                 @if ($User->image)
                                                     <img src="{{ asset('Users/' . $User->image) }}"alt="{{ $User->name }}"
                                                         class="img-thumbnail widgets-icons-2 msg-avatar">
                                                 @else
+                                                    <!-- যদি ইমেজ আপলোড করা না থাকে তাহলে ডিফল্ট ইমেজ দেখাবে -->
                                                     <img src="{{ asset('Users/Users.png') }}"
                                                         alt="{{ $User->name }}"class="img-thumbnail widgets-icons-2 msg-avatar" />
                                                 @endif
 
                                             <td>
+                                                <!-- এখানে আমরা ফর ইচ লুপ এর মাধ্যমে রোল নাম দেখাবো -->
                                                 @foreach ($User->roles as $role)
                                                     <span class="badge bg-danger">{{ $role->name }}</span>
                                                 @endforeach
                                             </td>
                                             <td>{{ $User->email }}</td>
                                             <td>
-
+                                                <!-- এখানে আমরা বাটন ব্যবহার করে ইউজার দের ইনফরমেশন দেখাবো -->
                                                 <a href="{{ route('user.edit', $User->id) }}"
                                                     class="btn btn-primary btn-small">Edit</a>
 
@@ -76,12 +80,11 @@
                                                 </a>
                                             </td>
                                             <td>
-                                               <!-- স্ট্যাটাস বাটন  এখানে যখন রাউট বন্ধ থাকবে তখন এই বাটন কাজ করবে না 
-                                                 রাউট ব্যবহার করলে কন্ট্রলারে ফংশন ব্যবহার করে স্ট্যাটাস পরিবর্তন করা যাবে।
-                                                  এখন শুধু রং পরিবর্তন হবে  -->
+                                                <!-- স্ট্যাটাস বাটন  এখানে যখন রাউট বন্ধ থাকবে তখন এই বাটন কাজ করবে না
+                                                                                 রাউট ব্যবহার করলে কন্ট্রলারে ফংশন ব্যবহার করে স্ট্যাটাস পরিবর্তন করা যাবে।
+                                                                                  এখন শুধু রং পরিবর্তন হবে  -->
                                                 {{-- <a href="{{ route('user.statusupdate', $User->id) }}"> --}}
-                                                <a href="#"
-                                                  {{-- এখানে আমরা কন্ডিশন লজিক ব্যবহার করে বাটনে রং পরিবর্তন করবো  --}}
+                                                <a href="#" {{-- এখানে আমরা কন্ডিশন লজিক ব্যবহার করে বাটনে রং পরিবর্তন করবো  --}}
                                                     class = "btn btn-{{ $User->status == 1 ? 'success' : 'danger' }}">
                                                     {{ $User->status == 1 ? 'Active' : 'Inactive' }}</a>
                                             </td>
