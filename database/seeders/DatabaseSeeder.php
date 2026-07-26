@@ -3,7 +3,6 @@
 namespace Database\Seeders;
 
 use App\Models\User;
-use Database\Seeders\UserSeederTable;
 use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
 
@@ -22,10 +21,13 @@ class DatabaseSeeder extends Seeder
             'name' => 'Test User',
             'email' => 'test@example.com',
         ]);
+        // পারমিশন সিডার কল করা হলো ডাটাবেজে পারমিশন টেবিলের জন্য
         $this->call([
-                PermissionSeederTable::class,
-                UserSeederTable::class,
-                ProductCategorySeeder::class
+            PermissionSeederTable::class,
+            // ইউজার সিডার কল করা হলো ডাটাবেজে ইউজার টেবিলের জন্য
+            UserSeederTable::class,
+            // প্রোডাক্ট ক্যাটাগরি সিডার কল করা হলো ডাটাবেজে প্রোডাক্ট ক্যাটাগরি টেবিলের জন্য
+            ProductCategorySeeder::class,
         ]);
     }
 }
