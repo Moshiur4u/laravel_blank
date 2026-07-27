@@ -49,6 +49,26 @@ class LoginRequest extends FormRequest
                 'email' => trans('auth.failed'),
             ]);
         }
+    
+        // ==========================================
+        // ইউজার অ্যাক্টিভ কিনা তা চেক করার নতুন কোড
+        // ==========================================
+        $user = Auth::user();
+        
+        // এখানে status 0 হলে ইনঅ্যাক্টিভ ধরা হচ্ছে
+        if ($user && $user->status == 0) { 
+            Auth::logout(); // লগিন হয়ে গেছে, তাই লগআউট করে দিন
+            
+            // সেশন ক্লিয়ার করে দিন (নিরাপত্তার জন্য)
+            $this->session()->invalidate();
+            $this->session()->regenerateToken();
+
+            // কাস্টম এরর মেসেজ দেখান
+            throw ValidationException::withMessages([
+                'email' => 'আপনার অ্যাকাউন্টটি ইনঅ্যাক্টিভ। লগিন করতে অ্যাডমিনের সাথে যোগাযোগ করুন।',
+            ]);
+        }
+        // ==========================================
 
         RateLimiter::clear($this->throttleKey());
     }

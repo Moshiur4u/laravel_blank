@@ -48,14 +48,14 @@
                                 </div>
                                 <div class="mb-3">
                                     <label for="name"> Password</label>
-                                    <input type="number" name="password" class="form-control" value="">
+                                    <input type="password" name="password" class="form-control" value="">
                                     @error('password')
                                         <strong class="text-danger">{{ $message }}</strong>
                                     @enderror
                                 </div>
                                 <div class="mb-3">
                                     <label for="name">Conform Password</label>
-                                    <input type="number" name="confarmPassword" class="form-control" value="">
+                                    <input type="password" name="confarmPassword" class="form-control" value="">
                                     @error('confarmPassword')
                                         <strong class="text-danger">{{ $message }}</strong>
                                     @enderror

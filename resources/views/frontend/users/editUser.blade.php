@@ -68,9 +68,9 @@
                                         <option value="" selected disabled>Select
                                             Status
                                         </option>
-                                        {{-- অপশন ভ্যালু ডাটাবেজ এ  সেভ হবে এ জন্য আলাদা করে value দিতে হয়েছে 
+                                        <!--অপশন ভ্যালু ডাটাবেজ এ  সেভ হবে এ জন্য আলাদা করে value দিতে হয়েছে 
                                             এবং {{ $Users->status == 1 ? 'selected' : '' }} 
-                                            দ্বারা চেক করা হয়েছে যে কোন অপশন টি সিলেক্ট করা আছে --}}
+                                            দ্বারা চেক করা হয়েছে যে কোন অপশন টি সিলেক্ট করা আছে -->
                                         <option value="1" {{ $Users->status == 1 ? 'selected' : '' }}>Active</option>
                                         <option value="0" {{ $Users->status == 0 ? 'selected' : '' }}>Inactive</option>
                                     </select>
@@ -80,7 +80,7 @@
                                     <textarea name="remark" class="form-control" value="">{{ $Users->remark }}</textarea>   
                                 </div>
                                 <div class="gap-2 mb-3 text-center ">
-                                    <button class="btn btn-primary" type="submit"> Update</button>
+                                    <button class="btn btn-primary" type="submit"> Update Information</button>
                                 </div>
                             </form>
                         </div>

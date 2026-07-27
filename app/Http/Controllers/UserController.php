@@ -47,7 +47,7 @@ class UserController extends Controller
             'roles' => 'required',
             'email' => 'required|unique:users,email',
             'password' => 'required|same:confarmPassword',
-            'image' => 'required|image|mimes:jpeg,png,jpg,gif|max:1048',
+            'image' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:1048',
             'remark' => 'nullable',
         ]);
         // ইমেজ ভ্যারিয়েবল তৈরি করা হলো
