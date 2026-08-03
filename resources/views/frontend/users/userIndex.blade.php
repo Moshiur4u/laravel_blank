@@ -54,11 +54,11 @@
                                                 <!-- এখানে আমরা ইফ  কন্ডিশন লজিক ব্যবহার করে ব্লেডে ইমেজ দেখাবো -->
                                                 @if ($User->image)
                                                     <img src="{{ asset('Users/' . $User->image) }}"alt="{{ $User->name }}"
-                                                        class="img-thumbnail widgets-icons-2 msg-avatar">
+                                                        class="product-img-2">
                                                 @else
                                                     <!-- যদি ইমেজ আপলোড করা না থাকে তাহলে ডিফল্ট ইমেজ দেখাবে -->
                                                     <img src="{{ asset('Users/Users.png') }}"
-                                                        alt="{{ $User->name }}"class="img-thumbnail widgets-icons-2 msg-avatar" />
+                                                        alt="{{ $User->name }}"class="product-img-2" />  
                                                 @endif
 
                                             <td>
@@ -79,14 +79,17 @@
                                                     class="btn btn-danger btn-icon">Delete
                                                 </a>
                                             </td>
-                                            <td>
+                                            {{-- এখানে আমরা স্ট্যাটাস চেক করে অ্যাক্টিভ হলে কালার দেখাব। --}}
+                                            <td @if ($User->status==1) class="fw-bold text-success" @else class="fw-bold text-danger" @endif>
                                                 <!-- স্ট্যাটাস বাটন  এখানে যখন রাউট বন্ধ থাকবে তখন এই বাটন কাজ করবে না
-                                                                                 রাউট ব্যবহার করলে কন্ট্রলারে ফংশন ব্যবহার করে স্ট্যাটাস পরিবর্তন করা যাবে।
-                                                                                  এখন শুধু রং পরিবর্তন হবে  -->
+                                                     রাউট ব্যবহার করলে কন্ট্রলারে ফংশন ব্যবহার করে স্ট্যাটাস পরিবর্তন করা যাবে।
+                                                    এখন শুধু রং পরিবর্তন হবে  -->
                                                 {{-- <a href="{{ route('user.statusupdate', $User->id) }}"> --}}
-                                                <a href="#" {{-- এখানে আমরা কন্ডিশন লজিক ব্যবহার করে বাটনে রং পরিবর্তন করবো  --}}
-                                                    class = "btn btn-{{ $User->status == 1 ? 'success' : 'danger' }}">
-                                                    {{ $User->status == 1 ? 'Active' : 'Inactive' }}</a>
+                                                    
+                                                 {{-- এখানে আমরা কন্ডিশন লজিক ব্যবহার করে বাটনে রং পরিবর্তন করবো  --}}
+                                                {{-- <a href="#"class = "btn btn-{{ $User->status == 1 ? 'success' : 'danger' }}">
+                                                    {{ $User->status == 1 ? 'Active' : 'Inactive' }}</a> --}}
+                                                {{ $User->status == 1 ? 'Active' : 'Inactive' }}     
                                             </td>
                                             <td>{{ $User->remark }}</td>
                                         </tr>
