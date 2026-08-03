@@ -37,6 +37,9 @@ class User extends Authenticatable
         return [
             'email_verified_at' => 'datetime',
             'password' => 'hashed',
+            //এখানে স্ট্যাটাসকে বুলিয়ান করা হয়েছে যাতে এটা 1 এবং 0 কে True এবং False তে কনভার্ট করতে পারে
+            // এবং লগইনের সময় স্ট্যাটাস অ্যাক্টিভ আছে কিনা এটা চেক করার জন্য এইটা ব্যবহার করা হয় Request - Auth - LoginRequest এর মধ্যে কাজ করা হয়েছে।
+            'status' => 'boolean',
         ];
     }
 }
