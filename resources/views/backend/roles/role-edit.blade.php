@@ -29,6 +29,7 @@
                     <div class="card">
                         <div class="p-4 card-body">
                             <h5 class="mb-4">Update Role</h5>
+                            <!- এখানে রোল আপডেট করার ফর্ম তৈরি করা হলো->
                             <form action="{{ route('roles.update', $role->id) }}" method="post">
                                 @csrf
                                 @method('PUT')
@@ -36,18 +37,21 @@
                                     <label for="name" class="col-sm-3 col-form-label">Role Name</label>
                                     <div class="col-sm-9">
                                         <input type="text" class="form-control" id="name" name="name"
+                                            {{-- এখানে ভ্যালু হিসেবে রোলের নাম রাখা হলো --}}
                                             value="{{ $role->name }}" placeholder="Enter Your Role Name">
-                                        {{-- @error('name')
+                                        @error('name')
                                             <div class="">{{ $message }}</div>
-                                        @enderror --}}
+                                        @enderror
                                     </div>
                                 </div>
                                 <div class="mb-3 form-group">
                                     <div class="col-sm-9 form-check">
+                                         {{-- এখনে ফর ইচ লুপের মাধ্যমে পারমিশন দেখানো হলো  --}}
                                         @foreach ($permissions as $permission)
                                             <label class="form-check-label">
                                                 <input type="checkbox" name="permission[]" value="{{ $permission->id }}"
                                                     class="form-check-input"
+                                                    {{-- এখানে যদি পারমিশন থাকে তাহলে checked দেখাবে --}}
                                                     {{ in_array($permission->id, $rolewithpermission) ? 'Checked' : '' }}>
                                                 {{ $permission->name }}
                                             </label>

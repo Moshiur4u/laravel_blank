@@ -29,6 +29,7 @@
                     <div class="card">
                         <div class="p-4 card-body">
                             <h5 class="mb-4">Create Role</h5>
+                            {{-- এখানে রোল স্টোরের জন্য ফর্ম তৈরি করা হলো --}}
                             <form action="{{ route('roles.store') }}" method="post">
                                 @csrf
                                 <div class="mb-3 form-group">
@@ -42,9 +43,11 @@
                                     @enderror
                                 </div>
                                 <div class="mb-3 form-group">
+                                     {{-- এখানে ফর ইচ লুপের মাধ্যমে ডাটাবেজ থেকে পারমিশনগুলো দেখানো হলো  --}}
                                     @foreach ($permissions as $permission)
                                         <div class="col-sm-9 form-check">
                                             <label class="form-check-label">
+                                                {{-- এখানে চেক বক্সে ক্লিক করা হলে পারমিশন সিলেক্ট হবে --}}
                                                 <input type="checkbox" name="permission[{{ $permission->id }}]"
                                                     value="{{ $permission->id }}" class="form-check-input">
                                                 {{ $permission->name }}

@@ -57,7 +57,9 @@
                                                 </a>
                                             </td>
                                             <td>
+                                                {{-- এখানে রোল এর সাথে পারমিশন দেখানো হলো --}}
                                                 @foreach ($role->permissions as $permission)
+                                                {{-- এখানে ব্যাডজ আকারে পারমিশনগুলো  নাম দেখানো হলো  --}}
                                                     <span class="badge bg-danger">{{ $permission->name }}</span>
                                                     {{-- <br> --}}
                                                 @endforeach

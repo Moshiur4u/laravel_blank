@@ -69,7 +69,10 @@
                                             <div class="col-12">
                                                 <label for="inputEmailAddress" class="form-label">Email</label>
                                                 <input type="email" name="email" class="form-control"
-                                                    id="inputEmailAddress" placeholder="jhon@example.com">
+                                                    id="inputEmailAddress" placeholder="Enter Your Email">
+                                                @error('email')
+                                                    <span class="text-danger">{{ $message }}</span>
+                                                @enderror
                                             </div>
                                             <div class="col-12">
                                                 <label for="inputChoosePassword" class="form-label">Password</label>
