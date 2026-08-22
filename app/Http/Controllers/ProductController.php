@@ -14,8 +14,9 @@ class ProductController extends Controller
      */
     public function index()
     {
-        $Products = Product::with('productCategory','brand')->get();
-        return view('backend.Product.product.indexProduct',compact('Products'));
+        $Products = Product::with('productCategory', 'brand')->get();
+
+        return view('backend.Product.product.indexProduct', compact('Products'));
     }
 
     /**
@@ -25,7 +26,8 @@ class ProductController extends Controller
     {
         $ProductCategories = ProductCategory::all();
         $brands = Brand::all();
-        return view('backend.Product.product.createProduct',compact('brands','ProductCategories'));
+
+        return view('backend.Product.product.createProduct', compact('brands', 'ProductCategories'));
     }
 
     /**
@@ -34,24 +36,31 @@ class ProductController extends Controller
     public function store(Request $request)
     {
         // dd($request->all());
-       $validated = $request->validate([
-            'productName'=>'required|unique:products,productName',
-            'product_categorie_id'=>'required',
-            'brand_id'=>'required',
-            'price'=>'required',
-            'unit'=>'required',
-            'img_url' => 'nullable|image|mimes:jpg,jpeg,png|max:2048',
+        $validated = $request->validate([
+            'productName' => 'required|unique:products,productName',
+            'product_categorie_id' => 'required',
+            'brand_id' => 'required',
+            'price' => 'required',
+            'unit' => 'required',
+            'imageName' => 'nullable|image|mimes:jpg,jpeg,png|max:2048',
         ]);
-          // ছবি public ফোল্ডারে সেভ করা
-        $image = $request->file('image');
-        $imageName = time() . '_' . $image->getClientOriginalName();
-        $destinationPath = public_path('/uploads/products'); // public/uploads/products পাথ
-        $image->move($destinationPath, $imageName);
+        $imagePath = null;
+        if ($request->hasFile('imageName')) {
+            $image = $request->file('imageName');
+            $imageName = time().'_'.$image->getClientOriginalName();
+            $destinationPath = public_path('/uploads/products'); // public/uploads/products পাথ
+            $image->move($destinationPath, $imageName);
+            $imagePath = $imageName;
+        }
 
-        Product::createOrFirst($request->all($validated));
-        // Product::create($validated);
+        $Product = Product::create($validated);
+        if ($Product) {
+            flash()->success('Product Added successfully!');
+        } else {
+            flash()->error('Product Added failed!');
+        }
+
         return redirect()->route('product.index');
-
 
     }
 
@@ -71,7 +80,8 @@ class ProductController extends Controller
         $product = Product::find($id);
         $ProductCategories = ProductCategory::latest()->get();
         $brand = Brand::latest()->get();
-        return view('backend.Product.product.editProduct',compact('product','ProductCategories','brand'));
+
+        return view('backend.Product.product.editProduct', compact('product', 'ProductCategories', 'brand'));
     }
 
     /**

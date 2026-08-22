@@ -43,7 +43,7 @@
                                                     {{-- <td>{{ $product->productCategory->category_name ?? 'N/A' }}</td> --}}
                                                     <td>{{ $product->brand->name }}</td>
                                                     <td>{{ $product->price }}</td>
-                                                    <td>{{ $product->quantity }}</td>
+                                                    <td>{{ $product->unit }}</td>
                                                     <td></td>
                                                     <td class="gap-2 d-flex">
                                                         <a href="{{ route('product.edit', $product->id) }}"
