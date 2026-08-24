@@ -29,7 +29,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
 });
 // মিডলওয়্যার সহ রোল রাউট শুরু
 Route::middleware(['auth', 'verified'])->group(function () {
-    Route::get('/roles', [RoleController::class, 'index'])->middleware('permission:role-menu|view-role-list')->name('roles.index');
+    Route::get('/roles', [RoleController::class, 'index'])->middleware('permission:role-menu')->name('roles.index');
     Route::get('/roles.create', [RoleController::class, 'create'])->middleware('permission:create-role')->name('roles.create');
     Route::post('/roles.store', [RoleController::class, 'store'])->middleware('permission:create-role')->name('roles.store');
     Route::get('/roles/{id}/edit', [RoleController::class, 'edit'])->middleware('permission:edit-role-permissions')->name('roles.edit');
