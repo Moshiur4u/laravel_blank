@@ -58,7 +58,7 @@
                                                 @else
                                                     <!-- যদি ইমেজ আপলোড করা না থাকে তাহলে ডিফল্ট ইমেজ দেখাবে -->
                                                     <img src="{{ asset('Users/Users.png') }}"
-                                                        alt="{{ $User->name }}"class="product-img-2" />  
+                                                        alt="{{ $User->name }}"class="product-img-2" />
                                                 @endif
 
                                             <td>
@@ -80,16 +80,17 @@
                                                 </a>
                                             </td>
                                             {{-- এখানে আমরা স্ট্যাটাস চেক করে অ্যাক্টিভ হলে কালার দেখাব। --}}
-                                            <td @if ($User->status==1) class="fw-bold text-success" @else class="fw-bold text-danger" @endif>
+                                            <td
+                                                @if ($User->status == 1) class="fw-bold text-success" @else class="fw-bold text-danger" @endif>
                                                 <!-- স্ট্যাটাস বাটন  এখানে যখন রাউট বন্ধ থাকবে তখন এই বাটন কাজ করবে না
-                                                     রাউট ব্যবহার করলে কন্ট্রলারে ফংশন ব্যবহার করে স্ট্যাটাস পরিবর্তন করা যাবে।
-                                                    এখন শুধু রং পরিবর্তন হবে  -->
+                                                             রাউট ব্যবহার করলে কন্ট্রলারে ফংশন ব্যবহার করে স্ট্যাটাস পরিবর্তন করা যাবে।
+                                                            এখন শুধু রং পরিবর্তন হবে  -->
                                                 {{-- <a href="{{ route('user.statusupdate', $User->id) }}"> --}}
-                                                    
-                                                 {{-- এখানে আমরা কন্ডিশন লজিক ব্যবহার করে বাটনে রং পরিবর্তন করবো  --}}
+
+                                                {{-- এখানে আমরা কন্ডিশন লজিক ব্যবহার করে বাটনে রং পরিবর্তন করবো  --}}
                                                 {{-- <a href="#"class = "btn btn-{{ $User->status == 1 ? 'success' : 'danger' }}">
                                                     {{ $User->status == 1 ? 'Active' : 'Inactive' }}</a> --}}
-                                                {{ $User->status == 1 ? 'Active' : 'Inactive' }}     
+                                                {{ $User->status == 1 ? 'Active' : 'Inactive' }}
                                             </td>
                                             <td>{{ $User->remark }}</td>
                                         </tr>

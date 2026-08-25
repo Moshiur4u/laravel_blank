@@ -43,13 +43,18 @@
                                     @enderror
                                 </div>
                                 <div class="mb-3 form-group">
-                                     {{-- এখানে ফর ইচ লুপের মাধ্যমে ডাটাবেজ থেকে পারমিশনগুলো দেখানো হলো  --}}
+                                    <div class="col-sm-9 form-check">
+                                        <label class="form-check-label fw-bold">
+                                            <input type="checkbox" id="selectAll" class="form-check-input">
+                                            Select All Permissions
+                                        </label>
+                                    </div>
                                     @foreach ($permissions as $permission)
                                         <div class="col-sm-9 form-check">
                                             <label class="form-check-label">
-                                                {{-- এখানে চেক বক্সে ক্লিক করা হলে পারমিশন সিলেক্ট হবে --}}
                                                 <input type="checkbox" name="permission[{{ $permission->id }}]"
-                                                    value="{{ $permission->id }}" class="form-check-input">
+                                                    value="{{ $permission->id }}"
+                                                    class="form-check-input permission-checkbox">
                                                 {{ $permission->name }}
                                             </label>
                                         </div>
@@ -69,9 +74,17 @@
                 </div>
             </div>
 
-
             <!-- end-content -->
         </div>
     </div>
     <!--end page wrapper -->
+    <script>
+        // Select All / Unselect All functionality
+        document.getElementById('selectAll').addEventListener('change', function() {
+            let checkboxes = document.querySelectorAll('.permission-checkbox');
+            checkboxes.forEach((checkbox) => {
+                checkbox.checked = this.checked;
+            });
+        });
+    </script>
 @endsection

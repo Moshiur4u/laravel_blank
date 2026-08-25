@@ -167,6 +167,7 @@
 
                     </ul>
                 </li>
+                    @can('role-menu')
                 <li>
                     <a href="javascript:;" class="has-arrow">
                         <div class="parent-icon"><i class='bx bx-key'></i>
@@ -183,6 +184,7 @@
 
                     </ul>
                 </li>
+                @endcan
                 <li class="menu-label">Reports</li>
                 <li>
                     <a class="has-arrow" href="javascript:;">
