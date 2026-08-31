@@ -182,9 +182,9 @@
                         </li>
 
                     </ul>
-<<<<<<< HEAD
+
                 </li>         
->>>>>>> 6f50e2f0f92c5361c065ae
+
                 <li class="menu-label">Reports</li>
                 <li>
                     <a class="has-arrow" href="javascript:;">

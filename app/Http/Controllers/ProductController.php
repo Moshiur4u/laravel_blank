@@ -44,13 +44,13 @@ class ProductController extends Controller
             'unit' => 'required',
             'imageName' => 'nullable|image|mimes:jpg,jpeg,png|max:2048',
         ]);
-        $imagePath = null;
+        // $imageName = null;
         if ($request->hasFile('imageName')) {
             $image = $request->file('imageName');
             $imageName = time().'_'.$image->getClientOriginalName();
             $destinationPath = public_path('/uploads/products'); // public/uploads/products পাথ
             $image->move($destinationPath, $imageName);
-            $imagePath = $imageName;
+            $validated['imageName'] = $imageName;
         }
 
         $Product = Product::create($validated);
