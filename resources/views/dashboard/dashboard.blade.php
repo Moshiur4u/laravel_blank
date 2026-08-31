@@ -167,11 +167,6 @@
 
                     </ul>
                 </li>
-<<<<<<< HEAD
-                    @can('role-menu')
-=======
-                @can('role-menu')
->>>>>>> 6f50e2f0f92c5361c065ae5b67c3aecca703665e
                 <li>
                     <a href="javascript:;" class="has-arrow">
                         <div class="parent-icon"><i class='bx bx-key'></i>
@@ -188,11 +183,8 @@
 
                     </ul>
 <<<<<<< HEAD
-                </li>
-=======
-                </li>          
->>>>>>> 6f50e2f0f92c5361c065ae5b67c3aecca703665e
-                @endcan
+                </li>         
+>>>>>>> 6f50e2f0f92c5361c065ae
                 <li class="menu-label">Reports</li>
                 <li>
                     <a class="has-arrow" href="javascript:;">
@@ -693,14 +685,6 @@
                 [5, 10, 25, 50, "All"]
             ]
         });
-    </script>
-    <script>
-        document.getElementById('imageInput').onchange = function(evt) {
-            const [file] = this.files;
-            if (file) {
-                document.getElementById('preview').src = URL.createObjectURL(file);
-            }
-        };
     </script>
 </body>
 
