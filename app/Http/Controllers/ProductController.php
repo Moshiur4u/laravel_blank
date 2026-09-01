@@ -35,33 +35,35 @@ class ProductController extends Controller
      */
     public function store(Request $request)
     {
-        // dd($request->all());
-        $validated = $request->validate([
-            'productName' => 'required|unique:products,productName',
+        $request->validate([
+            'productName' => 'required',
             'product_categorie_id' => 'required',
             'brand_id' => 'required',
             'price' => 'required',
             'unit' => 'required',
             'imageName' => 'nullable|image|mimes:jpg,jpeg,png|max:2048',
         ]);
-        // $imageName = null;
-        if ($request->hasFile('imageName')) {
-            $image = $request->file('imageName');
-            $imageName = time().'_'.$image->getClientOriginalName();
-            $destinationPath = public_path('/uploads/products'); // public/uploads/products পাথ
-            $image->move($destinationPath, $imageName);
-            $validated['imageName'] = $imageName;
-        }
+        $Product_image = $request->imageName;
+        $extension = $Product_image->extension();
+        $Product_Name = $request->productName . '.' . $extension;
+        $request->imageName->move(public_path('products/') . $Product_Name);
+        $Product_image_save = $Product_Name;
 
-        $Product = Product::create($validated);
-        if ($Product) {
+        $product = Product::create([
+            'productName' => $request->productName,
+            'product_categorie_id' => $request->product_categorie_id,
+            'brand_id' => $request->brand_id,
+            'price' => $request->price,
+            'unit' => $request->unit,
+            'img_url' => $Product_image_save
+        ]);
+
+        if ($product) {
             flash()->success('Product Added successfully!');
         } else {
             flash()->error('Product Added failed!');
         }
-
         return redirect()->route('product.index');
-
     }
 
     /**
@@ -77,9 +79,9 @@ class ProductController extends Controller
      */
     public function edit($id)
     {
-        $product = Product::find($id);
-        $ProductCategories = ProductCategory::latest()->get();
-        $brand = Brand::latest()->get();
+        // $product = Product::find($id);
+        // $ProductCategories = ProductCategory::latest()->get();
+        // $brand = Brand::latest()->get();
 
         return view('backend.Product.product.editProduct', compact('product', 'ProductCategories', 'brand'));
     }
