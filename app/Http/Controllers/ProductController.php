@@ -35,35 +35,7 @@ class ProductController extends Controller
      */
     public function store(Request $request)
     {
-        $request->validate([
-            'productName' => 'required',
-            'product_categorie_id' => 'required',
-            'brand_id' => 'required',
-            'price' => 'required',
-            'unit' => 'required',
-            'imageName' => 'nullable|image|mimes:jpg,jpeg,png|max:2048',
-        ]);
-        $Product_image = $request->imageName;
-        $extension = $Product_image->extension();
-        $Product_Name = $request->productName . '.' . $extension;
-        $request->imageName->move(public_path('products/') . $Product_Name);
-        $Product_image_save = $Product_Name;
-
-        $product = Product::create([
-            'productName' => $request->productName,
-            'product_categorie_id' => $request->product_categorie_id,
-            'brand_id' => $request->brand_id,
-            'price' => $request->price,
-            'unit' => $request->unit,
-            'img_url' => $Product_image_save
-        ]);
-
-        if ($product) {
-            flash()->success('Product Added successfully!');
-        } else {
-            flash()->error('Product Added failed!');
-        }
-        return redirect()->route('product.index');
+        
     }
 
     /**
