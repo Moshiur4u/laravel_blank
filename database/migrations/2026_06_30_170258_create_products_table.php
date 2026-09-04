@@ -19,7 +19,7 @@ return new class extends Migration
             $table->decimal('price');
             $table->string('unit', 100);
             $table->string('stock_unit', 100)->default(0);
-            $table->string('unit', 100)->nullable();
+            $table->string('img_url', 100)->nullable();
 
             // $table->foreign('categories_id')->references('id')->on('ProductCategory')->onDelete('cascade');
             // $table->foreign('brands_id')->references('id')->on('brand')->onDelete('cascade');

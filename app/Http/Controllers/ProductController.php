@@ -35,7 +35,42 @@ class ProductController extends Controller
      */
     public function store(Request $request)
     {
-        
+        $request->validate([
+            'productName' => 'required',
+            'product_categorie_id' => 'required',
+            'brand_id' => 'required',
+            'price' => 'required',
+            'unit' => 'required',
+            'imageName' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:1048'
+        ]);
+        // ইমেজ ভ্যারিয়েবল তৈরি করা হলো (যদি কোনো ইমেজ না থাকে তবে auto null হয়ে যাবে
+        // এবং ডাটাবেজেও null যাবে ও এক্সটেনশন চেক করবেনা না)
+        $product_image_name = null;
+        // ইমেজ আপলোড করার শর্ত তৈরি করা হলো
+        if ($request->hasFile('imageName')) {
+
+            // ইমেজ ভ্যারিয়েবলে রেকুয়েস্ট থেকে ইমেজ নেওয়া হলো
+            $image = $request->file('imageName');
+            // ইমেজ এক্সটেনশন নেওয়া হলো
+            $extension = $image->extension();
+            // Photo Rename As par user name
+            // $photo_name = Auth::User()->name.".".$extension;
+            // শুধু রিক্যেস্ট থেকে ফাইলের নাম নিবে
+            $product_image_name = ($request->productName) . '.' . $extension;
+            // ইউজার ফোল্ডারে ইমেজ সেভ হবে ও  ফোল্ডার নাম ইউজার
+            $image->move(public_path('Users'), $product_image_name);
+        }
+        // ডেটা ক্রিয়েট করা হলো
+        Product::create([
+            'productName' => $request->productName,
+            'product_categorie_id' => $request->product_categorie_id,
+            'brand_id' => $request->brand_id,
+            'price' => $request->price,
+            'unit' => $request->unit,
+            'img_url' => $product_image_name
+        ]);
+        // রিডাইরেক্ট করা হলো এবং ফ্ল্যাশ মেসেজ দেখানো হলো
+        return redirect()->route('product.index')->with('success', 'Product added successfully!');
     }
 
     /**

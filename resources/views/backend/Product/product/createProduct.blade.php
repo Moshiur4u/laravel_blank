@@ -16,11 +16,14 @@
                             </div>
                         </div>
                         <div class="card-body">
-                            <form action="{{ route('product.store') }}" method="POST">
+                            <form action="{{ route('product.store') }}" method="POST" enctype="multipart/form-data">
                                 @csrf
                                 <div class="mb-3">
                                     <label for="name">Product Name</label>
                                     <input type="text" name="productName" class="form-control" value="">
+                                    @error('productName')
+                                        <strong class="text-danger">{{ $message }}</strong>
+                                    @enderror
                                 </div>
                                 <div class="mb-3">
                                     <label for="category_id" class="col-sm-3 col-form-label">Select Category</label>
@@ -54,6 +57,9 @@
                                     <img id="preview" style="max-width:80px; margin-bottom: auto;" />
                                     <input type="file" name="imageName" id="imageInput" class="form-control"
                                         value="">
+                                    @error('imageName')
+                                        <strong class="text-danger">{{ $message }}</strong>
+                                    @enderror
                                 </div>
                                 <div class="gap-2 mb-3 d-flex">
                                     <button class="btn btn-primary" type="submit"> Save</button>
