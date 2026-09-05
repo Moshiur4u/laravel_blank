@@ -61,7 +61,7 @@
                                     @enderror
                                 </div>
                                 <div class="mb-3">
-                                    <label for="name">Change Photo </label>
+                                    <label for="name">Choice Photo </label>
                                     <input type="file" id="imageInput" name="image" class="form-control"
                                         value="">
                                     <img id="preview" style="max-width:200px; margin-top:10px;" />
@@ -82,11 +82,11 @@
     </div>
 @endsection
 
-    <script>
-        document.getElementById('imageInput').onchange = function(evt) {
-            const [file] = this.files;
-            if (file) {
-                document.getElementById('preview').src = URL.createObjectURL(file);
-            }
-        };
-    </script>
+<script>
+    document.getElementById('imageInput').onchange = function(evt) {
+        const [file] = this.files;
+        if (file) {
+            document.getElementById('preview').src = URL.createObjectURL(file);
+        }
+    };
+</script>

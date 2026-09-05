@@ -58,7 +58,7 @@ class ProductController extends Controller
             // শুধু রিক্যেস্ট থেকে ফাইলের নাম নিবে
             $product_image_name = ($request->productName) . '.' . $extension;
             // ইউজার ফোল্ডারে ইমেজ সেভ হবে ও  ফোল্ডার নাম ইউজার
-            $image->move(public_path('Users'), $product_image_name);
+            $image->move(public_path('uploads/products/'), $product_image_name);
         }
         // ডেটা ক্রিয়েট করা হলো
         Product::create([
