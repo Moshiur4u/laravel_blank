@@ -46,10 +46,10 @@
                                                     <td>{{ $product->unit }}</td>
                                                     <td>
                                                         <img src="{{ asset('uploads/products/' . $product->img_url) }}"
-                                                            alt="{{ $product->productName }} "class="img-thumbnail" />
+                                                            alt="{{ $product->productName }}" class="product-img-2" />
 
                                                     </td>
-                                                    <td class="gap-2 d-flex">
+                                                    <td>
                                                         <a href="{{ route('product.edit', $product->id) }}"
                                                             class="btn btn-primary btn-small">Edit</a>
                                                         <a href="#" class="btn btn-danger btn-icon">Delete

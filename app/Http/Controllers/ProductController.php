@@ -86,9 +86,9 @@ class ProductController extends Controller
      */
     public function edit($id)
     {
-        // $product = Product::find($id);
-        // $ProductCategories = ProductCategory::latest()->get();
-        // $brand = Brand::latest()->get();
+        $product = Product::find($id);
+        $ProductCategories = ProductCategory::latest()->get();
+        $brand = Brand::latest()->get();
 
         return view('backend.Product.product.editProduct', compact('product', 'ProductCategories', 'brand'));
     }
