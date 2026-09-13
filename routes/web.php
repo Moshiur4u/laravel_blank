@@ -61,7 +61,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::get('/product/create', [ProductController::class, 'create'])->name('product.create');
     Route::Post('/product/store', [ProductController::class, 'store'])->name('product.store');
     Route::get('/product/edit/{id}', [ProductController::class, 'edit'])->name('product.edit');
-    // route::get('/product/update/{id}',[ProductController::class,'update'])->name('product.update');
+    Route::put('/product/update/{id}', [ProductController::class, 'update'])->name('product.update');
 });
 // মিডলওয়্যার সহ ড্যাশবোর্ড রাউট শুরু
 Route::middleware(['auth', 'verified'])->group(function () {
