@@ -72,6 +72,9 @@
                                             <td>
                                                 <!-- এখানে আমরা বাটন ব্যবহার করে ইউজার দের ইনফরমেশন দেখাবো -->
                                                 <a href="{{ route('user.edit', $User->id) }}"
+                                                    class="btn btn-primary btn-small">View</a>
+                                                <!-- এখানে আমরা বাটন ব্যবহার করে ইউজার দের ইনফরমেশন দেখাবো -->
+                                                <a href="{{ route('user.edit', $User->id) }}"
                                                     class="btn btn-primary btn-small">Edit</a>
 
                                                 {{-- <button type="submit" class="btn btn-danger btn-small">delete</button> --}}
@@ -84,8 +87,8 @@
                                             <td
                                                 @if ($User->status == 1) class="fw-bold text-success" @else class="fw-bold text-danger" @endif>
                                                 <!-- স্ট্যাটাস বাটন  এখানে যখন রাউট বন্ধ থাকবে তখন এই বাটন কাজ করবে না
-                                                                                     রাউট ব্যবহার করলে কন্ট্রলারে ফংশন ব্যবহার করে স্ট্যাটাস পরিবর্তন করা যাবে।
-                                                                                    এখন শুধু রং পরিবর্তন হবে  -->
+                                                                                                     রাউট ব্যবহার করলে কন্ট্রলারে ফংশন ব্যবহার করে স্ট্যাটাস পরিবর্তন করা যাবে।
+                                                                                                    এখন শুধু রং পরিবর্তন হবে  -->
                                                 {{-- <a href="{{ route('user.statusupdate', $User->id) }}"> --}}
 
                                                 {{-- এখানে আমরা কন্ডিশন লজিক ব্যবহার করে বাটনে রং পরিবর্তন করবো  --}}

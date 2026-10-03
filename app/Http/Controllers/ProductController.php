@@ -98,7 +98,18 @@ class ProductController extends Controller
      */
     public function update(Request $request, Product $product)
     {
-        //
+        $request->validate([
+            'productName' => 'required',
+            'product_categorie_id' => 'required',
+            'brand_id' => 'required',
+            'price' => 'required',
+            'unit' => 'required',
+            'imageName' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:1048'
+        ]);
+        $product_image = null;
+        if ($request->imageName == !null) {
+            # code...
+        }
     }
 
     /**
