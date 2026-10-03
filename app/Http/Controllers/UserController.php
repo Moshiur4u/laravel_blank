@@ -90,7 +90,12 @@ class UserController extends Controller
      */
     public function show(string $id)
     {
-        //
+        // ইউজার এবং তার সাথে সম্পর্কিত রোল ও পারমিশন খুঁজে বের করা হলো
+        $user = User::with('roles.permissions')->findOrFail($id);
+        $Users = $user;
+
+        // ইউজার ডিটেইল ভিউ রিটার্ন করা হলো
+        return view('frontend.users.userDeteail', compact('user', 'Users'));
     }
 
     /**

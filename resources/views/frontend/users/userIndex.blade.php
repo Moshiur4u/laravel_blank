@@ -71,8 +71,8 @@
                                             <td>{{ $User->email }}</td>
                                             <td>
                                                 <!-- এখানে আমরা বাটন ব্যবহার করে ইউজার দের ইনফরমেশন দেখাবো -->
-                                                <a href="{{ route('user.edit', $User->id) }}"
-                                                    class="btn btn-primary btn-small">View</a>
+                                                <a href="{{ route('user.show', $User->id) }}"
+                                                    class="btn btn-info btn-small text-white">View</a>
                                                 <!-- এখানে আমরা বাটন ব্যবহার করে ইউজার দের ইনফরমেশন দেখাবো -->
                                                 <a href="{{ route('user.edit', $User->id) }}"
                                                     class="btn btn-primary btn-small">Edit</a>

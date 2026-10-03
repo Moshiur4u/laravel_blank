@@ -99,24 +99,13 @@ class ProductController extends Controller
      */
     public function update(Request $request, $id)
     {
-<<<<<<< HEAD
-=======
         // ১. ভ্যালিডেশন
->>>>>>> 95fb4aebcf1c967bbc9c2f09a0b013e13ca29a07
         $request->validate([
             'productName' => 'required',
             'product_categorie_id' => 'required',
             'brand_id' => 'required',
             'price' => 'required',
             'unit' => 'required',
-<<<<<<< HEAD
-            'imageName' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:1048'
-        ]);
-        $product_image = null;
-        if ($request->imageName == !null) {
-            # code...
-        }
-=======
             'imageName' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048', // ১০৪৮ KB বাড়িয়ে ২০৪৮ KB করা হলো
         ]);
 
@@ -156,7 +145,6 @@ class ProductController extends Controller
         ]);
 
         return redirect()->route('product.index')->with('success', 'Product Updated Successfully');
->>>>>>> 95fb4aebcf1c967bbc9c2f09a0b013e13ca29a07
     }
 
     /**
