@@ -16,8 +16,10 @@
                             </div>
                         </div>
                         <div class="card-body">
-                            <form action="" method="POST">
+                            <form action="{{ route('product.update', $product->id) }}" method="POST"
+                                enctype="multipart/form-data">
                                 @csrf
+                                @method('PUT')
                                 <div class="mb-3">
                                     <label for="name">Product Name</label>
                                     <input type="text" name="productName" class="form-control"
@@ -30,15 +32,25 @@
                                             Category
                                         </option>
                                         @foreach ($ProductCategories as $ProductCategory)
-                                            <option value="{{ $ProductCategory->id }}">{{ $ProductCategory->category_name }}
+                                            <option value="{{ $ProductCategory->id }}"
+                                                {{ $product->product_categorie_id == $ProductCategory->id ? 'selected' : '' }}>
+                                                {{ $ProductCategory->category_name }}
                                             </option>
                                         @endforeach
                                     </select>
                                 </div>
                                 <div class="mb-3">
-                                    <label for="name"> Product Brand</label>
-                                    <input type="text" name="productBrand" class="form-control"
-                                        value="{{ $product->brand->name }}">
+                                    <label for="brand_id" class="col-form-label">Select Brand</label>
+                                    <select class="form-select" name="brand_id" id="brand_id" required>
+                                        <option value="" disabled>Select Brand</option>
+                                        @foreach ($brands as $brand)
+                                            <option value="{{ $brand->id }}"
+                                                {{ $product->brand_id == $brand->id ? 'selected' : '' }}>
+                                                {{ $brand->name }}
+                                            </option>
+                                        @endforeach
+
+                                    </select>
                                 </div>
                                 <div class="mb-3">
                                     <label for="name">Price</label>
@@ -49,10 +61,19 @@
                                     <input type="number" name="unit" class="form-control" value="{{ $product->unit }}">
                                 </div>
                                 <div class="mb-3">
-                                    <label for="name">Image</label>
-                                    <input type="file" name="img_url" class="form-control"
-                                        value="{{ $product->img_url }}">
+                                    <label for="imageInput" class="form-label">Product Image</label>
+                                    <!-- বর্তমান ইমেজ শো করার জন্য -->
+                                    @if ($product->img_url)
+                                        <div class="mb-2">
+                                            <img id="preview" src="{{ asset('uploads/products/' . $product->img_url) }}"
+                                                style="max-width:150px;" />
+                                        </div>
+                                    @endif
+                                    <input type="file" id="imageInput" name="img_url" class="form-control">
                                 </div>
+                                @error('img_url')
+                                    <strong class="text-danger">{{ $message }}</strong>
+                                @enderror
                                 <div class="gap-2 mb-3 d-flex">
                                     <button class="btn btn-primary" type="submit"> Save Change</button>
                                 </div>
@@ -63,4 +84,12 @@
             </div>
         </div>
     </div>
+    <script>
+        document.getElementById('imageInput').onchange = function(evt) {
+            const [file] = this.files;
+            if (file) {
+                document.getElementById('preview').src = URL.createObjectURL(file);
+            }
+        };
+    </script>
 @endsection
