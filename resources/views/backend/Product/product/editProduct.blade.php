@@ -25,40 +25,44 @@
                                     <input type="text" name="productName" class="form-control"
                                         value="{{ $product->productName }}">
                                 </div>
-                                <div class="mb-3">
-                                    <label for="category_id" class="col-sm-3 col-form-label">Select Category</label>
-                                    <select class="form-select" name="product_categorie_id" id="category_id" required>
-                                        <option value="" selected disabled>Select
-                                            Category
-                                        </option>
-                                        @foreach ($ProductCategories as $ProductCategory)
-                                            <option value="{{ $ProductCategory->id }}"
-                                                {{ $product->product_categorie_id == $ProductCategory->id ? 'selected' : '' }}>
-                                                {{ $ProductCategory->category_name }}
+                                <div class="row">
+                                    <div class="mb-3 col-6">
+                                        <label for="category_id" class="col-sm-3 col-form-label">Select Category</label>
+                                        <select class="form-select" name="product_categorie_id" id="category_id" required>
+                                            <option value="" selected disabled>Select
+                                                Category
                                             </option>
-                                        @endforeach
-                                    </select>
-                                </div>
-                                <div class="mb-3">
-                                    <label for="brand_id" class="col-form-label">Select Brand</label>
-                                    <select class="form-select" name="brand_id" id="brand_id" required>
-                                        <option value="" disabled>Select Brand</option>
-                                        @foreach ($brands as $brand)
-                                            <option value="{{ $brand->id }}"
-                                                {{ $product->brand_id == $brand->id ? 'selected' : '' }}>
-                                                {{ $brand->name }}
-                                            </option>
-                                        @endforeach
+                                            @foreach ($ProductCategories as $ProductCategory)
+                                                <option value="{{ $ProductCategory->id }}"
+                                                    {{ $product->product_categorie_id == $ProductCategory->id ? 'selected' : '' }}>
+                                                    {{ $ProductCategory->category_name }}
+                                                </option>
+                                            @endforeach
+                                        </select>
+                                    </div>
+                                    <div class="mb-3 col-6">
+                                        <label for="brand_id" class="col-form-label">Select Brand</label>
+                                        <select class="form-select" name="brand_id" id="brand_id" required>
+                                            <option value="" disabled>Select Brand</option>
+                                            @foreach ($brands as $brand)
+                                                <option value="{{ $brand->id }}"
+                                                    {{ $product->brand_id == $brand->id ? 'selected' : '' }}>
+                                                    {{ $brand->name }}
+                                                </option>
+                                            @endforeach
 
-                                    </select>
+                                        </select>
+                                    </div>
                                 </div>
-                                <div class="mb-3">
-                                    <label for="name">Price</label>
-                                    <input type="number" name="price" class="form-control" value="{{ $product->price }}">
-                                </div>
-                                <div class="mb-3">
-                                    <label for="name">Quantity</label>
-                                    <input type="number" name="unit" class="form-control" value="{{ $product->unit }}">
+                                <div class="row">
+                                    <div class="mb-3 col-6">
+                                        <label for="name">Price</label>
+                                        <input type="number" name="price" class="form-control" value="{{ $product->price }}">
+                                    </div>
+                                    <div class="mb-3 col-6">
+                                        <label for="name">Quantity</label>
+                                        <input type="number" name="unit" class="form-control" value="{{ $product->unit }}">
+                                    </div>
                                 </div>
                                 <div class="mb-3">
                                     <label for="imageInput" class="form-label">Product Image</label>

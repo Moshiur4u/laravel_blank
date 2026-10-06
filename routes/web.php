@@ -56,6 +56,16 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::put('/product/brand/{id}/update', [BrandController::class, 'update'])->name('brand.update');
     Route::get('/product/brand/{id}/destroy', [BrandController::class, 'destroy'])->name('brand.destroy');
 });
+// মিডলওয়্যার সহ সাপ্লায়ার রাউট শুরু
+Route::middleware(['auth', 'verified'])->group(function () {
+    Route::get('/supplier/index', [SupplierController::class, 'index'])->name('supplier.index');
+    Route::get('/supplier/create', [SupplierController::class, 'create'])->name('supplier.create');
+    Route::Post('/supplier/store', [SupplierController::class, 'store'])->name('supplier.store');
+    Route::get('/supplier/{id}/edit', [SupplierController::class, 'edit'])->name('supplier.edit');
+    Route::put('/supplier/{id}/update', [SupplierController::class, 'update'])->name('supplier.update');
+    Route::get('/supplier/{id}/destroy', [SupplierController::class, 'destroy'])->name('supplier.destroy');
+});
+
 // মিডলওয়্যার সহ প্রোডক্ট রাউট শুরু
 Route::middleware(['auth', 'verified'])->group(function () {
     Route::get('/product/index', [ProductController::class, 'index'])->name('product.index');
@@ -63,6 +73,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::Post('/product/store', [ProductController::class, 'store'])->name('product.store');
     Route::get('/product/edit/{id}', [ProductController::class, 'edit'])->name('product.edit');
     Route::put('/product/update/{id}', [ProductController::class, 'update'])->name('product.update');
+    Route::get('/product/destroy/{id}', [ProductController::class, 'destroy'])->name('product.destroy');
 });
 // মিডলওয়্যার সহ ড্যাশবোর্ড রাউট শুরু
 Route::middleware(['auth', 'verified'])->group(function () {

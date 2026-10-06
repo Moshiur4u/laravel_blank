@@ -18,40 +18,70 @@
                         <div class="card-body">
                             <form action="{{ route('product.store') }}" method="POST" enctype="multipart/form-data">
                                 @csrf
-                                <div class="mb-3">
-                                    <label for="name">Product Name</label>
-                                    <input type="text" name="productName" class="form-control" value="">
-                                    @error('productName')
-                                        <strong class="text-danger">{{ $message }}</strong>
-                                    @enderror
+                                <div class="row">
+                                    <div class="mb-3 col-6">
+                                        <label for="category_id" class="col-sm-3 col-form-label">Product Name</label>
+                                        <input type="text" name="productName" class="form-control" value="">
+                                        @error('productName')
+                                            <strong class="text-danger">{{ $message }}</strong>
+                                        @enderror
+                                    </div>
+                                    <div class="mb-3 col-6">
+                                        <label for="Supplier" class="col-sm-3 col-form-label">Supplier</label>
+                                        <select class="form-select" name="brand_id" id="brand_id" required>
+                                            <option value="" selected disabled>Select Supplier Name</option>
+                                            @foreach ($brands as $brand)
+                                                <option value="{{ $brand->id }}">{{ $brand->name }}
+                                                </option>
+                                            @endforeach
+                                        </select>
+                                    </div>
+                                </div>
+                                <div class="row">
+                                    <div class="mb-3 col-6">
+                                        <label for="category_id" class="col-sm-3 col-form-label">Category</label>
+                                        <select class="form-select" name="product_categorie_id" id="category_id" required>
+                                            <option value="" selected disabled>Select Category</option>
+                                            @foreach ($ProductCategories as $ProductCategory)
+                                                <option value="{{ $ProductCategory->id }}">{{ $ProductCategory->category_name }}
+                                                </option>
+                                            @endforeach
+                                        </select>
+                                    </div>
+                                    <div class="mb-3 col-6">
+                                        <label for="brand_id" class="col-sm-3 col-form-label">Brand</label>
+                                        <select class="form-select" name="brand_id" id="brand_id" required>
+                                            <option value="" selected disabled>Select Brand</option>
+                                            @foreach ($brands as $brand)
+                                                <option value="{{ $brand->id }}">{{ $brand->name }}
+                                                </option>
+                                            @endforeach
+                                        </select>
+                                    </div>
+                                </div>
+                                <div class="row">
+                                    <div class="mb-3 col-6">
+                                        <label for="name">Price</label>
+                                        <input type="number" name="price" class="form-control" value="">
+                                    </div>
+                                    <div class="mb-3 col-6">
+                                        <label for="name">Quantity</label>
+                                        <input type="number" name="unit" class="form-control" value="">
+                                    </div>
+                                </div>
+                                <div class="row">
+                                    <div class="mb-3 col-6">
+                                        <label for="name">Menufecher Date</label>
+                                        <input type="date" name="menufecher_date" class="form-control" value="">
+                                    </div>
+                                <div class="mb-3 col-6">
+                                    <label for="name">Expire Date</label>
+                                    <input type="date" name="expire_date" class="form-control" value="">
+                                </div>
                                 </div>
                                 <div class="mb-3">
-                                    <label for="category_id" class="col-sm-3 col-form-label">Select Category</label>
-                                    <select class="form-select" name="product_categorie_id" id="category_id" required>
-                                        <option value="" selected disabled>Select Category</option>
-                                        @foreach ($ProductCategories as $ProductCategory)
-                                            <option value="{{ $ProductCategory->id }}">{{ $ProductCategory->category_name }}
-                                            </option>
-                                        @endforeach
-                                    </select>
-                                </div>
-                                <div class="mb-3">
-                                    <label for="brand_id" class="col-sm-3 col-form-label">Select Brand</label>
-                                    <select class="form-select" name="brand_id" id="brand_id" required>
-                                        <option value="" selected disabled>Select Brand</option>
-                                        @foreach ($brands as $brand)
-                                            <option value="{{ $brand->id }}">{{ $brand->name }}
-                                            </option>
-                                        @endforeach
-                                    </select>
-                                </div>
-                                <div class="mb-3">
-                                    <label for="name">Price</label>
-                                    <input type="number" name="price" class="form-control" value="">
-                                </div>
-                                <div class="mb-3">
-                                    <label for="name">Quantity</label>
-                                    <input type="number" name="unit" class="form-control" value="">
+                                    <label for="name">Barcode</label>
+                                    <input type="text" name="barcode" class="form-control" value="">
                                 </div>
                                 <div class="mb-3">
                                     <img id="preview" style="max-width:80px; margin-bottom: auto;" />

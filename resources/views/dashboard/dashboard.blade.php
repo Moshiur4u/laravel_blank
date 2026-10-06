@@ -113,6 +113,24 @@
                 <li>
                     <a href="javascript:;" class="has-arrow">
                         <div class="parent-icon"><i class="bx bx-customize "></i></div>
+                        <div class="menu-title">Supplier</div>
+                    </a>
+                    <ul>
+                        <li>
+                            <a href="{{ route('supplier.index') }}"><i class='bx bx-food-menu'></i> Supplier List</a>
+                        </li>
+
+                        <li>
+                            <a href="{{ route('supplier.create') }}"><i class=' bx bx-plus-medical'></i>New Supplier
+                                Entry
+                            </a>
+                        </li>
+
+                    </ul>
+                </li>
+                <li>
+                    <a href="javascript:;" class="has-arrow">
+                        <div class="parent-icon"><i class="bx bx-customize "></i></div>
                         <div class="menu-title">Categories</div>
                     </a>
                     <ul>
