@@ -11,12 +11,12 @@
                         <div class="card-header">
                             <h3 class="text-primary">Add Supplier Info.</h3>
                             <div class="gap-2 mb-3">
-                                <a href="{{ route('supplier.index') }}" class="btn btn-primary float-end">
+                                <a href="#" class="btn btn-primary float-end">
                                     BackToList</a>
                             </div>
                         </div>
                         <div class="card-body">
-                            <form action="{{ route('supplier.store') }}" method="POST" enctype="multipart/form-data">
+                            <form action="#" method="POST" enctype="multipart/form-data">
                                 @csrf
                                 <div class="mb-3">
                                     <label for="name"> Supplier Name</label>
