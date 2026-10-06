@@ -80,13 +80,13 @@
             </div>
         </div>
     </div>
-@endsection
 
-<script>
-    document.getElementById('imageInput').onchange = function(evt) {
-        const [file] = this.files;
-        if (file) {
-            document.getElementById('preview').src = URL.createObjectURL(file);
-        }
-    };
-</script>
+    <script>
+        document.getElementById('imageInput').onchange = function(evt) {
+            const [file] = this.files;
+            if (file) {
+                document.getElementById('preview').src = URL.createObjectURL(file);
+            }
+        };
+    </script>
+@endsection

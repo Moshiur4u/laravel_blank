@@ -77,7 +77,7 @@
 
                 <li>
                     <a href="javascript:;" class="has-arrow">
-                        <div class="parent-icon"><i class='bx bx-store'></i>
+                        <div class="parent-icon"><i class=' bx bxl-product-hunt'></i>
                         </div>
                         <div class="menu-title">Product</div>
                     </a>
@@ -112,7 +112,7 @@
                 </li>
                 <li>
                     <a href="javascript:;" class="has-arrow">
-                        <div class="parent-icon"><i class="bx bx-customize "></i></div>
+                        <div class="parent-icon"><i class="bx bxs-school"></i></div>
                         <div class="menu-title">Supplier</div>
                     </a>
                     <ul>
@@ -121,7 +121,7 @@
                         </li>
 
                         <li>
-                            <a href="{{ route('supplier.create') }}"><i class=' bx bx-plus-medical'></i>New Supplier
+                            <a href="{{ route('supplier.create') }}"><i class=' bx bxs-school'></i>New Supplier
                                 Entry
                             </a>
                         </li>
@@ -201,7 +201,7 @@
 
                     </ul>
 
-                </li>         
+                </li>
 
                 <li class="menu-label">Reports</li>
                 <li>
@@ -704,6 +704,17 @@
             ]
         });
     </script>
+
+    @section('scripts')
+        <script>
+            document.getElementById('imageInput').onchange = function(evt) {
+                const [file] = this.files;
+                if (file) {
+                    document.getElementById('preview').src = URL.createObjectURL(file);
+                }
+            };
+        </script>
+    @endsection
 </body>
 
 </html>
