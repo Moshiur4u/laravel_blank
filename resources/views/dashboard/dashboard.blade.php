@@ -636,7 +636,7 @@
                             {{-- -- ---------------------------------------------- --}}
                             <!-- এখানে আমরা ইফ কন্ডিশন লজিক ব্যবহার করে ব্লেডে লোগো দেখাবো -->
                             @if (Auth::user()->image !== null)
-                                <img src="{{ asset('uploads/suppliers/' . Auth::user()->image) }}"
+                                <img src="{{ asset('uploads/users/' . Auth::user()->image) }}"
                                     alt="{{ Auth::user()->name }}" class="product-img-2"
                                     style="width: 45px; height: 45px; border-radius: 50%; object-fit: cover;" />
                             @else

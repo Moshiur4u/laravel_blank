@@ -53,7 +53,7 @@
                                             <td>
                                                 <!-- এখানে আমরা ইফ  কন্ডিশন লজিক ব্যবহার করে ব্লেডে ইমেজ দেখাবো -->
                                                 @if ($User->image)
-                                                    <img src="{{ asset('Users/' . $User->image) }}"alt="{{ $User->name }}"
+                                                    <img src="{{ asset('uploads/users/' . $User->image) }}"alt="{{ $User->name }}"
                                                         class="product-img-2" />
                                                 @else
                                                     <!-- যদি ইমেজ আপলোড করা না থাকে তাহলে ডিফল্ট ইমেজ দেখাবে -->

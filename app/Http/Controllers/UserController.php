@@ -62,7 +62,7 @@ class UserController extends Controller
             // ফাইলের নাম দেওয়া হলো
             $photo_name = $request->name . '.' . $extension;
             // ইমেজ ফোল্ডারে মুভ করা হলো
-            $request->image->move(public_path('Users'), $photo_name);
+            $request->image->move(public_path('uploads/users'), $photo_name);
             // ইমেজ পাথ ভ্যারিয়েবলে রাখা হলো যার কারনে ফাইল টা ডাটাবেজে সেভ হবে
             $imagePath = $photo_name;
 

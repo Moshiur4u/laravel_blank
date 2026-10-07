@@ -45,7 +45,7 @@
                                     <div class="text-center d-flex flex-column align-items-center">
                                         <div class="mb-3 position-relative">
                                             @if ($employee->image)
-                                                <img src="{{ asset('Users/' . $employee->image) }}"
+                                                <img src="{{ asset('uploads/users/' . $employee->image) }}"
                                                      alt="{{ $employee->name }}"
                                                      class="p-1 rounded-circle bg-primary"
                                                      width="120" height="120"
