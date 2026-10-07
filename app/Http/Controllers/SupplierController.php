@@ -12,9 +12,9 @@ class SupplierController extends Controller
      */
     public function index()
     {
-        // $suppliers = Supplier::latest()->get();
+        $suppliers = Supplier::latest()->get();
 
-        // return view('backend.Supplier.supplierList', compact('suppliers'));    
+        return view('backend.Supplier.supplierList', compact('suppliers'));    
     }
 
     /**
@@ -68,24 +68,58 @@ class SupplierController extends Controller
     /**
      * Show the form for editing the specified resource.
      */
-    public function edit(Supplier $supplier)
+    public function edit($id)
     {
-        //
+        $supplier = Supplier::findOrFail($id);
+        return view('backend.Supplier.updateSupplier', compact('supplier'));
     }
 
     /**
      * Update the specified resource in storage.
      */
-    public function update(Request $request, Supplier $supplier)
+    public function update(Request $request, $id)
     {
-        //
+        $request->validate([
+            'name' => 'required',
+            'email' => 'required',
+            'phone' => 'required',
+            'address' => 'required',
+            'logo' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:1048',
+        ]);
+
+        $supplier = Supplier::findOrFail($id);
+        $supplier->name = $request->name;
+        $supplier->email = $request->email;
+        $supplier->phone = $request->phone;
+        $supplier->address = $request->address;
+
+        if ($request->hasFile('logo')) {
+            if ($supplier->logo && file_exists(public_path('uploads/suppliers/' . $supplier->logo))) {
+                @unlink(public_path('uploads/suppliers/' . $supplier->logo));
+            }
+            $image = $request->file('logo');
+            $extension = $image->extension();
+            $logoName = time() . '.' . $extension;
+            $image->move(public_path('uploads/suppliers'), $logoName);
+            $supplier->logo = $logoName;
+        }
+
+        $supplier->save();
+
+        return redirect()->route('supplier.index')->with('success', 'Supplier updated successfully!');
     }
 
     /**
      * Remove the specified resource from storage.
      */
-    public function destroy(Supplier $supplier)
+    public function destroy($id)
     {
-        //
+        $supplier = Supplier::findOrFail($id);
+        if ($supplier->logo && file_exists(public_path('uploads/suppliers/' . $supplier->logo))) {
+            @unlink(public_path('uploads/suppliers/' . $supplier->logo));
+        }
+        $supplier->delete();
+
+        return redirect()->route('supplier.index')->with('success', 'Supplier deleted successfully!');
     }
 }
