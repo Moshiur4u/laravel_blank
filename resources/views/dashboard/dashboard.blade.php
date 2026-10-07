@@ -631,8 +631,35 @@
 
                         <a class="gap-3 d-flex align-items-center nav-link dropdown-toggle dropdown-toggle-nocaret"
                             href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">
-                            <img src="{{ asset('assets/images/avatars/avatar-2.png') }}" class="user-img"
-                                alt="user avatar">
+                            {{-- <img src="{{ asset('assets/images/avatars/avatar-2.png') }}" class="user-img"
+                                alt="user avatar"> --}}
+                            {{-- -- ---------------------------------------------- --}}
+                            <!-- এখানে আমরা ইফ কন্ডিশন লজিক ব্যবহার করে ব্লেডে লোগো দেখাবো -->
+                            @if (Auth::user()->image !== null)
+                                <img src="{{ asset('uploads/suppliers/' . Auth::user()->image) }}"
+                                    alt="{{ Auth::user()->name }}" class="product-img-2"
+                                    style="width: 45px; height: 45px; border-radius: 50%; object-fit: cover;" />
+                            @else
+                                {{-- লোগো না থাকলে সাপ্লায়ার নামের প্রথম অক্ষর দিয়ে অ্যাভাটার দেখাবে --}}
+                                @php
+                                    $colors = [
+                                        '#0d6efd',
+                                        '#6f42c1',
+                                        '#d63384',
+                                        '#dc3545',
+                                        '#fd7e14',
+                                        '#198754',
+                                        '#0dcaf0',
+                                        '#6610f2',
+                                    ];
+                                    $colorIndex = Auth::user()->id % count($colors);
+                                @endphp
+                                <div
+                                    style="width: 45px; height: 45px; border-radius: 50%; background: {{ $colors[$colorIndex] }}; display: flex; align-items: center; justify-content: center; color: #fff; font-weight: 700; font-size: 16px; text-transform: uppercase;">
+                                    {{ strtoupper(substr(Auth::user()->name, 0, 2)) }}
+                                </div>
+                            @endif
+
                             <div class="user-info">
                                 <p class="mb-0 user-name">{{ Auth::user()->name }}</p>
                                 <p class="mb-0 designattion">{{ Auth::user()->email }}</p>
