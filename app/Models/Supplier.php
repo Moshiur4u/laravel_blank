@@ -16,6 +16,6 @@ class Supplier extends Model
 
     public function supplierledgers()
     {
-        return $this->hasMany(SupplierLedger::class);
+        return $this->hasMany(Supplierledger::class);
     }
 }

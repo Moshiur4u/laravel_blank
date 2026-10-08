@@ -45,8 +45,8 @@
                         </div>
                     </div>
                 </div>
-                
-    {{--  Here start Category Store  --}}
+
+                {{--  Here start Category Store  --}}
                 <div class="col-lg-4">
                     <div class="card">
                         <div class="card-header">

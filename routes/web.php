@@ -6,6 +6,7 @@ use App\Http\Controllers\ProductCategoryController;
 use App\Http\Controllers\ProductController;
 use App\Http\Controllers\RoleController;
 use App\Http\Controllers\SupplierController;
+use App\Http\Controllers\SupplierledgerController;
 use App\Http\Controllers\UserController;
 use Illuminate\Support\Facades\Route;
 
@@ -17,6 +18,11 @@ Route::get('/', function () {
 });
 Route::middleware(['auth', 'verified'])->group(function () {
     Route::get('/logout', [UserController::class, 'logout'])->name('logout');
+});
+// মিডলওয়্যার সহ ড্যাশবোর্ড রাউট শুরু
+Route::middleware(['auth', 'verified'])->group(function () {
+    Route::get('/dashboard', [DashboardConrtoller::class, 'dashboard'])->name('dashboard');
+    Route::get('/dashboard-body', [DashboardConrtoller::class, 'dashboardbody'])->name('dashboardbody');
 });
 // মিডলওয়্যার সহ ইউজার রাউট শুরু
 Route::middleware(['auth', 'verified'])->group(function () {
@@ -40,7 +46,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
 });
 // মিডলওয়্যার সহ প্রোডক্ট ক্যাটাগরি রাউট শুরু
 Route::middleware(['auth', 'verified'])->group(function () {
-    Route::get('/product/index', [ProductCategoryController::class, 'index'])->name('category.index');
+    Route::get('/productCategory/index', [ProductCategoryController::class, 'index'])->name('category.index');
     Route::get('/productCategory/create', [ProductCategoryController::class, 'create'])->name('category.create');
     Route::post('/productCategory/store', [ProductCategoryController::class, 'store'])->name('category.store');
     Route::get('/productCategory/{id}', [ProductCategoryController::class, 'edit'])->name('category.edit');
@@ -61,10 +67,18 @@ Route::middleware(['auth', 'verified'])->group(function () {
 Route::middleware(['auth', 'verified'])->group(function () {
     Route::get('/supplier/index', [SupplierController::class, 'index'])->name('supplier.index');
     Route::get('/supplier/create', [SupplierController::class, 'create'])->name('supplier.create');
-    Route::Post('/supplier/store', [SupplierController::class, 'store'])->name('supplier.store');
+    Route::post('/supplier/store', [SupplierController::class, 'store'])->name('supplier.store');
+    Route::get('/supplier/{id}/show', [SupplierController::class, 'show'])->name('supplier.show');
     Route::get('/supplier/{id}/edit', [SupplierController::class, 'edit'])->name('supplier.edit');
     Route::put('/supplier/{id}/update', [SupplierController::class, 'update'])->name('supplier.update');
     Route::get('/supplier/{id}/destroy', [SupplierController::class, 'destroy'])->name('supplier.destroy');
+
+    // সাপ্লায়ার লেজার রাউট
+    Route::get('/supplier/{id}/ledger', [SupplierledgerController::class, 'index'])->name('supplier.ledger');
+    Route::post('/supplier/ledger/store', [SupplierledgerController::class, 'store'])->name('supplier.ledger.store');
+    Route::get('/supplier/ledger/{id}/edit', [SupplierledgerController::class, 'edit'])->name('supplier.ledger.edit');
+    Route::put('/supplier/ledger/{id}/update', [SupplierledgerController::class, 'update'])->name('supplier.ledger.update');
+    Route::get('/supplier/ledger/{id}/destroy', [SupplierledgerController::class, 'destroy'])->name('supplier.ledger.destroy');
 });
 
 // মিডলওয়্যার সহ প্রোডক্ট রাউট শুরু
@@ -75,11 +89,6 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::get('/product/edit/{id}', [ProductController::class, 'edit'])->name('product.edit');
     Route::put('/product/update/{id}', [ProductController::class, 'update'])->name('product.update');
     Route::get('/product/destroy/{id}', [ProductController::class, 'destroy'])->name('product.destroy');
-});
-// মিডলওয়্যার সহ ড্যাশবোর্ড রাউট শুরু
-Route::middleware(['auth', 'verified'])->group(function () {
-    Route::get('/dashboard', [DashboardConrtoller::class, 'dashboard'])->name('dashboard');
-    Route::get('/dashboard-body', [DashboardConrtoller::class, 'dashboardbody'])->name('dashboardbody');
 });
 
 // Route::get('/dashboard', function () {

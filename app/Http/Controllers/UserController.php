@@ -185,7 +185,9 @@ class UserController extends Controller
         // ৫. রোল সিঙ্ক করা
         $user->syncRoles($request->roles);
 
-        return redirect()->route('user.index')->with('success', 'User updated successfully!');
+        sweetalert()->success('User updated successfully!');
+        return redirect()->route('user.index');
+
     }
 
     // এই ফংশনটা ইউজার স্ট্যাটাস একটি বাটন থাকে যা ক্লিক করলে ইউজার স্ট্যাটাস একটিভ এবং ইনএক্টিভ হয়
@@ -225,7 +227,7 @@ class UserController extends Controller
         }
         // ডাটাবেজ থেকে ইউজার ডিলিট করা হলো
         User::find($id)->delete();
-
+        sweetalert()->warning('User deleted successfully!');
         return redirect()->route('user.index');
     }
 

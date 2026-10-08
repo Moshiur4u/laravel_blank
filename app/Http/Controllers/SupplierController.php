@@ -12,7 +12,7 @@ class SupplierController extends Controller
      */
     public function index()
     {
-        $suppliers = Supplier::latest()->get();
+        $suppliers = Supplier::with('supplierledgers')->latest()->get();
 
         return view('backend.Supplier.supplierList', compact('suppliers'));
     }
@@ -60,9 +60,9 @@ class SupplierController extends Controller
     /**
      * Display the specified resource.
      */
-    public function show(Supplier $supplier)
+    public function show($id)
     {
-        //
+        return redirect()->route('supplier.ledger', $id);
     }
 
     /**

@@ -15,7 +15,7 @@ class ProductCategoryController extends Controller
     {
 
         $ProductCategories = ProductCategory::latest()->get();
-        return view('backend.Product.Category.ProductCategoryCreate',compact('ProductCategories'));
+        return view('backend.Product.Category.ProductCategoryindex',compact('ProductCategories'));
     }
 
     /**
