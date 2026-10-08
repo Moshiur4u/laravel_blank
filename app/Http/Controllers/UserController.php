@@ -60,9 +60,9 @@ class UserController extends Controller
             $extension = $image->extension(); // Photo Rename As par user name
             // $photo_name = Auth::User()->name.".".$extension;
             // ফাইলের নাম দেওয়া হলো
-            $photo_name = $request->name . '.' . $extension;
+            $photo_name = $request->name.'.'.$extension;
             // ইমেজ ফোল্ডারে মুভ করা হলো
-            $request->image->move(public_path('uploads/users'), $photo_name);
+            $request->image->move(public_path('uploads/users/'), $photo_name);
             // ইমেজ পাথ ভ্যারিয়েবলে রাখা হলো যার কারনে ফাইল টা ডাটাবেজে সেভ হবে
             $imagePath = $photo_name;
 
@@ -123,7 +123,7 @@ class UserController extends Controller
         $request->validate([
             'name' => 'required|string|max:255',
             'roles' => 'required',
-            'email' => 'required|email|unique:users,email,' . $id, // বর্তমান ইউজারকে ইগনোর করবে
+            'email' => 'required|email|unique:users,email,'.$id, // বর্তমান ইউজারকে ইগনোর করবে
             'password' => 'nullable|same:confirmPassword|min:6', // nullable করা হলো
             'image' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048', // nullable করা হলো
             'status' => 'nullable',
@@ -155,7 +155,7 @@ class UserController extends Controller
             // যদি ডাটাবেজে ইউজার ইমেজ থাকে তবে পুরানো ইমেজ ডিলিট করবে
             if ($user->image !== null) {
                 // পুরানো ইমেজ ডিলিট ইউজার ফোল্ডার থেকে  ইউজার -> ডাটাবেজ ইমেজ
-                $delete_from = public_path('Users/' . $user->image);
+                $delete_from = public_path('uploads/users/'.$user->image);
                 // উনলিঙ্ক মানে ডিলিট
                 unlink($delete_from);
             }
@@ -166,9 +166,9 @@ class UserController extends Controller
             // ফাইলের নামে স্পেস থাকলে সমস্যা হয়, তাই str_replace এবং time() ব্যবহার করা নিরাপদ
             // $photo_name = str_replace(' ', '_', $request->name).'_'.time().'.'.$extension;
             // শুধু রিক্যেস্ট থেকে নাম নিব
-            $photo_name = ($request->name) . '.' . $extension;
+            $photo_name = ($request->name).'.'.$extension;
             // ইউজার ফোল্ডারে ইমেজ সেভ হবে ও  ফোল্ডার নাম ইউজার
-            $image->move(public_path('Users'), $photo_name);
+            $image->move(public_path('uploads/users/'), $photo_name);
 
             // আপডেট ডেটাতে নতুন ইমেজের নাম যোগ করা
             $updateData['image'] = $photo_name;
@@ -219,7 +219,7 @@ class UserController extends Controller
         // ইফ কন্ডিশন ব্যবহার করে চেক করা হলো যে ইউজার ইমেজ আছে কিনা
         if ($Users->image !== null) {
             // ইমেজের পাথ তৈরি করা হলো
-            $delete_from = public_path('users/' . $Users->image);
+            $delete_from = public_path('users/'.$Users->image);
             // ইমেজ ডিলিট করা হলো
             unlink($delete_from);
         }

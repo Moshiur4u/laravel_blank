@@ -17,7 +17,8 @@
                             <form action="{{ route('user.store') }}" method="post" enctype="multipart/form-data">
                                 @csrf
                                 @method('POST')
-                                <div class="mb-3">
+                                <div class="row">
+                                <div class="mb-3 col-6">
                                     <label for="name"> User Name</label>
                                     <input type="text" name="name" class="form-control" value="">
                                     @error('photo')
@@ -25,12 +26,10 @@
                                     @enderror
                                 </div>
 
-                                <div class="mb-3">
-                                    <label for="category_id" class="col-sm-3 col-form-label">Select Roles</label>
+                                <div class="mb-3 col-6">
+                                    <label for="category_id"> Roles</label>
                                     <select class="form-select" name="roles" id="roles" required>
-                                        <option value="" selected disabled>Select
-                                            Role
-                                        </option>
+                                        <option value="" selected disabled>Select Roles</option>
                                         @foreach ($Roles as $role)
                                             <option value="{{ $role->name }}">{{ $role->name }}</option>
                                         @endforeach
@@ -39,26 +38,30 @@
                                         <strong class="text-danger">{{ $message }}</strong>
                                     @enderror
                                 </div>
-                                <div class="mb-3">
+                                </div>
+                                <div class="row">
+                                    
+                                <div class="mb-3 col-4">
                                     <label for="name"> User Email</label>
                                     <input type="email" name="email" class="form-control" value="">
                                     @error('email')
                                         <strong class="text-danger">{{ $message }}</strong>
                                     @enderror
                                 </div>
-                                <div class="mb-3">
+                                <div class="mb-3 col-4">
                                     <label for="name"> Password</label>
                                     <input type="password" name="password" class="form-control" value="">
                                     @error('password')
                                         <strong class="text-danger">{{ $message }}</strong>
                                     @enderror
                                 </div>
-                                <div class="mb-3">
+                                <div class="mb-3 col-4">
                                     <label for="name">Conform Password</label>
                                     <input type="password" name="confarmPassword" class="form-control" value="">
                                     @error('confarmPassword')
                                         <strong class="text-danger">{{ $message }}</strong>
                                     @enderror
+                                </div>
                                 </div>
                                 <div class="mb-3">
                                     <label for="name">Choice Photo </label>

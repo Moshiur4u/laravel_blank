@@ -16,6 +16,10 @@ class Product extends Model
             'price',
             'unit',
             'stock_unit',
+            'menufecher_date',
+            'expire_date',
+            'total_duration',
+            'description',
             'img_url'
     ];
     public function productCategory(){

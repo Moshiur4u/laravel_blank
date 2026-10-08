@@ -18,66 +18,73 @@
                                 enctype="multipart/form-data">
                                 @csrf
                                 @method('PUT')
-                                <div class="mb-3">
-                                    <label for="name"> User Name</label>
-                                    <input type="text" name="name" class="form-control" value="{{ $Users->name }}">
+                                <div class="row">
+                                    <div class="mb-3 col-6">
+                                        <label for="name"> User Name</label>
+                                        <input type="text" name="name" class="form-control"
+                                            value="{{ $Users->name }}">
+                                    </div>
+
+                                    <div class="mb-3 col-6">
+                                        <label for="category_id">Select Roles</label>
+                                        <select class="form-select" name="roles" id="category_id" required>
+                                            <option value="" selected disabled>Select
+                                                Role
+                                            </option>
+                                            <!--ফর ইচ লুপ এর মাধ্যমে ব্লেডে রোলেগুলো দেখান হলো -->
+                                            @foreach ($Roles as $role)
+                                                <!-- in_array ফাংশন ব্যবহার করে আমরা চেক করব  যে ইউজারকে কোন রোল টি সিলেক্ট করা আছে কিনা -->
+                                                <option value="{{ $role->name }}"
+                                                    {{ in_array($role->name, $userRole) ? 'selected' : '' }}>
+                                                    {{-- রোল-নাম দেখাব তাই নাম দিলাম --}}
+                                                    {{ $role->name }}</option>
+                                            @endforeach
+                                        </select>
+                                    </div>
+                                </div>
+                                <div class="row">
+                                    <div class="mb-3 col-4">
+                                        <label for="name"> User Email</label>
+                                        <input type="email" name="email" class="form-control"
+                                            value="{{ $Users->email }}">
+                                    </div>
+                                    <div class="mb-3 col-4">
+                                        <label for="name"> Password</label>
+                                        <input type="password" name="password" class="form-control" value="">
+                                    </div>
+                                    <div class="mb-3 col-4">
+                                        <label for="name">Conform Password</label>
+                                        <input type="password" name="confarmPassword" class="form-control" value="">
+                                    </div>
                                 </div>
 
                                 <div class="mb-3">
-                                    <label for="category_id" class="col-sm-3 col-form-label">Select Roles</label>
-                                    <select class="form-select" name="roles" id="category_id" required>
-                                        <option value="" selected disabled>Select
-                                            Role
-                                        </option>
-                                        <!--ফর ইচ লুপ এর মাধ্যমে ব্লেডে রোলেগুলো দেখান হলো --> 
-                                        @foreach ($Roles as $role)
-                                        <!-- in_array ফাংশন ব্যবহার করে আমরা চেক করব  যে ইউজারকে কোন রোল টি সিলেক্ট করা আছে কিনা -->
-                                            <option value="{{ $role->name }}"
-                                                {{ in_array($role->name, $userRole) ? 'selected' : '' }}>
-                                                {{-- রোল-নাম দেখাব তাই নাম দিলাম --}}
-                                                {{ $role->name }}</option>
-                                        @endforeach
-                                    </select>
-                                </div>
-                                <div class="mb-3">
-                                    <label for="name"> User Email</label>
-                                    <input type="email" name="email" class="form-control" value="{{ $Users->email }}">
-                                </div>
-                                <div class="mb-3">
-                                    <label for="name"> Password</label>
-                                    <input type="password" name="password" class="form-control" value="">
-                                </div>
-                                <div class="mb-3">
-                                    <label for="name">Conform Password</label>
-                                    <input type="password" name="confarmPassword" class="form-control" value="">
-                                </div>
-                                <div class="mb-3">
                                     <label for="name">Change Photo </label>
-                                    <input type="file" name="image" class="form-control" value="">
-                                    <!-- এখানে  আমরা ইফ  কন্ডিশন লজিক ব্যবহার করে ব্লেডে ইমেজ নাম দেখাবো -->
-                                    @if ($Users->image)
-                                        <small class="text-muted">Current: {{ $Users->image }}</small><br>
-                                        <!-- যদি ইমেজ আপলোড করা থাকে তাহলে ডিফল্ট ইমেজ দেখাবে -->
-                                        <img src="{{ asset('Users/' . $Users->image) }}" alt="{{ $Users->name }}"
-                                            class="img-thumbnail widgets-icons-2 msg-avatar">
-                                    @endif
+                                    <input type="file" id="imageInput" name="image" class="form-control" value="">
+                                    <img id="preview" src="{{ asset('Users/' . $Users->image) }}" alt="{{ $Users->name }}"
+                                        style="max-width:200px; margin-top:10px;" />
                                 </div>
-                                <div class="mb-3">
-                                    <label for="name"> Status</label>
-                                    <select class="form-select" name="status" id="status" required>
-                                        <option value="" selected disabled>Select
-                                            Status
-                                        </option>
-                                        <!--অপশন ভ্যালু ডাটাবেজ এ  সেভ হবে এ জন্য আলাদা করে value দিতে হয়েছে 
-                                            এবং {{ $Users->status == 1 ? 'selected' : '' }} 
-                                            দ্বারা চেক করা হয়েছে যে কোন অপশন টি সিলেক্ট করা আছে -->
-                                        <option value="1" {{ $Users->status == 1 ? 'selected' : '' }}>Active</option>
-                                        <option value="0" {{ $Users->status == 0 ? 'selected' : '' }}>Inactive</option>
-                                    </select>
-                                </div>
-                                <div class="mb-3">
-                                    <label for="name"> Remark</label>
-                                    <textarea name="remark" class="form-control" value="">{{ $Users->remark }}</textarea>   
+                                <div class="row">
+                                    <div class="mb-3 col-6">
+                                        <label for="name"> Status</label>
+                                        <select class="form-select" name="status" id="status" required>
+                                            <option value="" selected disabled>Select
+                                                Status
+                                            </option>
+                                            <!--অপশন ভ্যালু ডাটাবেজ এ  সেভ হবে এ জন্য আলাদা করে value দিতে হয়েছে
+                                                                        এবং {{ $Users->status == 1 ? 'selected' : '' }}
+                                                                        দ্বারা চেক করা হয়েছে যে কোন অপশন টি সিলেক্ট করা আছে -->
+                                            <option value="1" {{ $Users->status == 1 ? 'selected' : '' }}>Active
+                                            </option>
+                                            <option value="0" {{ $Users->status == 0 ? 'selected' : '' }}>Inactive
+                                            </option>
+                                        </select>
+                                    </div>
+
+                                    <div class="mb-3 col-6">
+                                        <label for="name"> Remark</label>
+                                        <textarea name="remark" class="form-control" value="">{{ $Users->remark }}</textarea>
+                                    </div>
                                 </div>
                                 <div class="gap-2 mb-3 text-center ">
                                     <button class="btn btn-primary" type="submit"> Update Information</button>
@@ -90,4 +97,12 @@
             </div>
         </div>
     </div>
+<script>
+        document.getElementById('imageInput').onchange = function(evt) {
+            const [file] = this.files;
+            if (file) {
+                document.getElementById('preview').src = URL.createObjectURL(file);
+            }
+        };
+    </script>
 @endsection

@@ -14,7 +14,7 @@ class SupplierController extends Controller
     {
         $suppliers = Supplier::latest()->get();
 
-        return view('backend.Supplier.supplierList', compact('suppliers'));    
+        return view('backend.Supplier.supplierList', compact('suppliers'));
     }
 
     /**
@@ -38,7 +38,7 @@ class SupplierController extends Controller
             'logo' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:1048',
         ]);
 
-        $supplier = new Supplier();
+        $supplier = new Supplier;
         $supplier->name = $request->name;
         $supplier->email = $request->email;
         $supplier->phone = $request->phone;
@@ -48,7 +48,7 @@ class SupplierController extends Controller
             $image = $request->file('logo');
             $extension = $image->extension();
             $logoName = time().'.'.$extension;
-            $image->move(public_path('uploads/suppliers'), $logoName);
+            $image->move(public_path('uploads/suppliers/'), $logoName);
             $supplier->logo = $logoName;
         }
 
@@ -71,6 +71,7 @@ class SupplierController extends Controller
     public function edit($id)
     {
         $supplier = Supplier::findOrFail($id);
+
         return view('backend.Supplier.updateSupplier', compact('supplier'));
     }
 
@@ -94,12 +95,12 @@ class SupplierController extends Controller
         $supplier->address = $request->address;
 
         if ($request->hasFile('logo')) {
-            if ($supplier->logo && file_exists(public_path('uploads/suppliers/' . $supplier->logo))) {
-                @unlink(public_path('uploads/suppliers/' . $supplier->logo));
+            if ($supplier->logo && file_exists(public_path('uploads/suppliers/'.$supplier->logo))) {
+                @unlink(public_path('uploads/suppliers/'.$supplier->logo));
             }
             $image = $request->file('logo');
             $extension = $image->extension();
-            $logoName = time() . '.' . $extension;
+            $logoName = time().'.'.$extension;
             $image->move(public_path('uploads/suppliers'), $logoName);
             $supplier->logo = $logoName;
         }
@@ -115,8 +116,8 @@ class SupplierController extends Controller
     public function destroy($id)
     {
         $supplier = Supplier::findOrFail($id);
-        if ($supplier->logo && file_exists(public_path('uploads/suppliers/' . $supplier->logo))) {
-            @unlink(public_path('uploads/suppliers/' . $supplier->logo));
+        if ($supplier->logo && file_exists(public_path('uploads/suppliers/'.$supplier->logo))) {
+            @unlink(public_path('uploads/suppliers/'.$supplier->logo));
         }
         $supplier->delete();
 

@@ -120,7 +120,7 @@ class ProductController extends Controller
 
             // পুরাতন ইমেজ ডিলিট করা (যদি ডেটাবেজে থাকে এবং ফাইলে বিদ্যমান থাকে)
             if ($product->img_url && file_exists(public_path('uploads/products/'.$product->img_url))) {
-                unlink(public_path('uploads/products/'.$product->img_url));
+                unlink(public_path('uploads/products'.$product->img_url));
             }
 
             // নতুন ইমেজ সেভ করা

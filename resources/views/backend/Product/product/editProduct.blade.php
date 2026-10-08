@@ -55,29 +55,33 @@
                                     </div>
                                 </div>
                                 <div class="row">
-                                    <div class="mb-3 col-6">
+                                    <div class="mb-3 col-4">
                                         <label for="name">Price</label>
-                                        <input type="number" name="price" class="form-control" value="{{ $product->price }}">
+                                        <input type="number" name="price" class="form-control"
+                                            value="{{ $product->price }}">
                                     </div>
-                                    <div class="mb-3 col-6">
+                                    <div class="mb-3 col-4">
                                         <label for="name">Quantity</label>
-                                        <input type="number" name="unit" class="form-control" value="{{ $product->unit }}">
+                                        <input type="number" name="unit" class="form-control"
+                                            value="{{ $product->unit }}">
                                     </div>
+
+                                    <div class="mb-3 col-4">
+                                        <label for="imageInput" class="form-label">Product Image</label>
+                                        <!-- বর্তমান ইমেজ শো করার জন্য -->
+                                        @if ($product->img_url)
+                                            <div class="mb-2">
+                                                <img id="preview"
+                                                    src="{{ asset('uploads/products/' . $product->img_url) }}"
+                                                    style="max-width:150px;" />
+                                            </div>
+                                        @endif
+                                        <input type="file" id="imageInput" name="img_url" class="form-control">
+                                    </div>
+                                    @error('img_url')
+                                        <strong class="text-danger">{{ $message }}</strong>
+                                    @enderror
                                 </div>
-                                <div class="mb-3">
-                                    <label for="imageInput" class="form-label">Product Image</label>
-                                    <!-- বর্তমান ইমেজ শো করার জন্য -->
-                                    @if ($product->img_url)
-                                        <div class="mb-2">
-                                            <img id="preview" src="{{ asset('uploads/products/' . $product->img_url) }}"
-                                                style="max-width:150px;" />
-                                        </div>
-                                    @endif
-                                    <input type="file" id="imageInput" name="img_url" class="form-control">
-                                </div>
-                                @error('img_url')
-                                    <strong class="text-danger">{{ $message }}</strong>
-                                @enderror
                                 <div class="gap-2 mb-3 d-flex">
                                     <button class="btn btn-primary" type="submit"> Save Change</button>
                                 </div>
