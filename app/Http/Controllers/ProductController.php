@@ -41,6 +41,10 @@ class ProductController extends Controller
             'brand_id' => 'required',
             'price' => 'required',
             'unit' => 'required',
+            'purchase_date' => 'nullable|date',
+            'menufecher_date' => 'nullable|date',
+            'expire_date' => 'nullable|date',
+            'description' => 'nullable|string|max:500',
             'imageName' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:1048',
         ]);
         // ইমেজ ভ্যারিয়েবল তৈরি করা হলো (যদি কোনো ইমেজ না থাকে তবে auto null হয়ে যাবে
@@ -67,6 +71,10 @@ class ProductController extends Controller
             'brand_id' => $request->brand_id,
             'price' => $request->price,
             'unit' => $request->unit,
+            'purchase_date' => $request->purchase_date,
+            'mfg_date' => $request->menufecher_date,
+            'expiry_date' => $request->expire_date,
+            'description' => $request->description,
             'img_url' => $product_image_name,
         ]);
 
@@ -106,6 +114,10 @@ class ProductController extends Controller
             'brand_id' => 'required',
             'price' => 'required',
             'unit' => 'required',
+            'purchase_date' => 'nullable|date',
+            'menufecher_date' => 'nullable|date',
+            'expire_date' => 'nullable|date',
+            'description' => 'nullable|string|max:500',
             'imageName' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048', // ১০৪৮ KB বাড়িয়ে ২০৪৮ KB করা হলো
         ]);
 
@@ -141,6 +153,10 @@ class ProductController extends Controller
             'brand_id' => $request->brand_id,
             'price' => $request->price,
             'unit' => $request->unit,
+            'purchase_date' => $request->purchase_date,
+            'mfg_date' => $request->menufecher_date,
+            'expiry_date' => $request->expire_date,
+            'description' => $request->description,
             'img_url' => $productImageName,
         ]);
 

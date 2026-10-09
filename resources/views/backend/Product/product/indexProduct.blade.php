@@ -39,6 +39,8 @@
                     return (float)$p->price * (float)$p->unit;
                 });
                 $avgPrice = $totalProductsCount > 0 ? $Products->avg('price') : 0;
+                $expiringSoonProducts = $Products->filter(fn ($p) => $p->isExpiringSoon());
+                $expiredProducts = $Products->filter(fn ($p) => $p->isExpired());
             @endphp
             <div class="row row-cols-1 row-cols-md-2 row-cols-xl-4 g-3 mb-4">
                 <div class="col">
@@ -111,6 +113,27 @@
             </div>
             <!-- End Summary Cards -->
 
+            @if ($expiredProducts->isNotEmpty() || $expiringSoonProducts->isNotEmpty())
+                @if ($expiredProducts->isNotEmpty())
+                    <div class="alert alert-danger border-0 shadow-sm d-flex align-items-start" role="alert">
+                        <i class="bx bx-error-circle fs-4 me-2"></i>
+                        <div>
+                            <strong>Expired products:</strong>
+                            {{ $expiredProducts->pluck('productName')->join(', ') }}
+                        </div>
+                    </div>
+                @endif
+                @if ($expiringSoonProducts->isNotEmpty())
+                    <div class="alert alert-warning border-0 shadow-sm d-flex align-items-start" role="alert">
+                        <i class="bx bx-time-five fs-4 me-2"></i>
+                        <div>
+                            <strong>Expiring within one month:</strong>
+                            {{ $expiringSoonProducts->map(fn ($p) => $p->productName.' ('.$p->expiry_date->format('Y-m-d').')')->join(', ') }}
+                        </div>
+                    </div>
+                @endif
+            @endif
+
             <!-- Product Table Card -->
             <div class="card radius-10 shadow-sm border-0">
                 <div class="card-header bg-transparent border-bottom py-3 d-flex align-items-center justify-content-between">
@@ -159,7 +182,14 @@
                                                     @endif
                                                 </div>
                                                 <div>
-                                                    <h6 class="mb-0 fw-semibold text-dark">{{ $product->productName }}</h6>
+                                                    <h6 class="mb-0 fw-semibold text-dark">
+                                                        {{ $product->productName }}
+                                                        @if ($product->isExpired())
+                                                            <span class="badge bg-danger ms-1">Expired</span>
+                                                        @elseif ($product->isExpiringSoon())
+                                                            <span class="badge bg-warning text-dark ms-1">Expires soon</span>
+                                                        @endif
+                                                    </h6>
                                                     <span class="text-muted small">SKU: #PRD-{{ str_pad($product->id, 5, '0', STR_PAD_LEFT) }}</span>
                                                 </div>
                                             </div>
@@ -296,7 +326,7 @@
                                                                                         <i class="bx bx-calendar me-1"></i>Purchase Date:
                                                                                     </td>
                                                                                     <td class="fw-semibold text-dark py-2">
-                                                                                        {{ $product->purchase_date ?? 'N/A' }}
+                                                                                        {{ optional($product->purchase_date)->format('Y-m-d') ?? 'N/A' }}
                                                                                     </td>
                                                                                 </tr>
                                                                                 <tr>
@@ -304,7 +334,7 @@
                                                                                         <i class="bx bx-calendar-check me-1"></i>Mfg Date:
                                                                                     </td>
                                                                                     <td class="fw-semibold text-dark py-2">
-                                                                                        {{ $product->mfg_date ?? $product->menufecher_date ?? 'N/A' }}
+                                                                                        {{ optional($product->mfg_date)->format('Y-m-d') ?? 'N/A' }}
                                                                                     </td>
                                                                                 </tr>
                                                                                 <tr>
@@ -312,7 +342,7 @@
                                                                                         <i class="bx bx-calendar-x me-1"></i>Expire Date:
                                                                                     </td>
                                                                                     <td class="fw-semibold text-dark py-2">
-                                                                                        {{ $product->expiry_date ?? $product->expire_date ?? 'N/A' }}
+                                                                                        {{ optional($product->expiry_date)->format('Y-m-d') ?? 'N/A' }}
                                                                                     </td>
                                                                                 </tr>
                                                                                 <tr>
@@ -320,9 +350,29 @@
                                                                                         <i class="bx bx-time me-1"></i>Shelf Duration:
                                                                                     </td>
                                                                                     <td class="fw-semibold text-dark py-2">
-                                                                                        {{ $product->total_duration ?? 'N/A' }}
+                                                                                        {{ $product->shelfDurationDays() !== null ? $product->shelfDurationDays().' days' : 'N/A' }}
                                                                                     </td>
                                                                                 </tr>
+                                                                                @if ($product->isExpired())
+                                                                                    <tr>
+                                                                                        <td colspan="2" class="pt-2">
+                                                                                            <div class="alert alert-danger mb-0" role="alert">
+                                                                                                <i class="bx bx-error-circle me-1"></i>
+                                                                                                This product expired on {{ $product->expiry_date->format('Y-m-d') }}.
+                                                                                            </div>
+                                                                                        </td>
+                                                                                    </tr>
+                                                                                @elseif ($product->isExpiringSoon())
+                                                                                    <tr>
+                                                                                        <td colspan="2" class="pt-2">
+                                                                                            <div class="alert alert-warning mb-0" role="alert">
+                                                                                                <i class="bx bx-error-circle me-1"></i>
+                                                                                                This product expires within one month
+                                                                                                ({{ $product->expiry_date->format('Y-m-d') }}).
+                                                                                            </div>
+                                                                                        </td>
+                                                                                    </tr>
+                                                                                @endif
                                                                                 @if ($product->description)
                                                                                     <tr>
                                                                                         <td class="text-muted py-2" colspan="2">

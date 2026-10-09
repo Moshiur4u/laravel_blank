@@ -213,7 +213,7 @@
                                             name="purchase_date"
                                             id="purchase_date"
                                             class="form-control"
-                                            value="{{ old('purchase_date', $product->purchase_date) }}">
+                                            value="{{ old('purchase_date', optional($product->purchase_date)->format('Y-m-d')) }}">
                                     </div>
 
                                     <!-- Manufacturing Date -->
@@ -225,7 +225,7 @@
                                             id="menufecher_date"
                                             name="menufecher_date"
                                             class="form-control"
-                                            value="{{ old('menufecher_date', $product->mfg_date ?? $product->menufecher_date) }}">
+                                            value="{{ old('menufecher_date', optional($product->mfg_date)->format('Y-m-d')) }}">
                                     </div>
 
                                     <!-- Expire Date -->
@@ -237,7 +237,7 @@
                                             id="expire_date"
                                             name="expire_date"
                                             class="form-control"
-                                            value="{{ old('expire_date', $product->expiry_date ?? $product->expire_date) }}">
+                                            value="{{ old('expire_date', optional($product->expiry_date)->format('Y-m-d')) }}">
                                     </div>
 
                                     <!-- Total Duration Output -->
@@ -255,7 +255,7 @@
                                                 class="form-control border-start-0 bg-light"
                                                 readonly
                                                 placeholder="Calculated automatically from Mfg & Expire date"
-                                                value="{{ old('total_duration', $product->total_duration) }}">
+                                                value="{{ old('total_duration', $product->shelfDurationDays() !== null ? $product->shelfDurationDays().' days' : '') }}">
                                         </div>
                                     </div>
                                 </div>

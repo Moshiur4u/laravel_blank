@@ -16,16 +16,46 @@ class Product extends Model
             'price',
             'unit',
             'stock_unit',
-            'menufecher_date',
-            'expire_date',
-            'total_duration',
+            'purchase_date',
+            'mfg_date',
+            'expiry_date',
             'description',
             'img_url'
     ];
+
+    protected $casts = [
+        'purchase_date' => 'date',
+        'mfg_date' => 'date',
+        'expiry_date' => 'date',
+    ];
+
     public function productCategory(){
         return $this->belongsTo(ProductCategory::class,'product_categorie_id');
     }
     public function brand(){
         return $this->belongsTo(Brand::class);
+    }
+
+    public function shelfDurationDays(): ?int
+    {
+        if (! $this->mfg_date || ! $this->expiry_date) {
+            return null;
+        }
+
+        return $this->mfg_date->diffInDays($this->expiry_date);
+    }
+
+    public function isExpired(): bool
+    {
+        return $this->expiry_date && $this->expiry_date->lt(today());
+    }
+
+    public function isExpiringSoon(): bool
+    {
+        if (! $this->expiry_date) {
+            return false;
+        }
+
+        return $this->expiry_date->between(today(), today()->addMonth());
     }
 }
