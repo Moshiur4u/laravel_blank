@@ -58,4 +58,21 @@ class Product extends Model
 
         return $this->expiry_date->between(today(), today()->addMonth());
     }
+
+    public function stockQuantity(): int
+    {
+        return (int) $this->unit;
+    }
+
+    public function isOutOfStock(): bool
+    {
+        return $this->stockQuantity() <= 0;
+    }
+
+    public function isLowStock(): bool
+    {
+        $qty = $this->stockQuantity();
+
+        return $qty > 0 && $qty <= 10;
+    }
 }

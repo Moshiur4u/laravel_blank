@@ -285,141 +285,66 @@
 
                             <li class="nav-item dropdown dropdown-large">
                                 <a class="nav-link dropdown-toggle dropdown-toggle-nocaret position-relative"
-                                    href="#" data-bs-toggle="dropdown"><span class="alert-count">7</span>
+                                    href="#" data-bs-toggle="dropdown">
+                                    @if (($expiryNotifications ?? collect())->isNotEmpty())
+                                        <span class="alert-count">{{ $expiryNotifications->count() }}</span>
+                                    @endif
                                     <i class='bx bx-bell'></i>
                                 </a>
                                 <div class="dropdown-menu dropdown-menu-end">
-                                    <a href="javascript:;">
+                                    <a href="{{ route('product.index') }}">
                                         <div class="msg-header">
                                             <p class="msg-header-title">Notifications</p>
-                                            <p class="msg-header-badge">8 New</p>
+                                            <p class="msg-header-badge">{{ ($expiryNotifications ?? collect())->count() }} New</p>
                                         </div>
                                     </a>
                                     <div class="header-notifications-list">
-                                        <a class="dropdown-item" href="javascript:;">
-                                            <div class="d-flex align-items-center">
-                                                <div class="user-online">
-                                                    <img src="{{ asset('assets/images/avatars/avatar-1.png') }}"
-                                                        class="msg-avatar" alt="user avatar">
+                                        @forelse (($expiryNotifications ?? collect()) as $alertProduct)
+                                            <a class="dropdown-item" href="{{ route('product.edit', $alertProduct->id) }}">
+                                                <div class="d-flex align-items-center">
+                                                    @if ($alertProduct->isExpired())
+                                                        <div class="notify bg-light-danger text-danger">
+                                                            <i class='bx bx-error-circle'></i>
+                                                        </div>
+                                                    @else
+                                                        <div class="notify bg-light-warning text-warning">
+                                                            <i class='bx bx-time-five'></i>
+                                                        </div>
+                                                    @endif
+                                                    <div class="flex-grow-1">
+                                                        <h6 class="msg-name">
+                                                            {{ $alertProduct->productName }}
+                                                            <span class="msg-time float-end">
+                                                                {{ $alertProduct->expiry_date->diffForHumans() }}
+                                                            </span>
+                                                        </h6>
+                                                        <p class="msg-info">
+                                                            @if ($alertProduct->isExpired())
+                                                                Expired on {{ $alertProduct->expiry_date->format('Y-m-d') }}
+                                                            @else
+                                                                Expires within one month ({{ $alertProduct->expiry_date->format('Y-m-d') }})
+                                                            @endif
+                                                        </p>
+                                                    </div>
                                                 </div>
-                                                <div class="flex-grow-1">
-                                                    <h6 class="msg-name">Daisy Anderson<span
-                                                            class="msg-time float-end">5 sec
-                                                            ago</span></h6>
-                                                    <p class="msg-info">The standard chunk of lorem</p>
+                                            </a>
+                                        @empty
+                                            <a class="dropdown-item" href="{{ route('product.index') }}">
+                                                <div class="d-flex align-items-center">
+                                                    <div class="notify bg-light-success text-success">
+                                                        <i class='bx bx-check-circle'></i>
+                                                    </div>
+                                                    <div class="flex-grow-1">
+                                                        <h6 class="msg-name">No expiry alerts</h6>
+                                                        <p class="msg-info">No products are expired or expiring within one month</p>
+                                                    </div>
                                                 </div>
-                                            </div>
-                                        </a>
-                                        <a class="dropdown-item" href="javascript:;">
-                                            <div class="d-flex align-items-center">
-                                                <div class="notify bg-light-danger text-danger">dc
-                                                </div>
-                                                <div class="flex-grow-1">
-                                                    <h6 class="msg-name">New Orders <span class="msg-time float-end">2
-                                                            min
-                                                            ago</span></h6>
-                                                    <p class="msg-info">You have recived new orders</p>
-                                                </div>
-                                            </div>
-                                        </a>
-                                        <a class="dropdown-item" href="javascript:;">
-                                            <div class="d-flex align-items-center">
-                                                <div class="user-online">
-                                                    <img src="{{ asset('assets/images/avatars/avatar-2.png') }}"
-                                                        class="msg-avatar" alt="user avatar">
-                                                </div>
-                                                <div class="flex-grow-1">
-                                                    <h6 class="msg-name">Althea Cabardo <span
-                                                            class="msg-time float-end">14
-                                                            sec ago</span></h6>
-                                                    <p class="msg-info">Many desktop publishing packages</p>
-                                                </div>
-                                            </div>
-                                        </a>
-                                        <a class="dropdown-item" href="javascript:;">
-                                            <div class="d-flex align-items-center">
-                                                <div class="notify bg-light-success text-success">
-                                                    <img src="{{ asset('assets/images/app/outlook.png') }}"
-                                                        width="25" alt="user avatar">
-                                                </div>
-                                                <div class="flex-grow-1">
-                                                    <h6 class="msg-name">Account Created<span
-                                                            class="msg-time float-end">28 min
-                                                            ago</span></h6>
-                                                    <p class="msg-info">Successfully created new email</p>
-                                                </div>
-                                            </div>
-                                        </a>
-                                        <a class="dropdown-item" href="javascript:;">
-                                            <div class="d-flex align-items-center">
-                                                <div class="notify bg-light-info text-info">Ss
-                                                </div>
-                                                <div class="flex-grow-1">
-                                                    <h6 class="msg-name">New Product Approved <span
-                                                            class="msg-time float-end">2 hrs ago</span></h6>
-                                                    <p class="msg-info">Your new product has approved</p>
-                                                </div>
-                                            </div>
-                                        </a>
-                                        <a class="dropdown-item" href="javascript:;">
-                                            <div class="d-flex align-items-center">
-                                                <div class="user-online">
-                                                    <img src="{{ asset('assets/images/avatars/avatar-4.png') }}"
-                                                        class="msg-avatar" alt="user avatar">
-                                                </div>
-                                                <div class="flex-grow-1">
-                                                    <h6 class="msg-name">Katherine Pechon <span
-                                                            class="msg-time float-end">15
-                                                            min ago</span></h6>
-                                                    <p class="msg-info">Making this the first true generator</p>
-                                                </div>
-                                            </div>
-                                        </a>
-                                        <a class="dropdown-item" href="javascript:;">
-                                            <div class="d-flex align-items-center">
-                                                <div class="notify bg-light-success text-success"><i
-                                                        class='bx bx-check-square'></i>
-                                                </div>
-                                                <div class="flex-grow-1">
-                                                    <h6 class="msg-name">Your item is shipped <span
-                                                            class="msg-time float-end">5 hrs
-                                                            ago</span></h6>
-                                                    <p class="msg-info">Successfully shipped your item</p>
-                                                </div>
-                                            </div>
-                                        </a>
-                                        <a class="dropdown-item" href="javascript:;">
-                                            <div class="d-flex align-items-center">
-                                                <div class="notify bg-light-primary">
-                                                    <img src="{{ asset('assets/images/app/github.png') }}"
-                                                        width="25" alt="user avatar">
-                                                </div>
-                                                <div class="flex-grow-1">
-                                                    <h6 class="msg-name">New 24 authors<span
-                                                            class="msg-time float-end">1 day
-                                                            ago</span></h6>
-                                                    <p class="msg-info">24 new authors joined last week</p>
-                                                </div>
-                                            </div>
-                                        </a>
-                                        <a class="dropdown-item" href="javascript:;">
-                                            <div class="d-flex align-items-center">
-                                                <div class="user-online">
-                                                    <img src="{{ asset('assets/images/avatars/avatar-8.png') }}"
-                                                        class="msg-avatar" alt="user avatar">
-                                                </div>
-                                                <div class="flex-grow-1">
-                                                    <h6 class="msg-name">Peter Costanzo <span
-                                                            class="msg-time float-end">6 hrs
-                                                            ago</span></h6>
-                                                    <p class="msg-info">It was popularised in the 1960s</p>
-                                                </div>
-                                            </div>
-                                        </a>
+                                            </a>
+                                        @endforelse
                                     </div>
-                                    <a href="javascript:;">
+                                    <a href="{{ route('product.index') }}">
                                         <div class="text-center msg-footer">
-                                            <button class="btn btn-primary w-100">View All Notifications</button>
+                                            <button class="btn btn-primary w-100">View All Products</button>
                                         </div>
                                     </a>
                                 </div>
@@ -428,196 +353,66 @@
                             <li class="nav-item dropdown dropdown-large">
                                 <a class="nav-link dropdown-toggle dropdown-toggle-nocaret position-relative"
                                     href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">
-                                    <span class="alert-count">8</span>
+                                    @if (($lowStockNotifications ?? collect())->isNotEmpty())
+                                        <span class="alert-count">{{ $lowStockNotifications->count() }}</span>
+                                    @endif
                                     <i class='bx bx-shopping-bag'></i>
                                 </a>
                                 <div class="dropdown-menu dropdown-menu-end">
-                                    <a href="javascript:;">
+                                    <a href="{{ route('product.index') }}">
                                         <div class="msg-header">
                                             <p class="msg-header-title">My Cart</p>
-                                            <p class="msg-header-badge">10 Items</p>
+                                            <p class="msg-header-badge">{{ ($lowStockNotifications ?? collect())->count() }} Low Stock</p>
                                         </div>
                                     </a>
                                     <div class="header-message-list">
-                                        <a class="dropdown-item" href="javascript:;">
-                                            <div class="gap-3 d-flex align-items-center">
-                                                <div class="position-relative">
-                                                    <div class="cart-product rounded-circle bg-light">
-                                                        <img src="{{ asset('assets/images/products/11.png') }}"
-                                                            class="" alt="product image">
+                                        @forelse (($lowStockNotifications ?? collect()) as $stockProduct)
+                                            <a class="dropdown-item" href="{{ route('product.edit', $stockProduct->id) }}">
+                                                <div class="gap-3 d-flex align-items-center">
+                                                    <div class="position-relative">
+                                                        <div class="cart-product rounded-circle bg-light">
+                                                            @if ($stockProduct->img_url && file_exists(public_path('uploads/products/' . $stockProduct->img_url)))
+                                                                <img src="{{ asset('uploads/products/' . $stockProduct->img_url) }}"
+                                                                    alt="{{ $stockProduct->productName }}">
+                                                            @else
+                                                                <img src="{{ asset('assets/images/products/11.png') }}"
+                                                                    alt="{{ $stockProduct->productName }}">
+                                                            @endif
+                                                        </div>
+                                                    </div>
+                                                    <div class="flex-grow-1">
+                                                        <h6 class="mb-0 cart-product-title">{{ $stockProduct->productName }}</h6>
+                                                        <p class="mb-0 cart-product-price">
+                                                            @if ($stockProduct->isOutOfStock())
+                                                                Out of Stock
+                                                            @else
+                                                                Low Stock: {{ $stockProduct->stockQuantity() }} Units
+                                                            @endif
+                                                        </p>
+                                                    </div>
+                                                    <div class="">
+                                                        <p class="mb-0 cart-price">৳{{ number_format((float) $stockProduct->price, 2) }}</p>
                                                     </div>
                                                 </div>
-                                                <div class="flex-grow-1">
-                                                    <h6 class="mb-0 cart-product-title">Men White T-Shirt</h6>
-                                                    <p class="mb-0 cart-product-price">1 X $29.00</p>
-                                                </div>
-                                                <div class="">
-                                                    <p class="mb-0 cart-price">$250</p>
-                                                </div>
-                                                <div class="cart-product-cancel"><i class="bx bx-x"></i>
-                                                </div>
-                                            </div>
-                                        </a>
-                                        <a class="dropdown-item" href="javascript:;">
-                                            <div class="gap-3 d-flex align-items-center">
-                                                <div class="position-relative">
-                                                    <div class="cart-product rounded-circle bg-light">
-                                                        <img src="{{ asset('assets/images/products/02.png') }}"
-                                                            class="" alt="product image">
+                                            </a>
+                                        @empty
+                                            <a class="dropdown-item" href="{{ route('product.index') }}">
+                                                <div class="gap-3 d-flex align-items-center">
+                                                    <div class="flex-grow-1">
+                                                        <h6 class="mb-0 cart-product-title">No low stock alerts</h6>
+                                                        <p class="mb-0 cart-product-price">All products have more than 10 units</p>
                                                     </div>
                                                 </div>
-                                                <div class="flex-grow-1">
-                                                    <h6 class="mb-0 cart-product-title">Men White T-Shirt</h6>
-                                                    <p class="mb-0 cart-product-price">1 X $29.00</p>
-                                                </div>
-                                                <div class="">
-                                                    <p class="mb-0 cart-price">$250</p>
-                                                </div>
-                                                <div class="cart-product-cancel"><i class="bx bx-x"></i>
-                                                </div>
-                                            </div>
-                                        </a>
-                                        <a class="dropdown-item" href="javascript:;">
-                                            <div class="gap-3 d-flex align-items-center">
-                                                <div class="position-relative">
-                                                    <div class="cart-product rounded-circle bg-light">
-                                                        <img src="{{ asset('assets/images/products/03.png') }}"
-                                                            class="" alt="product image">
-                                                    </div>
-                                                </div>
-                                                <div class="flex-grow-1">
-                                                    <h6 class="mb-0 cart-product-title">Men White T-Shirt</h6>
-                                                    <p class="mb-0 cart-product-price">1 X $29.00</p>
-                                                </div>
-                                                <div class="">
-                                                    <p class="mb-0 cart-price">$250</p>
-                                                </div>
-                                                <div class="cart-product-cancel"><i class="bx bx-x"></i>
-                                                </div>
-                                            </div>
-                                        </a>
-                                        <a class="dropdown-item" href="javascript:;">
-                                            <div class="gap-3 d-flex align-items-center">
-                                                <div class="position-relative">
-                                                    <div class="cart-product rounded-circle bg-light">
-                                                        <img src="{{ asset('assets/images/products/04.png') }}"
-                                                            class="" alt="product image">
-                                                    </div>
-                                                </div>
-                                                <div class="flex-grow-1">
-                                                    <h6 class="mb-0 cart-product-title">Men White T-Shirt</h6>
-                                                    <p class="mb-0 cart-product-price">1 X $29.00</p>
-                                                </div>
-                                                <div class="">
-                                                    <p class="mb-0 cart-price">$250</p>
-                                                </div>
-                                                <div class="cart-product-cancel"><i class="bx bx-x"></i>
-                                                </div>
-                                            </div>
-                                        </a>
-                                        <a class="dropdown-item" href="javascript:;">
-                                            <div class="gap-3 d-flex align-items-center">
-                                                <div class="position-relative">
-                                                    <div class="cart-product rounded-circle bg-light">
-                                                        <img src="{{ asset('assets/images/products/05.png') }}"
-                                                            class="" alt="product image">
-                                                    </div>
-                                                </div>
-                                                <div class="flex-grow-1">
-                                                    <h6 class="mb-0 cart-product-title">Men White T-Shirt</h6>
-                                                    <p class="mb-0 cart-product-price">1 X $29.00</p>
-                                                </div>
-                                                <div class="">
-                                                    <p class="mb-0 cart-price">$250</p>
-                                                </div>
-                                                <div class="cart-product-cancel"><i class="bx bx-x"></i>
-                                                </div>
-                                            </div>
-                                        </a>
-                                        <a class="dropdown-item" href="javascript:;">
-                                            <div class="gap-3 d-flex align-items-center">
-                                                <div class="position-relative">
-                                                    <div class="cart-product rounded-circle bg-light">
-                                                        <img src="{{ asset('assets/images/products/06.png') }}"
-                                                            class="" alt="product image">
-                                                    </div>
-                                                </div>
-                                                <div class="flex-grow-1">
-                                                    <h6 class="mb-0 cart-product-title">Men White T-Shirt</h6>
-                                                    <p class="mb-0 cart-product-price">1 X $29.00</p>
-                                                </div>
-                                                <div class="">
-                                                    <p class="mb-0 cart-price">$250</p>
-                                                </div>
-                                                <div class="cart-product-cancel"><i class="bx bx-x"></i>
-                                                </div>
-                                            </div>
-                                        </a>
-                                        <a class="dropdown-item" href="javascript:;">
-                                            <div class="gap-3 d-flex align-items-center">
-                                                <div class="position-relative">
-                                                    <div class="cart-product rounded-circle bg-light">
-                                                        <img src="{{ asset('assets/images/products/07.png') }}"
-                                                            class="" alt="product image">
-                                                    </div>
-                                                </div>
-                                                <div class="flex-grow-1">
-                                                    <h6 class="mb-0 cart-product-title">Men White T-Shirt</h6>
-                                                    <p class="mb-0 cart-product-price">1 X $29.00</p>
-                                                </div>
-                                                <div class="">
-                                                    <p class="mb-0 cart-price">$250</p>
-                                                </div>
-                                                <div class="cart-product-cancel"><i class="bx bx-x"></i>
-                                                </div>
-                                            </div>
-                                        </a>
-                                        <a class="dropdown-item" href="javascript:;">
-                                            <div class="gap-3 d-flex align-items-center">
-                                                <div class="position-relative">
-                                                    <div class="cart-product rounded-circle bg-light">
-                                                        <img src="{{ asset('assets/images/products/08.png') }}"
-                                                            class="" alt="product image">
-                                                    </div>
-                                                </div>
-                                                <div class="flex-grow-1">
-                                                    <h6 class="mb-0 cart-product-title">Men White T-Shirt</h6>
-                                                    <p class="mb-0 cart-product-price">1 X $29.00</p>
-                                                </div>
-                                                <div class="">
-                                                    <p class="mb-0 cart-price">$250</p>
-                                                </div>
-                                                <div class="cart-product-cancel"><i class="bx bx-x"></i>
-                                                </div>
-                                            </div>
-                                        </a>
-                                        <a class="dropdown-item" href="javascript:;">
-                                            <div class="gap-3 d-flex align-items-center">
-                                                <div class="position-relative">
-                                                    <div class="cart-product rounded-circle bg-light">
-                                                        <img src="{{ asset('assets/images/products/09.png') }}"
-                                                            class="" alt="product image">
-                                                    </div>
-                                                </div>
-                                                <div class="flex-grow-1">
-                                                    <h6 class="mb-0 cart-product-title">Men White T-Shirt</h6>
-                                                    <p class="mb-0 cart-product-price">1 X $29.00</p>
-                                                </div>
-                                                <div class="">
-                                                    <p class="mb-0 cart-price">$250</p>
-                                                </div>
-                                                <div class="cart-product-cancel"><i class="bx bx-x"></i>
-                                                </div>
-                                            </div>
-                                        </a>
+                                            </a>
+                                        @endforelse
                                     </div>
-                                    <a href="javascript:;">
+                                    <a href="{{ route('product.index') }}">
                                         <div class="text-center msg-footer">
                                             <div class="mb-3 d-flex align-items-center justify-content-between">
-                                                <h5 class="mb-0">Total</h5>
-                                                <h5 class="mb-0 ms-auto">$489.00</h5>
+                                                <h5 class="mb-0">Alerts</h5>
+                                                <h5 class="mb-0 ms-auto">{{ ($lowStockNotifications ?? collect())->count() }}</h5>
                                             </div>
-                                            <button class="btn btn-primary w-100">Checkout</button>
+                                            <button class="btn btn-primary w-100">View Products</button>
                                         </div>
                                     </a>
                                 </div>
