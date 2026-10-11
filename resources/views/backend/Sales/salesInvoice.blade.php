@@ -1,0 +1,112 @@
+@extends('dashboard.dashboard')
+@section('title', 'Invoice ' . $invoice->invoice_no)
+
+@section('content')
+    <div class="page-wrapper">
+        <div class="page-content">
+            @if (session('low_stock_products'))
+                <div class="alert alert-warning border-0 shadow-sm no-print" role="alert">
+                    <i class="bx bx-error-circle me-1"></i>
+                    <strong>Low stock:</strong> The following products now have 10 or fewer units:
+                    {{ implode(', ', session('low_stock_products')) }}
+                </div>
+            @endif
+
+            <div class="d-flex justify-content-end gap-2 mb-3 no-print">
+                <a href="{{ route('sales.index') }}" class="btn btn-outline-secondary"><i class="bx bx-arrow-back me-1"></i>New Sale</a>
+                <button type="button" class="btn btn-primary" onclick="window.print()"><i class="bx bx-printer me-1"></i>Print Invoice</button>
+            </div>
+
+            <div class="card border-0 shadow-sm">
+                <div class="card-body p-4 p-md-5">
+                    <div class="row align-items-start mb-4">
+                        <div class="col-7">
+                            <h2 class="text-primary fw-bold mb-1">Sales Invoice</h2>
+                            <div class="text-muted">Invoice: <strong>{{ $invoice->invoice_no }}</strong></div>
+                            <div class="text-muted">Date: {{ $invoice->invoice_date->format('d M Y, h:i A') }}</div>
+                        </div>
+                        <div class="col-5 text-end">
+                            <h5 class="fw-bold mb-1">Customer</h5>
+                            @if ($invoice->customer_name)
+                                <div>{{ $invoice->customer_name }}</div>
+                            @endif
+                            <div>Phone: {{ $invoice->customer_phone }}</div>
+                        </div>
+                    </div>
+
+                    <div class="table-responsive">
+                        <table class="table table-bordered align-middle">
+                            <thead class="table-light">
+                                <tr>
+                                    <th>#</th>
+                                    <th>Product</th>
+                                    <th class="text-end">Unit Price</th>
+                                    <th class="text-center">Quantity</th>
+                                    <th class="text-end">Amount</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @foreach ($invoice->items as $key => $item)
+                                    <tr>
+                                        <td>{{ $key + 1 }}</td>
+                                        <td>{{ $item->product_name }}</td>
+                                        <td class="text-end">৳{{ number_format($item->unit_price, 2) }}</td>
+                                        <td class="text-center">{{ $item->quantity }}</td>
+                                        <td class="text-end">৳{{ number_format($item->line_total, 2) }}</td>
+                                    </tr>
+                                @endforeach
+                            </tbody>
+                        </table>
+                    </div>
+
+                    <div class="row justify-content-end mt-4">
+                        <div class="col-md-6 col-lg-5">
+                            <div class="d-flex justify-content-between py-1"><span>Subtotal</span><span>৳{{ number_format($invoice->subtotal, 2) }}</span></div>
+                            <div class="d-flex justify-content-between py-1"><span>Discount</span><span>- ৳{{ number_format($invoice->discount_amount, 2) }}</span></div>
+                            <div class="d-flex justify-content-between py-1"><span>VAT</span><span>৳{{ number_format($invoice->vat_amount, 2) }}</span></div>
+                            @if ($invoice->include_previous_due)
+                                <div class="d-flex justify-content-between py-1"><span>Previous Due</span><span>৳{{ number_format($invoice->previous_due, 2) }}</span></div>
+                            @endif
+                            <hr>
+                            <div class="d-flex justify-content-between py-1 fw-bold fs-5"><span>Total</span><span>৳{{ number_format($invoice->total_amount, 2) }}</span></div>
+                            <div class="d-flex justify-content-between py-1"><span>Amount Paid</span><span>৳{{ number_format($invoice->amount_paid, 2) }}</span></div>
+                            <div class="d-flex justify-content-between py-1 text-danger fw-bold"><span>Due</span><span>৳{{ number_format($invoice->due_amount, 2) }}</span></div>
+                            <div class="d-flex justify-content-between py-1"><span>Payment Method</span><span>{{ $invoice->payment_method ? ucfirst($invoice->payment_method) : 'Unpaid' }}</span></div>
+                        </div>
+                    </div>
+
+                    @if ($invoice->notes)
+                        <div class="mt-4"><strong>Notes:</strong> {{ $invoice->notes }}</div>
+                    @endif
+                    <div class="row mt-5 pt-4">
+                        <div class="col-6"><div class="border-top pt-2">Customer Signature</div></div>
+                        <div class="col-6 text-end"><div class="border-top pt-2">Processed by {{ $invoice->employee->name ?? 'N/A' }}</div></div>
+                    </div>
+                    <p class="text-center text-muted small mt-4 mb-0">Thank you for your business.</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <style>
+        @media print {
+            header,
+            .topbar,
+            .sidebar-wrapper,
+            .no-print,
+            .page-footer,
+            .footer { display: none !important; }
+            .page-wrapper { margin: 0 !important; padding: 0 !important; }
+            .page-content { padding: 0 !important; }
+            .card { box-shadow: none !important; border: 0 !important; }
+            body { background: #fff !important; }
+        }
+    </style>
+    @if (session('auto_print'))
+        <script>
+            document.addEventListener('DOMContentLoaded', function () {
+                window.setTimeout(() => window.print(), 400);
+            });
+        </script>
+    @endif
+@endsection

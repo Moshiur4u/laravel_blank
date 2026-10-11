@@ -68,7 +68,7 @@
                     </a>
                     <ul>
                         <li>
-                            <a href="javascript:;"><i class='bx bx-plus-medical'></i>Create Sale</a>
+                            <a href="{{ route('sales.index') }}"><i class='bx bx-plus-medical'></i>Create Sale</a>
                         </li>
 
                     </ul>
@@ -152,16 +152,12 @@
                     <ul>
 
                         <li>
-                            <a href="javascript:;"><i class=' bx bx-id-card'></i>All Customer</a>
+                            <a href="{{ route('customer.index') }}"><i class=' bx bx-id-card'></i>All Customer</a>
                         </li>
 
                         <li>
-                            <a href="javascript:;"><i class='bx bx-user-plus'></i>Create Customer</a>
+                            <a href="{{ route('customer.create') }}"><i class='bx bx-user-plus'></i>Create Customer</a>
                         </li>
-                        <li>
-                            <a href="javascript:;"><i class='bx bx-list-ul'></i>Customer Ledger</a>
-                        </li>
-
                     </ul>
                 </li>
                 <li class="menu-label">Administration operations</li>

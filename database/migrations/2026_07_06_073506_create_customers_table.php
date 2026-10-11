@@ -13,6 +13,17 @@ return new class extends Migration
     {
         Schema::create('customers', function (Blueprint $table) {
             $table->id();
+            $table->string('name');
+            $table->string('phone')->nullable();
+            $table->string('email')->nullable();
+            $table->text('address')->nullable();
+            $table->string('customer_type')->default('temporary');
+            $table->foreignId('employee_id')->nullable()->constrained('users')->nullOnDelete();
+            $table->string('shop_name')->nullable();
+            $table->string('customer_code')->nullable()->unique();
+            $table->decimal('opening_due', 15, 2)->default(0);
+            $table->tinyInteger('status')->default(1);
+            $table->text('notes')->nullable();
             $table->timestamps();
         });
     }

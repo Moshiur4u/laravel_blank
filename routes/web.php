@@ -1,10 +1,12 @@
 <?php
 
 use App\Http\Controllers\BrandController;
+use App\Http\Controllers\CustomerController;
 use App\Http\Controllers\DashboardConrtoller;
 use App\Http\Controllers\ProductCategoryController;
 use App\Http\Controllers\ProductController;
 use App\Http\Controllers\RoleController;
+use App\Http\Controllers\SaleController;
 use App\Http\Controllers\SupplierController;
 use App\Http\Controllers\SupplierledgerController;
 use App\Http\Controllers\UserController;
@@ -89,6 +91,26 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::get('/product/edit/{id}', [ProductController::class, 'edit'])->name('product.edit');
     Route::put('/product/update/{id}', [ProductController::class, 'update'])->name('product.update');
     Route::get('/product/destroy/{id}', [ProductController::class, 'destroy'])->name('product.destroy');
+});
+
+// বিক্রির ইনভয়েস, ফোন দিয়ে গ্রাহক খোঁজা এবং প্রিন্ট
+Route::middleware(['auth', 'verified'])->group(function () {
+    Route::get('/sales', [SaleController::class, 'index'])->name('sales.index');
+    Route::get('/sales/customer-lookup', [SaleController::class, 'customerByPhone'])->name('sales.customer.lookup');
+    Route::post('/sales', [SaleController::class, 'store'])->name('sales.store');
+    Route::get('/sales/invoice/{id}', [SaleController::class, 'invoice'])->name('sales.invoice');
+});
+
+// মিডলওয়্যার সহ কাস্টমার রাউট শুরু
+Route::middleware(['auth', 'verified'])->group(function () {
+    Route::get('/customer/index', [CustomerController::class, 'index'])->name('customer.index');
+    Route::get('/customer/create', [CustomerController::class, 'create'])->name('customer.create');
+    Route::post('/customer/store', [CustomerController::class, 'store'])->name('customer.store');
+    Route::get('/customer/{id}/ledger', [CustomerController::class, 'ledger'])->name('customer.ledger');
+    Route::post('/customer/ledger/store', [CustomerController::class, 'ledgerStore'])->name('customer.ledger.store');
+    Route::get('/customer/{id}/edit', [CustomerController::class, 'edit'])->name('customer.edit');
+    Route::put('/customer/{id}/update', [CustomerController::class, 'update'])->name('customer.update');
+    Route::get('/customer/{id}/destroy', [CustomerController::class, 'destroy'])->name('customer.destroy');
 });
 
 // Route::get('/dashboard', function () {
