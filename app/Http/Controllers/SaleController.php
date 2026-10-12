@@ -139,6 +139,7 @@ class SaleController extends Controller
             foreach ($validated['items'] as $item) {
                 $product = $products->get($item['product_id']);
                 $quantity = (int) $item['quantity'];
+                // Product Create-এর products.price হলো বিক্রয়মূল্য; sale item-এ সেই সময়কার দাম snapshot হিসেবে রাখা হয়।
                 $unitPrice = round((float) $product->price, 2);
                 $lineTotal = round($unitPrice * $quantity, 2);
                 $subtotal += $lineTotal;

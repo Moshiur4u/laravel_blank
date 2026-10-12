@@ -5,7 +5,10 @@ namespace App\Http\Controllers;
 use App\Models\Brand;
 use App\Models\Product;
 use App\Models\ProductCategory;
+use App\Models\Supplier;
+use App\Models\Supplierledger;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 
 class ProductController extends Controller
 {
@@ -26,12 +29,14 @@ class ProductController extends Controller
     {
         $ProductCategories = ProductCategory::all();
         $brands = Brand::all();
+        // ফর্মের supplier dropdown-এ দেখানোর জন্য বিদ্যমান supplier-গুলো আনা হয়।
+        $suppliers = Supplier::orderBy('name')->get();
 
-        return view('backend.Product.product.createProduct', compact('brands', 'ProductCategories'));
+        return view('backend.Product.product.createProduct', compact('brands', 'ProductCategories', 'suppliers'));
     }
 
     /**
-     * Store a newly created resource in storage.
+     * যাচাইকৃত তথ্য দিয়ে product তৈরি করে এবং supplier থাকলে একই সঙ্গে ledger entry লেখে।
      */
     public function store(Request $request)
     {
@@ -40,7 +45,11 @@ class ProductController extends Controller
             'product_categorie_id' => 'required',
             'brand_id' => 'required',
             'price' => 'required',
-            'unit' => 'required',
+            // দুটো field-ই একসঙ্গে ঐচ্ছিক; supplier দিলে purchase price-ও দিতে হবে।
+            'supplier_id' => 'nullable|required_with:purchase_price|exists:suppliers,id',
+            'purchase_price' => 'nullable|required_with:supplier_id|numeric|min:0',
+            // ledger-এর quantity গণনায় সঠিক numeric পরিমাণ নিশ্চিত করা হয়।
+            'unit' => 'required|numeric|min:0',
             'purchase_date' => 'nullable|date',
             'menufecher_date' => 'nullable|date',
             'expire_date' => 'nullable|date',
@@ -64,19 +73,41 @@ class ProductController extends Controller
             // ইউজার ফোল্ডারে ইমেজ সেভ হবে ও  ফোল্ডার নাম ইউজার
             $image->move(public_path('uploads/products/'), $product_image_name);
         }
-        // ডেটা ক্রিয়েট করা হলো
-        Product::create([
-            'productName' => $request->productName,
-            'product_categorie_id' => $request->product_categorie_id,
-            'brand_id' => $request->brand_id,
-            'price' => $request->price,
-            'unit' => $request->unit,
-            'purchase_date' => $request->purchase_date,
-            'mfg_date' => $request->menufecher_date,
-            'expiry_date' => $request->expire_date,
-            'description' => $request->description,
-            'img_url' => $product_image_name,
-        ]);
+        // database transaction product ও তার ledger row-কে একসঙ্গে সফল বা ব্যর্থ রাখে।
+        DB::transaction(function () use ($request, $product_image_name) {
+            // আগে product সংরক্ষণ করলে ledger-এ তার আসল ID সংযুক্ত করা যায়।
+            $product = Product::create([
+                'productName' => $request->productName,
+                'product_categorie_id' => $request->product_categorie_id,
+                'brand_id' => $request->brand_id,
+                // price আগের বিক্রয়মূল্য; ক্রয়মূল্য আলাদা কলামে এবং supplier আলাদা সম্পর্ক হিসেবে রাখা হয়।
+                'supplier_id' => $request->supplier_id,
+                'purchase_price' => $request->purchase_price,
+                'price' => $request->price,
+                'unit' => $request->unit,
+                'purchase_date' => $request->purchase_date,
+                'mfg_date' => $request->menufecher_date,
+                'expiry_date' => $request->expire_date,
+                'description' => $request->description,
+                'img_url' => $product_image_name,
+            ]);
+
+            // supplier নির্বাচন ও purchase price থাকলেই supplier ledger-এ ক্রয়ের row তৈরি হয়।
+            if ($product->supplier_id !== null && $product->purchase_price !== null) {
+                // ledger total হলো প্রতি এককের ক্রয়মূল্য × মোট quantity; প্রাথমিক payment শূন্য, তাই পুরোটা due।
+                $ledgerTotal = round((float) $product->purchase_price * (float) $product->unit, 2);
+
+                Supplierledger::create([
+                    'supplier_id' => $product->supplier_id,
+                    'product_id' => (string) $product->id,
+                    'quantity' => (string) $product->unit,
+                    'price' => (string) $product->purchase_price,
+                    'total' => number_format($ledgerTotal, 2, '.', ''),
+                    'payment' => '0.00',
+                    'due' => number_format($ledgerTotal, 2, '.', ''),
+                ]);
+            }
+        });
 
         // রিডাইরেক্ট করা হলো এবং ফ্ল্যাশ মেসেজ দেখানো হলো
         return redirect()->route('product.index')->with('success', 'Product added successfully!');

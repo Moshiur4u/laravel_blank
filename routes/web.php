@@ -77,6 +77,10 @@ Route::middleware(['auth', 'verified'])->group(function () {
 
     // সাপ্লায়ার লেজার রাউট
     Route::get('/supplier/{id}/ledger', [SupplierledgerController::class, 'index'])->name('supplier.ledger');
+    // নির্দিষ্ট লেজার এন্ট্রির জন্য প্রিন্টযোগ্য সাপ্লায়ার ইনভয়েস দেখায়; কোনো ডেটা পরিবর্তন করে না।
+    Route::get('/supplier/ledger/{id}/invoice', [SupplierledgerController::class, 'invoice'])->name('supplier.ledger.invoice');
+    // তারিখসহ supplier payment জমা ও ledger-এর payment/due update করে।
+    Route::post('/supplier/ledger/{id}/payments', [SupplierledgerController::class, 'storePayment'])->name('supplier.ledger.payments.store');
     Route::post('/supplier/ledger/store', [SupplierledgerController::class, 'store'])->name('supplier.ledger.store');
     Route::get('/supplier/ledger/{id}/edit', [SupplierledgerController::class, 'edit'])->name('supplier.ledger.edit');
     Route::put('/supplier/ledger/{id}/update', [SupplierledgerController::class, 'update'])->name('supplier.ledger.update');

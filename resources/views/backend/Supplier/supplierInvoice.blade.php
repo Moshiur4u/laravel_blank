@@ -1,0 +1,139 @@
+@extends('dashboard.dashboard')
+@section('title', 'Supplier Invoice - ' . $invoiceNumber)
+
+@section('content')
+    <div class="page-wrapper">
+        <div class="page-content">
+            {{-- প্রিন্ট এবং লেজারে ফেরার নিয়ন্ত্রণগুলো কাগজের ইনভয়েসে দেখানো হবে না। --}}
+            <div class="d-flex justify-content-end gap-2 mb-3 no-print">
+                <a href="{{ route('supplier.ledger', $ledger->supplier_id) }}" class="btn btn-outline-secondary">
+                    <i class="bx bx-arrow-back me-1"></i>Back to Supplier Ledger
+                </a>
+                <button type="button" class="btn btn-primary" onclick="window.print()">
+                    <i class="bx bx-printer me-1"></i>Print Invoice
+                </button>
+            </div>
+
+            <div class="card border-0 shadow-sm">
+                <div class="card-body p-4 p-md-5">
+                    <div class="row align-items-start mb-4">
+                        <div class="col-md-7">
+                            <h2 class="text-primary fw-bold mb-1">Supplier Invoice</h2>
+                            <div class="text-muted">
+                                Invoice: <strong>{{ $invoiceNumber }}</strong>
+                            </div>
+                            {{-- লেজারের তৈরির তারিখই ইনভয়েসের তারিখ হিসেবে দেখানো হচ্ছে। --}}
+                            <div class="text-muted">Date: {{ $ledger->created_at->format('d M Y, h:i A') }}</div>
+                        </div>
+                        <div class="col-md-5 text-md-end mt-4 mt-md-0">
+                            {{-- supplier-এর আপলোড করা logo দেখায়; logo না থাকলে নামের আদ্যক্ষর দেখায়। --}}
+                            @if ($ledger->supplier->logo)
+                                <img src="{{ asset('uploads/suppliers/' . $ledger->supplier->logo) }}"
+                                    alt="{{ $ledger->supplier->name }} logo"
+                                    style="max-width: 120px; max-height: 90px; object-fit: contain;">
+                            @else
+                                <div class="d-inline-flex align-items-center justify-content-center rounded-circle bg-light text-primary fw-bold"
+                                    style="width: 80px; height: 80px; font-size: 24px;">
+                                    {{ strtoupper(substr($ledger->supplier->name, 0, 2)) }}
+                                </div>
+                            @endif
+                        </div>
+                    </div>
+
+                    <div class="mb-4">
+                        {{-- invoice-এ supplier-এর সংরক্ষিত নাম, যোগাযোগ ও ঠিকানা দেখানো হয়। --}}
+                        <h5 class="fw-bold mb-1">Supplier</h5>
+                        <div class="fw-semibold">{{ $ledger->supplier->name }}</div>
+                        <div>{{ $ledger->supplier->address }}</div>
+                        <div>Email: {{ $ledger->supplier->email }}</div>
+                        <div>Phone: {{ $ledger->supplier->phone }}</div>
+                    </div>
+
+                    <div class="table-responsive">
+                        <table class="table table-bordered align-middle">
+                            <thead class="table-light">
+                                <tr>
+                                    <th>Product</th>
+                                    <th class="text-end">Unit Price</th>
+                                    <th class="text-center">Quantity</th>
+                                    <th class="text-end">Amount</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {{-- এই ইনভয়েসটি নির্বাচিত ledger row-র product ও amount-ই দেখায়। --}}
+                                <tr>
+                                    <td>{{ $ledger->product->productName ?? 'N/A' }}</td>
+                                    <td class="text-end">৳{{ number_format($ledger->price ?? 0, 2) }}</td>
+                                    <td class="text-center">{{ $ledger->quantity ?? 0 }}</td>
+                                    <td class="text-end">৳{{ number_format($ledger->total ?? 0, 2) }}</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+
+                    {{-- প্রতিটি তারিখভিত্তিক payment invoice-এ দেখিয়ে জমার পরিষ্কার হিসাব রাখা হয়। --}}
+                    @if ($ledger->payments->isNotEmpty())
+                        <div class="mt-4">
+                            <h6 class="fw-bold">Payment History</h6>
+                            <table class="table table-sm table-bordered">
+                                <thead class="table-light">
+                                    <tr>
+                                        <th>Payment Date</th>
+                                        <th class="text-end">Amount Paid</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    @foreach ($ledger->payments as $paymentRecord)
+                                        <tr>
+                                            <td>{{ $paymentRecord->payment_date->format('d M Y') }}</td>
+                                            <td class="text-end">৳{{ number_format((float) $paymentRecord->amount, 2) }}</td>
+                                        </tr>
+                                    @endforeach
+                                </tbody>
+                            </table>
+                        </div>
+                    @endif
+
+                    {{-- customer invoice-এর মতো paid ও due দেখায়; supplier ledger-এ payment method সংরক্ষিত নেই। --}}
+                    <div class="row justify-content-end mt-4">
+                        <div class="col-md-6 col-lg-5">
+                            <div class="d-flex justify-content-between py-1">
+                                <span>Total</span>
+                                <span>৳{{ number_format($ledger->total ?? 0, 2) }}</span>
+                            </div>
+                            <div class="d-flex justify-content-between py-1">
+                                <span>Amount Paid</span>
+                                <span>৳{{ number_format($ledger->payment ?? 0, 2) }}</span>
+                            </div>
+                            <div class="d-flex justify-content-between py-1 text-danger fw-bold">
+                                <span>Due</span>
+                                <span>৳{{ number_format($ledger->due ?? 0, 2) }}</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="row mt-5 pt-4">
+                        <div class="col-6"><div class="border-top pt-2">Supplier Signature</div></div>
+                        <div class="col-6 text-end"><div class="border-top pt-2">Authorized Signature</div></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <style>
+        /* প্রিন্টে ড্যাশবোর্ডের নেভিগেশন ও নিয়ন্ত্রণ লুকিয়ে শুধু ইনভয়েস রাখা হয়। */
+        @media print {
+            header,
+            .topbar,
+            .sidebar-wrapper,
+            .no-print,
+            .page-footer,
+            .footer { display: none !important; }
+            .page-wrapper { margin: 0 !important; padding: 0 !important; }
+            .page-content { padding: 0 !important; }
+            .card { box-shadow: none !important; border: 0 !important; }
+            body { background: #fff !important; }
+        }
+    </style>
+@endsection

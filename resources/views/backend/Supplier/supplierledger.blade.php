@@ -181,9 +181,16 @@
                                     @error('payment')
                                         <span class="text-danger">{{ $message }}</span>
                                     @enderror
-                                    <input type="number" name="payment" id="ledger_payment" class="form-control"
-                                        placeholder="0.00" min="0" step="0.01"
-                                        value="{{ isset($ledger) ? $ledger->payment : old('payment') }}">
+                                    @if (isset($ledger))
+                                        {{-- edit form থেকে payment বদলানো বন্ধ রাখা হয়, যাতে payment history ও total এক থাকে। --}}
+                                        <input type="number" id="ledger_payment" class="form-control"
+                                            value="{{ $ledger->payment }}" readonly>
+                                        <small class="text-muted">Use the payment action in Ledger History.</small>
+                                    @else
+                                        <input type="number" name="payment" id="ledger_payment" class="form-control"
+                                            placeholder="0.00" min="0" step="0.01"
+                                            value="{{ old('payment') }}">
+                                    @endif
                                 </div>
                                 <div class="col-md-1">
                                     <label for="due" class="form-label fw-semibold">Due</label>
@@ -225,6 +232,17 @@
                         </div>
                     </div>
                     <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                </div>
+            @endif
+            {{-- payment form-এর validation ত্রুটি edit form field থেকে আলাদা করে Ledger History-র কাছে দেখানো হয়। --}}
+            @if ($errors->has('payment_date') || $errors->has('amount'))
+                <div class="alert alert-danger">
+                    @error('payment_date')
+                        <div>{{ $message }}</div>
+                    @enderror
+                    @error('amount')
+                        <div>{{ $message }}</div>
+                    @enderror
                 </div>
             @endif
 
@@ -273,10 +291,58 @@
                                                 <td>{{ $entry->quantity ?? 0 }}</td>
                                                 <td>৳{{ number_format($entry->price, 2) }}</td>
                                                 <td><strong>৳{{ number_format($entry->total, 2) }}</strong></td>
-                                                <td class="text-success fw-bold">৳{{ number_format($entry->payment, 2) }}
+                                                <td class="text-success fw-bold">
+                                                    ৳{{ number_format($entry->payment, 2) }}
+                                                    @if ($entry->payments->isNotEmpty())
+                                                        {{-- সংরক্ষিত payment date ও amount চাইলে details-এ খোলা যায়। --}}
+                                                        <details class="small fw-normal mt-1">
+                                                            <summary>Payment history ({{ $entry->payments->count() }})</summary>
+                                                            @foreach ($entry->payments as $paymentRecord)
+                                                                <div class="text-nowrap">
+                                                                    {{ $paymentRecord->payment_date->format('d M Y') }}:
+                                                                    ৳{{ number_format((float) $paymentRecord->amount, 2) }}
+                                                                </div>
+                                                            @endforeach
+                                                        </details>
+                                                    @endif
                                                 </td>
                                                 <td class="text-danger fw-bold">৳{{ number_format($entry->due, 2) }}</td>
                                                 <td>
+                                                    {{-- প্রতিটি entry-র জন্য date ও amount-সহ আলাদা payment যোগ করার form। --}}
+                                                    @if ((float) $entry->due > 0)
+                                                        <details class="mb-1">
+                                                            <summary class="btn btn-sm btn-success text-white">
+                                                                <i class="bx bx-money me-1"></i>Payment
+                                                            </summary>
+                                                            <form action="{{ route('supplier.ledger.payments.store', $entry->id) }}"
+                                                                method="POST" class="border rounded p-2 mt-2 bg-light"
+                                                                style="min-width: 220px;">
+                                                                @csrf
+                                                                <label class="form-label small mb-1"
+                                                                    for="payment_date_{{ $entry->id }}">Payment Date</label>
+                                                                <input type="date" name="payment_date"
+                                                                    id="payment_date_{{ $entry->id }}"
+                                                                    class="form-control form-control-sm mb-2"
+                                                                    value="{{ old('payment_date', now()->toDateString()) }}"
+                                                                    max="{{ now()->toDateString() }}" required>
+                                                                <label class="form-label small mb-1"
+                                                                    for="payment_amount_{{ $entry->id }}">Amount (৳)</label>
+                                                                <input type="number" name="amount"
+                                                                    id="payment_amount_{{ $entry->id }}"
+                                                                    class="form-control form-control-sm mb-2"
+                                                                    min="0.01" max="{{ number_format((float) $entry->due, 2, '.', '') }}"
+                                                                    step="0.01" value="{{ old('amount') }}" required>
+                                                                <button type="submit" class="btn btn-sm btn-success w-100">
+                                                                    Save Payment
+                                                                </button>
+                                                            </form>
+                                                        </details>
+                                                    @endif
+                                                    {{-- নির্দিষ্ট এন্ট্রির সংরক্ষিত তথ্য দিয়ে ইনভয়েস দেখানোর লিংক। --}}
+                                                    <a href="{{ route('supplier.ledger.invoice', $entry->id) }}"
+                                                        class="btn btn-sm btn-outline-success" title="Print Invoice">
+                                                        <i class="bx bx-printer"></i>
+                                                    </a>
                                                     <a href="{{ route('supplier.ledger.edit', $entry->id) }}"
                                                         class="btn btn-sm btn-primary">
                                                         <i class="bx bx-edit"></i>

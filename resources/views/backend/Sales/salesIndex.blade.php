@@ -17,7 +17,7 @@
             </div>
 
             @if ($errors->any())
-                <div class="alert alert-danger border-0 shadow-sm">
+                <div class="border-0 shadow-sm alert alert-danger">
                     <ul class="mb-0">
                         @foreach ($errors->all() as $error)
                             <li>{{ $error }}</li>
@@ -31,8 +31,8 @@
                 <input type="hidden" name="save_customer" id="save_customer" value="{{ old('save_customer', 'no') }}">
                 <div class="row">
                     <div class="col-lg-8">
-                        <div class="card radius-10 border-0 shadow-sm">
-                            <div class="card-header bg-transparent border-bottom py-3">
+                        <div class="border-0 shadow-sm card radius-10">
+                            <div class="py-3 bg-transparent card-header border-bottom">
                                 <h5 class="mb-0 fw-bold text-dark"><i class="bx bx-cart text-primary me-2"></i>Sale Items</h5>
                             </div>
                             <div class="card-body">
@@ -91,8 +91,8 @@
                             </div>
                         </div>
 
-                        <div class="card radius-10 border-0 shadow-sm mt-4">
-                            <div class="card-header bg-transparent border-bottom py-3">
+                        <div class="mt-4 border-0 shadow-sm card radius-10">
+                            <div class="py-3 bg-transparent card-header border-bottom">
                                 <h5 class="mb-0 fw-bold text-dark"><i class="bx bx-user text-primary me-2"></i>Customer</h5>
                             </div>
                             <div class="card-body">
@@ -112,12 +112,12 @@
                                 </div>
 
                                 <div id="customerLedgerPanel" class="mt-3 d-none">
-                                    <div class="d-flex align-items-center justify-content-between mb-2">
+                                    <div class="mb-2 d-flex align-items-center justify-content-between">
                                         <h6 class="mb-0 fw-bold">Customer Ledger</h6>
                                         <span class="badge bg-light-danger text-danger">Outstanding: <span id="customerDue">৳0.00</span></span>
                                     </div>
                                     <div class="table-responsive">
-                                        <table class="table table-sm table-hover mb-2">
+                                        <table class="table mb-2 table-sm table-hover">
                                             <thead class="table-light">
                                                 <tr><th>Date</th><th>Type / Item</th><th>Sale</th><th>Paid</th></tr>
                                             </thead>
@@ -130,9 +130,9 @@
                                     </div>
                                 </div>
 
-                                <div id="newCustomerDetails" class="row g-3 mt-2 d-none">
+                                <div id="newCustomerDetails" class="mt-2 row g-3 d-none">
                                     <div class="col-12">
-                                        <div class="alert alert-info py-2 mb-0">This phone number is not registered. You can print the invoice without saving a customer record, or choose Yes at checkout and enter their details.</div>
+                                        <div class="py-2 mb-0 alert alert-info">This phone number is not registered. You can print the invoice without saving a customer record, or choose Yes at checkout and enter their details.</div>
                                     </div>
                                     <div class="col-md-4">
                                         <label for="customer_name" class="form-label">Name (needed only if saving)</label>
@@ -152,25 +152,30 @@
                     </div>
 
                     <div class="col-lg-4">
-                        <div class="card radius-10 border-0 shadow-sm">
-                            <div class="card-header bg-transparent border-bottom py-3">
+                        <div class="border-0 shadow-sm card radius-10">
+                            <div class="py-3 bg-transparent card-header border-bottom">
                                 <h5 class="mb-0 fw-bold text-dark"><i class="bx bx-receipt text-primary me-2"></i>Invoice & Payment</h5>
                             </div>
                             <div class="card-body">
-                                <div class="mb-3">
-                                    <label for="discount_amount" class="form-label">Discount Amount</label>
+                                <div class="row">
+                                    <div class="mb-3 col-5">
+                                    <label for="discount_amount" class="form-label">Discount</label>
                                     <input type="number" name="discount_amount" id="discount_amount" class="form-control" min="0" step="0.01" value="{{ old('discount_amount', 0) }}">
                                 </div>
-                                <div class="mb-3">
-                                    <label for="vat_amount" class="form-label">VAT Amount</label>
-                                    <input type="number" name="vat_amount" id="vat_amount" class="form-control" min="0" step="0.01" value="{{ old('vat_amount', 0) }}">
+                                <div class="mb-3 col-7">
+                                    {{-- VAT-এর হার শতাংশে নেওয়া হয়; হিসাব করা টাকার অঙ্ক hidden ইনপুটে পাঠানো হয়। --}}
+                                    <label for="vat_percentage" class="form-label">VAT Percentage (%)</label>
+                                    <input type="number" name="vat_percentage" id="vat_percentage" class="form-control" min="0" step="0.01" value="{{ old('vat_percentage', 5) }}">
+                                    <input type="hidden" name="vat_amount" id="vat_amount" value="{{ old('vat_amount', 0) }}">
                                 </div>
-                                <div class="mb-3">
-                                    <label for="amount_paid" class="form-label">Amount Received</label>
+                                </div>
+                                <div class="row">
+                                <div class="mb-3 col-5">
+                                    <label for="amount_paid" class="form-label">Amount Receiv</label>
                                     <input type="number" name="amount_paid" id="amount_paid" class="form-control" min="0" step="0.01" value="{{ old('amount_paid', 0) }}">
                                 </div>
-                                <div class="mb-3">
-                                    <label for="payment_method" class="form-label">Payment Method</label>
+                                <div class="mb-3 col-7">
+                                    <label for="payment_method required" class="form-label">Payment Method</label>
                                     <select name="payment_method" id="payment_method" class="form-select">
                                         <option value="">Select method</option>
                                         @foreach (['cash' => 'Cash', 'bank' => 'Bank', 'nagad' => 'Nagad', 'bkash' => 'bKash', 'rocket' => 'Rocket', 'upay' => 'Upay'] as $value => $label)
@@ -178,15 +183,19 @@
                                         @endforeach
                                     </select>
                                 </div>
+                                </div>
                                 <div class="mb-3">
                                     <label for="notes" class="form-label">Notes</label>
                                     <textarea name="notes" id="notes" rows="2" class="form-control">{{ old('notes') }}</textarea>
                                 </div>
                                 <hr>
-                                <div class="d-flex justify-content-between mb-2"><span>Subtotal</span><strong id="subtotalText">৳0.00</strong></div>
-                                <div class="d-flex justify-content-between mb-2"><span>Previous Due</span><strong id="previousDueText">৳0.00</strong></div>
-                                <div class="d-flex justify-content-between mb-2"><span>Invoice Total</span><strong id="invoiceTotalText">৳0.00</strong></div>
-                                <div class="d-flex justify-content-between mb-3 text-danger"><span>Balance Due</span><strong id="balanceDueText">৳0.00</strong></div>
+                                <div class="mb-2 d-flex justify-content-between"><span>Subtotal</span><strong id="subtotalText">৳0.00</strong></div>
+                                {{-- সাবটোটালের পর ডিসকাউন্ট ও শতাংশ থেকে হিসাব করা VAT দেখানো হয়। --}}
+                                <div class="mb-2 d-flex justify-content-between"><span>Discount</span><strong id="discountText">৳0.00</strong></div>
+                                <div class="mb-2 d-flex justify-content-between"><span>VAT (<span id="vatPercentageText">5%</span>)</span><strong id="vatText">৳0.00</strong></div>
+                                <div class="mb-2 d-flex justify-content-between"><span>Previous Due</span><strong id="previousDueText">৳0.00</strong></div>
+                                <div class="mb-2 d-flex justify-content-between"><span>Invoice Total</span><strong id="invoiceTotalText">৳0.00</strong></div>
+                                <div class="mb-3 d-flex justify-content-between text-danger"><span>Balance Due</span><strong id="balanceDueText">৳0.00</strong></div>
                                 <button type="submit" id="checkoutButton" class="btn btn-primary w-100">
                                     <i class="bx bx-printer me-1"></i>Checkout & Print Invoice
                                 </button>
@@ -196,12 +205,12 @@
                 </div>
             </form>
 
-            <div class="card radius-10 border-0 shadow-sm mt-4">
-                <div class="card-header bg-transparent border-bottom py-3">
+            <div class="mt-4 border-0 shadow-sm card radius-10">
+                <div class="py-3 bg-transparent card-header border-bottom">
                     <h5 class="mb-0 fw-bold text-dark"><i class="bx bx-history text-primary me-2"></i>Recent Invoices</h5>
                 </div>
                 <div class="card-body table-responsive">
-                    <table class="table table-hover align-middle mb-0">
+                    <table class="table mb-0 align-middle table-hover">
                         <thead class="table-light">
                             <tr><th>Invoice</th><th>Date</th><th>Customer Phone</th><th>Employee</th><th>Total</th><th>Due</th><th></th></tr>
                         </thead>
@@ -217,7 +226,7 @@
                                     <td><a href="{{ route('sales.invoice', $invoice->id) }}" class="btn btn-sm btn-outline-primary"><i class="bx bx-show"></i></a></td>
                                 </tr>
                             @empty
-                                <tr><td colspan="7" class="text-center text-muted py-4">No invoices have been created yet.</td></tr>
+                                <tr><td colspan="7" class="py-4 text-center text-muted">No invoices have been created yet.</td></tr>
                             @endforelse
                         </tbody>
                     </table>
@@ -305,13 +314,20 @@
                 }
 
                 const discount = Number(document.getElementById('discount_amount').value || 0);
-                const vat = Number(document.getElementById('vat_amount').value || 0);
+                // ডিসকাউন্ট বাদ দেওয়ার পরের সাবটোটালের ওপর VAT শতাংশ হিসাব করা হয়।
+                const vatPercentage = Number(document.getElementById('vat_percentage').value || 0);
+                const vatBase = Math.max(0, subtotal - discount);
+                const vat = Math.round((vatBase * vatPercentage / 100 + Number.EPSILON) * 100) / 100;
+                document.getElementById('vat_amount').value = vat.toFixed(2);
                 const previousDue = document.getElementById('include_previous_due').checked
                     ? Number(document.getElementById('customerDue').dataset.value || 0)
                     : 0;
-                const total = Math.max(0, subtotal - discount) + vat + previousDue;
+                const total = vatBase + vat + previousDue;
                 const paid = Number(document.getElementById('amount_paid').value || 0);
                 document.getElementById('subtotalText').textContent = money(subtotal);
+                document.getElementById('discountText').textContent = money(discount);
+                document.getElementById('vatPercentageText').textContent = `${vatPercentage}%`;
+                document.getElementById('vatText').textContent = money(vat);
                 document.getElementById('previousDueText').textContent = money(previousDue);
                 document.getElementById('invoiceTotalText').textContent = money(total);
                 document.getElementById('balanceDueText').textContent = money(Math.max(total - paid, 0));
@@ -453,7 +469,7 @@
                 }
                 updateTotals();
             });
-            ['discount_amount', 'vat_amount', 'amount_paid', 'include_previous_due'].forEach((id) => {
+            ['discount_amount', 'vat_percentage', 'amount_paid', 'include_previous_due'].forEach((id) => {
                 document.getElementById(id).addEventListener('input', updateTotals);
                 document.getElementById(id).addEventListener('change', updateTotals);
             });

@@ -135,10 +135,61 @@
                                         @enderror
                                     </div>
 
-                                    <!-- Price -->
+                                        {{-- supplier ঐচ্ছিক রাখা হয়েছে, যাতে supplier ছাড়া product তৈরির পুরোনো সুবিধা থাকে। --}}
                                     <div class="col-md-6">
-                                        <label for="price" class="form-label fw-semibold text-secondary">
-                                            Unit Price (৳) <span class="text-danger">*</span>
+                                            <label for="supplier_id" class="form-label fw-semibold text-secondary">
+                                                Supplier
+                                            </label>
+                                            <div class="input-group">
+                                                <span class="input-group-text bg-light text-secondary border-end-0">
+                                                    <i class="bx bx-store"></i>
+                                                </span>
+                                                <select class="form-select border-start-0 @error('supplier_id') is-invalid @enderror"
+                                                    name="supplier_id"
+                                                    id="supplier_id">
+                                                    <option value="">Select Supplier (Optional)</option>
+                                                    @foreach ($suppliers as $supplier)
+                                                        <option value="{{ $supplier->id }}"
+                                                            {{ old('supplier_id') == $supplier->id ? 'selected' : '' }}>
+                                                            {{ $supplier->name }}
+                                                        </option>
+                                                    @endforeach
+                                                </select>
+                                            </div>
+                                            @error('supplier_id')
+                                                <div class="text-danger small mt-1">
+                                                    <i class="bx bx-error-circle me-1"></i>{{ $message }}
+                                                </div>
+                                            @enderror
+                                        </div>
+
+                                        {{-- ক্রয়মূল্য বিক্রয়মূল্য থেকে আলাদা field-এ রাখা হয়। --}}
+                                        <div class="col-md-6">
+                                            <label for="purchase_price" class="form-label fw-semibold text-secondary">
+                                                Purchase Order Price (৳)
+                                            </label>
+                                            <div class="input-group">
+                                                <span class="input-group-text bg-light text-secondary border-end-0">৳</span>
+                                                <input type="number"
+                                                    step="0.01"
+                                                    min="0"
+                                                    name="purchase_price"
+                                                    id="purchase_price"
+                                                    class="form-control border-start-0 @error('purchase_price') is-invalid @enderror"
+                                                    placeholder="0.00"
+                                                    value="{{ old('purchase_price') }}">
+                                            </div>
+                                            @error('purchase_price')
+                                                <div class="text-danger small mt-1">
+                                                    <i class="bx bx-error-circle me-1"></i>{{ $message }}
+                                                </div>
+                                            @enderror
+                                        </div>
+
+                                        {{-- বিদ্যমান price field-টিই বিক্রয়মূল্য হিসেবে রাখা হয়েছে, তাই পুরোনো ব্যবহার বদলায় না। --}}
+                                        <div class="col-md-6">
+                                            <label for="price" class="form-label fw-semibold text-secondary">
+                                                Product Selling Price (৳) <span class="text-danger">*</span>
                                         </label>
                                         <div class="input-group">
                                             <span class="input-group-text bg-light text-secondary border-end-0">৳</span>

@@ -40,7 +40,7 @@
                                 <tr>
                                     <th>#</th>
                                     <th>Product</th>
-                                    <th class="text-end">Unit Price</th>
+                                    <th class="text-end">Unit Selling Price</th>
                                     <th class="text-center">Quantity</th>
                                     <th class="text-end">Amount</th>
                                 </tr>
@@ -50,6 +50,7 @@
                                     <tr>
                                         <td>{{ $key + 1 }}</td>
                                         <td>{{ $item->product_name }}</td>
+                                        {{-- sale তৈরির সময় Product-এর selling price sale item-এ snapshot হয়ে invoice-এ দেখায়। --}}
                                         <td class="text-end">৳{{ number_format($item->unit_price, 2) }}</td>
                                         <td class="text-center">{{ $item->quantity }}</td>
                                         <td class="text-end">৳{{ number_format($item->line_total, 2) }}</td>

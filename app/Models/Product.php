@@ -13,6 +13,8 @@ class Product extends Model
             'productName',
             'product_categorie_id',
             'brand_id',
+            'supplier_id',
+            'purchase_price',
             'price',
             'unit',
             'stock_unit',
@@ -34,6 +36,11 @@ class Product extends Model
     }
     public function brand(){
         return $this->belongsTo(Brand::class);
+    }
+
+    // প্রতিটি product-এর সঙ্গে নির্বাচিত supplier-এর সম্পর্ক নির্ধারণ করে।
+    public function supplier(){
+        return $this->belongsTo(Supplier::class);
     }
 
     public function shelfDurationDays(): ?int
