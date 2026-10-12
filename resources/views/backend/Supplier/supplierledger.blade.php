@@ -31,10 +31,10 @@
             {{-- ============== Supplier Details Card ============== --}}
             <div class="row">
                 <div class="col-lg-12">
-                    <div class="card border-0 shadow-sm">
+                    <div class="border-0 shadow-sm card">
                         <div class="card-body">
                             <div class="row align-items-center">
-                                <div class="col-md-1 text-center">
+                                <div class="text-center col-md-1">
                                     @if ($supplier->logo)
                                         <img src="{{ asset('uploads/suppliers/' . $supplier->logo) }}"
                                             alt="{{ $supplier->name }}"
@@ -69,29 +69,29 @@
                                         {{ $supplier->address }}</p>
                                 </div>
                                 <div class="col-md-6">
-                                    <div class="row text-center">
+                                    <div class="text-center row">
                                         <div class="col-md-4">
-                                            <div class="card bg-light-primary border-0 mb-0">
-                                                <div class="card-body py-3">
-                                                    <h6 class="text-primary mb-1">Total Amount</h6>
+                                            <div class="mb-0 border-0 card bg-light-primary">
+                                                <div class="py-3 card-body">
+                                                    <h6 class="mb-1 text-primary">Total Amount</h6>
                                                     <h4 class="mb-0 fw-bold text-primary">
                                                         ৳{{ number_format($totalAmount, 2) }}</h4>
                                                 </div>
                                             </div>
                                         </div>
                                         <div class="col-md-4">
-                                            <div class="card bg-light-success border-0 mb-0">
-                                                <div class="card-body py-3">
-                                                    <h6 class="text-success mb-1">Total Payment</h6>
+                                            <div class="mb-0 border-0 card bg-light-success">
+                                                <div class="py-3 card-body">
+                                                    <h6 class="mb-1 text-success">Total Payment</h6>
                                                     <h4 class="mb-0 fw-bold text-success">
                                                         ৳{{ number_format($totalPayment, 2) }}</h4>
                                                 </div>
                                             </div>
                                         </div>
                                         <div class="col-md-4">
-                                            <div class="card bg-light-danger border-0 mb-0">
-                                                <div class="card-body py-3">
-                                                    <h6 class="text-danger mb-1">Total Due</h6>
+                                            <div class="mb-0 border-0 card bg-light-danger">
+                                                <div class="py-3 card-body">
+                                                    <h6 class="mb-1 text-danger">Total Due</h6>
                                                     <h4 class="mb-0 fw-bold text-danger">৳{{ number_format($totalDue, 2) }}
                                                     </h4>
                                                 </div>
@@ -105,11 +105,11 @@
                 </div>
             </div>
 
-            {{-- ============== Add/Edit Ledger Entry Form ============== --}}
+            {{-- ============== Add/Edit Ledger Entry Form Good Coding============== --}}
             <div class="row">
                 <div class="col-lg-12">
-                    <div class="card border-0 shadow-sm">
-                        <div class="card-header bg-primary text-white">
+                    <div class="border-0 shadow-sm card">
+                        <div class="text-white card-header bg-primary">
                             <h5 class="mb-0">
                                 <i class="bx bx-plus-medical me-1"></i>
                                 {{ isset($ledger) ? 'Edit Ledger Entry' : 'Add New Ledger Entry' }}
@@ -224,9 +224,9 @@
 
             {{-- সাকসেস মেসেজ দেখানো হবে --}}
             @if (session('success'))
-                <div class="alert alert-success border-0 bg-success alert-dismissible fade show py-2">
+                <div class="py-2 border-0 alert alert-success bg-success alert-dismissible fade show">
                     <div class="d-flex align-items-center">
-                        <div class="font-35 text-white"><i class="bx bxs-check-circle"></i></div>
+                        <div class="text-white font-35"><i class="bx bxs-check-circle"></i></div>
                         <div class="ms-3">
                             <h6 class="mb-0 text-white">{{ session('success') }}</h6>
                         </div>
@@ -249,7 +249,7 @@
             {{-- ============== Ledger Table ============== --}}
             <div class="row">
                 <div class="col-lg-12">
-                    <div class="card border-0 shadow-sm">
+                    <div class="border-0 shadow-sm card">
                         <div class="card-header">
                             <h5 class="mb-0"><i class="bx bx-list-ul me-1"></i> Ledger History -
                                 <span class="text-primary">{{ $supplier->name }}</span>
@@ -295,7 +295,7 @@
                                                     ৳{{ number_format($entry->payment, 2) }}
                                                     @if ($entry->payments->isNotEmpty())
                                                         {{-- সংরক্ষিত payment date ও amount চাইলে details-এ খোলা যায়। --}}
-                                                        <details class="small fw-normal mt-1">
+                                                        <details class="mt-1 small fw-normal">
                                                             <summary>Payment history ({{ $entry->payments->count() }})</summary>
                                                             @foreach ($entry->payments as $paymentRecord)
                                                                 <div class="text-nowrap">
@@ -311,25 +311,25 @@
                                                     {{-- প্রতিটি entry-র জন্য date ও amount-সহ আলাদা payment যোগ করার form। --}}
                                                     @if ((float) $entry->due > 0)
                                                         <details class="mb-1">
-                                                            <summary class="btn btn-sm btn-success text-white">
+                                                            <summary class="text-white btn btn-sm btn-success">
                                                                 <i class="bx bx-money me-1"></i>Payment
                                                             </summary>
                                                             <form action="{{ route('supplier.ledger.payments.store', $entry->id) }}"
-                                                                method="POST" class="border rounded p-2 mt-2 bg-light"
+                                                                method="POST" class="p-2 mt-2 border rounded bg-light"
                                                                 style="min-width: 220px;">
                                                                 @csrf
-                                                                <label class="form-label small mb-1"
+                                                                <label class="mb-1 form-label small"
                                                                     for="payment_date_{{ $entry->id }}">Payment Date</label>
                                                                 <input type="date" name="payment_date"
                                                                     id="payment_date_{{ $entry->id }}"
-                                                                    class="form-control form-control-sm mb-2"
+                                                                    class="mb-2 form-control form-control-sm"
                                                                     value="{{ old('payment_date', now()->toDateString()) }}"
                                                                     max="{{ now()->toDateString() }}" required>
-                                                                <label class="form-label small mb-1"
+                                                                <label class="mb-1 form-label small"
                                                                     for="payment_amount_{{ $entry->id }}">Amount (৳)</label>
                                                                 <input type="number" name="amount"
                                                                     id="payment_amount_{{ $entry->id }}"
-                                                                    class="form-control form-control-sm mb-2"
+                                                                    class="mb-2 form-control form-control-sm"
                                                                     min="0.01" max="{{ number_format((float) $entry->due, 2, '.', '') }}"
                                                                     step="0.01" value="{{ old('amount') }}" required>
                                                                 <button type="submit" class="btn btn-sm btn-success w-100">
