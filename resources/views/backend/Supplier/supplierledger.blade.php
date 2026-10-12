@@ -105,122 +105,109 @@
                 </div>
             </div>
 
-            {{-- ============== Add/Edit Ledger Entry Form Good Coding============== --}}
-            <div class="row">
-                <div class="col-lg-12">
-                    <div class="border-0 shadow-sm card">
-                        <div class="text-white card-header bg-primary">
-                            <h5 class="mb-0">
-                                <i class="bx bx-plus-medical me-1"></i>
-                                {{ isset($ledger) ? 'Edit Ledger Entry' : 'Add New Ledger Entry' }}
-                            </h5>
-                        </div>
-                        <div class="card-body">
-                            @if (isset($ledger))
+            {{-- ============== Edit Ledger Entry Form ============== --}}
+            @if (isset($ledger) && $ledger !== null)
+                <div class="row">
+                    <div class="col-lg-12">
+                        <div class="border-0 shadow-sm card">
+                            <div class="text-white card-header bg-primary">
+                                <h5 class="mb-0">
+                                    <i class="bx bx-edit-alt me-1"></i>
+                                    Edit Ledger Entry
+                                </h5>
+                            </div>
+                            <div class="card-body">
                                 <form action="{{ route('supplier.ledger.update', $ledger->id) }}" method="POST">
                                     @csrf
                                     @method('PUT')
-                                @else
-                                    <form action="{{ route('supplier.ledger.store') }}" method="POST">
-                                        @csrf
-                                        <input type="hidden" name="supplier_id" value="{{ $supplier->id }}">
-                            @endif
-                            <div class="row g-3">
-                                <div class="col-md-2">
-                                    <label for="invoice_id" class="form-label fw-semibold">Invoice No.</label>
-                                    @error('invoice_id')
-                                        <span class="text-danger">{{ $message }}</span>
-                                    @enderror
-                                    <input type="text" name="invoice_id" class="form-control" placeholder="INV-001"
-                                        value="{{ isset($ledger) ? $ledger->invoice_id : old('invoice_id') }}">
-                                </div>
-                                <div class="col-md-2">
-                                    <label for="product_id" class="form-label fw-semibold">Product</label>
-                                    @error('product_id')
-                                        <span class="text-danger">{{ $message }}</span>
-                                    @enderror
-                                    <select name="product_id" class="form-select">
-                                        <option value="">-- Select Product --</option>
-                                        @foreach ($products as $product)
-                                            <option value="{{ $product->id }}"
-                                                {{ isset($ledger) && $ledger->product_id == $product->id ? 'selected' : '' }}>
-                                                {{ $product->productName }}
-                                            </option>
-                                        @endforeach
-                                    </select>
-                                </div>
-                                <div class="col-md-1">
-                                    <label for="quantity" class="form-label fw-semibold">Quantity</label>
-                                    @error('quantity')
-                                        <span class="text-danger">{{ $message }}</span>
-                                    @enderror
-                                    <input type="number" name="quantity" id="ledger_quantity" class="form-control"
-                                        placeholder="0" min="0"
-                                        value="{{ isset($ledger) ? $ledger->quantity : old('quantity') }}">
-                                </div>
-                                <div class="col-md-2">
-                                    <label for="price" class="form-label fw-semibold">Unit Price</label>
-                                    @error('price')
-                                        <span class="text-danger">{{ $message }}</span>
-                                    @enderror
-                                    <input type="number" name="price" id="ledger_price" class="form-control"
-                                        placeholder="0.00" min="0" step="0.01"
-                                        value="{{ isset($ledger) ? $ledger->price : old('price') }}">
-                                </div>
-                                <div class="col-md-2">
-                                    <label for="total" class="form-label fw-semibold">Total</label>
-                                    @error('total')
-                                        <span class="text-danger">{{ $message }}</span>
-                                    @enderror
-                                    <input type="number" name="total" id="ledger_total" class="form-control"
-                                        placeholder="0.00" min="0" step="0.01"
-                                        value="{{ isset($ledger) ? $ledger->total : old('total') }}" readonly>
-                                </div>
-                                <div class="col-md-1">
-                                    <label for="payment" class="form-label fw-semibold">Payment</label>
-                                    @error('payment')
-                                        <span class="text-danger">{{ $message }}</span>
-                                    @enderror
-                                    @if (isset($ledger))
-                                        {{-- edit form থেকে payment বদলানো বন্ধ রাখা হয়, যাতে payment history ও total এক থাকে। --}}
-                                        <input type="number" id="ledger_payment" class="form-control"
-                                            value="{{ $ledger->payment }}" readonly>
-                                        <small class="text-muted">Use the payment action in Ledger History.</small>
-                                    @else
-                                        <input type="number" name="payment" id="ledger_payment" class="form-control"
-                                            placeholder="0.00" min="0" step="0.01"
-                                            value="{{ old('payment') }}">
-                                    @endif
-                                </div>
-                                <div class="col-md-1">
-                                    <label for="due" class="form-label fw-semibold">Due</label>
-                                    @error('due')
-                                        <span class="text-danger">{{ $message }}</span>
-                                    @enderror
-                                    <input type="number" name="due" id="ledger_due" class="form-control"
-                                        placeholder="0.00" min="0" step="0.01"
-                                        value="{{ isset($ledger) ? $ledger->due : old('due') }}" readonly>
-                                </div>
-                                <div class="col-md-1 d-flex align-items-end">
-                                    <button class="btn btn-primary w-100" type="submit">
-                                        <i class="bx {{ isset($ledger) ? 'bx-check' : 'bx-plus' }}"></i>
-                                        {{ isset($ledger) ? 'Update' : 'Add' }}
-                                    </button>
-                                </div>
-                            </div>
-                            </form>
-                            @if (isset($ledger))
+                                    <div class="row g-3">
+                                        <div class="col-12 col-sm-6 col-lg-2">
+                                            <label for="invoice_id" class="form-label fw-semibold">Invoice No.</label>
+                                            @error('invoice_id')
+                                                <span class="text-danger">{{ $message }}</span>
+                                            @enderror
+                                            <input type="text" name="invoice_id" class="form-control"
+                                                placeholder="INV-001" value="{{ $ledger->invoice_id }}">
+                                        </div>
+                                        <div class="col-12 col-sm-6 col-lg-2">
+                                            <label for="product_id" class="form-label fw-semibold">Product</label>
+                                            @error('product_id')
+                                                <span class="text-danger">{{ $message }}</span>
+                                            @enderror
+                                            <select name="product_id" class="form-select">
+                                                <option value="">-- Select Product --</option>
+                                                @foreach ($products as $product)
+                                                    <option value="{{ $product->id }}"
+                                                        {{ $ledger->product_id == $product->id ? 'selected' : '' }}>
+                                                        {{ $product->productName }}
+                                                    </option>
+                                                @endforeach
+                                            </select>
+                                        </div>
+                                        <div class="col-6 col-sm-4 col-lg-1">
+                                            <label for="quantity" class="form-label fw-semibold">Quantity</label>
+                                            @error('quantity')
+                                                <span class="text-danger">{{ $message }}</span>
+                                            @enderror
+                                            <input type="number" name="quantity" id="ledger_quantity"
+                                                class="form-control" placeholder="0" min="0"
+                                                value="{{ $ledger->quantity }}">
+                                        </div>
+                                        <div class="col-6 col-sm-4 col-lg-2">
+                                            <label for="price" class="form-label fw-semibold">Unit Price</label>
+                                            @error('price')
+                                                <span class="text-danger">{{ $message }}</span>
+                                            @enderror
+                                            <input type="number" name="price" id="ledger_price" class="form-control"
+                                                placeholder="0.00" min="0" step="0.01"
+                                                value="{{ $ledger->price }}">
+                                        </div>
+                                        <div class="col-6 col-sm-4 col-lg-2">
+                                            <label for="total" class="form-label fw-semibold">Total</label>
+                                            @error('total')
+                                                <span class="text-danger">{{ $message }}</span>
+                                            @enderror
+                                            <input type="number" name="total" id="ledger_total" class="form-control"
+                                                placeholder="0.00" min="0" step="0.01"
+                                                value="{{ $ledger->total }}" readonly>
+                                        </div>
+                                        <div class="col-6 col-sm-6 col-lg-1">
+                                            <label for="payment" class="form-label fw-semibold">Payment</label>
+                                            @error('payment')
+                                                <span class="text-danger">{{ $message }}</span>
+                                            @enderror
+                                            <input type="number" id="ledger_payment" class="form-control"
+                                                value="{{ $ledger->payment }}" readonly>
+                                            <small class="text-muted">Use the payment action in Ledger History.</small>
+                                        </div>
+                                        <div class="col-6 col-sm-6 col-lg-1">
+                                            <label for="due" class="form-label fw-semibold">Due</label>
+                                            @error('due')
+                                                <span class="text-danger">{{ $message }}</span>
+                                            @enderror
+                                            <input type="number" name="due" id="ledger_due" class="form-control"
+                                                placeholder="0.00" min="0" step="0.01"
+                                                value="{{ $ledger->due }}" readonly>
+                                        </div>
+                                        <div class="col-12 col-sm-6 col-lg-1 d-flex align-items-end">
+                                            <button class="btn btn-primary w-100" type="submit">
+                                                <i class="bx bx-check"></i>
+                                                Update
+                                            </button>
+                                        </div>
+                                    </div>
+                                </form>
                                 <div class="mt-2">
                                     <a href="{{ route('supplier.ledger', $supplier->id) }}"
                                         class="btn btn-sm btn-secondary">
                                         <i class="bx bx-x"></i> Cancel Edit
                                     </a>
                                 </div>
-                            @endif
+                            </div>
                         </div>
                     </div>
                 </div>
-            </div>
+            @endif
 
             {{-- সাকসেস মেসেজ দেখানো হবে --}}
             @if (session('success'))
@@ -383,6 +370,10 @@
             const totalInput = document.getElementById('ledger_total');
             const paymentInput = document.getElementById('ledger_payment');
             const dueInput = document.getElementById('ledger_due');
+
+            if (!quantityInput || !priceInput || !totalInput || !paymentInput || !dueInput) {
+                return;
+            }
 
             // quantity × price = total হিসাব করবে
             function calculateTotal() {

@@ -138,6 +138,38 @@
                                     </div>
                                 </div>
 
+                                {{-- বেতন এবং NID/Smart Card ঐচ্ছিকভাবে কর্মীর তথ্যের সঙ্গে জমা হয়। --}}
+                                <div class="row g-3 mb-3">
+                                    <div class="col-md-6">
+                                        <label for="salary" class="form-label fw-semibold">Employee Salary</label>
+                                        <div class="input-group">
+                                            <span class="input-group-text bg-light"><i class="bx bx-money"></i></span>
+                                            <input type="number" name="salary" id="salary"
+                                                class="form-control @error('salary') is-invalid @enderror"
+                                                min="0" max="9999999999.99" step="0.01" placeholder="Enter salary"
+                                                value="{{ old('salary') }}">
+                                        </div>
+                                        @error('salary')
+                                            <span class="text-danger small d-block mt-1">{{ $message }}</span>
+                                        @enderror
+                                    </div>
+                                    <div class="col-md-6">
+                                        <label for="nid_number" class="form-label fw-semibold">NID / Smart Card No.</label>
+                                        <div class="input-group">
+                                            <span class="input-group-text bg-light"><i class="bx bx-id-card"></i></span>
+                                            <input type="text" name="nid_number" id="nid_number"
+                                                class="form-control @error('nid_number') is-invalid @enderror"
+                                                maxlength="17" pattern="([0-9]{10}|[0-9]{17})"
+                                                title="Enter exactly 10 or 17 digits"
+                                                placeholder="Enter 10 or 17 digit NID / Smart Card number"
+                                                value="{{ old('nid_number') }}">
+                                        </div>
+                                        @error('nid_number')
+                                            <span class="text-danger small d-block mt-1">{{ $message }}</span>
+                                        @enderror
+                                    </div>
+                                </div>
+
                                 {{-- Remark --}}
                                 <div class="mb-3">
                                     <label for="remark" class="form-label fw-semibold">Remark / Note</label>

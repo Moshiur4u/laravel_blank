@@ -138,7 +138,8 @@
                             <a href="{{ route('category.index') }}"><i class='bx bx-food-menu'></i>All Category</a>
                         </li>
                         <li>
-                            <a href="{{ route('category.create') }}"><i class='bx bx-plus-medical'></i>Create Category</a>
+                            <a href="{{ route('category.create') }}"><i class='bx bx-plus-medical'></i>Create
+                                Category</a>
                         </li>
 
                     </ul>
@@ -156,11 +157,30 @@
                         </li>
 
                         <li>
-                            <a href="{{ route('customer.create') }}"><i class='bx bx-user-plus'></i>Create Customer</a>
+                            <a href="{{ route('customer.create') }}"><i class='bx bx-user-plus'></i>Create
+                                Customer</a>
                         </li>
                     </ul>
                 </li>
                 <li class="menu-label">Administration operations</li>
+                <li>
+                    <a class="has-arrow" href="javascript:;">
+                        <div class="parent-icon"><i class="bx bxs-user-pin "></i>
+                        </div>
+                        <div class="menu-title">Accounts</div>
+                    </a>
+                    <ul>
+
+                        <li>
+                            <a href="#"><i class=' bx bx-id-card'></i>Voucher Entries</a>
+                        </li>
+
+                        <li>
+                            <a href="{{ route('employee-payment.index') }}"><i class='bx bx-user-plus '></i>Employee Payment</a>
+                        </li>
+
+                    </ul>
+                </li>
                 <li>
                     <a class="has-arrow" href="javascript:;">
                         <div class="parent-icon"><i class="bx bxs-user-pin "></i>
@@ -291,12 +311,14 @@
                                     <a href="{{ route('product.index') }}">
                                         <div class="msg-header">
                                             <p class="msg-header-title">Notifications</p>
-                                            <p class="msg-header-badge">{{ ($expiryNotifications ?? collect())->count() }} New</p>
+                                            <p class="msg-header-badge">
+                                                {{ ($expiryNotifications ?? collect())->count() }} New</p>
                                         </div>
                                     </a>
                                     <div class="header-notifications-list">
                                         @forelse (($expiryNotifications ?? collect()) as $alertProduct)
-                                            <a class="dropdown-item" href="{{ route('product.edit', $alertProduct->id) }}">
+                                            <a class="dropdown-item"
+                                                href="{{ route('product.edit', $alertProduct->id) }}">
                                                 <div class="d-flex align-items-center">
                                                     @if ($alertProduct->isExpired())
                                                         <div class="notify bg-light-danger text-danger">
@@ -316,9 +338,11 @@
                                                         </h6>
                                                         <p class="msg-info">
                                                             @if ($alertProduct->isExpired())
-                                                                Expired on {{ $alertProduct->expiry_date->format('Y-m-d') }}
+                                                                Expired on
+                                                                {{ $alertProduct->expiry_date->format('Y-m-d') }}
                                                             @else
-                                                                Expires within one month ({{ $alertProduct->expiry_date->format('Y-m-d') }})
+                                                                Expires within one month
+                                                                ({{ $alertProduct->expiry_date->format('Y-m-d') }})
                                                             @endif
                                                         </p>
                                                     </div>
@@ -332,7 +356,8 @@
                                                     </div>
                                                     <div class="flex-grow-1">
                                                         <h6 class="msg-name">No expiry alerts</h6>
-                                                        <p class="msg-info">No products are expired or expiring within one month</p>
+                                                        <p class="msg-info">No products are expired or expiring within
+                                                            one month</p>
                                                     </div>
                                                 </div>
                                             </a>
@@ -358,12 +383,14 @@
                                     <a href="{{ route('product.index') }}">
                                         <div class="msg-header">
                                             <p class="msg-header-title">My Cart</p>
-                                            <p class="msg-header-badge">{{ ($lowStockNotifications ?? collect())->count() }} Low Stock</p>
+                                            <p class="msg-header-badge">
+                                                {{ ($lowStockNotifications ?? collect())->count() }} Low Stock</p>
                                         </div>
                                     </a>
                                     <div class="header-message-list">
                                         @forelse (($lowStockNotifications ?? collect()) as $stockProduct)
-                                            <a class="dropdown-item" href="{{ route('product.edit', $stockProduct->id) }}">
+                                            <a class="dropdown-item"
+                                                href="{{ route('product.edit', $stockProduct->id) }}">
                                                 <div class="gap-3 d-flex align-items-center">
                                                     <div class="position-relative">
                                                         <div class="cart-product rounded-circle bg-light">
@@ -377,7 +404,8 @@
                                                         </div>
                                                     </div>
                                                     <div class="flex-grow-1">
-                                                        <h6 class="mb-0 cart-product-title">{{ $stockProduct->productName }}</h6>
+                                                        <h6 class="mb-0 cart-product-title">
+                                                            {{ $stockProduct->productName }}</h6>
                                                         <p class="mb-0 cart-product-price">
                                                             @if ($stockProduct->isOutOfStock())
                                                                 Out of Stock
@@ -387,7 +415,8 @@
                                                         </p>
                                                     </div>
                                                     <div class="">
-                                                        <p class="mb-0 cart-price">৳{{ number_format((float) $stockProduct->price, 2) }}</p>
+                                                        <p class="mb-0 cart-price">
+                                                            ৳{{ number_format((float) $stockProduct->price, 2) }}</p>
                                                     </div>
                                                 </div>
                                             </a>
@@ -396,7 +425,8 @@
                                                 <div class="gap-3 d-flex align-items-center">
                                                     <div class="flex-grow-1">
                                                         <h6 class="mb-0 cart-product-title">No low stock alerts</h6>
-                                                        <p class="mb-0 cart-product-price">All products have more than 10 units</p>
+                                                        <p class="mb-0 cart-product-price">All products have more than
+                                                            10 units</p>
                                                     </div>
                                                 </div>
                                             </a>
@@ -406,7 +436,8 @@
                                         <div class="text-center msg-footer">
                                             <div class="mb-3 d-flex align-items-center justify-content-between">
                                                 <h5 class="mb-0">Alerts</h5>
-                                                <h5 class="mb-0 ms-auto">{{ ($lowStockNotifications ?? collect())->count() }}</h5>
+                                                <h5 class="mb-0 ms-auto">
+                                                    {{ ($lowStockNotifications ?? collect())->count() }}</h5>
                                             </div>
                                             <button class="btn btn-primary w-100">View Products</button>
                                         </div>

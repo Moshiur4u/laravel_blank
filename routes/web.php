@@ -3,6 +3,7 @@
 use App\Http\Controllers\BrandController;
 use App\Http\Controllers\CustomerController;
 use App\Http\Controllers\DashboardConrtoller;
+use App\Http\Controllers\EmployeePaymentVoucherController;
 use App\Http\Controllers\ProductCategoryController;
 use App\Http\Controllers\ProductController;
 use App\Http\Controllers\RoleController;
@@ -25,6 +26,19 @@ Route::middleware(['auth', 'verified'])->group(function () {
 Route::middleware(['auth', 'verified'])->group(function () {
     Route::get('/dashboard', [DashboardConrtoller::class, 'dashboard'])->name('dashboard');
     Route::get('/dashboard-body', [DashboardConrtoller::class, 'dashboardbody'])->name('dashboardbody');
+});
+// কর্মী ব্যয়ের voucher দেখানো ও জমা দেওয়া—দুই route-ই login এবং email verification চায়।
+Route::middleware(['auth', 'verified'])->group(function () {
+    Route::get('/employee-payment-vouchers', [EmployeePaymentVoucherController::class, 'index'])
+        ->name('employee-payment.index');
+    Route::post('/employee-payment-vouchers', [EmployeePaymentVoucherController::class, 'store'])
+        ->name('employee-payment.store');
+    Route::get('/employee-payment-vouchers/{employee}/ledger/export', [EmployeePaymentVoucherController::class, 'exportLedger'])
+        ->whereNumber('employee')
+        ->name('employee-payment.ledger.export');
+    Route::get('/employee-payment-vouchers/{employee}/ledger', [EmployeePaymentVoucherController::class, 'ledger'])
+        ->whereNumber('employee')
+        ->name('employee-payment.ledger');
 });
 // মিডলওয়্যার সহ ইউজার রাউট শুরু
 Route::middleware(['auth', 'verified'])->group(function () {

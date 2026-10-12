@@ -30,6 +30,9 @@
                         <a href="{{ route('user.edit', $employee->id) }}" class="btn btn-primary">
                             <i class="bx bx-edit me-1"></i> Edit Profile
                         </a>
+                        <a href="{{ route('employee-payment.ledger', $employee->id) }}" class="btn btn-success">
+                            <i class="bx bx-book-open me-1"></i> Employee Ledger
+                        </a>
                     </div>
                 </div>
             </div>
@@ -150,6 +153,22 @@
                                             @else
                                                 <span class="badge bg-light-warning text-warning ms-2 font-12">Unverified</span>
                                             @endif
+                                        </div>
+                                    </div>
+                                    <div class="row mb-3">
+                                        <div class="col-sm-4 text-secondary">
+                                            <strong>NID / Smart Card Number</strong>
+                                        </div>
+                                        <div class="col-sm-8 text-dark">
+                                            {{ $employee->nid_number ?: 'N/A' }}
+                                        </div>
+                                    </div>
+                                    <div class="row mb-3">
+                                        <div class="col-sm-4 text-secondary">
+                                            <strong>Current Salary</strong>
+                                        </div>
+                                        <div class="col-sm-8 text-dark">
+                                            {{ $employee->salary !== null ? '৳' . number_format((float) $employee->salary, 2) : 'N/A' }}
                                         </div>
                                     </div>
                                     <div class="row mb-3">

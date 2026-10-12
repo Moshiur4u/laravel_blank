@@ -17,44 +17,39 @@
             <div class="card border-0 shadow-sm">
                 <div class="card-body p-4 p-md-5">
                     <div class="row align-items-start mb-4">
-                        <div class="col-md-7">
+                        <div class="col-7">
                             <h2 class="text-primary fw-bold mb-1">Supplier Invoice</h2>
-                            <div class="text-muted">
-                                Invoice: <strong>{{ $invoiceNumber }}</strong>
-                            </div>
+                            <div class="text-muted">Invoice: <strong>{{ $invoiceNumber }}</strong></div>
                             {{-- লেজারের তৈরির তারিখই ইনভয়েসের তারিখ হিসেবে দেখানো হচ্ছে। --}}
                             <div class="text-muted">Date: {{ $ledger->created_at->format('d M Y, h:i A') }}</div>
                         </div>
-                        <div class="col-md-5 text-md-end mt-4 mt-md-0">
-                            {{-- supplier-এর আপলোড করা logo দেখায়; logo না থাকলে নামের আদ্যক্ষর দেখায়। --}}
+                        <div class="col-5 text-end">
+                            {{-- invoice-এ supplier-এর সংরক্ষিত নাম, যোগাযোগ ও ঠিকানা দেখানো হয়। --}}
                             @if ($ledger->supplier->logo)
                                 <img src="{{ asset('uploads/suppliers/' . $ledger->supplier->logo) }}"
                                     alt="{{ $ledger->supplier->name }} logo"
                                     style="max-width: 120px; max-height: 90px; object-fit: contain;">
-                            @else
-                                <div class="d-inline-flex align-items-center justify-content-center rounded-circle bg-light text-primary fw-bold"
-                                    style="width: 80px; height: 80px; font-size: 24px;">
-                                    {{ strtoupper(substr($ledger->supplier->name, 0, 2)) }}
-                                </div>
+                            @endif
+                            <div class="fw-semibold">{{ $ledger->supplier->name }}</div>
+                            @if ($ledger->supplier->address)
+                                <div>{{ $ledger->supplier->address }}</div>
+                            @endif
+                            @if ($ledger->supplier->email)
+                                <div>Email: {{ $ledger->supplier->email }}</div>
+                            @endif
+                            @if ($ledger->supplier->phone)
+                                <div>Phone: {{ $ledger->supplier->phone }}</div>
                             @endif
                         </div>
-                    </div>
-
-                    <div class="mb-4">
-                        {{-- invoice-এ supplier-এর সংরক্ষিত নাম, যোগাযোগ ও ঠিকানা দেখানো হয়। --}}
-                        <h5 class="fw-bold mb-1">Supplier</h5>
-                        <div class="fw-semibold">{{ $ledger->supplier->name }}</div>
-                        <div>{{ $ledger->supplier->address }}</div>
-                        <div>Email: {{ $ledger->supplier->email }}</div>
-                        <div>Phone: {{ $ledger->supplier->phone }}</div>
                     </div>
 
                     <div class="table-responsive">
                         <table class="table table-bordered align-middle">
                             <thead class="table-light">
                                 <tr>
+                                    <th>#</th>
                                     <th>Product</th>
-                                    <th class="text-end">Unit Price</th>
+                                    <th class="text-end">Unit Purchase Price</th>
                                     <th class="text-center">Quantity</th>
                                     <th class="text-end">Amount</th>
                                 </tr>
@@ -62,6 +57,7 @@
                             <tbody>
                                 {{-- এই ইনভয়েসটি নির্বাচিত ledger row-র product ও amount-ই দেখায়। --}}
                                 <tr>
+                                    <td>1</td>
                                     <td>{{ $ledger->product->productName ?? 'N/A' }}</td>
                                     <td class="text-end">৳{{ number_format($ledger->price ?? 0, 2) }}</td>
                                     <td class="text-center">{{ $ledger->quantity ?? 0 }}</td>
@@ -94,12 +90,11 @@
                         </div>
                     @endif
 
-                    {{-- customer invoice-এর মতো paid ও due দেখায়; supplier ledger-এ payment method সংরক্ষিত নেই। --}}
                     <div class="row justify-content-end mt-4">
                         <div class="col-md-6 col-lg-5">
                             <div class="d-flex justify-content-between py-1">
-                                <span>Total</span>
-                                <span>৳{{ number_format($ledger->total ?? 0, 2) }}</span>
+                                <span class="fw-bold fs-5">Total</span>
+                                <span class="fw-bold fs-5">৳{{ number_format($ledger->total ?? 0, 2) }}</span>
                             </div>
                             <div class="d-flex justify-content-between py-1">
                                 <span>Amount Paid</span>
@@ -116,6 +111,7 @@
                         <div class="col-6"><div class="border-top pt-2">Supplier Signature</div></div>
                         <div class="col-6 text-end"><div class="border-top pt-2">Authorized Signature</div></div>
                     </div>
+                    <p class="text-center text-muted small mt-4 mb-0">Thank you for your business.</p>
                 </div>
             </div>
         </div>

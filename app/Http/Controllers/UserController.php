@@ -49,6 +49,10 @@ class UserController extends Controller
             'password' => 'required|same:confarmPassword',
             'image' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:1048',
             'remark' => 'nullable',
+            'salary' => 'nullable|numeric|min:0|max:9999999999.99',
+            'nid_number' => ['nullable', 'regex:/^(?:[0-9]{10}|[0-9]{17})$/'],
+        ], [
+            'nid_number.regex' => 'The NID / Smart Card number must contain exactly 10 or 17 digits.',
         ]);
         // ইমেজ ভ্যারিয়েবল তৈরি করা হলো
         $imagePath = null;
@@ -75,6 +79,9 @@ class UserController extends Controller
             'password' => Hash::make($request->password),
             'image' => $imagePath,
             'remark' => $request->remark,
+            // salary ও NID/Smart Card ঐচ্ছিক; দেওয়া থাকলে কর্মীর রেকর্ডে সংরক্ষণ করা হয়।
+            'salary' => $request->input('salary'),
+            'nid_number' => $request->input('nid_number'),
         ]);
         // ইউজারকে রোল এসাইন করা হলো
         $Users->assignRole($request->roles);
@@ -128,6 +135,10 @@ class UserController extends Controller
             'image' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048', // nullable করা হলো
             'status' => 'nullable',
             'remark' => 'nullable',
+            'salary' => 'nullable|numeric|min:0|max:9999999999.99',
+            'nid_number' => ['nullable', 'regex:/^(?:[0-9]{10}|[0-9]{17})$/'],
+        ], [
+            'nid_number.regex' => 'The NID / Smart Card number must contain exactly 10 or 17 digits.',
         ]);
         // ডেটা আপডেট করার জন্য ইউজারকে খুজে বের করা হলো
         $user = User::findOrFail($id);
@@ -136,6 +147,9 @@ class UserController extends Controller
             'name' => $request->input('name'),
             'email' => $request->input('email'),
             'remark' => $request->input('remark'),
+            // ফাঁকা ইনপুট middleware-এর মাধ্যমে null হয়ে বিদ্যমান মান পরিষ্কার করে।
+            'salary' => $request->input('salary'),
+            'nid_number' => $request->input('nid_number'),
         ];
         // স্ট্যাটাস আপডেট লজিক
         if ($request->has('status')) {
