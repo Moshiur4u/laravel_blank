@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\BrandController;
+use App\Http\Controllers\CombinedVoucherReportController;
 use App\Http\Controllers\CustomerController;
 use App\Http\Controllers\DashboardConrtoller;
 use App\Http\Controllers\EmployeePaymentVoucherController;
@@ -8,6 +9,7 @@ use App\Http\Controllers\ProductCategoryController;
 use App\Http\Controllers\ProductController;
 use App\Http\Controllers\RoleController;
 use App\Http\Controllers\SaleController;
+use App\Http\Controllers\SalesReportController;
 use App\Http\Controllers\SupplierController;
 use App\Http\Controllers\SupplierledgerController;
 use App\Http\Controllers\UserController;
@@ -33,6 +35,8 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::get('/voucher-entries', [VoucherEntryController::class, 'index'])->name('voucher-entries.index');
     Route::post('/voucher-entries', [VoucherEntryController::class, 'store'])->name('voucher-entries.store');
     Route::get('/voucher-entries/report', [VoucherEntryController::class, 'report'])->name('voucher-entries.report');
+    Route::get('/voucher-report/combined', [CombinedVoucherReportController::class, 'index'])
+        ->name('voucher-report.combined');
 });
 // কর্মী ব্যয়ের voucher দেখানো ও জমা দেওয়া—দুই route-ই login এবং email verification চায়।
 Route::middleware(['auth', 'verified'])->group(function () {
@@ -126,6 +130,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::get('/sales/customer-lookup', [SaleController::class, 'customerByPhone'])->name('sales.customer.lookup');
     Route::post('/sales', [SaleController::class, 'store'])->name('sales.store');
     Route::get('/sales/invoice/{id}', [SaleController::class, 'invoice'])->name('sales.invoice');
+    Route::get('/sales/report', [SalesReportController::class, 'index'])->name('sales.report');
 });
 
 // মিডলওয়্যার সহ কাস্টমার রাউট শুরু

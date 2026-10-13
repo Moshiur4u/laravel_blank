@@ -16,16 +16,6 @@
                 </div>
             </div>
 
-            @if ($errors->any())
-                <div class="border-0 shadow-sm alert alert-danger">
-                    <ul class="mb-0">
-                        @foreach ($errors->all() as $error)
-                            <li>{{ $error }}</li>
-                        @endforeach
-                    </ul>
-                </div>
-            @endif
-
             <form id="saleForm" action="{{ route('sales.store') }}" method="POST">
                 @csrf
                 <input type="hidden" name="save_customer" id="save_customer" value="{{ old('save_customer', 'no') }}">
@@ -246,6 +236,7 @@
             const newCustomerDetails = document.getElementById('newCustomerDetails');
             const saveCustomer = document.getElementById('save_customer');
             let customerFound = false;
+            let calculatedInvoiceTotal = 0;
             let lookupTimer;
             let lastLookedUpPhone = '';
             let rowIndex = Array.from(itemsBody.querySelectorAll('.product-select')).reduce((nextIndex, select) => {
@@ -324,6 +315,7 @@
                     : 0;
                 const total = vatBase + vat + previousDue;
                 const paid = Number(document.getElementById('amount_paid').value || 0);
+                calculatedInvoiceTotal = Math.round((total + Number.EPSILON) * 100) / 100;
                 document.getElementById('subtotalText').textContent = money(subtotal);
                 document.getElementById('discountText').textContent = money(discount);
                 document.getElementById('vatPercentageText').textContent = `${vatPercentage}%`;
@@ -504,21 +496,59 @@
                     return;
                 }
 
-                const saveDetails = window.confirm('Save this customer’s details to the database before printing? Choose Cancel to print without saving customer details.');
-                if (saveDetails) {
+                const customerChoice = await window.Swal.fire({
+                    title: 'Customer not found',
+                    text: 'Save this customer’s details, or continue as a walk-in customer? Walk-in sales require full payment.',
+                    icon: 'question',
+                    showDenyButton: true,
+                    showCancelButton: true,
+                    confirmButtonText: 'Yes, save customer',
+                    denyButtonText: 'No, walk-in',
+                    cancelButtonText: 'Cancel sale',
+                    reverseButtons: true,
+                });
+                if (customerChoice.isConfirmed) {
                     const name = document.getElementById('customer_name').value.trim();
                     if (!name) {
-                        window.alert('Enter the customer name to save their details.');
+                        await window.Swal.fire({
+                            title: 'Customer name required',
+                            text: 'Enter the customer name before saving their details.',
+                            icon: 'warning',
+                        });
                         document.getElementById('customer_name').focus();
                         return;
                     }
                     saveCustomer.value = 'yes';
-                } else {
+                } else if (customerChoice.isDenied) {
                     saveCustomer.value = 'no';
+                    document.getElementById('amount_paid').value = calculatedInvoiceTotal.toFixed(2);
+                    updateTotals();
+                } else {
+                    return;
                 }
+
+                if (Number(document.getElementById('amount_paid').value || 0) > 0
+                    && !document.getElementById('payment_method').value) {
+                    await window.Swal.fire({
+                        title: 'Payment method required',
+                        text: 'Select how the payment was received before checkout.',
+                        icon: 'warning',
+                    });
+                    document.getElementById('payment_method').focus();
+                    return;
+                }
+
                 saveCustomer.dataset.confirmed = 'yes';
                 form.requestSubmit();
             });
+
+            @if ($errors->any())
+                window.Swal.fire({
+                    title: 'Unable to create sale',
+                    text: @json($errors->all()).join('\n'),
+                    icon: 'error',
+                });
+            @endif
 
             updateTotals();
             if (customerPhone.value) lookupCustomer();

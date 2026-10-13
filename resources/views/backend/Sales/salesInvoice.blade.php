@@ -4,14 +4,6 @@
 @section('content')
     <div class="page-wrapper">
         <div class="page-content">
-            @if (session('low_stock_products'))
-                <div class="alert alert-warning border-0 shadow-sm no-print" role="alert">
-                    <i class="bx bx-error-circle me-1"></i>
-                    <strong>Low stock:</strong> The following products now have 10 or fewer units:
-                    {{ implode(', ', session('low_stock_products')) }}
-                </div>
-            @endif
-
             <div class="d-flex justify-content-end gap-2 mb-3 no-print">
                 <a href="{{ route('sales.index') }}" class="btn btn-outline-secondary"><i class="bx bx-arrow-back me-1"></i>New Sale</a>
                 <button type="button" class="btn btn-primary" onclick="window.print()"><i class="bx bx-printer me-1"></i>Print Invoice</button>
@@ -103,7 +95,22 @@
             body { background: #fff !important; }
         }
     </style>
-    @if (session('auto_print'))
+    @if (session('low_stock_products'))
+        <script>
+            window.addEventListener('DOMContentLoaded', function () {
+                window.Swal.fire({
+                    title: 'Low stock',
+                    text: 'The following products now have 10 or fewer units: ' +
+                        @json(implode(', ', session('low_stock_products'))),
+                    icon: 'warning',
+                }).then(function () {
+                    @if (session('auto_print'))
+                        window.setTimeout(() => window.print(), 400);
+                    @endif
+                });
+            });
+        </script>
+    @elseif (session('auto_print'))
         <script>
             document.addEventListener('DOMContentLoaded', function () {
                 window.setTimeout(() => window.print(), 400);

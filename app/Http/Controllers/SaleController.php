@@ -85,14 +85,9 @@ class SaleController extends Controller
         ]);
 
         $customerPhone = trim($validated['customer_phone']);
-        $paymentAmount = round((float) ($validated['amount_paid'] ?? 0), 2);
-        if ($paymentAmount > 0 && empty($validated['payment_method'])) {
-            throw ValidationException::withMessages([
-                'payment_method' => 'Select how the payment was received.',
-            ]);
-        }
+        $requestedPaymentAmount = round((float) ($validated['amount_paid'] ?? 0), 2);
 
-        $invoice = DB::transaction(function () use ($validated, $customerPhone, $paymentAmount) {
+        $invoice = DB::transaction(function () use ($validated, $customerPhone, $requestedPaymentAmount) {
             // একই পণ্যের একাধিক কার্ট লাইনের মজুত একসাথে যাচাই করতে পণ্যগুলো ID অনুযায়ী lock করা হয়।
             $quantities = collect($validated['items'])
                 ->groupBy('product_id')
@@ -156,6 +151,15 @@ class SaleController extends Controller
             $vat = round((float) ($validated['vat_amount'] ?? 0), 2);
             $saleAmount = round($subtotal - $discount + $vat, 2);
             $invoiceTotal = round($saleAmount + ($includePreviousDue ? $previousDue : 0), 2);
+
+            // Walk-in sales have no customer ledger for later collection, so collect the full invoice total.
+            $paymentAmount = $customer ? $requestedPaymentAmount : $invoiceTotal;
+
+            if ($paymentAmount > 0 && empty($validated['payment_method'])) {
+                throw ValidationException::withMessages([
+                    'payment_method' => 'Select how the payment was received.',
+                ]);
+            }
 
             if ($paymentAmount > $invoiceTotal) {
                 throw ValidationException::withMessages([

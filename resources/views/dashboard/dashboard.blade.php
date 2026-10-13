@@ -29,6 +29,66 @@
     <link rel="stylesheet" href="{{ asset('assets/css/dark-theme.css') }}" />
     <link rel="stylesheet" href="{{ asset('assets/css/semi-dark.css') }}" />
     <link rel="stylesheet" href="{{ asset('assets/css/header-colors.css') }}" />
+    <style>
+        .help-line-banner {
+            border: 1px solid #f3c34f;
+            background: linear-gradient(135deg, #fff8df, #fff1c2);
+            box-shadow: 0 3px 12px rgba(139, 98, 0, .12);
+        }
+
+        .help-line-icon {
+            width: 38px;
+            height: 38px;
+            color: #fff;
+            background: #a86e00;
+            font-size: 1.25rem;
+        }
+
+        .help-line-title {
+            color: #715000;
+            font-size: .72rem;
+            font-weight: 700;
+            letter-spacing: .06em;
+            text-transform: uppercase;
+        }
+
+        .help-line-number {
+            color: #412d00;
+            font-size: 1.05rem;
+            font-weight: 800;
+            text-decoration: none;
+            white-space: nowrap;
+        }
+
+        .help-line-apps {
+            color: #168b4a;
+            font-size: 1.35rem;
+        }
+
+        .help-line-viber {
+            color: #665cac;
+        }
+
+        @media (max-width: 575.98px) {
+            .help-line-banner {
+                gap: .4rem !important;
+                padding: .35rem .5rem !important;
+            }
+
+            .help-line-icon {
+                width: 32px;
+                height: 32px;
+            }
+
+            .help-line-number {
+                font-size: .9rem;
+            }
+
+            .help-line-apps {
+                font-size: 1.15rem;
+            }
+        }
+    </style>
 
     <!--Datatable -->
     <link href="https://cdn.datatables.net/v/bs5/jq-3.7.0/dt-2.2.2/r-3.0.3/datatables.min.css" rel="stylesheet">
@@ -220,6 +280,12 @@
 
                 <li class="menu-label">Reports</li>
                 <li>
+                    <a href="{{ route('voucher-report.combined') }}">
+                        <div class="parent-icon"><i class="bx bx-receipt"></i></div>
+                        <div class="menu-title">Combined Voucher Report</div>
+                    </a>
+                </li>
+                <li>
                     <a href="{{ route('employee-payment.report') }}">
                         <div class="parent-icon"><i class="bx bx-receipt"></i></div>
                         <div class="menu-title">Daily Employee Payment Report</div>
@@ -238,28 +304,10 @@
                         <div class="menu-title">Sale Reports</div>
                     </a>
                     <ul>
-                        <li> <a href="form-elements.html"><i class='bx bx-radio-circle'></i>Form Elements</a>
-                        </li>
-                        <li> <a href="form-input-group.html"><i class='bx bx-radio-circle'></i>Input Groups</a>
-                        </li>
-                        <li> <a href="form-radios-and-checkboxes.html"><i class='bx bx-radio-circle'></i>Radios &
-                                Checkboxes</a>
-                        </li>
-                        <li> <a href="form-layouts.html"><i class='bx bx-radio-circle'></i>Forms Layouts</a>
-                        </li>
-                        <li> <a href="form-validations.html"><i class='bx bx-radio-circle'></i>Form Validation</a>
-                        </li>
-                        <li> <a href="form-wizard.html"><i class='bx bx-radio-circle'></i>Form Wizard</a>
-                        </li>
-                        <li> <a href="form-text-editor.html"><i class='bx bx-radio-circle'></i>Text Editor</a>
-                        </li>
-                        <li> <a href="form-file-upload.html"><i class='bx bx-radio-circle'></i>File Upload</a>
-                        </li>
-                        <li> <a href="form-date-time-pickes.html"><i class='bx bx-radio-circle'></i>Date Pickers</a>
-                        </li>
-                        <li> <a href="form-select2.html"><i class='bx bx-radio-circle'></i>Select2</a>
-                        </li>
-                        <li> <a href="form-repeater.html"><i class='bx bx-radio-circle'></i>Form Repeater</a>
+                        <li>
+                            <a href="{{ route('sales.report') }}">
+                                <i class='bx bx-radio-circle'></i>Sales Report
+                            </a>
                         </li>
                     </ul>
                 </li>
@@ -288,23 +336,22 @@
                     <div class="mobile-toggle-menu"><i class='bx bx-menu'></i>
                     </div>
 
-                    <div class="position-relative search-bar d-lg-block d-none" data-bs-toggle="modal"
-                        data-bs-target="#SearchModal">
-                        <input class="px-5 form-control" disabled type="search" placeholder="Search">
-                        <span class="position-absolute top-50 search-show ms-3 translate-middle-y start-0 fs-5"><i
-                                class='bx bx-search'></i></span>
+                    <div class="gap-2 px-3 py-2 help-line-banner d-flex align-items-center rounded-3">
+                        <span class="help-line-icon d-flex align-items-center justify-content-center rounded-circle">
+                            <i class="bx bx-headphone"></i>
+                        </span>
+                        <div class="lh-sm ">
+                            <div class="help-line-title">Help Line</div>
+                            <a class="help-line-number" href="tel:01716770085">01716770085</a>
+                        </div>
+                        <span class="gap-2 help-line-apps d-flex align-items-center ms-1" aria-label="WhatsApp and Viber">
+                            <i class="bx bxl-whatsapp" title="WhatsApp" aria-label="WhatsApp"></i>
+                            <i class="bx bxs-phone-call help-line-viber" title="Viber" aria-label="Viber"></i>
+                        </span>
                     </div>
-
 
                     <div class="top-menu ms-auto">
                         <ul class="gap-1 navbar-nav align-items-center">
-
-                            <li class="nav-item mobile-search-icon d-flex d-lg-none" data-bs-toggle="modal"
-                                data-bs-target="#SearchModal">
-                                <a class="nav-link" href="avascript:;"><i class='bx bx-search'></i>
-                                </a>
-                            </li>
-
 
                             <li class="nav-item dark-mode d-none d-sm-flex">
                                 <a class="nav-link dark-mode-icon" href="javascript:;"><i class='bx bx-moon'></i>
@@ -323,7 +370,7 @@
                                 <div class="dropdown-menu dropdown-menu-end">
                                     <a href="{{ route('product.index') }}">
                                         <div class="msg-header">
-                                            <p class="msg-header-title">Notifications</p>
+                                            <p class="msg-header-title">Expiry Notifications</p>
                                             <p class="msg-header-badge">
                                                 {{ ($expiryNotifications ?? collect())->count() }} New</p>
                                         </div>
@@ -395,7 +442,7 @@
                                 <div class="dropdown-menu dropdown-menu-end">
                                     <a href="{{ route('product.index') }}">
                                         <div class="msg-header">
-                                            <p class="msg-header-title">My Cart</p>
+                                            <p class="msg-header-title">Stock Alert</p>
                                             <p class="msg-header-badge">
                                                 {{ ($lowStockNotifications ?? collect())->count() }} Low Stock</p>
                                         </div>

@@ -20,7 +20,7 @@ class DashboardConrtoller extends Controller
      */
     public function dashboardbody()
     {
-        // আজ, চলতি সপ্তাহ (সোমবার থেকে) ও চলতি মাসের জন্য inclusive-start/exclusive-end range তৈরি হয়।
+        // Dashboard KPI ও chart-এর জন্য আজ, চলতি সপ্তাহ, মাস এবং বছরের date range তৈরি হয়।
         $today = Carbon::today();
         $periods = [
             'daily' => [$today->copy(), $today->copy()->addDay()],
@@ -29,10 +29,13 @@ class DashboardConrtoller extends Controller
                 $today->copy()->startOfWeek(Carbon::MONDAY)->addWeek(),
             ],
             'monthly' => [$today->copy()->startOfMonth(), $today->copy()->startOfMonth()->addMonth()],
+            'yearly' => [$today->copy()->startOfYear(), $today->copy()->startOfYear()->addYear()],
         ];
 
         $metrics = [];
-        foreach ($periods as $period => [$start, $end]) {
+        foreach (['daily', 'weekly', 'monthly'] as $period) {
+            [$start, $end] = $periods[$period];
+
             // আগের বকেয়া নতুন বিক্রির আয় নয়, তাই revenue থেকে তা বাদ দিয়ে বিক্রি, discount ও VAT ধরা হয়।
             $invoiceTotals = SaleInvoice::query()
                 ->where('invoice_date', '>=', $start)
@@ -64,20 +67,89 @@ class DashboardConrtoller extends Controller
                 ->where('voucher_date', '<', $end->toDateString())
                 ->where('voucher_type', 'credit')
                 ->sum('amount');
+            $expenses = (float) $employeeVoucherTotal
+                + (float) $debitVoucherTotal
+                - (float) $creditVoucherTotal;
             $profit = round(
                 (float) $revenue
                     - (float) $purchaseTotal
-                    - (float) $employeeVoucherTotal
-                    - (float) $debitVoucherTotal
-                    + (float) $creditVoucherTotal,
+                    - $expenses,
                 2
             );
 
             $metrics[$period] = [
                 'revenue' => (float) $revenue,
                 'due' => (float) $due,
-                'profit' => $profit,
                 'purchase' => (float) $purchaseTotal,
+                'expenses' => round($expenses, 2),
+                'profit' => $profit,
+            ];
+        }
+
+        $yearStart = $periods['yearly'][0];
+        $yearEnd = $periods['yearly'][1];
+        $chartStart = $periods['weekly'][0]->lt($yearStart)
+            ? $periods['weekly'][0]
+            : $yearStart;
+        $dailyTotals = [
+            'revenue' => $this->dailyTotals('sale_invoices', 'invoice_date', 'subtotal - discount_amount + vat_amount', $chartStart, $yearEnd),
+            'purchase' => $this->dailyTotals('supplierledgers', 'created_at', 'total', $chartStart, $yearEnd),
+            'employee_vouchers' => $this->dailyTotals('employee_payment_vouchers', 'payment_date', 'amount', $chartStart, $yearEnd),
+            'debit_vouchers' => $this->dailyTotals('voucher_entries', 'voucher_date', 'amount', $chartStart, $yearEnd, 'debit'),
+            'credit_vouchers' => $this->dailyTotals('voucher_entries', 'voucher_date', 'amount', $chartStart, $yearEnd, 'credit'),
+        ];
+
+        $profitChart = [];
+        foreach ($periods as $period => [$start, $end]) {
+            $isYearly = $period === 'yearly';
+            $buckets = [];
+            $bucketDate = $start->copy();
+            $sumForBucket = static function (array $totals, string $bucketKey) use ($isYearly): float {
+                if (! $isYearly) {
+                    return (float) ($totals[$bucketKey] ?? 0);
+                }
+
+                $sum = 0.0;
+                foreach ($totals as $date => $amount) {
+                    if (str_starts_with($date, $bucketKey)) {
+                        $sum += (float) $amount;
+                    }
+                }
+
+                return $sum;
+            };
+
+            while ($bucketDate < $end) {
+                $buckets[] = [
+                    'date' => $bucketDate->copy(),
+                    'key' => $isYearly ? $bucketDate->format('Y-m') : $bucketDate->toDateString(),
+                ];
+                $bucketDate = $isYearly ? $bucketDate->addMonth() : $bucketDate->addDay();
+            }
+
+            $labels = [];
+            $revenueValues = [];
+            $profitValues = [];
+            foreach ($buckets as $bucket) {
+                $bucketDate = $bucket['date'];
+                $bucketKey = $bucket['key'];
+                $labels[] = $isYearly ? $bucketDate->format('M Y') : $bucketDate->format('d M');
+
+                $revenue = $sumForBucket($dailyTotals['revenue'], $bucketKey);
+                $purchase = $sumForBucket($dailyTotals['purchase'], $bucketKey);
+                $employeeVouchers = $sumForBucket($dailyTotals['employee_vouchers'], $bucketKey);
+                $debitVouchers = $sumForBucket($dailyTotals['debit_vouchers'], $bucketKey);
+                $creditVouchers = $sumForBucket($dailyTotals['credit_vouchers'], $bucketKey);
+
+                $expenses = $employeeVouchers + $debitVouchers - $creditVouchers;
+                $revenueValues[] = round($revenue, 2);
+                $profitValues[] = round($revenue - $purchase - $expenses, 2);
+            }
+
+            $profitChart[$period] = [
+                'labels' => $labels,
+                'revenue' => $revenueValues,
+                'profit' => $profitValues,
             ];
         }
 
@@ -104,6 +176,34 @@ class DashboardConrtoller extends Controller
             ->limit(5)
             ->get();
 
-        return view('dashboard.dashboard-body', compact('metrics', 'topProducts', 'topEmployees'));
+        return view('dashboard.dashboard-body', compact('metrics', 'profitChart', 'topProducts', 'topEmployees'));
+    }
+
+    /**
+     * Date-key অনুযায়ী একটি metric aggregate করে chart-এ ব্যবহারের map তৈরি করে।
+     */
+    private function dailyTotals(
+        string $table,
+        string $dateColumn,
+        string $amountExpression,
+        Carbon $start,
+        Carbon $end,
+        ?string $voucherType = null
+    ): array {
+        $query = DB::table($table)
+            ->where($dateColumn, '>=', $start->toDateString())
+            ->where($dateColumn, '<', $end->toDateString());
+
+        if ($voucherType !== null) {
+            $query->where('voucher_type', $voucherType);
+        }
+
+        return $query
+            ->selectRaw("DATE({$dateColumn}) as date_key")
+            ->selectRaw("SUM({$amountExpression}) as total")
+            ->groupByRaw("DATE({$dateColumn})")
+            ->pluck('total', 'date_key')
+            ->map(fn ($total) => (float) $total)
+            ->all();
     }
 }

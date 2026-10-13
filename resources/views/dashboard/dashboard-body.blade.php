@@ -10,7 +10,7 @@
                         'purchase' => ['title' => 'Total Purchase', 'icon' => 'bx-cart', 'color' => 'info', 'gradient' => 'bg-gradient-blues'],
                         'revenue' => ['title' => 'Total Revenue', 'icon' => 'bx-wallet', 'color' => 'danger', 'gradient' => 'bg-gradient-burning'],
                         'due' => ['title' => 'Total Due', 'icon' => 'bx-time-five', 'color' => 'warning', 'gradient' => 'bg-gradient-orange'],
-                        'profit' => ['title' => 'Profit', 'icon' => 'bx-bar-chart-alt-2', 'color' => 'success', 'gradient' => 'bg-gradient-ohhappiness'],
+                        'expenses' => ['title' => 'Total Expense', 'icon' => 'bx-money', 'color' => 'warning', 'gradient' => 'bg-gradient-orange'],
                     ];
                 @endphp
 
@@ -35,8 +35,8 @@
                                         <i class="bx {{ $card['icon'] }}"></i>
                                     </div>
                                 </div>
-                                @if ($metricKey === 'profit')
-                                    <small class="mt-2 text-muted d-block">Sales − Purchase − Employee − Debit + Credit</small>
+                                @if ($metricKey === 'expenses')
+                                    <small class="mt-2 text-muted d-block">Employee Voucher + Debit − Credit</small>
                                 @else
                                     {{-- সব card-এর footer-এর জায়গা একই রাখলে card-এর উচ্চতাও এক থাকে। --}}
                                     <small class="mt-2 d-block" aria-hidden="true">&nbsp;</small>
@@ -47,8 +47,29 @@
                 @endforeach
             </div>
 
+            <div class="mt-3 card radius-10">
+                <div class="flex-wrap gap-2 card-header d-flex align-items-center justify-content-between">
+                    <div>
+                        <h6 class="mb-0">Profit Trend</h6>
+                        <small class="text-muted">Revenue columns and profit line</small>
+                    </div>
+                    <select id="profit-chart-period" class="form-select form-select-sm" aria-label="Profit chart period"
+                        style="width: auto">
+                        <option value="daily">Daily</option>
+                        <option value="weekly">Weekly</option>
+                        <option value="monthly">Monthly</option>
+                        <option value="yearly">Yearly</option>
+                    </select>
+                </div>
+                <div class="card-body">
+                    <div style="height: 320px">
+                        <canvas id="profit-trend-chart" aria-label="Revenue and profit chart" role="img"></canvas>
+                    </div>
+                </div>
+            </div>
+
             {{-- দুইটি আলাদা টেবিলে সর্বাধিক বিক্রিত পণ্য ও সর্বাধিক বিক্রয় করা কর্মী দেখানো হয়। --}}
-            <div class="row g-3 mt-1">
+            <div class="mt-1 row g-3">
                 <div class="col-12 col-xl-6">
                     <div class="card radius-10 h-100">
                         <div class="card-header">
@@ -69,7 +90,7 @@
                                         @forelse ($topProducts as $product)
                                             <tr>
                                                 <td>{{ $loop->iteration }}</td>
-                                                <td class="d-flex align-items-center gap-2">
+                                                <td class="gap-2 d-flex align-items-center">
                                                     @if ($product->img_url)
                                                         <img src="{{ asset('uploads/products/' . $product->img_url) }}"
                                                             alt="{{ $product->product_name }}"
@@ -130,7 +151,7 @@
             </div>
 
             <div class="mt-3 text-muted small">
-                Revenue excludes previous customer due. Profit = Revenue − Purchase − Employee Voucher − Debit Voucher + Credit Voucher.
+                Expense = Employee Voucher + Debit Voucher − Credit Voucher. Profit = Revenue − Purchase − Expense. Revenue excludes previous customer due.
             </div>
         </div>
     </div>
@@ -141,4 +162,70 @@
             min-height: 190px;
         }
     </style>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            const chartData = @json($profitChart);
+            const periodSelector = document.getElementById('profit-chart-period');
+            const chartContext = document.getElementById('profit-trend-chart');
+
+            if (!periodSelector || !chartContext || typeof Chart === 'undefined') {
+                return;
+            }
+
+            const chart = new Chart(chartContext, {
+                type: 'bar',
+                data: {
+                    labels: chartData.daily.labels,
+                    datasets: [{
+                        type: 'bar',
+                        label: 'Revenue',
+                        data: chartData.daily.revenue,
+                        backgroundColor: 'rgba(54, 162, 235, 0.45)',
+                        borderColor: 'rgb(54, 162, 235)',
+                        borderWidth: 1,
+                    }, {
+                        type: 'line',
+                        label: 'Profit',
+                        data: chartData.daily.profit,
+                        borderColor: 'rgb(40, 167, 69)',
+                        backgroundColor: 'rgb(40, 167, 69)',
+                        tension: 0.3,
+                        pointRadius: 3,
+                    }],
+                },
+                options: {
+                    maintainAspectRatio: false,
+                    responsive: true,
+                    interaction: {
+                        mode: 'index',
+                        intersect: false,
+                    },
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            ticks: {
+                                callback: value => '৳' + Number(value).toLocaleString(),
+                            },
+                        },
+                    },
+                    plugins: {
+                        tooltip: {
+                            callbacks: {
+                                label: context => context.dataset.label + ': ৳' + Number(context.raw).toLocaleString(),
+                            },
+                        },
+                    },
+                },
+            });
+
+            periodSelector.addEventListener('change', function () {
+                const periodData = chartData[this.value];
+                chart.data.labels = periodData.labels;
+                chart.data.datasets[0].data = periodData.revenue;
+                chart.data.datasets[1].data = periodData.profit;
+                chart.update();
+            });
+        });
+    </script>
 @endsection

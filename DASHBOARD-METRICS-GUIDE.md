@@ -1,6 +1,6 @@
 # Dashboard Metrics - শেখার নোট
 
-ড্যাশবোর্ডে দৈনিক, সাপ্তাহিক ও মাসিক **Purchase, Revenue, Due, Profit** এই ক্রমে চারটি card এবং দুটি Top-5 table দেখানো হয়। এই পরিবর্তনে business data লেখা বা পরিবর্তন হয় না; শুধু read-only query দিয়ে হিসাব করা হয়।
+ড্যাশবোর্ডে দৈনিক, সাপ্তাহিক ও মাসিক **Purchase, Revenue, Due, Total Expense** এই ক্রমে চারটি card এবং Revenue column/Profit line-সহ একটি Profit Trend chart দেখানো হয়। Chart Daily, Weekly, Monthly ও Yearly দিয়ে filter হয়; দুটি Top-5 table আগের মতো থাকে। এই পরিবর্তনে business data লেখা বা পরিবর্তন হয় না; শুধু read-only query দিয়ে হিসাব করা হয়।
 
 ## তারিখের সীমা ও KPI
 
@@ -14,7 +14,9 @@
 - **Employee Voucher Cost:** `employee_payment_vouchers.amount` যোগফল, `payment_date` অনুযায়ী।
 - **Debit Voucher Cost:** `voucher_entries.amount`-এর debit type যোগফল, `voucher_date` অনুযায়ী।
 - **Credit Voucher Income:** `voucher_entries.amount`-এর credit type যোগফল, `voucher_date` অনুযায়ী।
-- **Profit:** `Revenue - Purchase - Employee Voucher Cost - Debit Voucher Cost + Credit Voucher Income`। এই একই সূত্র daily, weekly ও monthly period-এ আলাদাভাবে চলে।
+- **Total Expense:** `Employee Voucher Cost + Debit Voucher Cost - Credit Voucher Income`।
+- **Profit:** `Revenue - Purchase - Total Expense`। এই একই সূত্র daily, weekly ও monthly period-এ আলাদাভাবে চলে।
+- **Profit Trend chart:** Revenue-কে column এবং হিসাব করা Profit-কে line হিসেবে দেখায়। Daily-তে আজকের total-এ একটি point; Weekly-তে চলতি সপ্তাহের প্রতিদিন; Monthly-তে চলতি মাসের প্রতিদিন; Yearly-তে চলতি বছরের প্রতি মাসের total থাকে। তারিখ-ভিত্তিক group না থাকলেও শূন্য amount-এর bucket chart-এ থাকে।
 
 Revenue query-তে `subtotal - discount_amount + vat_amount` ব্যবহৃত হয়; আগের customer due আবার revenue হিসেবে ধরা হয় না। হিসাবটি business amount/date অনুসারে; product-এর বর্তমান ক্রয়মূল্যের ওপর নির্ভর করে না।
 
@@ -27,11 +29,13 @@ Revenue query-তে `subtotal - discount_amount + vat_amount` ব্যবহ�
 
 - `routes/web.php`-এর `GET /dashboard` (`dashboard`) dashboard shell দেখায়; `GET /dashboard-body` (`dashboardbody`) card ও table-এর data load করে। দুই route-ই `auth` এবং `verified` middleware-এ সুরক্ষিত; নতুন route যোগ হয়নি।
 - `DashboardConrtoller::dashboard()` shell view `dashboard.dashboard` ফেরায়।
-- `DashboardConrtoller::dashboardbody()` daily/week/month-এর inclusive-start, exclusive-end date range বানায়। প্রতিটি period-এ invoice থেকে revenue/due, supplier ledger থেকে purchase, employee voucher থেকে employee cost, এবং general voucher থেকে debit/credit যোগ করে; এরপর profit সূত্র প্রয়োগ করে। Top product ও employee ranking-ও তৈরি করে।
-- `resources/views/dashboard/dashboard-body.blade.php` card-গুলো **Purchase → Revenue → Due → Profit** ক্রমে render করে। বড় amount monthly; নিচে daily ও weekly amount দেখায়। একই view-তে Top Selling Products ও Top Sales Employees table থাকে।
+- `DashboardConrtoller::dashboardbody()` daily/week/month-এর inclusive-start, exclusive-end date range বানায়। প্রতিটি card period-এ invoice থেকে revenue/due, supplier ledger থেকে purchase, employee voucher থেকে employee cost, এবং general voucher থেকে debit/credit যোগ করে; এরপর expense ও profit সূত্র প্রয়োগ করে। Chart-এর জন্য চলতি বছরের প্রতিদিনের aggregate নিয়ে চার filter-এর bucket বানায়। Top product ও employee ranking-ও তৈরি করে।
+- `DashboardConrtoller::dailyTotals()` date range-এ একটি source-এর amount date ধরে aggregate করে chart data তৈরির map দেয়।
+- `resources/views/dashboard/dashboard-body.blade.php` card-গুলো **Purchase → Revenue → Due → Total Expense** ক্রমে render করে। বড় amount monthly; নিচে daily ও weekly amount দেখায়। Chart period selector-এ chart-টি update হয়; Revenue column ও Profit line dataset দেখায়। একই view-তে Top Selling Products ও Top Sales Employees table থাকে।
 - হিসাবের জন্য ব্যবহৃত model/table: `SaleInvoice`/`sale_invoices`, `Supplierledger`/`supplierledgers`, `EmployeePaymentVoucher`/`employee_payment_vouchers`, `VoucherEntry`/`voucher_entries`।
 - সংশ্লিষ্ট relation: `SaleInvoice::customer()`, `SaleInvoice::employee()`, `SaleInvoice::items()`; `EmployeePaymentVoucher::employee()` ও `EmployeePaymentVoucher::createdBy()`; `VoucherEntry::createdBy()`; `Supplierledger::supplier()` ও `Supplierledger::product()`। Dashboard-এর period aggregate সরাসরি table/date/amount column-এ চলে, তাই এই relation eager-load করা হয় না; Top Sales Employees query `sale_invoices.user_id` দিয়ে `users` join করে।
-- Dashboard পরিবর্তনের জন্য route, model, relation বা migration schema-তে কোনো পরিবর্তন প্রয়োজন হয়নি। ব্যবহৃত schema আগের migration-গুলোতেই তৈরি: `2026_07_06_172251_create_sale_invoices_table.php`, `2026_07_06_172445_create_sale_items_table.php`, `2026_10_11_000003_upgrade_sales_tables.php`, `2026_10_06_111603_create_supplierledgers_table.php`, `2026_10_12_181140_create_employee_payment_vouchers_table.php`, `2026_10_13_000000_add_created_by_to_employee_payment_vouchers_table.php`, এবং `2026_10_13_000001_create_voucher_entries_table.php`। Dashboard request-এ শুধু read query চলে; নতুন migration চালাতে হয় না।
+- `routes/web.php`-এ আগের `dashboardbody` route-ই chart ও metrics load করে; নতুন route নেই। Chart data একই controller থেকে Blade-এ যায়; আলাদা API/controller route নেই।
+- Dashboard পরিবর্তনের জন্য model, relation বা migration schema-তে কোনো পরিবর্তন প্রয়োজন হয়নি। ব্যবহৃত schema আগের migration-গুলোতেই তৈরি। Dashboard request-এ শুধু read query চলে; নতুন migration চালাতে হয় না।
 
 ## সংশ্লিষ্ট ফাইল
 
