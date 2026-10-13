@@ -4,12 +4,14 @@ namespace App\Http\Controllers;
 
 use App\Models\User;
 use App\Models\VoucherEntry;
+use App\Support\ExcelCsvExport;
 use Carbon\Carbon;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\View\View;
+use Symfony\Component\HttpFoundation\StreamedResponse;
 
 class VoucherEntryController extends Controller
 {
@@ -144,5 +146,98 @@ class VoucherEntryController extends Controller
             'vouchers',
             'creators'
         ));
+    }
+
+    /**
+     * Downloads all filtered debit/credit vouchers and date summaries.
+     */
+    public function exportReport(Request $request): StreamedResponse|RedirectResponse
+    {
+        $validator = Validator::make($request->query(), [
+            'start_date' => ['nullable', 'date'],
+            'end_date' => ['nullable', 'date'],
+            'created_by' => ['nullable', 'integer', 'exists:users,id'],
+        ]);
+        $validator->after(function ($validator): void {
+            $dates = $validator->getData();
+
+            if (
+                ! empty($dates['start_date'])
+                && ! empty($dates['end_date'])
+                && ! $validator->errors()->has('start_date')
+                && ! $validator->errors()->has('end_date')
+                && Carbon::parse($dates['end_date'])->lt(Carbon::parse($dates['start_date']))
+            ) {
+                $validator->errors()->add('end_date', 'The end date must be on or after the start date.');
+            }
+        });
+
+        if ($validator->fails()) {
+            return redirect()->route('voucher-entries.report')
+                ->withErrors($validator)
+                ->withInput($request->query());
+        }
+
+        $filters = $validator->validated();
+        $startDate = $filters['start_date'] ?? $filters['end_date'] ?? today()->toDateString();
+        $endDate = $filters['end_date'] ?? $startDate;
+        $reportQuery = VoucherEntry::query()->whereBetween('voucher_date', [$startDate, $endDate]);
+        if (! empty($filters['created_by'])) {
+            $reportQuery->where('created_by', $filters['created_by']);
+        }
+        $totalCount = (clone $reportQuery)->count();
+        $debitTotal = (float) (clone $reportQuery)->where('voucher_type', 'debit')->sum('amount');
+        $creditTotal = (float) (clone $reportQuery)->where('voucher_type', 'credit')->sum('amount');
+        $dailySummaries = (clone $reportQuery)
+            ->selectRaw('voucher_date, voucher_type, created_by, created_by_name')
+            ->selectRaw('COUNT(*) as voucher_count')
+            ->selectRaw('SUM(amount) as total_amount')
+            ->groupBy('voucher_date', 'voucher_type', 'created_by', 'created_by_name')
+            ->orderByDesc('voucher_date')
+            ->get();
+        $vouchers = (clone $reportQuery)->latest('voucher_date')->latest('id')->cursor();
+
+        return ExcelCsvExport::download('debit-credit-voucher-report-'.now()->format('Ymd-His').'.csv', function (callable $writeRow) use (
+            $startDate,
+            $endDate,
+            $totalCount,
+            $debitTotal,
+            $creditTotal,
+            $dailySummaries,
+            $vouchers
+        ): void {
+            $writeRow(['Daily Debit/Credit Voucher Report']);
+            $writeRow(['Period', $startDate.' - '.$endDate]);
+            $writeRow(['Voucher Count', $totalCount]);
+            $writeRow(['Total Debit', number_format($debitTotal, 2, '.', '')]);
+            $writeRow(['Total Credit', number_format($creditTotal, 2, '.', '')]);
+            $writeRow([]);
+            $writeRow(['Daily Summary']);
+            $writeRow(['Date', 'Created By', 'Type', 'Voucher Count', 'Total Amount']);
+            foreach ($dailySummaries as $summary) {
+                $writeRow([
+                    $summary->voucher_date,
+                    $summary->created_by_name,
+                    VoucherEntry::TYPES[$summary->voucher_type],
+                    (int) $summary->voucher_count,
+                    number_format((float) $summary->total_amount, 2, '.', ''),
+                ]);
+            }
+            $writeRow([]);
+            $writeRow(['Voucher Details']);
+            $writeRow(['Voucher Code', 'Type', 'Expense/Income Type', 'Date', 'Created By', 'Reference', 'Description', 'Amount']);
+            foreach ($vouchers as $voucher) {
+                $writeRow([
+                    $voucher->voucher_code,
+                    VoucherEntry::TYPES[$voucher->voucher_type],
+                    $voucher->expense_income_type,
+                    $voucher->voucher_date->format('Y-m-d'),
+                    $voucher->created_by_name,
+                    $voucher->reference,
+                    $voucher->description,
+                    number_format((float) $voucher->amount, 2, '.', ''),
+                ]);
+            }
+        });
     }
 }

@@ -5,11 +5,14 @@ namespace App\Http\Controllers;
 use App\Models\EmployeePaymentVoucher;
 use App\Models\Organization;
 use App\Models\User;
+use App\Support\ExcelCsvExport;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
+use Illuminate\Http\RedirectResponse;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Validation\ValidationException;
+use Symfony\Component\HttpFoundation\StreamedResponse;
 
 class EmployeePaymentVoucherController extends Controller
 {
@@ -120,6 +123,107 @@ class EmployeePaymentVoucherController extends Controller
             'creators',
             'employees'
         ));
+    }
+
+    /**
+     * Downloads every filtered employee voucher and its daily summary.
+     */
+    public function exportReport(Request $request): StreamedResponse|RedirectResponse
+    {
+        $validator = Validator::make($request->query(), [
+            'start_date' => 'nullable|date',
+            'end_date' => 'nullable|date',
+            'created_by' => 'nullable|integer|exists:users,id',
+            'employee_id' => 'nullable|integer|exists:users,id',
+        ]);
+        $validator->after(function ($validator): void {
+            $dates = $validator->getData();
+
+            if (
+                ! empty($dates['start_date'])
+                && ! empty($dates['end_date'])
+                && ! $validator->errors()->has('start_date')
+                && ! $validator->errors()->has('end_date')
+                && Carbon::parse($dates['end_date'])->lt(Carbon::parse($dates['start_date']))
+            ) {
+                $validator->errors()->add('end_date', 'The end date must be on or after the start date.');
+            }
+        });
+
+        if ($validator->fails()) {
+            return redirect()->route('employee-payment.report')
+                ->withErrors($validator)
+                ->withInput($request->query());
+        }
+
+        $filters = $validator->validated();
+        $startDate = $filters['start_date'] ?? $filters['end_date'] ?? today()->toDateString();
+        $endDate = $filters['end_date'] ?? $startDate;
+        $reportQuery = EmployeePaymentVoucher::query()
+            ->with(['employee:id,name', 'createdBy:id,name'])
+            ->whereDate('employee_payment_vouchers.created_at', '>=', $startDate)
+            ->whereDate('employee_payment_vouchers.created_at', '<=', $endDate)
+            ->when($filters['created_by'] ?? null, fn ($query, $creatorId) => $query->where('employee_payment_vouchers.created_by', $creatorId))
+            ->when($filters['employee_id'] ?? null, fn ($query, $employeeId) => $query->where('employee_payment_vouchers.employee_id', $employeeId));
+        $totalCount = (clone $reportQuery)->count();
+        $totalAmount = (float) (clone $reportQuery)->sum('amount');
+        $dailySummaries = (clone $reportQuery)
+            ->setEagerLoads([])
+            ->leftJoin('users as creators', 'creators.id', '=', 'employee_payment_vouchers.created_by')
+            ->selectRaw('DATE(employee_payment_vouchers.created_at) as voucher_date')
+            ->addSelect('creators.name as creator_name')
+            ->addSelect('employee_payment_vouchers.employee_name')
+            ->selectRaw('COUNT(employee_payment_vouchers.id) as voucher_count')
+            ->selectRaw('SUM(employee_payment_vouchers.amount) as total_amount')
+            ->groupByRaw('DATE(employee_payment_vouchers.created_at), employee_payment_vouchers.employee_id, employee_payment_vouchers.employee_name, employee_payment_vouchers.created_by, creators.name')
+            ->orderByDesc('voucher_date')
+            ->get();
+        $vouchers = (clone $reportQuery)
+            ->latest('employee_payment_vouchers.created_at')
+            ->latest('employee_payment_vouchers.id')
+            ->lazy(500);
+
+        return ExcelCsvExport::download('employee-voucher-report-'.now()->format('Ymd-His').'.csv', function (callable $writeRow) use (
+            $startDate,
+            $endDate,
+            $totalCount,
+            $totalAmount,
+            $dailySummaries,
+            $vouchers
+        ): void {
+            $writeRow(['Daily Employee Voucher Report']);
+            $writeRow(['Period', $startDate.' - '.$endDate]);
+            $writeRow(['Voucher Count', $totalCount]);
+            $writeRow(['Total Voucher Amount', number_format($totalAmount, 2, '.', '')]);
+            $writeRow([]);
+            $writeRow(['Daily Summary']);
+            $writeRow(['Created Date', 'Employee', 'Created By', 'Voucher Count', 'Total Amount']);
+            foreach ($dailySummaries as $summary) {
+                $writeRow([
+                    $summary->voucher_date,
+                    $summary->employee_name,
+                    $summary->creator_name ?: 'Unknown / legacy voucher',
+                    (int) $summary->voucher_count,
+                    number_format((float) $summary->total_amount, 2, '.', ''),
+                ]);
+            }
+            $writeRow([]);
+            $writeRow(['Voucher Details']);
+            $writeRow(['Voucher No.', 'Created At', 'Created By', 'Employee', 'Expense Type', 'Payment Method', 'Reference', 'Notes', 'Amount']);
+            foreach ($vouchers as $voucher) {
+                $writeRow([
+                    $voucher->voucher_no,
+                    $voucher->created_at->format('Y-m-d H:i:s'),
+                    $voucher->createdBy?->name ?: 'Unknown / legacy voucher',
+                    $voucher->employee_name,
+                    EmployeePaymentVoucher::EXPENSE_TYPES[$voucher->expense_type] ?? $voucher->expense_type,
+                    EmployeePaymentVoucher::PAYMENT_METHODS[$voucher->payment_method] ?? $voucher->payment_method,
+                    $voucher->reference,
+                    $voucher->notes,
+                    number_format((float) $voucher->amount, 2, '.', ''),
+                ]);
+            }
+        });
     }
 
     /**

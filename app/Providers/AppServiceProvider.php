@@ -38,6 +38,7 @@ class AppServiceProvider extends ServiceProvider
         });
 
         View::composer('dashboard.dashboard', function ($view) {
+            $organization = Organization::query()->find(1);
             $expiryNotifications = Product::query()
                 ->whereNotNull('expiry_date')
                 ->whereDate('expiry_date', '<=', today()->addMonth())
@@ -50,6 +51,7 @@ class AppServiceProvider extends ServiceProvider
                 ->get();
 
             $view->with([
+                'organization' => $organization,
                 'expiryNotifications' => $expiryNotifications,
                 'lowStockNotifications' => $lowStockNotifications,
             ]);

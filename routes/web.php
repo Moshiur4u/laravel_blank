@@ -41,7 +41,11 @@ Route::middleware(['auth', 'verified'])->group(function () {
 Route::middleware(['auth', 'verified'])->group(function () {
     Route::get('/voucher-entries', [VoucherEntryController::class, 'index'])->name('voucher-entries.index');
     Route::post('/voucher-entries', [VoucherEntryController::class, 'store'])->name('voucher-entries.store');
+    Route::get('/voucher-entries/report/export', [VoucherEntryController::class, 'exportReport'])
+        ->name('voucher-entries.report.export');
     Route::get('/voucher-entries/report', [VoucherEntryController::class, 'report'])->name('voucher-entries.report');
+    Route::get('/voucher-report/combined/export', [CombinedVoucherReportController::class, 'export'])
+        ->name('voucher-report.combined.export');
     Route::get('/voucher-report/combined', [CombinedVoucherReportController::class, 'index'])
         ->name('voucher-report.combined');
 });
@@ -51,6 +55,8 @@ Route::middleware(['auth', 'verified'])->group(function () {
         ->name('employee-payment.index');
     Route::post('/employee-payment-vouchers', [EmployeePaymentVoucherController::class, 'store'])
         ->name('employee-payment.store');
+    Route::get('/employee-payment-vouchers/report/export', [EmployeePaymentVoucherController::class, 'exportReport'])
+        ->name('employee-payment.report.export');
     Route::get('/employee-payment-vouchers/report', [EmployeePaymentVoucherController::class, 'report'])
         ->name('employee-payment.report');
     Route::get('/employee-payment-vouchers/{employee}/ledger/export', [EmployeePaymentVoucherController::class, 'exportLedger'])
@@ -133,6 +139,8 @@ Route::middleware(['auth', 'verified'])->group(function () {
     // লগইন করা ও verified ব্যবহারকারীদের জন্য পণ্যভিত্তিক ক্রয় ও মজুত রিপোর্ট।
     Route::get('/reports/product-inventory', [ProductInventoryReportController::class, 'index'])
         ->name('product.inventory.report');
+    Route::get('/reports/product-inventory/export', [ProductInventoryReportController::class, 'export'])
+        ->name('product.inventory.report.export');
 });
 
 // বিক্রির ইনভয়েস, ফোন দিয়ে গ্রাহক খোঁজা এবং প্রিন্ট
@@ -141,6 +149,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::get('/sales/customer-lookup', [SaleController::class, 'customerByPhone'])->name('sales.customer.lookup');
     Route::post('/sales', [SaleController::class, 'store'])->name('sales.store');
     Route::get('/sales/invoice/{id}', [SaleController::class, 'invoice'])->name('sales.invoice');
+    Route::get('/sales/report/export', [SalesReportController::class, 'export'])->name('sales.report.export');
     Route::get('/sales/report', [SalesReportController::class, 'index'])->name('sales.report');
 });
 

@@ -13,6 +13,9 @@
                     <a href="{{ route('dashboardbody') }}" class="btn btn-outline-secondary">
                         <i class="bx bx-arrow-back me-1"></i>Dashboard
                     </a>
+                    <a href="{{ route('product.inventory.report.export') }}" class="btn btn-success">
+                        <i class="bx bx-spreadsheet me-1"></i>Export Excel
+                    </a>
                     <button type="button" class="btn btn-primary" onclick="window.print()">
                         <i class="bx bx-printer me-1"></i>Print Report
                     </button>

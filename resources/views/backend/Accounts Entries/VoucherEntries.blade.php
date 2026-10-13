@@ -14,6 +14,9 @@
                     <a href="{{ route('employee-payment.index') }}" class="btn btn-outline-primary">
                         <i class="bx bx-plus me-1"></i>Create Voucher
                     </a>
+                    <a href="{{ route('employee-payment.report.export', request()->except('page')) }}" class="btn btn-success">
+                        <i class="bx bx-spreadsheet me-1"></i>Export Excel
+                    </a>
                     <button type="button" class="btn btn-outline-secondary" onclick="window.print()">
                         <i class="bx bx-printer me-1"></i>Print Report
                     </button>
