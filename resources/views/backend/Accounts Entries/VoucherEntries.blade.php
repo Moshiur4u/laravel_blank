@@ -5,7 +5,7 @@
 @section('content')
     <div class="page-wrapper">
         <div class="page-content">
-            <div class="mb-3 page-breadcrumb d-flex flex-wrap align-items-center justify-content-between gap-2">
+            <div class="mb-3 page-breadcrumb d-flex flex-wrap align-items-center justify-content-between gap-2 no-print">
                 <div>
                     <div class="breadcrumb-title pe-3">Reports</div>
                     <h4 class="mb-0 mt-2">Daily Employee Voucher Report</h4>
@@ -20,7 +20,7 @@
                 </div>
             </div>
 
-            <div class="card border-0 shadow-sm mb-4">
+            <div class="card border-0 shadow-sm mb-4 no-print">
                 <div class="card-header">
                     <h5 class="mb-0"><i class="bx bx-filter-alt me-1"></i>Filter Report</h5>
                 </div>
@@ -77,17 +77,44 @@
                 </div>
             </div>
 
-            <div class="row g-3 mb-4">
-                <div class="col-md-6">
-                    <div class="card border-0 shadow-sm h-100">
+            <div class="print-report">
+                @include('backend.partials.organizationHeader', [
+                    'reportTitle' => 'Daily Employee Voucher Report',
+                    'reportSubtitle' => 'Period: ' . \Illuminate\Support\Carbon::parse($startDate)->format('d M Y')
+                        . ($endDate !== $startDate ? ' – ' . \Illuminate\Support\Carbon::parse($endDate)->format('d M Y') : ''),
+                    'reportGeneratedAt' => now()->format('d M Y, h:i A'),
+                ])
+                <div class="row align-items-start mb-4 print-report-heading d-print-none">
+                    <div class="col-7">
+                        <h2 class="text-primary fw-bold mb-1 d-print-none">Daily Employee Voucher Report</h2>
+                        <div class="text-muted">
+                            Period:
+                            <strong>
+                                {{ \Illuminate\Support\Carbon::parse($startDate)->format('d M Y') }}
+                                @if ($endDate !== $startDate)
+                                    — {{ \Illuminate\Support\Carbon::parse($endDate)->format('d M Y') }}
+                                @endif
+                            </strong>
+                        </div>
+                    </div>
+                    <div class="col-5 text-end d-print-none">
+                        <h5 class="fw-bold mb-1">Report Generated</h5>
+                        <div>{{ now()->format('d M Y, h:i A') }}</div>
+                        <div class="text-muted">Employee voucher entries</div>
+                    </div>
+                </div>
+
+            <div class="row g-3 mb-4 print-summary">
+                <div class="col-md-6 summary-card">
+                    <div class="card border-0 bg-light h-100">
                         <div class="card-body">
                             <div class="text-muted">Vouchers created in selected period</div>
                             <div class="fs-4 fw-bold text-primary">{{ number_format($totalCount) }}</div>
                         </div>
                     </div>
                 </div>
-                <div class="col-md-6">
-                    <div class="card border-0 shadow-sm h-100">
+                <div class="col-md-6 summary-card">
+                    <div class="card border-0 bg-light h-100">
                         <div class="card-body">
                             <div class="text-muted">Total voucher amount</div>
                             <div class="fs-4 fw-bold text-success">৳{{ number_format((float) $totalAmount, 2) }}</div>
@@ -96,7 +123,7 @@
                 </div>
             </div>
 
-            <div class="card border-0 shadow-sm mb-4">
+            <div class="card border-0 shadow-sm mb-4 print-report-card">
                 <div class="card-header">
                     <h5 class="mb-0"><i class="bx bx-calendar me-1"></i>Daily Summary</h5>
                 </div>
@@ -132,7 +159,7 @@
                 </div>
             </div>
 
-            <div class="card border-0 shadow-sm">
+            <div class="card border-0 shadow-sm print-report-card">
                 <div class="card-header">
                     <h5 class="mb-0"><i class="bx bx-list-ul me-1"></i>Voucher Details</h5>
                 </div>
@@ -176,19 +203,24 @@
                     {{ $vouchers->links('pagination::bootstrap-5') }}
                 </div>
             </div>
+            </div>
         </div>
     </div>
 
     <style>
         @media print {
+            @page {
+                size: landscape;
+                margin: 12mm;
+            }
+
             header,
             .topbar,
             .sidebar-wrapper,
             .page-footer,
             .footer,
-            .page-content > .card:first-of-type form,
-            .page-breadcrumb button,
-            .page-breadcrumb a {
+            .no-print,
+            .pagination {
                 display: none !important;
             }
 
@@ -198,9 +230,54 @@
                 padding: 0 !important;
             }
 
-            .card {
+            .card,
+            .print-report-card {
                 box-shadow: none !important;
                 border: 0 !important;
+            }
+
+            .print-report-heading {
+                display: flex !important;
+                break-inside: avoid;
+            }
+
+            .print-summary {
+                display: flex !important;
+                flex-wrap: nowrap !important;
+                margin-bottom: 1rem !important;
+                break-inside: avoid;
+            }
+
+            .print-summary .summary-card {
+                display: block !important;
+                flex: 0 0 50% !important;
+                max-width: 50% !important;
+                visibility: visible !important;
+            }
+
+            .print-summary .summary-card .card {
+                display: block !important;
+                min-height: 0 !important;
+                border: 1px solid #dee2e6 !important;
+                background-color: #f8f9fa !important;
+                print-color-adjust: exact;
+                -webkit-print-color-adjust: exact;
+            }
+
+            .print-report-card .card-header {
+                background-color: #f8f9fa !important;
+                print-color-adjust: exact;
+                -webkit-print-color-adjust: exact;
+            }
+
+            .print-report table {
+                width: 100% !important;
+                font-size: 9pt;
+            }
+
+            .print-report th,
+            .print-report td {
+                padding: 0.35rem !important;
             }
         }
     </style>

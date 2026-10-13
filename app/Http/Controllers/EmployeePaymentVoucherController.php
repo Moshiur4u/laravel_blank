@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\EmployeePaymentVoucher;
+use App\Models\Organization;
 use App\Models\User;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
@@ -165,9 +166,10 @@ class EmployeePaymentVoucherController extends Controller
             ->orderBy('payment_date')
             ->orderBy('id')
             ->lazy(500);
+        $organization = Organization::query()->find(1);
         $filename = 'employee-payment-ledger-' . $employee->id . '-' . now()->format('Ymd') . '.csv';
 
-        return response()->streamDownload(function () use ($vouchers, $employee, $expenseTypes, $paymentMethods) {
+        return response()->streamDownload(function () use ($vouchers, $employee, $expenseTypes, $paymentMethods, $organization) {
             $output = fopen('php://output', 'w');
             if ($output === false) {
                 throw new \RuntimeException('Unable to open the employee ledger export stream.');
@@ -176,6 +178,12 @@ class EmployeePaymentVoucherController extends Controller
             // UTF-8 BOM দিলে Microsoft Excel-এ বাংলা/Unicode text সঠিকভাবে খোলে।
             fwrite($output, "\xEF\xBB\xBF");
             fputcsv($output, ['Employee Payment Ledger'], ',', '"', '\\');
+            if ($organization) {
+                fputcsv($output, ['Organization', $this->spreadsheetSafeValue($organization->name)], ',', '"', '\\');
+                fputcsv($output, ['Phone', $this->spreadsheetSafeValue($organization->phone)], ',', '"', '\\');
+                fputcsv($output, ['Email', $this->spreadsheetSafeValue($organization->email)], ',', '"', '\\');
+                fputcsv($output, ['Address', $this->spreadsheetSafeValue($organization->address)], ',', '"', '\\');
+            }
             fputcsv($output, ['Employee', $this->spreadsheetSafeValue($employee->name)], ',', '"', '\\');
             fputcsv($output, ['Current Salary', $employee->salary ?? ''], ',', '"', '\\');
             fputcsv($output, [], ',', '"', '\\');

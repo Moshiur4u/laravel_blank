@@ -4,7 +4,11 @@
 
 @section('content')
     <div class="page-wrapper">
-        <div class="page-content">
+        <div class="page-content print-report">
+            @include('backend.partials.organizationHeader', [
+                'reportTitle' => 'Employee Payment Ledger',
+                'reportGeneratedAt' => now()->format('d M Y, h:i A'),
+            ])
             {{-- print ও export control কাগজের ledger-এ দেখানো হবে না। --}}
             <div class="d-flex flex-wrap justify-content-between align-items-center gap-2 mb-3 no-print">
                 <a href="{{ route('employee-payment.index') }}" class="btn btn-outline-secondary">
@@ -25,7 +29,7 @@
                 <div class="card-body">
                     <div class="row align-items-center g-3">
                         <div class="col-md">
-                            <h3 class="text-primary fw-bold mb-1">Employee Payment Ledger</h3>
+                            <h3 class="text-primary fw-bold mb-1 d-print-none">Employee Payment Ledger</h3>
                             <div><strong>Employee:</strong> {{ $employee->name }}</div>
                             <div><strong>Email:</strong> {{ $employee->email }}</div>
                             <div>
@@ -110,6 +114,11 @@
     </div>
 
     <style>
+        @page {
+            size: landscape;
+            margin: 10mm;
+        }
+
         @media print {
             header,
             .topbar,
@@ -129,6 +138,34 @@
             .card {
                 box-shadow: none !important;
                 border: 0 !important;
+            }
+
+            .print-report,
+            .print-report .card-body,
+            .print-report .table-responsive {
+                overflow: visible !important;
+            }
+
+            .print-report table {
+                width: 100% !important;
+                table-layout: fixed;
+            }
+
+            .print-report th,
+            .print-report td {
+                padding: 0.3rem !important;
+                font-size: 9pt;
+                overflow-wrap: anywhere;
+                white-space: normal !important;
+            }
+
+            .print-report thead {
+                display: table-header-group;
+            }
+
+            .print-report tr {
+                break-inside: avoid;
+                page-break-inside: avoid;
             }
 
             body {

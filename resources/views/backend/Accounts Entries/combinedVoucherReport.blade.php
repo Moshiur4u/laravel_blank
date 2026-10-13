@@ -62,9 +62,16 @@
 
             <div class="card border-0 shadow-sm print-report">
                 <div class="card-body p-4 p-md-5">
-                    <div class="row align-items-start mb-4">
+                    @include('backend.partials.organizationHeader', [
+                        'reportTitle' => 'Combined Voucher Report',
+                        'reportSubtitle' => 'Period: ' . ($period === 'daily'
+                            ? \Illuminate\Support\Carbon::parse($startDate)->format('d M Y')
+                            : \Illuminate\Support\Carbon::parse($startDate)->format('F Y')),
+                        'reportGeneratedAt' => now()->format('d M Y, h:i A'),
+                    ])
+                    <div class="row align-items-start mb-4 d-print-none">
                         <div class="col-7">
-                            <h2 class="text-primary fw-bold mb-1">Combined Voucher Report</h2>
+                            <h2 class="text-primary fw-bold mb-1 d-print-none">Combined Voucher Report</h2>
                             <div class="text-muted">
                                 Period:
                                 <strong>
@@ -74,7 +81,7 @@
                                 </strong>
                             </div>
                         </div>
-                        <div class="col-5 text-end">
+                        <div class="col-5 text-end d-print-none">
                             <h5 class="fw-bold mb-1">Report Generated</h5>
                             <div>{{ now()->format('d M Y, h:i A') }}</div>
                             <div class="text-muted">{{ ucfirst($period) }} voucher entries</div>
@@ -203,7 +210,7 @@
         @media print {
             @page {
                 size: landscape;
-                margin: 12mm;
+                margin: 10mm;
             }
 
             header,
@@ -230,6 +237,34 @@
 
             .print-report .card-body {
                 padding: 0 !important;
+            }
+
+            .print-report,
+            .print-report .card-body,
+            .print-report .table-responsive {
+                overflow: visible !important;
+            }
+
+            .print-report table {
+                width: 100% !important;
+                table-layout: fixed;
+            }
+
+            .print-report th,
+            .print-report td {
+                padding: 0.3rem !important;
+                font-size: 9pt;
+                overflow-wrap: anywhere;
+                white-space: normal !important;
+            }
+
+            .print-report thead {
+                display: table-header-group;
+            }
+
+            .print-report tr {
+                break-inside: avoid;
+                page-break-inside: avoid;
             }
 
             .print-summary {

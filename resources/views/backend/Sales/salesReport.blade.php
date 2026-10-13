@@ -91,7 +91,12 @@
 
             <div class="card border-0 shadow-sm print-report">
                 <div class="card-body p-4">
-                    <div class="row align-items-start mb-4">
+                    @include('backend.partials.organizationHeader', [
+                        'reportTitle' => 'Sales Report',
+                        'reportSubtitle' => 'Period: ' . ($startDate ? \Illuminate\Support\Carbon::parse($startDate)->format('d M Y') : 'Beginning') . ' – ' . ($endDate ? \Illuminate\Support\Carbon::parse($endDate)->format('d M Y') : 'Present'),
+                        'reportGeneratedAt' => $reportGeneratedAt->format('d M Y, h:i A'),
+                    ])
+                    <div class="row align-items-start mb-4 d-print-none">
                         <div class="col-md-8">
                             <h2 class="text-primary fw-bold mb-1">Sales Report</h2>
                             <div class="text-muted">
@@ -109,8 +114,8 @@
                         </div>
                     </div>
 
-                    <div class="row g-3 mb-4">
-                        <div class="col-md-4">
+                    <div class="row g-3 mb-4 print-summary">
+                        <div class="col-md-4 summary-card">
                             <div class="card border-0 bg-light h-100">
                                 <div class="card-body">
                                     <div class="text-muted">Total Sale Amount</div>
@@ -118,7 +123,7 @@
                                 </div>
                             </div>
                         </div>
-                        <div class="col-md-4">
+                        <div class="col-md-4 summary-card">
                             <div class="card border-0 bg-light h-100">
                                 <div class="card-body">
                                     <div class="text-muted">Total Due</div>
@@ -126,7 +131,7 @@
                                 </div>
                             </div>
                         </div>
-                        <div class="col-md-4">
+                        <div class="col-md-4 summary-card">
                             <div class="card border-0 bg-light h-100">
                                 <div class="card-body">
                                     <div class="text-muted">Total Sales (Invoices)</div>
@@ -209,9 +214,16 @@
     </div>
 
     <style>
+        @page {
+            size: landscape;
+            margin: 10mm;
+        }
+
         @media print {
             .no-print,
             .sidebar-wrapper,
+            header,
+            .topbar,
             .top-header,
             .footer {
                 display: none !important;
@@ -226,6 +238,62 @@
             .print-report {
                 border: 0 !important;
                 box-shadow: none !important;
+            }
+
+            .print-report,
+            .print-report .card-body,
+            .print-report .table-responsive {
+                overflow: visible !important;
+            }
+
+            .print-report table {
+                width: 100% !important;
+                table-layout: fixed;
+            }
+
+            .print-report th,
+            .print-report td {
+                padding: 0.3rem !important;
+                font-size: 9pt;
+                overflow-wrap: anywhere;
+                white-space: normal !important;
+            }
+
+            .print-report thead {
+                display: table-header-group;
+            }
+
+            .print-report tr {
+                break-inside: avoid;
+                page-break-inside: avoid;
+            }
+
+            .print-summary {
+                display: flex !important;
+                flex-wrap: nowrap !important;
+                margin-bottom: 1rem !important;
+                break-inside: avoid;
+            }
+
+            .print-summary .summary-card {
+                display: block !important;
+                flex: 0 0 33.333333% !important;
+                max-width: 33.333333% !important;
+                visibility: visible !important;
+            }
+
+            .print-summary .card {
+                display: block !important;
+                min-height: 0 !important;
+                border: 1px solid #dee2e6 !important;
+                background-color: #f8f9fa !important;
+                print-color-adjust: exact;
+                -webkit-print-color-adjust: exact;
+            }
+
+            .print-summary .card-body {
+                display: block !important;
+                padding: 0.75rem !important;
             }
         }
     </style>

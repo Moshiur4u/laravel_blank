@@ -6,6 +6,7 @@
 @section('content')
     <div class="page-wrapper">
         <div class="page-content">
+            @include('backend.partials.organizationHeader')
             <div class="mb-3 page-breadcrumb d-none d-sm-flex align-items-center">
                 <div class="breadcrumb-title pe-3">Customer</div>
                 <div class="ps-3">

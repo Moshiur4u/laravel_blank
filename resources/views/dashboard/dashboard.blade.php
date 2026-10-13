@@ -156,7 +156,7 @@
 
                 <li>
                     <a href="javascript:;" class="has-arrow">
-                        <div class="parent-icon"><i class="bx bx-customize "></i></div>
+                        <div class="parent-icon"><i class="bx bxl-bootstrap "></i></div>
                         <div class="menu-title">Brand</div>
                     </a>
                     <ul>
@@ -226,18 +226,20 @@
                 <li class="menu-label">Administration operations</li>
                 <li>
                     <a class="has-arrow" href="javascript:;">
-                        <div class="parent-icon"><i class="bx bxs-user-pin "></i>
+                        <div class="parent-icon"><i class="bx bxs-blanket"></i>
                         </div>
                         <div class="menu-title">Accounts</div>
                     </a>
                     <ul>
 
                         <li>
-                            <a href="{{ route('voucher-entries.index') }}"><i class=' bx bx-id-card'></i>Voucher Entries</a>
+                            <a href="{{ route('voucher-entries.index') }}"><i class=' bx bx-id-card'></i>Voucher
+                                Entries</a>
                         </li>
 
                         <li>
-                            <a href="{{ route('employee-payment.index') }}"><i class='bx bx-user-plus '></i>Employee Payment</a>
+                            <a href="{{ route('employee-payment.index') }}"><i class='bx bx-user-plus '></i>Employee
+                                Payment</a>
                         </li>
 
                     </ul>
@@ -277,29 +279,55 @@
                     </ul>
 
                 </li>
+                <li>
+                    <a href="javascript:;" class="has-arrow">
+                        <div class="parent-icon"><i class='bx bxs-landmark'></i>
+                        </div>
+                        <div class="menu-title">organization</div>
+                    </a>
+                    <ul>
+                        <li>
+                            <a href="{{ route('organization.edit') }}"><i class='bx bxs-door-open'></i>Organization
+                                Information</a>
+                        </li>
+                    </ul>
+
+                </li>
 
                 <li class="menu-label">Reports</li>
-                <li>
-                    <a href="{{ route('voucher-report.combined') }}">
-                        <div class="parent-icon"><i class="bx bx-receipt"></i></div>
-                        <div class="menu-title">Combined Voucher Report</div>
-                    </a>
-                </li>
-                <li>
-                    <a href="{{ route('employee-payment.report') }}">
-                        <div class="parent-icon"><i class="bx bx-receipt"></i></div>
-                        <div class="menu-title">Daily Employee Payment Report</div>
-                    </a>
-                </li>
-                <li>
-                    <a href="{{ route('voucher-entries.report') }}">
-                        <div class="parent-icon"><i class="bx bx-receipt"></i></div>
-                        <div class="menu-title">Daily Debit/Credit Voucher Report</div>
-                    </a>
-                </li>
+
                 <li>
                     <a class="has-arrow" href="javascript:;">
-                        <div class="parent-icon"><i class='bx bx-message-square-edit'></i>
+                        <div class="parent-icon"><i class='bx bxs-bookmark-alt-plus'></i>
+                        </div>
+                        <div class="menu-title">Voucher</div>
+                    </a>
+                    <ul>
+                        <li>
+                            <a href="{{ route('voucher-report.combined') }}">
+                                <div class="parent-icon"><i class="bx bx-receipt"></i></div>
+                                <div class="menu-title">Voucher</div>
+                            </a>
+                        </li>
+
+                        <li>
+                            <a href="{{ route('employee-payment.report') }}">
+                                <div class="parent-icon"><i class="bx bx-receipt"></i></div>
+                                <div class="menu-title">Employee Payment</div>
+                            </a>
+                        </li>
+                        <li>
+                            <a href="{{ route('voucher-entries.report') }}">
+                                <div class="parent-icon"><i class="bx bx-receipt"></i></div>
+                                <div class="menu-title">Miscellaneous Voucher</div>
+                            </a>
+                        </li>
+                    </ul>
+                </li>
+
+                <li>
+                    <a class="has-arrow" href="javascript:;">
+                        <div class="parent-icon"><i class='bx bxs-book-open'></i>
                         </div>
                         <div class="menu-title">Sale Reports</div>
                     </a>
@@ -307,6 +335,20 @@
                         <li>
                             <a href="{{ route('sales.report') }}">
                                 <i class='bx bx-radio-circle'></i>Sales Report
+                            </a>
+                        </li>
+                    </ul>
+                </li>
+                <li>
+                    <a class="has-arrow" href="javascript:;">
+                        <div class="parent-icon"><i class='bx bxs-spreadsheet'></i>
+                        </div>
+                        <div class="menu-title">Inventory Reports</div>
+                    </a>
+                    <ul>
+                        <li>
+                            <a href="{{ route('product.inventory.report') }}">
+                                <i class='bx bx-radio-circle'></i>Product Inventory
                             </a>
                         </li>
                     </ul>
@@ -344,7 +386,8 @@
                             <div class="help-line-title">Help Line</div>
                             <a class="help-line-number" href="tel:01716770085">01716770085</a>
                         </div>
-                        <span class="gap-2 help-line-apps d-flex align-items-center ms-1" aria-label="WhatsApp and Viber">
+                        <span class="gap-2 help-line-apps d-flex align-items-center ms-1"
+                            aria-label="WhatsApp and Viber">
                             <i class="bx bxl-whatsapp" title="WhatsApp" aria-label="WhatsApp"></i>
                             <i class="bx bxs-phone-call help-line-viber" title="Viber" aria-label="Viber"></i>
                         </span>

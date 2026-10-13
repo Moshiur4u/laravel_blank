@@ -4,6 +4,7 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class Product extends Model
 {
@@ -41,6 +42,15 @@ class Product extends Model
     // প্রতিটি product-এর সঙ্গে নির্বাচিত supplier-এর সম্পর্ক নির্ধারণ করে।
     public function supplier(){
         return $this->belongsTo(Supplier::class);
+    }
+
+    /**
+     * supplier ledger-এ সংরক্ষিত এই পণ্যের সব ক্রয়-এন্ট্রি ফেরত দেয়।
+     */
+    public function purchaseLedgers(): HasMany
+    {
+        // supplierledgers.product_id string হলেও তা products.id-এর মান সংরক্ষণ করে।
+        return $this->hasMany(Supplierledger::class, 'product_id');
     }
 
     public function shelfDurationDays(): ?int

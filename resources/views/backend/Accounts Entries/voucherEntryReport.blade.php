@@ -5,7 +5,8 @@
 @section('content')
     <div class="page-wrapper">
         <div class="page-content">
-            <div class="mb-3 page-breadcrumb d-flex flex-wrap align-items-center justify-content-between gap-2">
+            <div class="print-report">
+            <div class="mb-3 page-breadcrumb d-flex flex-wrap align-items-center justify-content-between gap-2 no-print">
                 <div>
                     <div class="breadcrumb-title pe-3">Reports</div>
                     <h4 class="mb-0 mt-2">Daily Debit/Credit Voucher Report</h4>
@@ -20,7 +21,7 @@
                 </div>
             </div>
 
-            <div class="card border-0 shadow-sm mb-4 report-filters">
+            <div class="card border-0 shadow-sm mb-4 report-filters no-print">
                 <div class="card-header">
                     <h5 class="mb-0"><i class="bx bx-filter-alt me-1"></i>Filter Report</h5>
                 </div>
@@ -65,8 +66,28 @@
                 </div>
             </div>
 
-            <div class="row g-2 mb-4">
-                <div class="col-md-4">
+            @include('backend.partials.organizationHeader', [
+                'reportTitle' => 'Daily Debit/Credit Voucher Report',
+                'reportSubtitle' => \Illuminate\Support\Carbon::parse($startDate)->format('d M Y')
+                    . ' – ' . \Illuminate\Support\Carbon::parse($endDate)->format('d M Y'),
+                'reportGeneratedAt' => now()->format('d M Y, h:i A'),
+            ])
+            <div class="d-flex flex-wrap align-items-start justify-content-between gap-2 mb-4 d-print-none">
+                <div>
+                    <h2 class="text-primary fw-bold mb-1 d-print-none">Daily Debit/Credit Voucher Report</h2>
+                    <p class="text-muted mb-0">
+                        {{ \Illuminate\Support\Carbon::parse($startDate)->format('d M Y') }}
+                        – {{ \Illuminate\Support\Carbon::parse($endDate)->format('d M Y') }}
+                    </p>
+                </div>
+                <div class="small text-muted d-print-none">
+                    <span class="fw-bold text-body">Report Generated:</span>
+                    {{ now()->format('d M Y, h:i A') }}
+                </div>
+            </div>
+
+            <div class="row g-2 mb-4 print-summary">
+                <div class="col-md-4 summary-card">
                     <div class="card border-0 shadow-sm h-100">
                         <div class="card-body py-3 d-flex align-items-center justify-content-between gap-2">
                             <div class="text-muted fw-medium">Voucher Count</div>
@@ -74,7 +95,7 @@
                         </div>
                     </div>
                 </div>
-                <div class="col-md-4">
+                <div class="col-md-4 summary-card">
                     <div class="card border-0 shadow-sm h-100">
                         <div class="card-body py-3 d-flex align-items-center justify-content-between gap-2">
                             <div class="text-muted fw-medium">Total Debit</div>
@@ -82,7 +103,7 @@
                         </div>
                     </div>
                 </div>
-                <div class="col-md-4">
+                <div class="col-md-4 summary-card">
                     <div class="card border-0 shadow-sm h-100">
                         <div class="card-body py-3 d-flex align-items-center justify-content-between gap-2">
                             <div class="text-muted fw-medium">Total Credit</div>
@@ -182,22 +203,24 @@
                     {{ $vouchers->links('pagination::bootstrap-5') }}
                 </div>
             </div>
+            </div>
         </div>
     </div>
 
     <style>
+        @page {
+            size: landscape;
+            margin: 10mm;
+        }
+
         @media print {
+            .no-print,
+            .sidebar-wrapper,
             header,
             .topbar,
-            .sidebar-wrapper,
+            .top-header,
             .page-footer,
             .footer,
-            .page-breadcrumb button,
-            .page-breadcrumb a,
-            .report-filters {
-                display: none !important;
-            }
-
             .pagination {
                 display: none !important;
             }
@@ -211,6 +234,62 @@
             .card {
                 box-shadow: none !important;
                 border: 0 !important;
+            }
+
+            .print-report,
+            .print-report .card-body,
+            .print-report .table-responsive {
+                overflow: visible !important;
+            }
+
+            .print-report table {
+                width: 100% !important;
+                table-layout: fixed;
+            }
+
+            .print-report th,
+            .print-report td {
+                padding: 0.3rem !important;
+                font-size: 9pt;
+                overflow-wrap: anywhere;
+                white-space: normal !important;
+            }
+
+            .print-report thead {
+                display: table-header-group;
+            }
+
+            .print-report tr {
+                break-inside: avoid;
+                page-break-inside: avoid;
+            }
+
+            .print-summary {
+                display: flex !important;
+                flex-wrap: nowrap !important;
+                margin-bottom: 1rem !important;
+                break-inside: avoid;
+            }
+
+            .print-summary .summary-card {
+                display: block !important;
+                flex: 0 0 33.333333% !important;
+                max-width: 33.333333% !important;
+                visibility: visible !important;
+            }
+
+            .print-summary .card {
+                display: block !important;
+                min-height: 0 !important;
+                border: 1px solid #dee2e6 !important;
+                background-color: #f8f9fa !important;
+                print-color-adjust: exact;
+                -webkit-print-color-adjust: exact;
+            }
+
+            .print-summary .card-body {
+                display: block !important;
+                padding: 0.75rem !important;
             }
         }
     </style>

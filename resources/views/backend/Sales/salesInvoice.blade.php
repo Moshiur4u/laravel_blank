@@ -11,6 +11,7 @@
 
             <div class="card border-0 shadow-sm">
                 <div class="card-body p-4 p-md-5">
+                    @include('backend.partials.organizationHeader')
                     <div class="row align-items-start mb-4">
                         <div class="col-7">
                             <h2 class="text-primary fw-bold mb-1">Sales Invoice</h2>

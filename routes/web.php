@@ -5,8 +5,10 @@ use App\Http\Controllers\CombinedVoucherReportController;
 use App\Http\Controllers\CustomerController;
 use App\Http\Controllers\DashboardConrtoller;
 use App\Http\Controllers\EmployeePaymentVoucherController;
+use App\Http\Controllers\OrganizationController;
 use App\Http\Controllers\ProductCategoryController;
 use App\Http\Controllers\ProductController;
+use App\Http\Controllers\ProductInventoryReportController;
 use App\Http\Controllers\RoleController;
 use App\Http\Controllers\SaleController;
 use App\Http\Controllers\SalesReportController;
@@ -29,6 +31,11 @@ Route::middleware(['auth', 'verified'])->group(function () {
 Route::middleware(['auth', 'verified'])->group(function () {
     Route::get('/dashboard', [DashboardConrtoller::class, 'dashboard'])->name('dashboard');
     Route::get('/dashboard-body', [DashboardConrtoller::class, 'dashboardbody'])->name('dashboardbody');
+});
+// organization profile শুধুমাত্র authenticated এবং verified user পরিবর্তন করতে পারে।
+Route::middleware(['auth', 'verified'])->group(function () {
+    Route::get('/organization', [OrganizationController::class, 'edit'])->name('organization.edit');
+    Route::put('/organization', [OrganizationController::class, 'update'])->name('organization.update');
 });
 // সাধারণ Debit/Credit voucher entry ও দৈনিক report login এবং email verification চায়।
 Route::middleware(['auth', 'verified'])->group(function () {
@@ -122,6 +129,10 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::get('/product/edit/{id}', [ProductController::class, 'edit'])->name('product.edit');
     Route::put('/product/update/{id}', [ProductController::class, 'update'])->name('product.update');
     Route::get('/product/destroy/{id}', [ProductController::class, 'destroy'])->name('product.destroy');
+
+    // লগইন করা ও verified ব্যবহারকারীদের জন্য পণ্যভিত্তিক ক্রয় ও মজুত রিপোর্ট।
+    Route::get('/reports/product-inventory', [ProductInventoryReportController::class, 'index'])
+        ->name('product.inventory.report');
 });
 
 // বিক্রির ইনভয়েস, ফোন দিয়ে গ্রাহক খোঁজা এবং প্রিন্ট
