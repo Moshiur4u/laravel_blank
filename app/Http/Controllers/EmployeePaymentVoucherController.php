@@ -4,8 +4,10 @@ namespace App\Http\Controllers;
 
 use App\Models\EmployeePaymentVoucher;
 use App\Models\User;
+use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Validator;
 use Illuminate\Validation\ValidationException;
 
 class EmployeePaymentVoucherController extends Controller
@@ -31,6 +33,91 @@ class EmployeePaymentVoucherController extends Controller
             'paymentMethods',
             'vouchers',
             'totalAmount'
+        ));
+    }
+
+    /**
+     * তৈরি-তারিখের পরিসর ও creator অনুযায়ী দৈনিক voucher report দেখায়।
+     */
+    public function report(Request $request)
+    {
+        $validator = Validator::make($request->query(), [
+            'start_date' => 'nullable|date',
+            'end_date' => 'nullable|date',
+            'created_by' => 'nullable|integer|exists:users,id',
+            'employee_id' => 'nullable|integer|exists:users,id',
+        ]);
+
+        $validator->after(function ($validator) {
+            $dates = $validator->getData();
+
+            if (
+                ! empty($dates['start_date'])
+                && ! empty($dates['end_date'])
+                && ! $validator->errors()->has('start_date')
+                && ! $validator->errors()->has('end_date')
+                && Carbon::parse($dates['end_date'])->lt(Carbon::parse($dates['start_date']))
+            ) {
+                $validator->errors()->add('end_date', 'The end date must be on or after the start date.');
+            }
+        });
+
+        if ($validator->fails()) {
+            return redirect()->route('employee-payment.report')
+                ->withErrors($validator)
+                ->withInput($request->query());
+        }
+
+        $validated = $validator->validated();
+        $startDate = $validated['start_date'] ?? $validated['end_date'] ?? today()->toDateString();
+        $endDate = $validated['end_date'] ?? $startDate;
+
+        $reportQuery = EmployeePaymentVoucher::query()
+            ->with(['employee:id,name', 'createdBy:id,name'])
+            ->whereDate('employee_payment_vouchers.created_at', '>=', $startDate)
+            ->whereDate('employee_payment_vouchers.created_at', '<=', $endDate);
+
+        if (! empty($validated['created_by'])) {
+            $reportQuery->where('employee_payment_vouchers.created_by', $validated['created_by']);
+        }
+
+        if (! empty($validated['employee_id'])) {
+            $reportQuery->where('employee_payment_vouchers.employee_id', $validated['employee_id']);
+        }
+
+        $dailySummaries = (clone $reportQuery)
+            ->setEagerLoads([])
+            ->leftJoin('users as creators', 'creators.id', '=', 'employee_payment_vouchers.created_by')
+            ->selectRaw('DATE(employee_payment_vouchers.created_at) as voucher_date')
+            ->addSelect('employee_payment_vouchers.created_by')
+            ->addSelect('creators.name as creator_name')
+            ->addSelect('employee_payment_vouchers.employee_name')
+            ->selectRaw('COUNT(employee_payment_vouchers.id) as voucher_count')
+            ->selectRaw('SUM(employee_payment_vouchers.amount) as total_amount')
+            ->groupByRaw('DATE(employee_payment_vouchers.created_at), employee_payment_vouchers.employee_id, employee_payment_vouchers.employee_name, employee_payment_vouchers.created_by, creators.name')
+            ->orderByDesc('voucher_date')
+            ->get();
+
+        $totalCount = (clone $reportQuery)->count();
+        $totalAmount = (float) (clone $reportQuery)->sum('amount');
+        $vouchers = (clone $reportQuery)
+            ->latest('employee_payment_vouchers.created_at')
+            ->latest('employee_payment_vouchers.id')
+            ->paginate(30)
+            ->withQueryString();
+        $creators = User::query()->orderBy('name')->get(['id', 'name']);
+        $employees = User::query()->orderBy('name')->get(['id', 'name']);
+
+        return view('backend.Accounts Entries.VoucherEntries', compact(
+            'startDate',
+            'endDate',
+            'validated',
+            'dailySummaries',
+            'totalCount',
+            'totalAmount',
+            'vouchers',
+            'creators',
+            'employees'
         ));
     }
 
@@ -138,7 +225,9 @@ class EmployeePaymentVoucherController extends Controller
             'notes' => 'required_if:expense_type,other|nullable|string|max:2000',
         ]);
 
-        $voucher = DB::transaction(function () use ($validated) {
+        $creatorId = $request->user()->id;
+
+        $voucher = DB::transaction(function () use ($validated, $creatorId) {
             $employee = User::query()->lockForUpdate()->findOrFail($validated['employee_id']);
             $amountInCents = (int) round((float) $validated['amount'] * 100);
 
@@ -159,6 +248,7 @@ class EmployeePaymentVoucherController extends Controller
                 // প্রথমে null রাখা হয়; record ID পাওয়ার পর transaction-এর মধ্যেই unique number বসে।
                 'voucher_no' => null,
                 'employee_id' => $employee->id,
+                'created_by' => $creatorId,
                 'employee_name' => $employee->name,
                 'expense_type' => $validated['expense_type'],
                 'payment_date' => $validated['payment_date'],

@@ -7,10 +7,10 @@
             <div class="row row-cols-1 row-cols-sm-2 row-cols-xl-4 g-3">
                 @php
                     $cards = [
+                        'purchase' => ['title' => 'Total Purchase', 'icon' => 'bx-cart', 'color' => 'info', 'gradient' => 'bg-gradient-blues'],
                         'revenue' => ['title' => 'Total Revenue', 'icon' => 'bx-wallet', 'color' => 'danger', 'gradient' => 'bg-gradient-burning'],
                         'due' => ['title' => 'Total Due', 'icon' => 'bx-time-five', 'color' => 'warning', 'gradient' => 'bg-gradient-orange'],
-                        'profit' => ['title' => 'Estimated Profit', 'icon' => 'bx-bar-chart-alt-2', 'color' => 'success', 'gradient' => 'bg-gradient-ohhappiness'],
-                        'purchase' => ['title' => 'Purchase Order Amount', 'icon' => 'bx-cart', 'color' => 'info', 'gradient' => 'bg-gradient-blues'],
+                        'profit' => ['title' => 'Profit', 'icon' => 'bx-bar-chart-alt-2', 'color' => 'success', 'gradient' => 'bg-gradient-ohhappiness'],
                     ];
                 @endphp
 
@@ -23,26 +23,12 @@
                                         <p class="mb-0 text-secondary">{{ $card['title'] }}</p>
                                         {{-- আগের বড় value স্থানে monthly total; নিচে daily ও weekly value-ও রাখা হয়। --}}
                                         <h4 class="my-1 text-{{ $card['color'] }}">
-                                            @if ($metricKey === 'profit' && $metrics['monthly']['profit'] === null)
-                                                Cost missing
-                                            @else
-                                                ৳{{ number_format($metrics['monthly'][$metricKey], 2) }}
-                                            @endif
+                                            ৳{{ number_format($metrics['monthly'][$metricKey], 2) }}
                                         </h4>
                                         <p class="mb-0 font-13 text-muted">
-                                            Daily
-                                            @if ($metricKey === 'profit' && $metrics['daily']['profit'] === null)
-                                                Cost missing
-                                            @else
-                                                ৳{{ number_format($metrics['daily'][$metricKey], 2) }}
-                                            @endif
+                                            Daily ৳{{ number_format($metrics['daily'][$metricKey], 2) }}
                                             <span class="mx-1">|</span>
-                                            Weekly
-                                            @if ($metricKey === 'profit' && $metrics['weekly']['profit'] === null)
-                                                Cost missing
-                                            @else
-                                                ৳{{ number_format($metrics['weekly'][$metricKey], 2) }}
-                                            @endif
+                                            Weekly ৳{{ number_format($metrics['weekly'][$metricKey], 2) }}
                                         </p>
                                     </div>
                                     <div class="text-white widgets-icons-2 rounded-circle {{ $card['gradient'] }} ms-auto">
@@ -50,7 +36,7 @@
                                     </div>
                                 </div>
                                 @if ($metricKey === 'profit')
-                                    <small class="mt-2 text-muted d-block">Estimated using current purchase prices</small>
+                                    <small class="mt-2 text-muted d-block">Sales − Purchase − Employee − Debit + Credit</small>
                                 @else
                                     {{-- সব card-এর footer-এর জায়গা একই রাখলে card-এর উচ্চতাও এক থাকে। --}}
                                     <small class="mt-2 d-block" aria-hidden="true">&nbsp;</small>
@@ -144,7 +130,7 @@
             </div>
 
             <div class="mt-3 text-muted small">
-                Revenue and employee sales exclude previous customer due. Profit excludes products without a recorded purchase price and does not allocate invoice-level discounts or VAT.
+                Revenue excludes previous customer due. Profit = Revenue − Purchase − Employee Voucher − Debit Voucher + Credit Voucher.
             </div>
         </div>
     </div>

@@ -31,6 +31,7 @@ class EmployeePaymentVoucher extends Model
     protected $fillable = [
         'voucher_no',
         'employee_id',
+        'created_by',
         'employee_name',
         'expense_type',
         'payment_date',
@@ -55,5 +56,13 @@ class EmployeePaymentVoucher extends Model
     public function employee(): BelongsTo
     {
         return $this->belongsTo(User::class, 'employee_id');
+    }
+
+    /**
+     * ভাউচারটি তৈরি করা user-কে ফেরায়; user মুছে গেলে relation null হতে পারে।
+     */
+    public function createdBy(): BelongsTo
+    {
+        return $this->belongsTo(User::class, 'created_by');
     }
 }

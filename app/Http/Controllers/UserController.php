@@ -51,6 +51,7 @@ class UserController extends Controller
             'remark' => 'nullable',
             'salary' => 'nullable|numeric|min:0|max:9999999999.99',
             'nid_number' => ['nullable', 'regex:/^(?:[0-9]{10}|[0-9]{17})$/'],
+            'phone' => 'nullable|string|max:30',
         ], [
             'nid_number.regex' => 'The NID / Smart Card number must contain exactly 10 or 17 digits.',
         ]);
@@ -82,6 +83,7 @@ class UserController extends Controller
             // salary ও NID/Smart Card ঐচ্ছিক; দেওয়া থাকলে কর্মীর রেকর্ডে সংরক্ষণ করা হয়।
             'salary' => $request->input('salary'),
             'nid_number' => $request->input('nid_number'),
+            'phone' => $request->input('phone'),
         ]);
         // ইউজারকে রোল এসাইন করা হলো
         $Users->assignRole($request->roles);
@@ -137,6 +139,7 @@ class UserController extends Controller
             'remark' => 'nullable',
             'salary' => 'nullable|numeric|min:0|max:9999999999.99',
             'nid_number' => ['nullable', 'regex:/^(?:[0-9]{10}|[0-9]{17})$/'],
+            'phone' => 'nullable|string|max:30',
         ], [
             'nid_number.regex' => 'The NID / Smart Card number must contain exactly 10 or 17 digits.',
         ]);
@@ -150,6 +153,7 @@ class UserController extends Controller
             // ফাঁকা ইনপুট middleware-এর মাধ্যমে null হয়ে বিদ্যমান মান পরিষ্কার করে।
             'salary' => $request->input('salary'),
             'nid_number' => $request->input('nid_number'),
+            'phone' => $request->input('phone'),
         ];
         // স্ট্যাটাস আপডেট লজিক
         if ($request->has('status')) {

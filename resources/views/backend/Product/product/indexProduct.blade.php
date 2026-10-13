@@ -249,7 +249,8 @@
                                                 <!-- Delete Button -->
                                                 <a href="{{ route('product.destroy', $product->id) }}"
                                                     class="btn btn-sm btn-outline-danger"
-                                                    onclick="return confirm('Are you sure you want to delete product: {{ $product->productName }}?')"
+                                                    data-swal-delete
+                                                    data-delete-message="Product: {{ $product->productName }}"
                                                     title="Delete Product">
                                                     <i class="bx bx-trash"></i>
                                                 </a>

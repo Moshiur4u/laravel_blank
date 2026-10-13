@@ -2,8 +2,10 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\EmployeePaymentVoucher;
 use App\Models\SaleInvoice;
 use App\Models\Supplierledger;
+use App\Models\VoucherEntry;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\DB;
 
@@ -41,26 +43,35 @@ class DashboardConrtoller extends Controller
                 ->value('total');
             $due = (clone $invoiceTotals)->sum('due_amount');
 
-            // products.price থেকে purchase_price বাদ দিয়ে বিক্রিত quantity গুণে এই period-এর profit হয়।
-            // কোনো sold item-এর ক্রয়মূল্য না থাকলে partial/ভুল profit না দেখিয়ে period-টি অসম্পূর্ণ ধরা হয়।
-            $profitSummary = DB::table('sale_items')
-                ->join('sale_invoices', 'sale_invoices.id', '=', 'sale_items.sale_invoice_id')
-                ->leftJoin('products', 'products.id', '=', 'sale_items.product_id')
-                ->where('sale_invoices.invoice_date', '>=', $start)
-                ->where('sale_invoices.invoice_date', '<', $end)
-                ->selectRaw('COUNT(*) as sold_items')
-                ->selectRaw('SUM(CASE WHEN products.purchase_price IS NULL THEN 1 ELSE 0 END) as missing_cost_items')
-                ->selectRaw('SUM((products.price - products.purchase_price) * sale_items.quantity) as total')
-                ->first();
-            $profit = $profitSummary->sold_items > 0 && $profitSummary->missing_cost_items > 0
-                ? null
-                : (float) ($profitSummary->total ?? 0);
-
             // supplier ledger-এর total-কে entry creation date অনুযায়ী ঐ সময়ের purchase order ধরা হয়।
             $purchaseTotal = Supplierledger::query()
                 ->where('created_at', '>=', $start)
                 ->where('created_at', '<', $end)
                 ->sum('total');
+
+            // Employee voucher payment date এবং general voucher voucher date অনুযায়ী খরচ/আয় ধরা হয়।
+            $employeeVoucherTotal = EmployeePaymentVoucher::query()
+                ->where('payment_date', '>=', $start->toDateString())
+                ->where('payment_date', '<', $end->toDateString())
+                ->sum('amount');
+            $debitVoucherTotal = VoucherEntry::query()
+                ->where('voucher_date', '>=', $start->toDateString())
+                ->where('voucher_date', '<', $end->toDateString())
+                ->where('voucher_type', 'debit')
+                ->sum('amount');
+            $creditVoucherTotal = VoucherEntry::query()
+                ->where('voucher_date', '>=', $start->toDateString())
+                ->where('voucher_date', '<', $end->toDateString())
+                ->where('voucher_type', 'credit')
+                ->sum('amount');
+            $profit = round(
+                (float) $revenue
+                    - (float) $purchaseTotal
+                    - (float) $employeeVoucherTotal
+                    - (float) $debitVoucherTotal
+                    + (float) $creditVoucherTotal,
+                2
+            );
 
             $metrics[$period] = [
                 'revenue' => (float) $revenue,

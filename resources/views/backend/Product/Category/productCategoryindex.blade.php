@@ -186,7 +186,8 @@
 
                                                 <a href="{{ route('category.destroy', $category->id) }}"
                                                     class="btn btn-sm btn-outline-danger"
-                                                    onclick="return confirm('Are you sure you want to delete category: {{ $category->category_name }}?')"
+                                                    data-swal-delete
+                                                    data-delete-message="Category: {{ $category->category_name }}"
                                                     title="Delete Category">
                                                     <i class="bx bx-trash"></i>
                                                 </a>

@@ -171,7 +171,8 @@
                                                 <!-- Delete Role -->
                                                 <a href="{{ route('roles.destroy', $role->id) }}"
                                                     class="btn btn-sm btn-outline-danger"
-                                                    onclick="return confirm('Are you sure you want to delete role: {{ $role->name }}?')"
+                                                    data-swal-delete
+                                                    data-delete-message="Role: {{ $role->name }}"
                                                     title="Delete Role">
                                                     <i class="bx bx-trash"></i>
                                                 </a>

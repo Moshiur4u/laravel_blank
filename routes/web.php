@@ -11,6 +11,7 @@ use App\Http\Controllers\SaleController;
 use App\Http\Controllers\SupplierController;
 use App\Http\Controllers\SupplierledgerController;
 use App\Http\Controllers\UserController;
+use App\Http\Controllers\VoucherEntryController;
 use Illuminate\Support\Facades\Route;
 
 // Route::get('/', function () {
@@ -27,12 +28,20 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::get('/dashboard', [DashboardConrtoller::class, 'dashboard'])->name('dashboard');
     Route::get('/dashboard-body', [DashboardConrtoller::class, 'dashboardbody'])->name('dashboardbody');
 });
+// সাধারণ Debit/Credit voucher entry ও দৈনিক report login এবং email verification চায়।
+Route::middleware(['auth', 'verified'])->group(function () {
+    Route::get('/voucher-entries', [VoucherEntryController::class, 'index'])->name('voucher-entries.index');
+    Route::post('/voucher-entries', [VoucherEntryController::class, 'store'])->name('voucher-entries.store');
+    Route::get('/voucher-entries/report', [VoucherEntryController::class, 'report'])->name('voucher-entries.report');
+});
 // কর্মী ব্যয়ের voucher দেখানো ও জমা দেওয়া—দুই route-ই login এবং email verification চায়।
 Route::middleware(['auth', 'verified'])->group(function () {
     Route::get('/employee-payment-vouchers', [EmployeePaymentVoucherController::class, 'index'])
         ->name('employee-payment.index');
     Route::post('/employee-payment-vouchers', [EmployeePaymentVoucherController::class, 'store'])
         ->name('employee-payment.store');
+    Route::get('/employee-payment-vouchers/report', [EmployeePaymentVoucherController::class, 'report'])
+        ->name('employee-payment.report');
     Route::get('/employee-payment-vouchers/{employee}/ledger/export', [EmployeePaymentVoucherController::class, 'exportLedger'])
         ->whereNumber('employee')
         ->name('employee-payment.ledger.export');

@@ -169,7 +169,8 @@
                                                     </a>
                                                     <a href="{{ route('user.destroy', $User->id) }}"
                                                         class="btn btn-sm btn-danger"
-                                                        onclick="return confirm('Are you sure you want to delete this user?')"
+                                                        data-swal-delete
+                                                        data-delete-message="Employee: {{ $User->name }}"
                                                         title="Delete Employee">
                                                         <i class="bx bx-trash"></i>
                                                     </a>

@@ -20,6 +20,12 @@
                 </div>
             </div>
 
+            <div class="mb-3 d-flex justify-content-end">
+                <a href="{{ route('employee-payment.report') }}" class="btn btn-outline-primary">
+                    <i class="bx bx-bar-chart-alt-2 me-1"></i> Daily Voucher Report
+                </a>
+            </div>
+
             @if (session('success'))
                 <div class="alert alert-success alert-dismissible fade show" role="alert">
                     {{ session('success') }}

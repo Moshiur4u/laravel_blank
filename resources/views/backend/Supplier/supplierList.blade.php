@@ -216,7 +216,8 @@
                                                     </a>
                                                     <a href="{{ route('supplier.destroy', $supplier->id) }}"
                                                         class="btn btn-sm btn-danger"
-                                                        onclick="return confirm('Are you sure you want to delete this supplier?')"
+                                                        data-swal-delete
+                                                        data-delete-message="Supplier: {{ $supplier->name }}"
                                                         title="Delete Supplier">
                                                         <i class="bx bx-trash"></i> Delete
                                                     </a>

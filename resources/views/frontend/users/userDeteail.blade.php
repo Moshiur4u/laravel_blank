@@ -144,6 +144,14 @@
                                     </div>
                                     <div class="row mb-3">
                                         <div class="col-sm-4 text-secondary">
+                                            <strong>Phone</strong>
+                                        </div>
+                                        <div class="col-sm-8 text-dark">
+                                            {{ $employee->phone ?: 'N/A' }}
+                                        </div>
+                                    </div>
+                                    <div class="row mb-3">
+                                        <div class="col-sm-4 text-secondary">
                                             <strong>Email Address</strong>
                                         </div>
                                         <div class="col-sm-8 text-dark">

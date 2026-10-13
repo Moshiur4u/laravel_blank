@@ -141,6 +141,19 @@
                                 {{-- কর্মীর বেতন ও পরিচয়পত্র নম্বর edit করা যায়; ফাঁকা রাখলে তথ্য মুছে যাবে। --}}
                                 <div class="row g-3 mb-3">
                                     <div class="col-md-6">
+                                        <label for="phone" class="form-label fw-semibold">Phone</label>
+                                        <div class="input-group">
+                                            <span class="input-group-text bg-light"><i class="bx bx-phone"></i></span>
+                                            <input type="text" name="phone" id="phone"
+                                                class="form-control @error('phone') is-invalid @enderror"
+                                                maxlength="30" placeholder="Enter employee phone"
+                                                value="{{ old('phone', $Users->phone) }}">
+                                        </div>
+                                        @error('phone')
+                                            <span class="text-danger small d-block mt-1">{{ $message }}</span>
+                                        @enderror
+                                    </div>
+                                    <div class="col-md-6">
                                         <label for="salary" class="form-label fw-semibold">Employee Salary</label>
                                         <div class="input-group">
                                             <span class="input-group-text bg-light"><i class="bx bx-money"></i></span>

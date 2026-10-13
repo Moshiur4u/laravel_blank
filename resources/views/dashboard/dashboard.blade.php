@@ -23,6 +23,7 @@
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css">
     <link href="{{ asset('assets/css/app.css') }}" rel="stylesheet">
     <link href="{{ asset('assets/css/icons.css') }}" rel="stylesheet">
+    <link href="{{ asset('assets/plugins/sweetalert2/sweetalert2.min.css') }}" rel="stylesheet">
 
     <!-- Theme Style CSS -->
     <link rel="stylesheet" href="{{ asset('assets/css/dark-theme.css') }}" />
@@ -172,7 +173,7 @@
                     <ul>
 
                         <li>
-                            <a href="#"><i class=' bx bx-id-card'></i>Voucher Entries</a>
+                            <a href="{{ route('voucher-entries.index') }}"><i class=' bx bx-id-card'></i>Voucher Entries</a>
                         </li>
 
                         <li>
@@ -218,6 +219,18 @@
                 </li>
 
                 <li class="menu-label">Reports</li>
+                <li>
+                    <a href="{{ route('employee-payment.report') }}">
+                        <div class="parent-icon"><i class="bx bx-receipt"></i></div>
+                        <div class="menu-title">Daily Employee Payment Report</div>
+                    </a>
+                </li>
+                <li>
+                    <a href="{{ route('voucher-entries.report') }}">
+                        <div class="parent-icon"><i class="bx bx-receipt"></i></div>
+                        <div class="menu-title">Daily Debit/Credit Voucher Report</div>
+                    </a>
+                </li>
                 <li>
                     <a class="has-arrow" href="javascript:;">
                         <div class="parent-icon"><i class='bx bx-message-square-edit'></i>
@@ -539,6 +552,8 @@
     <script src="{{ asset('assets/js/index.js') }}"></script>
     <!--app JS-->
     <script src="{{ asset('assets/js/app.js') }}"></script>
+    <script src="{{ asset('assets/plugins/sweetalert2/sweetalert2.min.js') }}"></script>
+    <script src="{{ asset('assets/js/delete-confirmation.js') }}"></script>
     <script>
         new PerfectScrollbar(".app-container");
     </script>

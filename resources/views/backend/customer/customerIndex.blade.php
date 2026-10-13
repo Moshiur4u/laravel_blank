@@ -145,7 +145,11 @@
                                                 <a href="{{ route('customer.edit', $customer->id) }}" class="btn btn-sm btn-outline-primary" title="Edit">
                                                     <i class="bx bx-edit-alt"></i>
                                                 </a>
-                                                <a href="{{ route('customer.destroy', $customer->id) }}" class="btn btn-sm btn-outline-danger" title="Delete" onclick="return confirm('Delete this customer?')">
+                                                <a href="{{ route('customer.destroy', $customer->id) }}"
+                                                    class="btn btn-sm btn-outline-danger"
+                                                    title="Delete"
+                                                    data-swal-delete
+                                                    data-delete-message="Customer: {{ $customer->name }}">
                                                     <i class="bx bx-trash"></i>
                                                 </a>
                                             </div>

@@ -336,7 +336,8 @@
                                                     </a>
                                                     <a href="{{ route('supplier.ledger.destroy', $entry->id) }}"
                                                         class="btn btn-sm btn-danger"
-                                                        onclick="return confirm('Are you sure you want to delete this ledger entry?')">
+                                                        data-swal-delete
+                                                        data-delete-message="Supplier ledger entry: {{ $entry->invoice_id }}">
                                                         <i class="bx bx-trash"></i>
                                                     </a>
                                                 </td>
