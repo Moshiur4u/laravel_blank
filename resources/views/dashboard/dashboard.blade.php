@@ -582,7 +582,7 @@
                             </div>
                         </a>
                         <ul class="dropdown-menu dropdown-menu-end">
-                            <li><a class="dropdown-item d-flex align-items-center" href="javascript:;"><i
+                            <li><a class="dropdown-item d-flex align-items-center" href="{{ route('user.show', Auth::user()->id) }}"><i
                                         class="bx bx-user fs-5"></i><span>Profile</span></a>
                             </li>
                             <li><a class="dropdown-item d-flex align-items-center" href="javascript:;"><i
