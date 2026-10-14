@@ -151,8 +151,8 @@
                                     <div class="col-6">
                                         <label for="discount_type" class="form-label fw-semibold text-nowrap">Discount Type</label>
                                         <select name="discount_type" id="discount_type" class="form-select">
-                                            <option value="amount" {{ old('discount_type', 'amount') === 'amount' ? 'selected' : '' }}>Direct Amount (৳)</option>
-                                            <option value="percentage" {{ old('discount_type') === 'percentage' ? 'selected' : '' }}>Percentage (%)</option>
+                                            <option value="amount" {{ old('discount_type', 'amount') === 'amount' ? 'selected' : '' }}>Amount</option>
+                                            <option value="percentage" {{ old('discount_type') === 'percentage' ? 'selected' : '' }}>Percent</option>
                                         </select>
                                     </div>
                                     <div class="col-6">
@@ -175,7 +175,7 @@
                                         <input type="hidden" name="vat_amount" id="vat_amount" value="{{ old('vat_amount', 0) }}">
                                     </div>
                                     <div class="col-6">
-                                        <label for="amount_paid" class="form-label fw-semibold text-nowrap">Amount Received</label>
+                                        <label for="amount_paid" class="form-label fw-semibold text-nowrap">Amount_Received</label>
                                         <div class="input-group">
                                             <input type="number" name="amount_paid" id="amount_paid" class="form-control" min="0" step="0.01" value="{{ old('amount_paid', 0) }}">
                                             <span class="input-group-text px-2">৳</span>

@@ -359,19 +359,6 @@
                         </li>
                     </ul>
                 </li>
-                <li>
-                    <a class="has-arrow" href="javascript:;">
-                        <div class="parent-icon"><i class="bx bx-grid-alt"></i>
-                        </div>
-                        <div class="menu-title">Store Reports</div>
-                    </a>
-                    <ul>
-                        <li> <a href="table-basic-table.html"><i class='bx bx-radio-circle'></i>Basic Table</a>
-                        </li>
-                        <li> <a href="table-datatable.html"><i class='bx bx-radio-circle'></i>Data Table</a>
-                        </li>
-                    </ul>
-                </li>
 
             </ul>
             <!--end navigation-->

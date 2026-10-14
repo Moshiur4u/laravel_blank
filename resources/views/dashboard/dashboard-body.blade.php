@@ -46,17 +46,11 @@
                                             Daily ৳{{ number_format(round($metrics['daily'][$metricKey])) }}
                                             <span class="mx-1">|</span>
                                             Weekly ৳{{ number_format(round($metrics['weekly'][$metricKey])) }}
+                                            <span class="mx-1">|</span>
+                                            Monthly ৳{{ number_format(round($metrics['monthly'][$metricKey])) }}
                                         </p>
                                     @endif
                                 </div>
-                                @if ($metricKey === 'expenses')
-                                    <small class="mt-2 text-muted d-block">Employee Voucher + Debit − Credit</small>
-                                @elseif ($metricKey === 'profit')
-                                    <small class="mt-2 text-muted d-block">Yearly (Monthly, Weekly & Daily profit)</small>
-                                @else
-                                    {{-- সব card-এর footer-এর জায়গা একই রাখলে card-এর উচ্চতাও এক থাকে। --}}
-                                    <small class="mt-2 d-block" aria-hidden="true">&nbsp;</small>
-                                @endif
                             </div>
                         </div>
                     </div>
