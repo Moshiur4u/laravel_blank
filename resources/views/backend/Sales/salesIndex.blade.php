@@ -19,8 +19,8 @@
             <form id="saleForm" action="{{ route('sales.store') }}" method="POST">
                 @csrf
                 <input type="hidden" name="save_customer" id="save_customer" value="{{ old('save_customer', 'no') }}">
-                <div class="row">
-                    <div class="col-lg-8">
+                <div class="row g-3">
+                    <div class="col-12 col-lg-7 col-xl-8">
                         <div class="border-0 shadow-sm card radius-10">
                             <div class="py-3 bg-transparent card-header border-bottom">
                                 <h5 class="mb-0 fw-bold text-dark"><i class="bx bx-cart text-primary me-2"></i>Sale Items</h5>
@@ -141,38 +141,55 @@
                         </div>
                     </div>
 
-                    <div class="col-lg-4">
+                    <div class="col-12 col-lg-5 col-xl-4">
                         <div class="border-0 shadow-sm card radius-10">
                             <div class="py-3 bg-transparent card-header border-bottom">
                                 <h5 class="mb-0 fw-bold text-dark"><i class="bx bx-receipt text-primary me-2"></i>Invoice & Payment</h5>
                             </div>
                             <div class="card-body">
-                                <div class="row">
-                                    <div class="mb-3 col-5">
-                                    <label for="discount_amount" class="form-label">Discount</label>
-                                    <input type="number" name="discount_amount" id="discount_amount" class="form-control" min="0" step="0.01" value="{{ old('discount_amount', 0) }}">
+                                <div class="row g-2 mb-3">
+                                    <div class="col-6">
+                                        <label for="discount_type" class="form-label fw-semibold text-nowrap">Discount Type</label>
+                                        <select name="discount_type" id="discount_type" class="form-select">
+                                            <option value="amount" {{ old('discount_type', 'amount') === 'amount' ? 'selected' : '' }}>Direct Amount (৳)</option>
+                                            <option value="percentage" {{ old('discount_type') === 'percentage' ? 'selected' : '' }}>Percentage (%)</option>
+                                        </select>
+                                    </div>
+                                    <div class="col-6">
+                                        <label for="discount_value" id="discount_label" class="form-label fw-semibold text-nowrap">Discount (৳)</label>
+                                        <div class="input-group">
+                                            <input type="number" name="discount_value" id="discount_value" class="form-control" min="0" step="0.01" value="{{ old('discount_value', old('discount_amount', 0)) }}" placeholder="0.00">
+                                            <span class="input-group-text px-2" id="discount_symbol">৳</span>
+                                        </div>
+                                        <input type="hidden" name="discount_amount" id="discount_amount" value="{{ old('discount_amount', 0) }}">
+                                    </div>
                                 </div>
-                                <div class="mb-3 col-7">
-                                    {{-- VAT-এর হার শতাংশে নেওয়া হয়; হিসাব করা টাকার অঙ্ক hidden ইনপুটে পাঠানো হয়। --}}
-                                    <label for="vat_percentage" class="form-label">VAT Percentage (%)</label>
-                                    <input type="number" name="vat_percentage" id="vat_percentage" class="form-control" min="0" step="0.01" value="{{ old('vat_percentage', 5) }}">
-                                    <input type="hidden" name="vat_amount" id="vat_amount" value="{{ old('vat_amount', 0) }}">
+                                <div class="row g-2 mb-3">
+                                    <div class="col-6">
+                                        {{-- VAT-এর হার শতাংশে নেওয়া হয়; হিসাব করা টাকার অঙ্ক hidden ইনপুটে পাঠানো হয়। --}}
+                                        <label for="vat_percentage" class="form-label fw-semibold text-nowrap">VAT (%)</label>
+                                        <div class="input-group">
+                                            <input type="number" name="vat_percentage" id="vat_percentage" class="form-control" min="0" step="0.01" value="{{ old('vat_percentage', 5) }}">
+                                            <span class="input-group-text px-2">%</span>
+                                        </div>
+                                        <input type="hidden" name="vat_amount" id="vat_amount" value="{{ old('vat_amount', 0) }}">
+                                    </div>
+                                    <div class="col-6">
+                                        <label for="amount_paid" class="form-label fw-semibold text-nowrap">Amount Received</label>
+                                        <div class="input-group">
+                                            <input type="number" name="amount_paid" id="amount_paid" class="form-control" min="0" step="0.01" value="{{ old('amount_paid', 0) }}">
+                                            <span class="input-group-text px-2">৳</span>
+                                        </div>
+                                    </div>
                                 </div>
-                                </div>
-                                <div class="row">
-                                <div class="mb-3 col-5">
-                                    <label for="amount_paid" class="form-label">Amount Receiv</label>
-                                    <input type="number" name="amount_paid" id="amount_paid" class="form-control" min="0" step="0.01" value="{{ old('amount_paid', 0) }}">
-                                </div>
-                                <div class="mb-3 col-7">
-                                    <label for="payment_method required" class="form-label">Payment Method</label>
+                                <div class="mb-3">
+                                    <label for="payment_method" class="form-label fw-semibold">Payment Method</label>
                                     <select name="payment_method" id="payment_method" class="form-select">
                                         <option value="">Select method</option>
                                         @foreach (['cash' => 'Cash', 'bank' => 'Bank', 'nagad' => 'Nagad', 'bkash' => 'bKash', 'rocket' => 'Rocket', 'upay' => 'Upay'] as $value => $label)
                                             <option value="{{ $value }}" {{ old('payment_method') === $value ? 'selected' : '' }}>{{ $label }}</option>
                                         @endforeach
                                     </select>
-                                </div>
                                 </div>
                                 <div class="mb-3">
                                     <label for="notes" class="form-label">Notes</label>
@@ -181,7 +198,7 @@
                                 <hr>
                                 <div class="mb-2 d-flex justify-content-between"><span>Subtotal</span><strong id="subtotalText">৳0.00</strong></div>
                                 {{-- সাবটোটালের পর ডিসকাউন্ট ও শতাংশ থেকে হিসাব করা VAT দেখানো হয়। --}}
-                                <div class="mb-2 d-flex justify-content-between"><span>Discount</span><strong id="discountText">৳0.00</strong></div>
+                                <div class="mb-2 d-flex justify-content-between"><span id="discountSummaryLabel">Discount</span><strong id="discountText">৳0.00</strong></div>
                                 <div class="mb-2 d-flex justify-content-between"><span>VAT (<span id="vatPercentageText">5%</span>)</span><strong id="vatText">৳0.00</strong></div>
                                 <div class="mb-2 d-flex justify-content-between"><span>Previous Due</span><strong id="previousDueText">৳0.00</strong></div>
                                 <div class="mb-2 d-flex justify-content-between"><span>Invoice Total</span><strong id="invoiceTotalText">৳0.00</strong></div>
@@ -304,7 +321,32 @@
                     stockAlert.textContent = lowStockItems.join(' • ');
                 }
 
-                const discount = Number(document.getElementById('discount_amount').value || 0);
+                // ডিসকাউন্ট টাইপ অনুযায়ী হিসাব: Direct Amount হলে সরাসরি টাকা, Percentage হলে সাবটোটালের শতকরা হার
+                const discountType = document.getElementById('discount_type').value;
+                const discountVal = Number(document.getElementById('discount_value').value || 0);
+                const discountLabel = document.getElementById('discount_label');
+                const discountSymbol = document.getElementById('discount_symbol');
+                const discountSummaryLabel = document.getElementById('discountSummaryLabel');
+
+                let discount = 0;
+                if (discountType === 'percentage') {
+                    if (discountLabel) discountLabel.textContent = 'Discount Percentage (%)';
+                    if (discountSymbol) discountSymbol.textContent = '%';
+                    document.getElementById('discount_value').placeholder = '0%';
+                    discount = Math.round((subtotal * discountVal / 100 + Number.EPSILON) * 100) / 100;
+                    if (discountSummaryLabel) discountSummaryLabel.textContent = `Discount (${discountVal}%)`;
+                } else {
+                    if (discountLabel) discountLabel.textContent = 'Discount Amount (৳)';
+                    if (discountSymbol) discountSymbol.textContent = '৳';
+                    document.getElementById('discount_value').placeholder = '0.00';
+                    discount = Math.round((discountVal + Number.EPSILON) * 100) / 100;
+                    if (discountSummaryLabel) discountSummaryLabel.textContent = 'Discount';
+                }
+
+                // ডিসকাউন্ট সাবটোটালের চেয়ে বেশি হতে পারবে না
+                discount = Math.min(discount, subtotal);
+                document.getElementById('discount_amount').value = discount.toFixed(2);
+
                 // ডিসকাউন্ট বাদ দেওয়ার পরের সাবটোটালের ওপর VAT শতাংশ হিসাব করা হয়।
                 const vatPercentage = Number(document.getElementById('vat_percentage').value || 0);
                 const vatBase = Math.max(0, subtotal - discount);
@@ -461,9 +503,12 @@
                 }
                 updateTotals();
             });
-            ['discount_amount', 'vat_percentage', 'amount_paid', 'include_previous_due'].forEach((id) => {
-                document.getElementById(id).addEventListener('input', updateTotals);
-                document.getElementById(id).addEventListener('change', updateTotals);
+            ['discount_type', 'discount_value', 'vat_percentage', 'amount_paid', 'include_previous_due'].forEach((id) => {
+                const el = document.getElementById(id);
+                if (el) {
+                    el.addEventListener('input', updateTotals);
+                    el.addEventListener('change', updateTotals);
+                }
             });
 
             form.addEventListener('submit', async function (event) {

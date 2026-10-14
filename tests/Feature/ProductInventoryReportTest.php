@@ -4,6 +4,7 @@ namespace Tests\Feature;
 
 use App\Http\Controllers\ProductInventoryReportController;
 use App\Models\Product;
+use App\Models\SaleItem;
 use App\Models\Supplier;
 use App\Models\Supplierledger;
 use Illuminate\Database\Schema\Blueprint;
@@ -46,6 +47,12 @@ class ProductInventoryReportTest extends TestCase
             'unit' => '7',
             'expiry_date' => today()->addDays(5)->toDateString(),
             'supplier_id' => $supplierOne->id,
+            'purchase_price' => '15.00',
+        ]);
+        Product::create([
+            'productName' => 'Expired Product',
+            'unit' => '2',
+            'expiry_date' => today()->subDay()->toDateString(),
         ]);
 
         Supplierledger::create([
@@ -60,21 +67,45 @@ class ProductInventoryReportTest extends TestCase
             'quantity' => '5',
             'total' => '110.00',
         ]);
+        SaleItem::create([
+            'product_id' => $product->id,
+            'product_name' => 'Rice',
+            'quantity' => 3,
+            'purchase_price' => '10.00',
+            'unit_price' => '20.00',
+            'line_total' => '60.00',
+        ]);
+        SaleItem::create([
+            'product_id' => $product->id,
+            'product_name' => 'Rice',
+            'quantity' => 2,
+            'purchase_price' => null,
+            'unit_price' => '25.00',
+            'line_total' => '50.00',
+        ]);
 
         $view = app(ProductInventoryReportController::class)->index();
         $data = $view->getData();
-        $row = $data['rows']->first();
+        $row = $data['rows']->firstWhere('name', 'Rice');
 
         $this->assertSame('backend.reports.productinventory', $view->name());
         $this->assertEquals(15, $row['purchased_quantity']);
         $this->assertEquals(310, $row['purchase_amount']);
         $this->assertEquals(7, $row['stock']);
+        $this->assertEquals(12, $row['purchase_price']);
+        $this->assertEquals(22, $row['avg_selling_price']);
+        $this->assertEquals(5, $row['quantity_sold']);
+        $this->assertEquals(110, $row['revenue']);
+        $this->assertEquals(60, $row['total_cost']);
+        $this->assertEquals(50, $row['profit']);
         $this->assertSame('expiring', $row['expiry_status']);
         $this->assertCount(2, $row['suppliers']);
         $this->assertSame('01700000001', $row['suppliers'][0]['phone']);
+        $this->assertEquals(2, $data['total_products']);
         $this->assertEquals(15, $data['total_purchased_quantity']);
         $this->assertEquals(310, $data['total_purchase_amount']);
         $this->assertEquals(7, $data['total_stock']);
+        $this->assertSame(1, $data['total_expired_products']);
     }
 
     private function createReportSchema(): void
@@ -92,6 +123,7 @@ class ProductInventoryReportTest extends TestCase
             $table->string('unit');
             $table->date('expiry_date')->nullable();
             $table->foreignId('supplier_id')->nullable();
+            $table->decimal('purchase_price', 10, 2)->nullable();
             $table->timestamps();
         });
 
@@ -101,6 +133,18 @@ class ProductInventoryReportTest extends TestCase
             $table->string('product_id')->nullable();
             $table->string('quantity')->nullable();
             $table->string('total')->nullable();
+            $table->timestamps();
+        });
+
+        Schema::create('sale_items', function (Blueprint $table): void {
+            $table->id();
+            $table->foreignId('sale_invoice_id')->nullable();
+            $table->foreignId('product_id')->nullable();
+            $table->string('product_name');
+            $table->decimal('quantity', 15, 2);
+            $table->decimal('purchase_price', 15, 2)->nullable();
+            $table->decimal('unit_price', 15, 2);
+            $table->decimal('line_total', 15, 2);
             $table->timestamps();
         });
     }

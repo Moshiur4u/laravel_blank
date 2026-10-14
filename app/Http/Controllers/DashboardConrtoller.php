@@ -33,7 +33,8 @@ class DashboardConrtoller extends Controller
         ];
 
         $metrics = [];
-        foreach (['daily', 'weekly', 'monthly'] as $period) {
+        // ড্যাশবোর্ড কার্ডের জন্য daily, weekly, monthly ও yearly KPI এবং লাভ হিসাব করা হয়।
+        foreach (['daily', 'weekly', 'monthly', 'yearly'] as $period) {
             [$start, $end] = $periods[$period];
 
             // আগের বকেয়া নতুন বিক্রির আয় নয়, তাই revenue থেকে তা বাদ দিয়ে বিক্রি, discount ও VAT ধরা হয়।
@@ -154,11 +155,13 @@ class DashboardConrtoller extends Controller
         }
 
         // product-এর নাম snapshot থেকে রাখা হয়; ranking quantity sold অনুযায়ী সব সময়ের জন্য।
+        // এছাড়া বিক্রির মোট আয়ের পাশাপাশি ক্রয়মূল্যের স্ন্যাপশট অনুযায়ী লাভ (profit) নির্ণয় করা হয়।
         $topProducts = DB::table('sale_items')
             ->leftJoin('products', 'products.id', '=', 'sale_items.product_id')
             ->select('sale_items.product_id', 'sale_items.product_name', 'products.img_url')
             ->selectRaw('SUM(sale_items.quantity) as quantity_sold')
             ->selectRaw('SUM(sale_items.line_total) as sales_amount')
+            ->selectRaw('SUM(sale_items.line_total - (sale_items.quantity * COALESCE(sale_items.purchase_price, products.purchase_price, 0))) as profit')
             ->groupBy('sale_items.product_id', 'sale_items.product_name', 'products.img_url')
             ->orderByDesc('quantity_sold')
             ->limit(5)

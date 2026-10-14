@@ -56,7 +56,7 @@
                     <div class="row justify-content-end mt-4">
                         <div class="col-md-6 col-lg-5">
                             <div class="d-flex justify-content-between py-1"><span>Subtotal</span><span>৳{{ number_format($invoice->subtotal, 2) }}</span></div>
-                            <div class="d-flex justify-content-between py-1"><span>Discount</span><span>- ৳{{ number_format($invoice->discount_amount, 2) }}</span></div>
+                            <div class="d-flex justify-content-between py-1"><span>Discount{{ ($invoice->discount_type === 'percentage' && (float) $invoice->discount_value > 0) ? ' (' . rtrim(rtrim(number_format((float) $invoice->discount_value, 2), '0'), '.') . '%)' : '' }}</span><span>- ৳{{ number_format($invoice->discount_amount, 2) }}</span></div>
                             <div class="d-flex justify-content-between py-1"><span>VAT</span><span>৳{{ number_format($invoice->vat_amount, 2) }}</span></div>
                             @if ($invoice->include_previous_due)
                                 <div class="d-flex justify-content-between py-1"><span>Previous Due</span><span>৳{{ number_format($invoice->previous_due, 2) }}</span></div>

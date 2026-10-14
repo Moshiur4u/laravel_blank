@@ -3,40 +3,56 @@
 @section('content')
     <div class="page-wrapper">
         <div class="page-content">
-            {{-- আগের dashboard card layout অক্ষুণ্ণ রেখে চারটি KPI-র period value দেখানো হয়। --}}
-            <div class="row row-cols-1 row-cols-sm-2 row-cols-xl-4 g-3">
+            {{-- আগের dashboard card layout-এ Profit Card যুক্ত করে মোট ৫টি KPI প্রদর্শিত হয়। --}}
+            <div class="row row-cols-1 row-cols-sm-2 row-cols-md-3 row-cols-xl-5 g-3">
                 @php
                     $cards = [
                         'purchase' => ['title' => 'Total Purchase', 'icon' => 'bx-cart', 'color' => 'info', 'gradient' => 'bg-gradient-blues'],
                         'revenue' => ['title' => 'Total Revenue', 'icon' => 'bx-wallet', 'color' => 'danger', 'gradient' => 'bg-gradient-burning'],
                         'due' => ['title' => 'Total Due', 'icon' => 'bx-time-five', 'color' => 'warning', 'gradient' => 'bg-gradient-orange'],
-                        'expenses' => ['title' => 'Total Expense', 'icon' => 'bx-money', 'color' => 'warning', 'gradient' => 'bg-gradient-orange'],
+                        'expenses' => ['title' => 'Total Expense', 'icon' => 'bx-money', 'color' => 'secondary', 'gradient' => 'bg-gradient-orange'],
+                        'profit' => ['title' => 'Net Profit', 'icon' => 'bx-trending-up', 'color' => 'success', 'gradient' => 'bg-gradient-ohhappiness'],
                     ];
                 @endphp
 
                 @foreach ($cards as $metricKey => $card)
                     <div class="col d-flex">
                         <div class="border-4 card radius-10 border-start border-{{ $card['color'] }} dashboard-metric-card w-100">
-                            <div class="card-body d-flex flex-column justify-content-between">
-                                <div class="d-flex align-items-center">
-                                    <div>
-                                        <p class="mb-0 text-secondary">{{ $card['title'] }}</p>
-                                        {{-- আগের বড় value স্থানে monthly total; নিচে daily ও weekly value-ও রাখা হয়। --}}
-                                        <h4 class="my-1 text-{{ $card['color'] }}">
-                                            ৳{{ number_format($metrics['monthly'][$metricKey], 2) }}
+                            <div class="card-body d-flex flex-column justify-content-between text-center">
+                                {{-- ড্যাশবোর্ড কার্ডের আইকন সেন্টারে স্থাপন করা হয়েছে --}}
+                                <div class="text-white widgets-icons-2 rounded-circle {{ $card['gradient'] }} mx-auto mb-2">
+                                    <i class="bx {{ $card['icon'] }}"></i>
+                                </div>
+                                <div>
+                                    <p class="mb-1 text-secondary fw-semibold">{{ $card['title'] }}</p>
+                                    @if ($metricKey === 'profit')
+                                        {{-- Profit Card: বড় ফন্টে বাৎসরিক লাভ এবং ছোট ফন্টে দৈনিক, সাপ্তাহিক ও মাসিক লাভ (রাউন্ডেড অ্যামাউন্ট) --}}
+                                        <h4 class="my-1 text-{{ $card['color'] }} fw-bold">
+                                            ৳{{ number_format(round($metrics['yearly']['profit'])) }}
                                         </h4>
                                         <p class="mb-0 font-13 text-muted">
-                                            Daily ৳{{ number_format($metrics['daily'][$metricKey], 2) }}
+                                            Daily ৳{{ number_format(round($metrics['daily']['profit'])) }}
                                             <span class="mx-1">|</span>
-                                            Weekly ৳{{ number_format($metrics['weekly'][$metricKey], 2) }}
+                                            Weekly ৳{{ number_format(round($metrics['weekly']['profit'])) }}
+                                            <span class="mx-1">|</span>
+                                            Monthly ৳{{ number_format(round($metrics['monthly']['profit'])) }}
                                         </p>
-                                    </div>
-                                    <div class="text-white widgets-icons-2 rounded-circle {{ $card['gradient'] }} ms-auto">
-                                        <i class="bx {{ $card['icon'] }}"></i>
-                                    </div>
+                                    @else
+                                        {{-- অন্যান্য কার্ডে বড় ফন্টে মাসিক মোট এবং ছোট ফন্টে দৈনিক ও সাপ্তাহিক মান (রাউন্ডেড অ্যামাউন্ট) --}}
+                                        <h4 class="my-1 text-{{ $card['color'] }} fw-bold">
+                                            ৳{{ number_format(round($metrics['monthly'][$metricKey])) }}
+                                        </h4>
+                                        <p class="mb-0 font-13 text-muted">
+                                            Daily ৳{{ number_format(round($metrics['daily'][$metricKey])) }}
+                                            <span class="mx-1">|</span>
+                                            Weekly ৳{{ number_format(round($metrics['weekly'][$metricKey])) }}
+                                        </p>
+                                    @endif
                                 </div>
                                 @if ($metricKey === 'expenses')
                                     <small class="mt-2 text-muted d-block">Employee Voucher + Debit − Credit</small>
+                                @elseif ($metricKey === 'profit')
+                                    <small class="mt-2 text-muted d-block">Yearly (Monthly, Weekly & Daily profit)</small>
                                 @else
                                     {{-- সব card-এর footer-এর জায়গা একই রাখলে card-এর উচ্চতাও এক থাকে। --}}
                                     <small class="mt-2 d-block" aria-hidden="true">&nbsp;</small>
@@ -84,6 +100,7 @@
                                             <th>Product</th>
                                             <th class="text-end">Quantity Sold</th>
                                             <th class="text-end">Sales Amount</th>
+                                            <th class="text-end">Profit</th>
                                         </tr>
                                     </thead>
                                     <tbody>
@@ -100,10 +117,11 @@
                                                 </td>
                                                 <td class="text-end">{{ number_format((int) $product->quantity_sold) }}</td>
                                                 <td class="text-end">৳{{ number_format((float) $product->sales_amount, 2) }}</td>
+                                                <td class="text-end fw-semibold text-success">৳{{ number_format(round((float) $product->profit)) }}</td>
                                             </tr>
                                         @empty
                                             <tr>
-                                                <td colspan="4" class="py-4 text-center text-muted">No sales recorded yet.</td>
+                                                <td colspan="5" class="py-4 text-center text-muted">No sales recorded yet.</td>
                                             </tr>
                                         @endforelse
                                     </tbody>
@@ -150,9 +168,9 @@
                 </div>
             </div>
 
-            <div class="mt-3 text-muted small">
+            {{-- <div class="mt-3 text-muted small">
                 Expense = Employee Voucher + Debit Voucher − Credit Voucher. Profit = Revenue − Purchase − Expense. Revenue excludes previous customer due.
-            </div>
+            </div> --}}
         </div>
     </div>
 

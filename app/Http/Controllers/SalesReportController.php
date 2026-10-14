@@ -58,27 +58,35 @@ class SalesReportController extends Controller
 
         $topProductsQuery = SaleItem::query()
             ->join('sale_invoices', 'sale_items.sale_invoice_id', '=', 'sale_invoices.id')
+            ->leftJoin('products', 'sale_items.product_id', '=', 'products.id')
             ->when($startDate, fn ($query) => $query->whereDate('sale_invoices.invoice_date', '>=', $startDate))
             ->when($endDate, fn ($query) => $query->whereDate('sale_invoices.invoice_date', '<=', $endDate))
             ->when($filters['employee_id'] ?? null, fn ($query, $employeeId) => $query->where('sale_invoices.user_id', $employeeId))
             ->when($filters['customer_id'] ?? null, fn ($query, $customerId) => $query->where('sale_invoices.customer_id', $customerId))
             ->when($filters['product_id'] ?? null, fn ($query, $productId) => $query->where('sale_items.product_id', $productId));
 
-        $topProducts = $topProductsQuery
+        // প্রতিটি পণ্যের বিক্রির পরিমাণ, গড় বিক্রয়মূল্য, গড় ক্রয়মূল্য এবং একক পণ্যভিত্তিক মোট লাভ হিসাব করা হয়।
+        $topProducts = (clone $topProductsQuery)
             ->select([
                 'sale_items.product_id',
                 'sale_items.product_name',
             ])
+            ->selectRaw('CASE WHEN SUM(sale_items.quantity) > 0 THEN SUM(sale_items.quantity * COALESCE(sale_items.purchase_price, products.purchase_price, 0)) / SUM(sale_items.quantity) ELSE 0 END as purchase_price')
+            ->selectRaw('CASE WHEN SUM(sale_items.quantity) > 0 THEN SUM(sale_items.line_total) / SUM(sale_items.quantity) ELSE 0 END as avg_selling_price')
             ->selectRaw('SUM(sale_items.quantity) as quantity_sold')
             ->selectRaw('SUM(sale_items.line_total) as revenue')
+            ->selectRaw('SUM(sale_items.quantity * COALESCE(sale_items.purchase_price, products.purchase_price, 0)) as total_cost')
+            ->selectRaw('SUM(sale_items.line_total - (sale_items.quantity * COALESCE(sale_items.purchase_price, products.purchase_price, 0))) as profit')
             ->groupBy('sale_items.product_id', 'sale_items.product_name')
             ->orderByDesc('revenue')
             ->orderBy('sale_items.product_name')
-            ->limit(5)
             ->get();
 
+        $totalProfit = (float) $topProducts->sum('profit');
+        $totalCost = (float) $topProducts->sum('total_cost');
+
         $invoices = (clone $invoiceQuery)
-            ->with(['customer', 'employee'])
+            ->with(['customer', 'employee', 'items.product'])
             ->withCount('items')
             ->latest('invoice_date')
             ->paginate(20)
@@ -96,6 +104,8 @@ class SalesReportController extends Controller
             'totalSalesAmount' => $totalSalesAmount,
             'totalDue' => $totalDue,
             'totalSalesCount' => $totalSalesCount,
+            'totalProfit' => $totalProfit,
+            'totalCost' => $totalCost,
             'reportGeneratedAt' => now(),
         ]);
     }
@@ -140,24 +150,33 @@ class SalesReportController extends Controller
             ->value('total') ?? 0);
         $totalDue = (float) (clone $invoiceQuery)->sum('due_amount');
         $totalSalesCount = (clone $invoiceQuery)->count();
+
         $topProductsQuery = SaleItem::query()
             ->join('sale_invoices', 'sale_items.sale_invoice_id', '=', 'sale_invoices.id')
+            ->leftJoin('products', 'sale_items.product_id', '=', 'products.id')
             ->when($startDate, fn ($query) => $query->whereDate('sale_invoices.invoice_date', '>=', $startDate))
             ->when($endDate, fn ($query) => $query->whereDate('sale_invoices.invoice_date', '<=', $endDate))
             ->when($filters['employee_id'] ?? null, fn ($query, $employeeId) => $query->where('sale_invoices.user_id', $employeeId))
             ->when($filters['customer_id'] ?? null, fn ($query, $customerId) => $query->where('sale_invoices.customer_id', $customerId))
             ->when($filters['product_id'] ?? null, fn ($query, $productId) => $query->where('sale_items.product_id', $productId));
-        $topProducts = $topProductsQuery
-            ->select(['sale_items.product_name'])
+
+        $topProducts = (clone $topProductsQuery)
+            ->select(['sale_items.product_id', 'sale_items.product_name'])
+            ->selectRaw('CASE WHEN SUM(sale_items.quantity) > 0 THEN SUM(sale_items.quantity * COALESCE(sale_items.purchase_price, products.purchase_price, 0)) / SUM(sale_items.quantity) ELSE 0 END as purchase_price')
+            ->selectRaw('CASE WHEN SUM(sale_items.quantity) > 0 THEN SUM(sale_items.line_total) / SUM(sale_items.quantity) ELSE 0 END as avg_selling_price')
             ->selectRaw('SUM(sale_items.quantity) as quantity_sold')
             ->selectRaw('SUM(sale_items.line_total) as revenue')
+            ->selectRaw('SUM(sale_items.quantity * COALESCE(sale_items.purchase_price, products.purchase_price, 0)) as total_cost')
+            ->selectRaw('SUM(sale_items.line_total - (sale_items.quantity * COALESCE(sale_items.purchase_price, products.purchase_price, 0))) as profit')
             ->groupBy('sale_items.product_id', 'sale_items.product_name')
             ->orderByDesc('revenue')
             ->orderBy('sale_items.product_name')
-            ->limit(5)
             ->get();
+
+        $totalProfit = (float) $topProducts->sum('profit');
+
         $invoices = (clone $invoiceQuery)
-            ->with(['customer', 'employee'])
+            ->with(['customer', 'employee', 'items.product'])
             ->withCount('items')
             ->latest('invoice_date')
             ->lazy(500);
@@ -168,25 +187,36 @@ class SalesReportController extends Controller
             $totalSalesAmount,
             $totalDue,
             $totalSalesCount,
+            $totalProfit,
             $topProducts,
             $invoices
         ): void {
             $writeRow(['Sales Report']);
             $writeRow(['Period', $period]);
             $writeRow(['Total Sale Amount', number_format($totalSalesAmount, 2, '.', '')]);
+            $writeRow(['Total Profit', number_format($totalProfit, 2, '.', '')]);
             $writeRow(['Total Due', number_format($totalDue, 2, '.', '')]);
             $writeRow(['Total Sales (Invoices)', $totalSalesCount]);
             $writeRow([]);
-            $writeRow(['Top Products by Revenue']);
-            $writeRow(['Product', 'Quantity Sold', 'Revenue']);
+            $writeRow(['Product-wise Sales & Profit']);
+            $writeRow(['Product', 'Purchase Price', 'Avg Selling Price', 'Quantity Sold', 'Total Sales (Revenue)', 'Total Purchase Cost', 'Profit']);
             foreach ($topProducts as $product) {
-                $writeRow([$product->product_name, $product->quantity_sold, number_format((float) $product->revenue, 2, '.', '')]);
+                $writeRow([
+                    $product->product_name,
+                    number_format((float) $product->purchase_price, 2, '.', ''),
+                    number_format((float) $product->avg_selling_price, 2, '.', ''),
+                    $product->quantity_sold,
+                    number_format((float) $product->revenue, 2, '.', ''),
+                    number_format((float) $product->total_cost, 2, '.', ''),
+                    number_format((float) $product->profit, 2, '.', ''),
+                ]);
             }
             $writeRow([]);
             $writeRow(['Sales Details']);
-            $writeRow(['Date', 'Invoice', 'Customer', 'Employee', 'Items', 'Sale Amount', 'Due']);
+            $writeRow(['Date', 'Invoice', 'Customer', 'Employee', 'Items', 'Sale Amount', 'Profit', 'Due']);
 
             foreach ($invoices as $invoice) {
+                $invoiceProfit = $invoice->items->sum(fn ($item) => (float) $item->profit) - (float) $invoice->discount_amount;
                 $writeRow([
                     $invoice->invoice_date?->format('Y-m-d H:i:s'),
                     $invoice->invoice_no,
@@ -194,6 +224,7 @@ class SalesReportController extends Controller
                     $invoice->employee?->name ?? 'N/A',
                     $invoice->items_count,
                     number_format((float) $invoice->subtotal - (float) $invoice->discount_amount + (float) $invoice->vat_amount, 2, '.', ''),
+                    number_format((float) $invoiceProfit, 2, '.', ''),
                     number_format((float) $invoice->due_amount, 2, '.', ''),
                 ]);
             }

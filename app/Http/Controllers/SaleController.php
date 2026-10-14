@@ -74,6 +74,8 @@ class SaleController extends Controller
             'customer_email' => 'nullable|email|max:255',
             'customer_address' => 'nullable|string|max:2000',
             'include_previous_due' => 'nullable|boolean',
+            'discount_type' => 'nullable|in:amount,percentage',
+            'discount_value' => 'nullable|numeric|min:0',
             'discount_amount' => 'nullable|numeric|min:0',
             'vat_amount' => 'nullable|numeric|min:0',
             'amount_paid' => 'nullable|numeric|min:0',
@@ -142,7 +144,17 @@ class SaleController extends Controller
             }
 
             $subtotal = round($subtotal, 2);
-            $discount = round((float) ($validated['discount_amount'] ?? 0), 2);
+            $discountType = $validated['discount_type'] ?? 'amount';
+            $discountValue = isset($validated['discount_value']) ? round((float) $validated['discount_value'], 2) : null;
+
+            // যদি Percentage বাছা হয় তবে সাবটোটালের ওপর শতকরা হার অনুযায়ী ডিসকাউন্ট নির্ণয় হয়, অন্যথায় সরাসরি টাকার অঙ্ক ব্যবহৃত হয়।
+            if ($discountType === 'percentage' && $discountValue !== null) {
+                $discount = round(($subtotal * $discountValue) / 100, 2);
+            } else {
+                $discount = round((float) ($validated['discount_amount'] ?? $discountValue ?? 0), 2);
+                $discountValue = $discount;
+            }
+
             if ($discount > $subtotal) {
                 throw ValidationException::withMessages([
                     'discount_amount' => 'The discount cannot be greater than the subtotal.',
@@ -175,6 +187,8 @@ class SaleController extends Controller
                 'user_id' => $userId,
                 'invoice_date' => now(),
                 'subtotal' => $subtotal,
+                'discount_type' => $discountType,
+                'discount_value' => $discountValue ?? 0,
                 'discount_amount' => $discount,
                 'vat_amount' => $vat,
                 'previous_due' => $includePreviousDue ? $previousDue : 0,
@@ -191,11 +205,13 @@ class SaleController extends Controller
                 $product = $lineItem['product'];
                 $quantity = $lineItem['quantity'];
 
+                // বিক্রির সময় পণ্যের ক্রয়মূল্য snapshot আকারে রাখা হয় যাতে পরে পণ্যের ক্রয়মূল্য বদলালেও রিপোর্টের লাভ অপরিবর্তিত থাকে।
                 SaleItem::create([
                     'sale_invoice_id' => $invoice->id,
                     'product_id' => $product->id,
                     'product_name' => $product->productName,
                     'quantity' => $quantity,
+                    'purchase_price' => $product->purchase_price !== null ? (float) $product->purchase_price : null,
                     'unit_price' => $lineItem['unitPrice'],
                     'line_total' => $lineItem['lineTotal'],
                 ]);

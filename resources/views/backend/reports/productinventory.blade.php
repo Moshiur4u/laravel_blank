@@ -41,7 +41,7 @@
                     </div>
 
                     <div class="row g-3 mb-4">
-                        <div class="col-12 col-sm-6 col-xl-3">
+                        <div class="col-12 col-sm-6 col-xl">
                             <div class="card border-0 bg-light h-100">
                                 <div class="card-body">
                                     <div class="text-muted">Total Products</div>
@@ -49,7 +49,7 @@
                                 </div>
                             </div>
                         </div>
-                        <div class="col-12 col-sm-6 col-xl-3">
+                        <div class="col-12 col-sm-6 col-xl">
                             <div class="card border-0 bg-light h-100">
                                 <div class="card-body">
                                     <div class="text-muted">Total Purchased Quantity</div>
@@ -57,7 +57,7 @@
                                 </div>
                             </div>
                         </div>
-                        <div class="col-12 col-sm-6 col-xl-3">
+                        <div class="col-12 col-sm-6 col-xl">
                             <div class="card border-0 bg-light h-100">
                                 <div class="card-body">
                                     <div class="text-muted">Total Purchase Amount</div>
@@ -65,11 +65,21 @@
                                 </div>
                             </div>
                         </div>
-                        <div class="col-12 col-sm-6 col-xl-3">
+                        <div class="col-12 col-sm-6 col-xl">
                             <div class="card border-0 bg-light h-100">
                                 <div class="card-body">
                                     <div class="text-muted">Current Stock</div>
                                     <div class="fs-4 fw-bold">{{ number_format($total_stock, 2) }}</div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-12 col-sm-6 col-xl">
+                            <div class="card border-0 bg-light h-100">
+                                <div class="card-body">
+                                    <div class="text-muted">Expired Products</div>
+                                    <div class="fs-4 fw-bold text-danger">
+                                        {{ number_format($total_expired_products) }}
+                                    </div>
                                 </div>
                             </div>
                         </div>
@@ -80,6 +90,7 @@
                         <span class="text-muted small">{{ number_format($total_products) }} products</span>
                     </div>
 
+                    <h6 class="fw-bold mb-3">Stock, Expiry &amp; Supplier Details</h6>
                     <div class="table-responsive">
                         <table class="table table-bordered table-striped align-middle mb-0">
                             <thead class="table-light">
@@ -89,6 +100,9 @@
                                     <th scope="col" class="text-end">Purchased Qty</th>
                                     <th scope="col" class="text-end">Purchase Amount</th>
                                     <th scope="col" class="text-end">Current Stock</th>
+                                    <th scope="col" class="text-end">Total Quantity Sold</th>
+                                    <th scope="col" class="text-end">Total Sales</th>
+                                    <th scope="col" class="text-end">Profit</th>
                                     <th scope="col">Expiry</th>
                                     <th scope="col">Supplier</th>
                                     <th scope="col">Phone Number</th>
@@ -102,6 +116,13 @@
                                         <td class="text-end">{{ number_format($row['purchased_quantity'], 2) }}</td>
                                         <td class="text-end">৳{{ number_format($row['purchase_amount'], 2) }}</td>
                                         <td class="text-end">{{ number_format($row['stock'], 2) }}</td>
+                                        <td class="text-end">{{ number_format($row['quantity_sold'], 2) }}</td>
+                                        <td class="text-end">৳{{ number_format($row['revenue'], 2) }}</td>
+                                        <td class="text-end">
+                                            <span class="fw-bold {{ $row['profit'] >= 0 ? 'text-success' : 'text-danger' }}">
+                                                ৳{{ number_format($row['profit'], 2) }}
+                                            </span>
+                                        </td>
                                         <td>
                                             @if ($row['expiry_date'])
                                                 <div class="text-nowrap">{{ $row['expiry_date']->format('d M Y') }}</div>
@@ -138,10 +159,24 @@
                                     </tr>
                                 @empty
                                     <tr>
-                                        <td colspan="8" class="py-4 text-center text-muted">No products found.</td>
+                                        <td colspan="11" class="py-4 text-center text-muted">No products found.</td>
                                     </tr>
                                 @endforelse
                             </tbody>
+                            @if ($rows->isNotEmpty())
+                                <tfoot class="table-light fw-bold">
+                                    <tr>
+                                        <td colspan="2" class="text-end">Total:</td>
+                                        <td class="text-end">{{ number_format($rows->sum('purchased_quantity'), 2) }}</td>
+                                        <td class="text-end">৳{{ number_format($rows->sum('purchase_amount'), 2) }}</td>
+                                        <td class="text-end">{{ number_format($rows->sum('stock'), 2) }}</td>
+                                        <td class="text-end">{{ number_format($rows->sum('quantity_sold'), 2) }}</td>
+                                        <td class="text-end">৳{{ number_format($rows->sum('revenue'), 2) }}</td>
+                                        <td class="text-end text-success">৳{{ number_format($rows->sum('profit'), 2) }}</td>
+                                        <td colspan="3"></td>
+                                    </tr>
+                                </tfoot>
+                            @endif
                         </table>
                     </div>
                 </div>

@@ -118,7 +118,7 @@
                     </div>
 
                     <div class="row g-3 mb-4 print-summary">
-                        <div class="col-md-4 summary-card">
+                        <div class="col-6 col-md-3 summary-card">
                             <div class="card border-0 bg-light h-100">
                                 <div class="card-body">
                                     <div class="text-muted">Total Sale Amount</div>
@@ -126,7 +126,15 @@
                                 </div>
                             </div>
                         </div>
-                        <div class="col-md-4 summary-card">
+                        <div class="col-6 col-md-3 summary-card">
+                            <div class="card border-0 bg-light h-100">
+                                <div class="card-body">
+                                    <div class="text-muted">Total Profit</div>
+                                    <div class="fs-4 fw-bold text-success">৳{{ number_format($totalProfit ?? 0, 2) }}</div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-6 col-md-3 summary-card">
                             <div class="card border-0 bg-light h-100">
                                 <div class="card-body">
                                     <div class="text-muted">Total Due</div>
@@ -134,7 +142,7 @@
                                 </div>
                             </div>
                         </div>
-                        <div class="col-md-4 summary-card">
+                        <div class="col-6 col-md-3 summary-card">
                             <div class="card border-0 bg-light h-100">
                                 <div class="card-body">
                                     <div class="text-muted">Total Sales (Invoices)</div>
@@ -144,33 +152,59 @@
                         </div>
                     </div>
 
-                    <h5 class="fw-bold mb-3">Top Products by Revenue</h5>
+                    <div class="d-flex align-items-center justify-content-between mb-3">
+                        <h5 class="fw-bold mb-0"><i class="bx bx-package text-primary me-2"></i>Product-wise Sales & Profit</h5>
+                        <small class="text-muted">Purchase price and individual product profit</small>
+                    </div>
                     <div class="table-responsive mb-4">
                         <table class="table table-bordered table-striped align-middle">
                             <thead class="table-light">
                                 <tr>
-                                    <th>Rank</th>
+                                    <th style="width: 50px;">#</th>
                                     <th>Product</th>
+                                    <th class="text-end">Purchase Price</th>
+                                    <th class="text-end">Selling Price</th>
                                     <th class="text-end">Quantity Sold</th>
-                                    <th class="text-end">Revenue</th>
+                                    <th class="text-end">Total Sales</th>
+                                    <th class="text-end">Total Cost</th>
+                                    <th class="text-end">Profit</th>
                                 </tr>
                             </thead>
                             <tbody>
                                 @forelse ($topProducts as $index => $topProduct)
                                     <tr>
                                         <td>{{ $index + 1 }}</td>
-                                        <td>{{ $topProduct->product_name }}</td>
-                                        <td class="text-end">{{ number_format($topProduct->quantity_sold) }}</td>
-                                        <td class="text-end">৳{{ number_format($topProduct->revenue, 2) }}</td>
+                                        <td class="fw-semibold">{{ $topProduct->product_name }}</td>
+                                        <td class="text-end">৳{{ number_format((float) ($topProduct->purchase_price ?? 0), 2) }}</td>
+                                        <td class="text-end">৳{{ number_format((float) ($topProduct->avg_selling_price ?? 0), 2) }}</td>
+                                        <td class="text-end">{{ number_format((int) $topProduct->quantity_sold) }}</td>
+                                        <td class="text-end">৳{{ number_format((float) $topProduct->revenue, 2) }}</td>
+                                        <td class="text-end">৳{{ number_format((float) ($topProduct->total_cost ?? 0), 2) }}</td>
+                                        <td class="text-end">
+                                            <span class="fw-bold {{ (float) ($topProduct->profit ?? 0) >= 0 ? 'text-success' : 'text-danger' }}">
+                                                ৳{{ number_format((float) ($topProduct->profit ?? 0), 2) }}
+                                            </span>
+                                        </td>
                                     </tr>
                                 @empty
-                                    <tr><td colspan="4" class="py-4 text-center text-muted">No product sales found for the selected filters.</td></tr>
+                                    <tr><td colspan="8" class="py-4 text-center text-muted">No product sales found for the selected filters.</td></tr>
                                 @endforelse
                             </tbody>
+                            @if ($topProducts->isNotEmpty())
+                                <tfoot class="table-light fw-bold">
+                                    <tr>
+                                        <td colspan="4" class="text-end">Total:</td>
+                                        <td class="text-end">{{ number_format($topProducts->sum('quantity_sold')) }}</td>
+                                        <td class="text-end">৳{{ number_format($topProducts->sum('revenue'), 2) }}</td>
+                                        <td class="text-end">৳{{ number_format($topProducts->sum('total_cost'), 2) }}</td>
+                                        <td class="text-end text-success">৳{{ number_format($topProducts->sum('profit'), 2) }}</td>
+                                    </tr>
+                                </tfoot>
+                            @endif
                         </table>
                     </div>
 
-                    <h5 class="fw-bold mb-3">Sales Details</h5>
+                    <h5 class="fw-bold mb-3"><i class="bx bx-receipt text-primary me-2"></i>Sales Details</h5>
                     <div class="table-responsive">
                         <table class="table table-bordered table-striped align-middle">
                             <thead class="table-light">
@@ -181,11 +215,15 @@
                                     <th>Employee</th>
                                     <th class="text-end">Items</th>
                                     <th class="text-end">Sale Amount</th>
+                                    <th class="text-end">Profit</th>
                                     <th class="text-end">Due</th>
                                 </tr>
                             </thead>
                             <tbody>
                                 @forelse ($invoices as $invoice)
+                                    @php
+                                        $invoiceProfit = $invoice->items->sum(fn ($item) => (float) $item->profit) - (float) $invoice->discount_amount;
+                                    @endphp
                                     <tr>
                                         <td>{{ $invoice->invoice_date?->format('d M Y, h:i A') }}</td>
                                         <td>
@@ -200,10 +238,15 @@
                                         <td class="text-end">
                                             ৳{{ number_format((float) $invoice->subtotal - (float) $invoice->discount_amount + (float) $invoice->vat_amount, 2) }}
                                         </td>
+                                        <td class="text-end">
+                                            <span class="fw-semibold {{ $invoiceProfit >= 0 ? 'text-success' : 'text-danger' }}">
+                                                ৳{{ number_format($invoiceProfit, 2) }}
+                                            </span>
+                                        </td>
                                         <td class="text-end">৳{{ number_format($invoice->due_amount, 2) }}</td>
                                     </tr>
                                 @empty
-                                    <tr><td colspan="7" class="py-4 text-center text-muted">No sales found for the selected filters.</td></tr>
+                                    <tr><td colspan="8" class="py-4 text-center text-muted">No sales found for the selected filters.</td></tr>
                                 @endforelse
                             </tbody>
                         </table>
@@ -280,8 +323,8 @@
 
             .print-summary .summary-card {
                 display: block !important;
-                flex: 0 0 33.333333% !important;
-                max-width: 33.333333% !important;
+                flex: 0 0 25% !important;
+                max-width: 25% !important;
                 visibility: visible !important;
             }
 
