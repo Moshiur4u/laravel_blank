@@ -4,12 +4,12 @@
     {{-- The controller prepares report rows and totals; this view only formats and displays them. --}}
     <div class="page-wrapper">
         <div class="page-content">
-            <div class="mb-3 d-flex flex-wrap align-items-center justify-content-between gap-2 no-print">
+            <div class="flex-wrap gap-2 mb-3 d-flex align-items-center justify-content-between no-print">
                 <div>
                     <div class="breadcrumb-title pe-3">Reports</div>
-                    <h4 class="mb-0 mt-2">Product Inventory Report</h4>
+                    <h4 class="mt-2 mb-0">Product Inventory Report</h4>
                 </div>
-                <div class="d-flex flex-wrap gap-2">
+                <div class="flex-wrap gap-2 d-flex">
                     <a href="{{ route('dashboardbody') }}" class="btn btn-outline-secondary">
                         <i class="bx bx-arrow-back me-1"></i>Dashboard
                     </a>
@@ -22,17 +22,17 @@
                 </div>
             </div>
 
-            <div class="card border-0 shadow-sm print-report">
-                <div class="card-body p-3 p-md-4">
+            <div class="border-0 shadow-sm card print-report">
+                <div class="p-3 card-body p-md-4">
                     @include('backend.partials.organizationHeader', [
                         'reportTitle' => 'Product Inventory Report',
                         'reportSubtitle' => 'Purchase, stock, expiry, and supplier details by product',
                         'reportGeneratedAt' => now()->format('d M Y, h:i A'),
                     ])
-                    <div class="d-flex flex-wrap align-items-start justify-content-between gap-2 mb-4">
+                    <div class="flex-wrap gap-2 mb-4 d-flex align-items-start justify-content-between">
                         <div class="d-print-none">
-                            <h2 class="text-primary fw-bold mb-1">Product Inventory</h2>
-                            <p class="text-muted mb-0">Purchase, stock, expiry, and supplier details by product</p>
+                            <h2 class="mb-1 text-primary fw-bold">Product Inventory</h2>
+                            <p class="mb-0 text-muted">Purchase, stock, expiry, and supplier details by product</p>
                         </div>
                         <div class="small text-muted d-print-none">
                             <span class="fw-bold text-body">Report Generated:</span>
@@ -40,9 +40,9 @@
                         </div>
                     </div>
 
-                    <div class="row g-3 mb-4">
+                    <div class="mb-4 row g-3">
                         <div class="col-12 col-sm-6 col-xl">
-                            <div class="card border-0 bg-light h-100">
+                            <div class="border-0 card bg-light h-100">
                                 <div class="card-body">
                                     <div class="text-muted">Total Products</div>
                                     <div class="fs-4 fw-bold">{{ number_format($total_products) }}</div>
@@ -50,7 +50,7 @@
                             </div>
                         </div>
                         <div class="col-12 col-sm-6 col-xl">
-                            <div class="card border-0 bg-light h-100">
+                            <div class="border-0 card bg-light h-100">
                                 <div class="card-body">
                                     <div class="text-muted">Total Purchased Quantity</div>
                                     <div class="fs-4 fw-bold">{{ number_format($total_purchased_quantity, 2) }}</div>
@@ -58,15 +58,16 @@
                             </div>
                         </div>
                         <div class="col-12 col-sm-6 col-xl">
-                            <div class="card border-0 bg-light h-100">
+                            <div class="border-0 card bg-light h-100">
                                 <div class="card-body">
                                     <div class="text-muted">Total Purchase Amount</div>
-                                    <div class="fs-4 fw-bold text-primary">৳{{ number_format($total_purchase_amount, 2) }}</div>
+                                    <div class="fs-4 fw-bold text-primary">৳{{ number_format($total_purchase_amount, 2) }}
+                                    </div>
                                 </div>
                             </div>
                         </div>
                         <div class="col-12 col-sm-6 col-xl">
-                            <div class="card border-0 bg-light h-100">
+                            <div class="border-0 card bg-light h-100">
                                 <div class="card-body">
                                     <div class="text-muted">Current Stock</div>
                                     <div class="fs-4 fw-bold">{{ number_format($total_stock, 2) }}</div>
@@ -74,7 +75,7 @@
                             </div>
                         </div>
                         <div class="col-12 col-sm-6 col-xl">
-                            <div class="card border-0 bg-light h-100">
+                            <div class="border-0 card bg-light h-100">
                                 <div class="card-body">
                                     <div class="text-muted">Expired Products</div>
                                     <div class="fs-4 fw-bold text-danger">
@@ -85,14 +86,14 @@
                         </div>
                     </div>
 
-                    <div class="d-flex flex-wrap align-items-center justify-content-between gap-2 mb-3">
-                        <h5 class="fw-bold mb-0">Inventory Details</h5>
+                    <div class="flex-wrap gap-2 mb-3 d-flex align-items-center justify-content-between">
+                        <h5 class="mb-0 fw-bold">Inventory Details</h5>
                         <span class="text-muted small">{{ number_format($total_products) }} products</span>
                     </div>
 
-                    <h6 class="fw-bold mb-3">Stock, Expiry &amp; Supplier Details</h6>
+                    <h6 class="mb-3 fw-bold">Stock, Expiry &amp; Supplier Details</h6>
                     <div class="table-responsive">
-                        <table class="table table-bordered table-striped align-middle mb-0">
+                        <table class="table mb-0 align-middle table-bordered table-striped">
                             <thead class="table-light">
                                 <tr>
                                     <th scope="col">#</th>
@@ -100,7 +101,7 @@
                                     <th scope="col" class="text-end">Purchased Qty</th>
                                     <th scope="col" class="text-end">Purchase Amount</th>
                                     <th scope="col" class="text-end">Current Stock</th>
-                                    <th scope="col" class="text-end">Total Quantity Sold</th>
+                                    <th scope="col" class="text-end">Total Qty Sold</th>
                                     <th scope="col" class="text-end">Total Sales</th>
                                     <th scope="col" class="text-end">Profit</th>
                                     <th scope="col">Expiry</th>
@@ -119,7 +120,8 @@
                                         <td class="text-end">{{ number_format($row['quantity_sold'], 2) }}</td>
                                         <td class="text-end">৳{{ number_format($row['revenue'], 2) }}</td>
                                         <td class="text-end">
-                                            <span class="fw-bold {{ $row['profit'] >= 0 ? 'text-success' : 'text-danger' }}">
+                                            <span
+                                                class="fw-bold {{ $row['profit'] >= 0 ? 'text-success' : 'text-danger' }}">
                                                 ৳{{ number_format($row['profit'], 2) }}
                                             </span>
                                         </td>
@@ -172,7 +174,8 @@
                                         <td class="text-end">{{ number_format($rows->sum('stock'), 2) }}</td>
                                         <td class="text-end">{{ number_format($rows->sum('quantity_sold'), 2) }}</td>
                                         <td class="text-end">৳{{ number_format($rows->sum('revenue'), 2) }}</td>
-                                        <td class="text-end text-success">৳{{ number_format($rows->sum('profit'), 2) }}</td>
+                                        <td class="text-end text-success">৳{{ number_format($rows->sum('profit'), 2) }}
+                                        </td>
                                         <td colspan="3"></td>
                                     </tr>
                                 </tfoot>
@@ -191,6 +194,7 @@
         }
 
         @media print {
+
             .no-print,
             .sidebar-wrapper,
             header,

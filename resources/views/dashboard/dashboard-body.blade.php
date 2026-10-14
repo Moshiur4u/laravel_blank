@@ -7,18 +7,44 @@
             <div class="row row-cols-1 row-cols-sm-2 row-cols-md-3 row-cols-xl-5 g-3">
                 @php
                     $cards = [
-                        'purchase' => ['title' => 'Total Purchase', 'icon' => 'bx-cart', 'color' => 'info', 'gradient' => 'bg-gradient-blues'],
-                        'revenue' => ['title' => 'Total Revenue', 'icon' => 'bx-wallet', 'color' => 'danger', 'gradient' => 'bg-gradient-burning'],
-                        'due' => ['title' => 'Total Due', 'icon' => 'bx-time-five', 'color' => 'warning', 'gradient' => 'bg-gradient-orange'],
-                        'expenses' => ['title' => 'Total Expense', 'icon' => 'bx-money', 'color' => 'secondary', 'gradient' => 'bg-gradient-orange'],
-                        'profit' => ['title' => 'Net Profit', 'icon' => 'bx-trending-up', 'color' => 'success', 'gradient' => 'bg-gradient-ohhappiness'],
+                        'purchase' => [
+                            'title' => 'Total Purchase',
+                            'icon' => 'bx-cart',
+                            'color' => 'info',
+                            'gradient' => 'bg-gradient-blues',
+                        ],
+                        'revenue' => [
+                            'title' => 'Total Revenue',
+                            'icon' => 'bx-wallet',
+                            'color' => 'danger',
+                            'gradient' => 'bg-gradient-burning',
+                        ],
+                        'due' => [
+                            'title' => 'Total Due',
+                            'icon' => 'bx-time-five',
+                            'color' => 'warning',
+                            'gradient' => 'bg-gradient-orange',
+                        ],
+                        'expenses' => [
+                            'title' => 'Total Expense',
+                            'icon' => 'bx-money',
+                            'color' => 'secondary',
+                            'gradient' => 'bg-gradient-orange',
+                        ],
+                        'profit' => [
+                            'title' => 'Net Profit',
+                            'icon' => 'bx-trending-up',
+                            'color' => 'success',
+                            'gradient' => 'bg-gradient-ohhappiness',
+                        ],
                     ];
                 @endphp
 
                 @foreach ($cards as $metricKey => $card)
                     <div class="col d-flex">
-                        <div class="border-4 card radius-10 border-start border-{{ $card['color'] }} dashboard-metric-card w-100">
-                            <div class="card-body d-flex flex-column justify-content-between text-center">
+                        <div
+                            class="border-4 card radius-10 border-start border-{{ $card['color'] }} dashboard-metric-card w-100">
+                            <div class="text-center card-body d-flex flex-column justify-content-between">
                                 {{-- ড্যাশবোর্ড কার্ডের আইকন সেন্টারে স্থাপন করা হয়েছে --}}
                                 <div class="text-white widgets-icons-2 rounded-circle {{ $card['gradient'] }} mx-auto mb-2">
                                     <i class="bx {{ $card['icon'] }}"></i>
@@ -34,8 +60,8 @@
                                             Daily ৳{{ number_format(round($metrics['daily']['profit'])) }}
                                             <span class="mx-1">|</span>
                                             Weekly ৳{{ number_format(round($metrics['weekly']['profit'])) }}
-                                            <span class="mx-1">|</span>
-                                            Monthly ৳{{ number_format(round($metrics['monthly']['profit'])) }}
+                                            {{-- <span class="mx-1">|</span>
+                                            Monthly ৳{{ number_format(round($metrics['monthly']['profit'])) }} --}}
                                         </p>
                                     @else
                                         {{-- অন্যান্য কার্ডে বড় ফন্টে মাসিক মোট এবং ছোট ফন্টে দৈনিক ও সাপ্তাহিক মান (রাউন্ডেড অ্যামাউন্ট) --}}
@@ -46,8 +72,8 @@
                                             Daily ৳{{ number_format(round($metrics['daily'][$metricKey])) }}
                                             <span class="mx-1">|</span>
                                             Weekly ৳{{ number_format(round($metrics['weekly'][$metricKey])) }}
-                                            <span class="mx-1">|</span>
-                                            Monthly ৳{{ number_format(round($metrics['monthly'][$metricKey])) }}
+                                            {{-- <span class="mx-1">|</span>
+                                            Monthly ৳{{ number_format(round($metrics['monthly'][$metricKey])) }} --}}
                                         </p>
                                     @endif
                                 </div>
@@ -83,7 +109,8 @@
                 <div class="col-12 col-xl-6">
                     <div class="card radius-10 h-100">
                         <div class="card-header">
-                            <h6 class="mb-0">Top Selling Products <small class="text-muted">(All time by quantity)</small></h6>
+                            <h6 class="mb-0">Top Selling Products <small class="text-muted">(All time by quantity)</small>
+                            </h6>
                         </div>
                         <div class="card-body">
                             <div class="table-responsive">
@@ -92,7 +119,7 @@
                                         <tr>
                                             <th>#</th>
                                             <th>Product</th>
-                                            <th class="text-end">Quantity Sold</th>
+                                            <th class="text-end">Qty Sold</th>
                                             <th class="text-end">Sales Amount</th>
                                             <th class="text-end">Profit</th>
                                         </tr>
@@ -104,18 +131,21 @@
                                                 <td class="gap-2 d-flex align-items-center">
                                                     @if ($product->img_url)
                                                         <img src="{{ asset('uploads/products/' . $product->img_url) }}"
-                                                            alt="{{ $product->product_name }}"
-                                                            class="product-img-2">
+                                                            alt="{{ $product->product_name }}" class="product-img-2">
                                                     @endif
                                                     <span>{{ $product->product_name }}</span>
                                                 </td>
-                                                <td class="text-end">{{ number_format((int) $product->quantity_sold) }}</td>
-                                                <td class="text-end">৳{{ number_format((float) $product->sales_amount, 2) }}</td>
-                                                <td class="text-end fw-semibold text-success">৳{{ number_format(round((float) $product->profit)) }}</td>
+                                                <td class="text-end">{{ number_format((int) $product->quantity_sold) }}
+                                                </td>
+                                                <td class="text-end">
+                                                    ৳{{ number_format((float) $product->sales_amount, 2) }}</td>
+                                                <td class="text-end fw-semibold text-success">
+                                                    ৳{{ number_format(round((float) $product->profit)) }}</td>
                                             </tr>
                                         @empty
                                             <tr>
-                                                <td colspan="5" class="py-4 text-center text-muted">No sales recorded yet.</td>
+                                                <td colspan="5" class="py-4 text-center text-muted">No sales recorded
+                                                    yet.</td>
                                             </tr>
                                         @endforelse
                                     </tbody>
@@ -128,7 +158,8 @@
                 <div class="col-12 col-xl-6">
                     <div class="card radius-10 h-100">
                         <div class="card-header">
-                            <h6 class="mb-0">Top Sales Employees <small class="text-muted">(All time by sales amount)</small></h6>
+                            <h6 class="mb-0">Top Sales Employees <small class="text-muted">(All time by sales
+                                    amount)</small></h6>
                         </div>
                         <div class="card-body">
                             <div class="table-responsive">
@@ -146,12 +177,15 @@
                                             <tr>
                                                 <td>{{ $loop->iteration }}</td>
                                                 <td>{{ $employee->employee_name }}</td>
-                                                <td class="text-end">{{ number_format((int) $employee->invoice_count) }}</td>
-                                                <td class="text-end">৳{{ number_format((float) $employee->sales_amount, 2) }}</td>
+                                                <td class="text-end">{{ number_format((int) $employee->invoice_count) }}
+                                                </td>
+                                                <td class="text-end">
+                                                    ৳{{ number_format((float) $employee->sales_amount, 2) }}</td>
                                             </tr>
                                         @empty
                                             <tr>
-                                                <td colspan="4" class="py-4 text-center text-muted">No sales recorded yet.</td>
+                                                <td colspan="4" class="py-4 text-center text-muted">No sales recorded
+                                                    yet.</td>
                                             </tr>
                                         @endforelse
                                     </tbody>
@@ -176,7 +210,7 @@
     </style>
 
     <script>
-        document.addEventListener('DOMContentLoaded', function () {
+        document.addEventListener('DOMContentLoaded', function() {
             const chartData = @json($profitChart);
             const periodSelector = document.getElementById('profit-chart-period');
             const chartContext = document.getElementById('profit-trend-chart');
@@ -224,14 +258,15 @@
                     plugins: {
                         tooltip: {
                             callbacks: {
-                                label: context => context.dataset.label + ': ৳' + Number(context.raw).toLocaleString(),
+                                label: context => context.dataset.label + ': ৳' + Number(context.raw)
+                                    .toLocaleString(),
                             },
                         },
                     },
                 },
             });
 
-            periodSelector.addEventListener('change', function () {
+            periodSelector.addEventListener('change', function() {
                 const periodData = chartData[this.value];
                 chart.data.labels = periodData.labels;
                 chart.data.datasets[0].data = periodData.revenue;

@@ -104,8 +104,8 @@
             <div class="sidebar-header">
                 <div>
                     @if ($organization?->logo)
-                        <img src="{{ asset('uploads/organizations/' . $organization->logo) }}"
-                            class="logo-icon" alt="{{ $organization->name ?: 'Organization logo' }}"
+                        <img src="{{ asset('uploads/organizations/' . $organization->logo) }}" class="logo-icon"
+                            alt="{{ $organization->name ?: 'Organization logo' }}"
                             style="max-height: 45px; object-fit: contain;">
                     @else
                         <img src="{{ asset('assets/images/logo-icon.png') }}" class="logo-icon" alt="logo icon">
@@ -340,7 +340,7 @@
                     <ul>
                         <li>
                             <a href="{{ route('sales.report') }}">
-                                <i class='bx bx-radio-circle'></i>Sales Report
+                                <i class='bx bx-layer'></i>Sales Report
                             </a>
                         </li>
                     </ul>
@@ -354,7 +354,7 @@
                     <ul>
                         <li>
                             <a href="{{ route('product.inventory.report') }}">
-                                <i class='bx bx-radio-circle'></i>Product Inventory
+                                <i class='bx bx-calculator'></i>Product Inventory
                             </a>
                         </li>
                     </ul>
@@ -582,7 +582,8 @@
                             </div>
                         </a>
                         <ul class="dropdown-menu dropdown-menu-end">
-                            <li><a class="dropdown-item d-flex align-items-center" href="{{ route('user.show', Auth::user()->id) }}"><i
+                            <li><a class="dropdown-item d-flex align-items-center"
+                                    href="{{ route('user.show', Auth::user()->id) }}"><i
                                         class="bx bx-user fs-5"></i><span>Profile</span></a>
                             </li>
                             <li><a class="dropdown-item d-flex align-items-center" href="javascript:;"><i
