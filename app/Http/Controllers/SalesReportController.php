@@ -65,7 +65,7 @@ class SalesReportController extends Controller
             ->when($filters['customer_id'] ?? null, fn ($query, $customerId) => $query->where('sale_invoices.customer_id', $customerId))
             ->when($filters['product_id'] ?? null, fn ($query, $productId) => $query->where('sale_items.product_id', $productId));
 
-        // প্রতিটি পণ্যের বিক্রির পরিমাণ, গড় বিক্রয়মূল্য, গড় ক্রয়মূল্য এবং একক পণ্যভিত্তিক মোট লাভ হিসাব করা হয়।
+        // Invoice-এর VAT পণ্যের বিক্রয়মূল্যের অনুপাতে ভাগ করে পণ্যভিত্তিক VAT হিসাব করা হয়।
         $topProducts = (clone $topProductsQuery)
             ->select([
                 'sale_items.product_id',
@@ -77,6 +77,7 @@ class SalesReportController extends Controller
             ->selectRaw('SUM(sale_items.line_total) as revenue')
             ->selectRaw('SUM(sale_items.quantity * COALESCE(sale_items.purchase_price, products.purchase_price, 0)) as total_cost')
             ->selectRaw('SUM(sale_items.line_total - (sale_items.quantity * COALESCE(sale_items.purchase_price, products.purchase_price, 0))) as profit')
+            ->selectRaw('SUM(CASE WHEN sale_invoices.subtotal > 0 THEN sale_invoices.vat_amount * sale_items.line_total / sale_invoices.subtotal ELSE 0 END) as vat_amount')
             ->groupBy('sale_items.product_id', 'sale_items.product_name')
             ->orderByDesc('revenue')
             ->orderBy('sale_items.product_name')
@@ -168,6 +169,7 @@ class SalesReportController extends Controller
             ->selectRaw('SUM(sale_items.line_total) as revenue')
             ->selectRaw('SUM(sale_items.quantity * COALESCE(sale_items.purchase_price, products.purchase_price, 0)) as total_cost')
             ->selectRaw('SUM(sale_items.line_total - (sale_items.quantity * COALESCE(sale_items.purchase_price, products.purchase_price, 0))) as profit')
+            ->selectRaw('SUM(CASE WHEN sale_invoices.subtotal > 0 THEN sale_invoices.vat_amount * sale_items.line_total / sale_invoices.subtotal ELSE 0 END) as vat_amount')
             ->groupBy('sale_items.product_id', 'sale_items.product_name')
             ->orderByDesc('revenue')
             ->orderBy('sale_items.product_name')
@@ -199,7 +201,7 @@ class SalesReportController extends Controller
             $writeRow(['Total Sales (Invoices)', $totalSalesCount]);
             $writeRow([]);
             $writeRow(['Product-wise Sales & Profit']);
-            $writeRow(['Product', 'Purchase Price', 'Avg Selling Price', 'Quantity Sold', 'Total Sales (Revenue)', 'Total Purchase Cost', 'Profit']);
+            $writeRow(['Product', 'Purchase Price', 'Avg Selling Price', 'Quantity Sold', 'Total Sales (Revenue)', 'Total Purchase Cost', 'Profit', 'VAT']);
             foreach ($topProducts as $product) {
                 $writeRow([
                     $product->product_name,
@@ -209,6 +211,7 @@ class SalesReportController extends Controller
                     number_format((float) $product->revenue, 2, '.', ''),
                     number_format((float) $product->total_cost, 2, '.', ''),
                     number_format((float) $product->profit, 2, '.', ''),
+                    number_format((float) $product->vat_amount, 2, '.', ''),
                 ]);
             }
             $writeRow([]);

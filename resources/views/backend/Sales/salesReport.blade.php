@@ -5,12 +5,12 @@
 @section('content')
     <div class="page-wrapper">
         <div class="page-content">
-            <div class="mb-3 d-flex flex-wrap align-items-center justify-content-between gap-2 no-print">
+            <div class="flex-wrap gap-2 mb-3 d-flex align-items-center justify-content-between no-print">
                 <div>
                     <div class="breadcrumb-title pe-3">Reports</div>
-                    <h4 class="mb-0 mt-2">Sales Report</h4>
+                    <h4 class="mt-2 mb-0">Sales Report</h4>
                 </div>
-                <div class="d-flex gap-2">
+                <div class="gap-2 d-flex">
                     <a href="{{ route('dashboardbody') }}" class="btn btn-outline-secondary">
                         <i class="bx bx-arrow-back me-1"></i>Dashboard
                     </a>
@@ -23,7 +23,7 @@
                 </div>
             </div>
 
-            <div class="card border-0 shadow-sm mb-4 no-print">
+            <div class="mb-4 border-0 shadow-sm card no-print">
                 <div class="card-header">
                     <h5 class="mb-0"><i class="bx bx-filter-alt me-1"></i>Filter Sales</h5>
                 </div>
@@ -75,7 +75,7 @@
                                 @endforeach
                             </select>
                         </div>
-                        <div class="col-12 d-flex gap-2">
+                        <div class="gap-2 col-12 d-flex">
                             <button type="submit" class="btn btn-primary">
                                 <i class="bx bx-search me-1"></i>Apply Filters
                             </button>
@@ -83,7 +83,7 @@
                         </div>
                     </form>
                     @if ($errors->any())
-                        <div class="alert alert-danger mt-3 mb-0" role="alert">
+                        <div class="mt-3 mb-0 alert alert-danger" role="alert">
                             @foreach ($errors->all() as $message)
                                 <div>{{ $message }}</div>
                             @endforeach
@@ -92,16 +92,22 @@
                 </div>
             </div>
 
-            <div class="card border-0 shadow-sm print-report">
-                <div class="card-body p-4">
+            <div class="border-0 shadow-sm card print-report">
+                <div class="p-4 card-body">
                     @include('backend.partials.organizationHeader', [
                         'reportTitle' => 'Sales Report',
-                        'reportSubtitle' => 'Period: ' . ($startDate ? \Illuminate\Support\Carbon::parse($startDate)->format('d M Y') : 'Beginning') . ' – ' . ($endDate ? \Illuminate\Support\Carbon::parse($endDate)->format('d M Y') : 'Present'),
+                        'reportSubtitle' =>
+                            'Period: ' .
+                            ($startDate
+                                ? \Illuminate\Support\Carbon::parse($startDate)->format('d M Y')
+                                : 'Beginning') .
+                            ' – ' .
+                            ($endDate ? \Illuminate\Support\Carbon::parse($endDate)->format('d M Y') : 'Present'),
                         'reportGeneratedAt' => $reportGeneratedAt->format('d M Y, h:i A'),
                     ])
-                    <div class="row align-items-start mb-4 d-print-none">
+                    <div class="mb-4 row align-items-start d-print-none">
                         <div class="col-md-8">
-                            <h2 class="text-primary fw-bold mb-1">Sales Report</h2>
+                            <h2 class="mb-1 text-primary fw-bold">Sales Report</h2>
                             <div class="text-muted">
                                 Period:
                                 <strong>
@@ -117,9 +123,9 @@
                         </div>
                     </div>
 
-                    <div class="row g-3 mb-4 print-summary">
+                    <div class="mb-4 row g-3 print-summary">
                         <div class="col-6 col-md-3 summary-card">
-                            <div class="card border-0 bg-light h-100">
+                            <div class="border-0 card bg-light h-100">
                                 <div class="card-body">
                                     <div class="text-muted">Total Sale Amount</div>
                                     <div class="fs-4 fw-bold text-primary">৳{{ number_format($totalSalesAmount, 2) }}</div>
@@ -127,7 +133,7 @@
                             </div>
                         </div>
                         <div class="col-6 col-md-3 summary-card">
-                            <div class="card border-0 bg-light h-100">
+                            <div class="border-0 card bg-light h-100">
                                 <div class="card-body">
                                     <div class="text-muted">Total Profit</div>
                                     <div class="fs-4 fw-bold text-success">৳{{ number_format($totalProfit ?? 0, 2) }}</div>
@@ -135,7 +141,7 @@
                             </div>
                         </div>
                         <div class="col-6 col-md-3 summary-card">
-                            <div class="card border-0 bg-light h-100">
+                            <div class="border-0 card bg-light h-100">
                                 <div class="card-body">
                                     <div class="text-muted">Total Due</div>
                                     <div class="fs-4 fw-bold text-danger">৳{{ number_format($totalDue, 2) }}</div>
@@ -143,7 +149,7 @@
                             </div>
                         </div>
                         <div class="col-6 col-md-3 summary-card">
-                            <div class="card border-0 bg-light h-100">
+                            <div class="border-0 card bg-light h-100">
                                 <div class="card-body">
                                     <div class="text-muted">Total Sales (Invoices)</div>
                                     <div class="fs-4 fw-bold">{{ number_format($totalSalesCount) }}</div>
@@ -152,12 +158,13 @@
                         </div>
                     </div>
 
-                    <div class="d-flex align-items-center justify-content-between mb-3">
-                        <h5 class="fw-bold mb-0"><i class="bx bx-package text-primary me-2"></i>Product-wise Sales & Profit</h5>
+                    <div class="mb-3 d-flex align-items-center justify-content-between">
+                        <h5 class="mb-0 fw-bold"><i class="bx bx-package text-primary me-2"></i>Product-wise Sales &
+                            Profit</h5>
                         <small class="text-muted">Purchase price and individual product profit</small>
                     </div>
-                    <div class="table-responsive mb-4">
-                        <table class="table table-bordered table-striped align-middle">
+                    <div class="mb-4 table-responsive">
+                        <table class="table align-middle table-bordered table-striped">
                             <thead class="table-light">
                                 <tr>
                                     <th style="width: 50px;">#</th>
@@ -166,8 +173,9 @@
                                     <th class="text-end">Selling Price</th>
                                     <th class="text-end">Quantity Sold</th>
                                     <th class="text-end">Total Sales</th>
-                                    <th class="text-end">Total Cost</th>
+                                    <th class="text-end">Purchase Cost </th>
                                     <th class="text-end">Profit</th>
+                                    <th class="text-end">VAT</th>
                                 </tr>
                             </thead>
                             <tbody>
@@ -175,19 +183,32 @@
                                     <tr>
                                         <td>{{ $index + 1 }}</td>
                                         <td class="fw-semibold">{{ $topProduct->product_name }}</td>
-                                        <td class="text-end">৳{{ number_format((float) ($topProduct->purchase_price ?? 0), 2) }}</td>
-                                        <td class="text-end">৳{{ number_format((float) ($topProduct->avg_selling_price ?? 0), 2) }}</td>
+                                        <td class="text-end">
+                                            ৳{{ number_format((float) ($topProduct->purchase_price ?? 0), 2) }}</td>
+                                        <td class="text-end">
+                                            ৳{{ number_format((float) ($topProduct->avg_selling_price ?? 0), 2) }}</td>
                                         <td class="text-end">{{ number_format((int) $topProduct->quantity_sold) }}</td>
                                         <td class="text-end">৳{{ number_format((float) $topProduct->revenue, 2) }}</td>
-                                        <td class="text-end">৳{{ number_format((float) ($topProduct->total_cost ?? 0), 2) }}</td>
                                         <td class="text-end">
-                                            <span class="fw-bold {{ (float) ($topProduct->profit ?? 0) >= 0 ? 'text-success' : 'text-danger' }}">
+                                            ৳{{ number_format((float) ($topProduct->total_cost ?? 0), 2) }}</td>
+                                        <td class="text-end">
+                                            <span
+                                                class="fw-bold {{ (float) ($topProduct->profit ?? 0) >= 0 ? 'text-success' : 'text-danger' }}">
                                                 ৳{{ number_format((float) ($topProduct->profit ?? 0), 2) }}
+                                            </span>
+                                        </td>
+                                        <td class="text-end">
+                                            <span
+                                                class="fw-bold {{ (float) ($topProduct->vat_amount ?? 0) >= 0 ? 'text-success' : 'text-danger' }}">
+                                                ৳{{ number_format((float) ($topProduct->vat_amount ?? 0), 2) }}
                                             </span>
                                         </td>
                                     </tr>
                                 @empty
-                                    <tr><td colspan="8" class="py-4 text-center text-muted">No product sales found for the selected filters.</td></tr>
+                                    <tr>
+                                        <td colspan="9" class="py-4 text-center text-muted">No product sales found for
+                                            the selected filters.</td>
+                                    </tr>
                                 @endforelse
                             </tbody>
                             @if ($topProducts->isNotEmpty())
@@ -197,16 +218,19 @@
                                         <td class="text-end">{{ number_format($topProducts->sum('quantity_sold')) }}</td>
                                         <td class="text-end">৳{{ number_format($topProducts->sum('revenue'), 2) }}</td>
                                         <td class="text-end">৳{{ number_format($topProducts->sum('total_cost'), 2) }}</td>
-                                        <td class="text-end text-success">৳{{ number_format($topProducts->sum('profit'), 2) }}</td>
+                                        <td class="text-end text-success">
+                                            ৳{{ number_format($topProducts->sum('profit'), 2) }}</td>
+                                        <td class="text-end text-success">
+                                            ৳{{ number_format($topProducts->sum('vat_amount'), 2) }}</td>
                                     </tr>
                                 </tfoot>
                             @endif
                         </table>
                     </div>
 
-                    <h5 class="fw-bold mb-3"><i class="bx bx-receipt text-primary me-2"></i>Sales Details</h5>
+                    <h5 class="mb-3 fw-bold"><i class="bx bx-receipt text-primary me-2"></i>Sales Details</h5>
                     <div class="table-responsive">
-                        <table class="table table-bordered table-striped align-middle">
+                        <table class="table align-middle table-bordered table-striped">
                             <thead class="table-light">
                                 <tr>
                                     <th>Date</th>
@@ -222,7 +246,9 @@
                             <tbody>
                                 @forelse ($invoices as $invoice)
                                     @php
-                                        $invoiceProfit = $invoice->items->sum(fn ($item) => (float) $item->profit) - (float) $invoice->discount_amount;
+                                        $invoiceProfit =
+                                            $invoice->items->sum(fn($item) => (float) $item->profit) -
+                                            (float) $invoice->discount_amount;
                                     @endphp
                                     <tr>
                                         <td>{{ $invoice->invoice_date?->format('d M Y, h:i A') }}</td>
@@ -232,21 +258,26 @@
                                             </a>
                                             <span class="d-none d-print-inline">{{ $invoice->invoice_no }}</span>
                                         </td>
-                                        <td>{{ $invoice->customer?->name ?? $invoice->customer_name ?? 'Walk-in Customer' }}</td>
+                                        <td>{{ $invoice->customer?->name ?? ($invoice->customer_name ?? 'Walk-in Customer') }}
+                                        </td>
                                         <td>{{ $invoice->employee?->name ?? 'N/A' }}</td>
                                         <td class="text-end">{{ number_format($invoice->items_count) }}</td>
                                         <td class="text-end">
                                             ৳{{ number_format((float) $invoice->subtotal - (float) $invoice->discount_amount + (float) $invoice->vat_amount, 2) }}
                                         </td>
                                         <td class="text-end">
-                                            <span class="fw-semibold {{ $invoiceProfit >= 0 ? 'text-success' : 'text-danger' }}">
+                                            <span
+                                                class="fw-semibold {{ $invoiceProfit >= 0 ? 'text-success' : 'text-danger' }}">
                                                 ৳{{ number_format($invoiceProfit, 2) }}
                                             </span>
                                         </td>
                                         <td class="text-end">৳{{ number_format($invoice->due_amount, 2) }}</td>
                                     </tr>
                                 @empty
-                                    <tr><td colspan="8" class="py-4 text-center text-muted">No sales found for the selected filters.</td></tr>
+                                    <tr>
+                                        <td colspan="8" class="py-4 text-center text-muted">No sales found for the
+                                            selected filters.</td>
+                                    </tr>
                                 @endforelse
                             </tbody>
                         </table>
@@ -266,6 +297,7 @@
         }
 
         @media print {
+
             .no-print,
             .sidebar-wrapper,
             header,
