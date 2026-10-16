@@ -100,10 +100,10 @@
                                     <th scope="col">Product</th>
                                     <th scope="col" class="text-end">Purchased Qty</th>
                                     <th scope="col" class="text-end">Purchase Amount</th>
-                                    <th scope="col" class="text-end">Current Stock</th>
                                     <th scope="col" class="text-end">Total Qty Sold</th>
                                     <th scope="col" class="text-end">Total Sales</th>
                                     <th scope="col" class="text-end">Profit</th>
+                                    <th scope="col" class="text-end">Current Stock</th>
                                     <th scope="col">Expiry</th>
                                     <th scope="col">Supplier</th>
                                     <th scope="col">Phone Number</th>
@@ -116,7 +116,6 @@
                                         <td class="fw-semibold">{{ $row['name'] }}</td>
                                         <td class="text-end">{{ number_format($row['purchased_quantity'], 2) }}</td>
                                         <td class="text-end">৳{{ number_format($row['purchase_amount'], 2) }}</td>
-                                        <td class="text-end">{{ number_format($row['stock'], 2) }}</td>
                                         <td class="text-end">{{ number_format($row['quantity_sold'], 2) }}</td>
                                         <td class="text-end">৳{{ number_format($row['revenue'], 2) }}</td>
                                         <td class="text-end">
@@ -125,6 +124,7 @@
                                                 ৳{{ number_format($row['profit'], 2) }}
                                             </span>
                                         </td>
+                                        <td class="text-end">{{ number_format($row['stock'], 2) }}</td>
                                         <td>
                                             @if ($row['expiry_date'])
                                                 <div class="text-nowrap">{{ $row['expiry_date']->format('d M Y') }}</div>
@@ -171,10 +171,10 @@
                                         <td colspan="2" class="text-end">Total:</td>
                                         <td class="text-end">{{ number_format($rows->sum('purchased_quantity'), 2) }}</td>
                                         <td class="text-end">৳{{ number_format($rows->sum('purchase_amount'), 2) }}</td>
-                                        <td class="text-end">{{ number_format($rows->sum('stock'), 2) }}</td>
                                         <td class="text-end">{{ number_format($rows->sum('quantity_sold'), 2) }}</td>
                                         <td class="text-end">৳{{ number_format($rows->sum('revenue'), 2) }}</td>
                                         <td class="text-end text-success">৳{{ number_format($rows->sum('profit'), 2) }}
+                                        <td class="text-end">{{ number_format($rows->sum('stock'), 2) }}</td>
                                         </td>
                                         <td colspan="3"></td>
                                     </tr>

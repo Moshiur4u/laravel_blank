@@ -11,8 +11,9 @@ use Illuminate\Support\Facades\DB;
 
 class DashboardConrtoller extends Controller
 {
-    public function dashboard(){
-        return view ('dashboard.dashboard');
+    public function dashboard()
+    {
+        return view('dashboard.dashboard');
     }
 
     /**
@@ -206,7 +207,7 @@ class DashboardConrtoller extends Controller
             ->selectRaw("SUM({$amountExpression}) as total")
             ->groupByRaw("DATE({$dateColumn})")
             ->pluck('total', 'date_key')
-            ->map(fn ($total) => (float) $total)
+            ->map(fn($total) => (float) $total)
             ->all();
     }
 }

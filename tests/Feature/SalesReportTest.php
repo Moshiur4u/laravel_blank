@@ -137,3 +137,47 @@ test('sales report defaults to today and validates date and filter values', func
     $this->get(route('sales.report', ['product_id' => 999999]))
         ->assertSessionHasErrors('product_id');
 });
+
+test('sales report allocates invoice VAT to products by their share of invoice sales', function () {
+    $user = User::factory()->create();
+    $categoryId = DB::table('product_categories')->insertGetId(['category_name' => 'VAT Report Category']);
+    $brandId = DB::table('brands')->insertGetId(['name' => 'VAT Report Brand']);
+    $products = collect(['VAT Product A', 'VAT Product B'])->map(fn (string $name) => Product::create([
+        'productName' => $name,
+        'product_categorie_id' => $categoryId,
+        'brand_id' => $brandId,
+        'price' => 150,
+        'unit' => '50',
+        'stock_unit' => '50',
+    ]));
+    $invoice = SaleInvoice::create([
+        'invoice_no' => 'SALES-REPORT-VAT-001',
+        'user_id' => $user->id,
+        'invoice_date' => today(),
+        'subtotal' => 200,
+        'discount_amount' => 0,
+        'vat_amount' => 20,
+        'total_amount' => 220,
+        'amount_paid' => 220,
+        'due_amount' => 0,
+    ]);
+
+    foreach ([[$products[0], 50], [$products[1], 150]] as [$product, $lineTotal]) {
+        SaleItem::create([
+            'sale_invoice_id' => $invoice->id,
+            'product_id' => $product->id,
+            'product_name' => $product->productName,
+            'quantity' => 1,
+            'unit_price' => $lineTotal,
+            'line_total' => $lineTotal,
+        ]);
+    }
+
+    $this->actingAs($user)
+        ->get(route('sales.report'))
+        ->assertOk()
+        ->assertViewHas('topProducts', fn ($topProducts) => $topProducts->count() === 2
+            && (float) $topProducts->firstWhere('product_name', 'VAT Product A')->vat_amount === 5.0
+            && (float) $topProducts->firstWhere('product_name', 'VAT Product B')->vat_amount === 15.0
+            && (float) $topProducts->sum('vat_amount') === 20.0);
+});
