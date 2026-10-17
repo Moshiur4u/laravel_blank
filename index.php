@@ -1,4 +1,5 @@
 <?php
+<<<<<<< HEAD
 // BanglaHost default page - replace this file with your own.
 if (isset($_GET['phpinfo'])) { phpinfo(); exit; }
 $php  = PHP_VERSION;
@@ -154,3 +155,24 @@ $e = fn($s) => htmlspecialchars((string)$s, ENT_QUOTES);
 </body>
 
 </html>
+=======
+
+use Illuminate\Foundation\Application;
+use Illuminate\Http\Request;
+
+define('LARAVEL_START', microtime(true));
+
+// Determine if the application is in maintenance mode...
+if (file_exists($maintenance = __DIR__.'/../storage/framework/maintenance.php')) {
+    require $maintenance;
+}
+
+// Register the Composer autoloader...
+require __DIR__.'/../vendor/autoload.php';
+
+// Bootstrap Laravel and handle the request...
+/** @var Application $app */
+$app = require_once __DIR__.'/../bootstrap/app.php';
+
+$app->handleRequest(Request::capture());
+>>>>>>> 865ed5dfcac4468190b163c3c02691aac399224e

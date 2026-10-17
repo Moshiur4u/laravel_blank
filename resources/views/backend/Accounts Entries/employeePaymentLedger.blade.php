@@ -11,9 +11,11 @@
             ])
             {{-- print ও export control কাগজের ledger-এ দেখানো হবে না। --}}
             <div class="d-flex flex-wrap justify-content-between align-items-center gap-2 mb-3 no-print">
+                @can('employee_payment_voucher.entry')
                 <a href="{{ route('employee-payment.index') }}" class="btn btn-outline-secondary">
                     <i class="bx bx-arrow-back me-1"></i> Back to Employee Payments
                 </a>
+                @endcan
                 <div class="d-flex flex-wrap gap-2">
                     <a href="{{ route('employee-payment.ledger.export', $employee->id) }}"
                         class="btn btn-success">

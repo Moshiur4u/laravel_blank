@@ -185,3 +185,46 @@
 
 ---
 *ডকুমেন্টটি সফলভাবে তৈরি ও সংরক্ষিত হয়েছে।*
+
+---
+
+## ৭. ব্যবহারকারী কার্যকলাপ লগ (User Activity Log)
+
+### উদ্দেশ্য
+সিস্টেমে কোন ব্যবহারকারী কখন লগইন/লগআউট করেছেন এবং কোন রেকর্ড তৈরি, পরিবর্তন বা মুছে ফেলেছেন তা সংরক্ষণ ও খোঁজার জন্য এই মডিউল যোগ করা হয়েছে। লগ তালিকা তারিখের সীমা, ব্যবহারকারী এবং কার্যকলাপের ধরন দিয়ে ফিল্টার করা যায়।
+
+### Migration: `database/migrations/2026_10_17_000001_create_user_activity_logs_table.php`
+- `user_activity_logs` টেবিলে ব্যবহারকারীর ID, নাম ও ইমেইলের snapshot রাখা হয়। ইউজার মুছে গেলেও পুরোনো লগ অক্ষত রাখার জন্য `user_id`-এ foreign key cascade ব্যবহার করা হয়নি।
+- `event`-এ `login`, `logout`, `create`, `update` বা `delete` রাখা হয়। `description`-এ কাজের সংক্ষিপ্ত বিবরণ এবং `subject_type`/`subject_id`-এ লক্ষ্য রেকর্ডের ধরন ও ID থাকে।
+- `properties` JSON-এ password, token ও method spoofing field বাদ দিয়ে request-এর প্রাসঙ্গিক তথ্য রাখা হয়। Login/logout-এর জন্য guard, আর প্রতিটি রেকর্ডে IP, user-agent ও timestamp রাখা হয়।
+- `event` এবং `created_at`-ভিত্তিক index দিয়ে ফিল্টার/সাম্প্রতিক লগ query সহায়তা করা হয়। `down()` rollback-এ শুধু নতুন audit table সরায়।
+
+### Model ও Relation: `app/Models/UserActivityLog.php`
+- `properties` array হিসেবে cast হয়; `user()` relation `belongsTo(User::class)`। ইউজার মুছে গেলেও snapshot নাম/ইমেইল দিয়ে ইতিহাস দেখা যায়।
+- `scopeForDateRange()` শুরু ও শেষের তারিখের inclusive filter তৈরি করে।
+
+### Logging middleware: `app/Http/Middleware/AuditUserActivity.php`
+- `bootstrap/app.php`-এর web middleware group-এ যুক্ত হওয়ায় web request-এর শেষে কাজ করে। সফল POST/PUT/PATCH/DELETE এবং বিদ্যমান GET-ভিত্তিক destroy/status-update route লগ হয়।
+- HTTP error ও validation error-সহ redirect লগ হয় না। Login/logout path বাদ থাকে, কারণ সেগুলো Laravel-এর Auth event থেকে একবারই লগ করা হয়।
+- Route name থেকে Product, Sale, Customer/Supplier ledger, Role, User, Voucher ইত্যাদি subject চেনা হয়। Sale request-এর product ID-র পাশাপাশি product name এবং role permission ID-র পাশাপাশি permission name-ও properties-এ যোগ হয়।
+- Password, token এবং remember field সংরক্ষণ করা হয় না।
+
+### Login/logout event: `app/Providers/AppServiceProvider.php`
+Laravel-এর `Login` ও `Logout` event-এ ব্যবহারকারীর ID/name/email snapshot, guard, IP এবং user-agent-সহ লগ তৈরি হয়। ফলে standard `/login`, `/logout` এবং প্রকল্পের custom logout action-ও ধরা পড়ে।
+
+### Controller: `app/Http/Controllers/UserActivityLogController.php`
+- `index()` `from`, `to`, `user_id` এবং `event` filter validate করে, `UserActivityLog` query-তে প্রয়োগ করে এবং ২৫টি করে pagination দেয়।
+- User filter-এ activity history-র actor snapshot ব্যবহার হয়; তাই user delete হলেও তার ID/name দিয়ে আগের লগ filter করা যায়।
+
+### Route ও Permission: `routes/web.php`
+- `GET /user-activity-logs` (`user-activity-logs.index`) authenticated ও verified ব্যবহারকারীর জন্য এবং `reports.all_access` permission-এ সীমাবদ্ধ।
+- নতুন permission বা বিদ্যমান permission পরিবর্তন করা হয়নি। Dashboard-এর Reports menu-তে একই permission-ধারী ব্যবহারকারীদের জন্য link যোগ করা হয়েছে।
+
+### Blade: `resources/views/backend/user-activity/index.blade.php`
+- তারিখ থেকে/পর্যন্ত, user এবং activity filter form; timestamp, actor, activity, description, subject ID, IP address এবং প্রয়োজনে expandable JSON details-এর তালিকা দেখায়।
+- Filter query pagination link-এ বজায় থাকে; Reset link সব filter পরিষ্কার করে।
+- User dropdown-এ `users` table-এর সব বর্তমান user/employee-এর নাম ও ইমেইল দেখায়, activity না থাকলেও। পাশাপাশি delete হওয়া user-এর audit snapshot-ও দেখায়। user নির্বাচন করলে ID দিয়ে history filter হয় এবং শিরোনামে নির্বাচিত নাম/ইমেইল দেখা যায়।
+- `Print` এবং `Save as PDF` browser print dialog খোলে; PDF পেতে print destination থেকে `Save as PDF` বেছে নিতে হয়। Print layout-এ navigation, filter ও pagination বাদ দিয়ে selected user, date range এবং বর্তমান পাতার activity rows রাখা হয়।
+
+### Activity-র পরিধি
+এই সংস্করণে অ্যাপের web form/API-ধাঁচের route দিয়ে সম্পন্ন write action এবং login/logout রেকর্ড হয়। Background job, সরাসরি database/console পরিবর্তন এবং failed validation/write request এই HTTP audit middleware-এর আওতায় পড়ে না।

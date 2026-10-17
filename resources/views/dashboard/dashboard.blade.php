@@ -119,246 +119,302 @@
             </div>
             <!--navigation-->
             <ul class="metismenu" id="menu">
-                <li>
-                    <a href="{{ route('dashboardbody') }}" class="">
-                        <div class="parent-icon"><i class='bx bx-home-smile'></i>
-                        </div>
-                        <div class="menu-title">Dashboard</div>
-                    </a>
+                {{-- Keep navigation visibility aligned with the server-side permission checks. --}}
+                @can('Dashboard')
+                    <li>
+                        <a href="{{ route('dashboardbody') }}" class="">
+                            <div class="parent-icon"><i class='bx bx-home-smile'></i>
+                            </div>
+                            <div class="menu-title">Dashboard</div>
+                        </a>
 
-                </li>
-                <li class="menu-label">Regural Operation</li>
-                <li>
-                    <a href="javascript:;" class="has-arrow">
-                        <div class="parent-icon"><i class='bx bx-cart-alt'></i></div>
-                        <div class="menu-title">Sales</div>
-                    </a>
-                    <ul>
-                        <li>
-                            <a href="{{ route('sales.index') }}"><i class='bx bx-plus-medical'></i>Create Sale</a>
-                        </li>
+                    </li>
+                @endcan
+                @canany(['sales.create', 'sales.view'])
+                    <li class="menu-label">Regural Operation</li>
+                    <li>
+                        <a href="javascript:;" class="has-arrow">
+                            <div class="parent-icon"><i class='bx bx-cart-alt'></i></div>
+                            <div class="menu-title">Sales</div>
+                        </a>
+                        <ul>
+                            @can('sales.create')
+                                <li>
+                                    <a href="{{ route('sales.index') }}"><i class='bx bx-plus-medical'></i>Create Sale</a>
+                                </li>
+                            @endcan
+                        </ul>
+                    </li>
+                @endcan
+                @canany(['Products', 'create-product', 'edit-product-details', 'Brands', 'brand_category.create',
+                    'brand_category.edit', 'brand_category.update', 'brand_category.delete', 'supplier.index',
+                    'supplier.create', 'Categories', 'customer.index', 'customer.create'])
+                    <li class="menu-label">Managerial Operations</li>
+                @endcanany
+                @canany(['Products', 'create-product', 'edit-product-details'])
+                    <li>
+                        <a href="javascript:;" class="has-arrow">
+                            <div class="parent-icon"><i class=' bx bxl-product-hunt'></i>
+                            </div>
+                            <div class="menu-title">Product</div>
+                        </a>
+                        <ul>
+                            @can('Products')
+                                <li>
+                                    <a href="{{ route('product.index') }}"><i class='bx bx-food-menu'></i>All Product</a>
+                                </li>
+                            @endcan
+                            @can('create-product')
+                                <li>
+                                    <a href="{{ route('product.create') }}"><i class='bx bx-plus-medical'></i>Create
+                                        Product</a>
+                                </li>
+                            @endcan
+                        </ul>
+                    </li>
+                @endcan
 
-                    </ul>
-                </li>
-                <li class="menu-label">Managerial Operations</li>
+                @canany(['Brands', 'brand_category.create', 'brand_category.edit', 'brand_category.update',
+                    'brand_category.delete'])
+                    <li>
+                        <a href="javascript:;" class="has-arrow">
+                            <div class="parent-icon"><i class="bx bxl-bootstrap "></i></div>
+                            <div class="menu-title">Brand</div>
+                        </a>
+                        <ul>
+                            @can('Brands')
+                                <li>
+                                    <a href="{{ route('brand.index') }}"><i class='bx bx-food-menu'></i>Brand List</a>
+                                </li>
+                            @endcan
+                            @can('brand_category.create')
+                                <li>
+                                    <a href="{{ route('brand.create') }}"><i class=' bx bx-plus-medical'></i>New Brand Entry
+                                    </a>
+                                </li>
+                            @endcan
+                        </ul>
+                    </li>
+                @endcan
+                @canany(['supplier.index', 'supplier.create'])
+                    <li>
+                        <a href="javascript:;" class="has-arrow">
+                            <div class="parent-icon"><i class="bx bxs-school"></i></div>
+                            <div class="menu-title">Supplier</div>
+                        </a>
+                        <ul>
+                            @can('supplier.index')
+                                <li>
+                                    <a href="{{ route('supplier.index') }}"><i class='bx bx-food-menu'></i> Supplier List</a>
+                                </li>
+                            @endcan
+                            @can('supplier.create')
+                                <li>
+                                    <a href="{{ route('supplier.create') }}"><i class=' bx bxs-school'></i>New Supplier
+                                        Entry
+                                    </a>
+                                </li>
+                            @endcan
+                        </ul>
+                    </li>
+                @endcan
+                @canany(['Categories', 'brand_category.create', 'brand_category.edit', 'brand_category.update',
+                    'brand_category.delete'])
+                    <li>
+                        <a href="javascript:;" class="has-arrow">
+                            <div class="parent-icon"><i class="bx bx-customize "></i></div>
+                            <div class="menu-title">Categories</div>
+                        </a>
+                        <ul>
+                            @can('Categories')
+                                <li>
+                                    <a href="{{ route('category.index') }}"><i class='bx bx-food-menu'></i>All Category</a>
+                                </li>
+                            @endcan
+                            @can('brand_category.create')
+                                <li>
+                                    <a href="{{ route('category.create') }}"><i class='bx bx-plus-medical'></i>Create
+                                        Category</a>
+                                </li>
+                            @endcan
+                        </ul>
+                    </li>
+                @endcan
+                @canany(['customer.index', 'customer.create'])
+                    <li>
+                        <a class="has-arrow" href="javascript:;">
+                            <div class="parent-icon"><i class="bx bx-user-circle"></i>
+                            </div>
+                            <div class="menu-title">Customers</div>
+                        </a>
+                        <ul>
+                            @can('customer.index')
+                                <li>
+                                    <a href="{{ route('customer.index') }}"><i class=' bx bx-id-card'></i>All Customer</a>
+                                </li>
+                            @endcan
+                            @can('customer.create')
+                                <li>
+                                    <a href="{{ route('customer.create') }}"><i class='bx bx-user-plus'></i>Create
+                                        Customer</a>
+                                </li>
+                            @endcan
+                        </ul>
+                    </li>
+                @endcan
+                @canany(['voucher', 'voucher.entry', 'employee_payment_voucher.entry'])
+                    <li class="menu-label">Administration operations</li>
+                    <li>
+                        <a class="has-arrow" href="javascript:;">
+                            <div class="parent-icon"><i class="bx bxs-blanket"></i>
+                            </div>
+                            <div class="menu-title">Accounts</div>
+                        </a>
+                        <ul>
+                            @can('voucher')
+                                <li>
+                                    <a href="{{ route('voucher-entries.index') }}"><i class=' bx bx-id-card'></i>Voucher
+                                        Entries</a>
+                                </li>
+                            @endcan
+                            @can('employee_payment_voucher.entry')
+                                <li>
+                                    <a href="{{ route('employee-payment.index') }}"><i class='bx bx-user-plus '></i>Employee
+                                        Payment</a>
+                                </li>
+                            @endcan
+                        </ul>
+                    </li>
+                @endcanany
+                @canany(['employee.index', 'employee.create'])
+                    <li>
+                        <a class="has-arrow" href="javascript:;">
+                            <div class="parent-icon"><i class="bx bxs-user-pin "></i>
+                            </div>
+                            <div class="menu-title">Empolyee</div>
+                        </a>
+                        <ul>
+                            @can('employee.index')
+                                <li>
+                                    <a href="{{ route('user.index') }}"><i class=' bx bx-id-card'></i>All Empolyee</a>
+                                </li>
+                            @endcan
+                            @can('employee.create')
+                                <li>
+                                    <a href="{{ route('user.create') }}"><i class='bx bx-user-plus '></i>Create Empolyee</a>
+                                </li>
+                            @endcan
+                        </ul>
+                    </li>
+                @endcan
+                @canany(['role-menu', 'create-role'])
+                    <li>
+                        <a href="javascript:;" class="has-arrow">
+                            <div class="parent-icon"><i class='bx bx-key'></i>
+                            </div>
+                            <div class="menu-title">Role and Permission</div>
+                        </a>
+                        <ul>
+                            @can('role-menu')
+                                <li>
+                                    <a href="{{ route('roles.index') }}"><i class='bx bxs-door-open'></i>All Roles</a>
+                                </li>
+                            @endcan
+                            @can('create-role')
+                                <li>
+                                    <a href="{{ route('roles.create') }}"><i class='bx bx-user-plus'></i>Create Role</a>
+                                </li>
+                            @endcan
+                        </ul>
 
-                <li>
-                    <a href="javascript:;" class="has-arrow">
-                        <div class="parent-icon"><i class=' bx bxl-product-hunt'></i>
-                        </div>
-                        <div class="menu-title">Product</div>
-                    </a>
-                    <ul>
-                        <li>
-                            <a href="{{ route('product.index') }}"><i class='bx bx-food-menu'></i>All Product</a>
-                        </li>
+                    </li>
+                @endcan
+                @can('organization info.access')
+                    <li>
+                        <a href="javascript:;" class="has-arrow">
+                            <div class="parent-icon"><i class='bx bxs-landmark'></i>
+                            </div>
+                            <div class="menu-title">Organization</div>
+                        </a>
+                        <ul>
+                            <li>
+                                <a href="{{ route('organization.edit') }}"><i class='bx bxs-door-open'></i>Organization
+                                    Information</a>
+                            </li>
+                        </ul>
 
-                        <li>
-                            <a href="{{ route('product.create') }}"><i class='bx bx-plus-medical'></i>Create
-                                Product</a>
-                        </li>
-                    </ul>
-                </li>
+                    </li>
+                @endcan
 
-                <li>
-                    <a href="javascript:;" class="has-arrow">
-                        <div class="parent-icon"><i class="bx bxl-bootstrap "></i></div>
-                        <div class="menu-title">Brand</div>
-                    </a>
-                    <ul>
-                        <li>
-                            <a href="{{ route('brand.index') }}"><i class='bx bx-food-menu'></i>Brand List</a>
-                        </li>
+                @canany(['reports.vouchers', 'reports.all_access'])
+                    <li class="menu-label">Reports</li>
 
-                        <li>
-                            <a href="{{ route('brand.create') }}"><i class=' bx bx-plus-medical'></i>New Brand Entry
-                            </a>
-                        </li>
+                    <li>
+                        <a class="has-arrow" href="javascript:;">
+                            <div class="parent-icon"><i class='bx bxs-bookmark-alt-plus'></i>
+                            </div>
+                            <div class="menu-title">Voucher</div>
+                        </a>
+                        <ul>
+                            <li>
+                                <a href="{{ route('voucher-report.combined') }}">
+                                    <div class="parent-icon"><i class="bx bx-receipt"></i></div>
+                                    <div class="menu-title">Voucher</div>
+                                </a>
+                            </li>
 
-                    </ul>
-                </li>
-                <li>
-                    <a href="javascript:;" class="has-arrow">
-                        <div class="parent-icon"><i class="bx bxs-school"></i></div>
-                        <div class="menu-title">Supplier</div>
-                    </a>
-                    <ul>
-                        <li>
-                            <a href="{{ route('supplier.index') }}"><i class='bx bx-food-menu'></i> Supplier List</a>
-                        </li>
+                            <li>
+                                <a href="{{ route('employee-payment.report') }}">
+                                    <div class="parent-icon"><i class="bx bx-receipt"></i></div>
+                                    <div class="menu-title">Employee Payment</div>
+                                </a>
+                            </li>
+                            <li>
+                                <a href="{{ route('voucher-entries.report') }}">
+                                    <div class="parent-icon"><i class="bx bx-receipt"></i></div>
+                                    <div class="menu-title">Miscellaneous Voucher</div>
+                                </a>
+                            </li>
+                        </ul>
+                    </li>
+                @endcanany
 
-                        <li>
-                            <a href="{{ route('supplier.create') }}"><i class=' bx bxs-school'></i>New Supplier
-                                Entry
-                            </a>
-                        </li>
-
-                    </ul>
-                </li>
-                <li>
-                    <a href="javascript:;" class="has-arrow">
-                        <div class="parent-icon"><i class="bx bx-customize "></i></div>
-                        <div class="menu-title">Categories</div>
-                    </a>
-                    <ul>
-                        <li>
-                            <a href="{{ route('category.index') }}"><i class='bx bx-food-menu'></i>All Category</a>
-                        </li>
-                        <li>
-                            <a href="{{ route('category.create') }}"><i class='bx bx-plus-medical'></i>Create
-                                Category</a>
-                        </li>
-
-                    </ul>
-                </li>
-                <li>
-                    <a class="has-arrow" href="javascript:;">
-                        <div class="parent-icon"><i class="bx bx-user-circle"></i>
-                        </div>
-                        <div class="menu-title">Customers</div>
-                    </a>
-                    <ul>
-
-                        <li>
-                            <a href="{{ route('customer.index') }}"><i class=' bx bx-id-card'></i>All Customer</a>
-                        </li>
-
-                        <li>
-                            <a href="{{ route('customer.create') }}"><i class='bx bx-user-plus'></i>Create
-                                Customer</a>
-                        </li>
-                    </ul>
-                </li>
-                <li class="menu-label">Administration operations</li>
-                <li>
-                    <a class="has-arrow" href="javascript:;">
-                        <div class="parent-icon"><i class="bx bxs-blanket"></i>
-                        </div>
-                        <div class="menu-title">Accounts</div>
-                    </a>
-                    <ul>
-
-                        <li>
-                            <a href="{{ route('voucher-entries.index') }}"><i class=' bx bx-id-card'></i>Voucher
-                                Entries</a>
-                        </li>
-
-                        <li>
-                            <a href="{{ route('employee-payment.index') }}"><i class='bx bx-user-plus '></i>Employee
-                                Payment</a>
-                        </li>
-
-                    </ul>
-                </li>
-                <li>
-                    <a class="has-arrow" href="javascript:;">
-                        <div class="parent-icon"><i class="bx bxs-user-pin "></i>
-                        </div>
-                        <div class="menu-title">Empolyee</div>
-                    </a>
-                    <ul>
-
-                        <li>
-                            <a href="{{ route('user.index') }}"><i class=' bx bx-id-card'></i>All Empolyee</a>
-                        </li>
-
-                        <li>
-                            <a href="{{ route('user.create') }}"><i class='bx bx-user-plus '></i>Create Empolyee</a>
-                        </li>
-
-                    </ul>
-                </li>
-                <li>
-                    <a href="javascript:;" class="has-arrow">
-                        <div class="parent-icon"><i class='bx bx-key'></i>
-                        </div>
-                        <div class="menu-title">Role and Permission</div>
-                    </a>
-                    <ul>
-                        <li>
-                            <a href="{{ route('roles.index') }}"><i class='bx bxs-door-open'></i>All Roles</a>
-                        </li>
-                        <li>
-                            <a href="{{ route('roles.create') }}"><i class='bx bx-user-plus'></i>Create Role</a>
-                        </li>
-
-                    </ul>
-
-                </li>
-                <li>
-                    <a href="javascript:;" class="has-arrow">
-                        <div class="parent-icon"><i class='bx bxs-landmark'></i>
-                        </div>
-                        <div class="menu-title">organization</div>
-                    </a>
-                    <ul>
-                        <li>
-                            <a href="{{ route('organization.edit') }}"><i class='bx bxs-door-open'></i>Organization
-                                Information</a>
-                        </li>
-                    </ul>
-
-                </li>
-
-                <li class="menu-label">Reports</li>
-
-                <li>
-                    <a class="has-arrow" href="javascript:;">
-                        <div class="parent-icon"><i class='bx bxs-bookmark-alt-plus'></i>
-                        </div>
-                        <div class="menu-title">Voucher</div>
-                    </a>
-                    <ul>
-                        <li>
-                            <a href="{{ route('voucher-report.combined') }}">
-                                <div class="parent-icon"><i class="bx bx-receipt"></i></div>
-                                <div class="menu-title">Voucher</div>
-                            </a>
-                        </li>
-
-                        <li>
-                            <a href="{{ route('employee-payment.report') }}">
-                                <div class="parent-icon"><i class="bx bx-receipt"></i></div>
-                                <div class="menu-title">Employee Payment</div>
-                            </a>
-                        </li>
-                        <li>
-                            <a href="{{ route('voucher-entries.report') }}">
-                                <div class="parent-icon"><i class="bx bx-receipt"></i></div>
-                                <div class="menu-title">Miscellaneous Voucher</div>
-                            </a>
-                        </li>
-                    </ul>
-                </li>
-
-                <li>
-                    <a class="has-arrow" href="javascript:;">
-                        <div class="parent-icon"><i class='bx bxs-book-open'></i>
-                        </div>
-                        <div class="menu-title">Sale Reports</div>
-                    </a>
-                    <ul>
-                        <li>
-                            <a href="{{ route('sales.report') }}">
-                                <i class='bx bx-layer'></i>Sales Report
-                            </a>
-                        </li>
-                    </ul>
-                </li>
-                <li>
-                    <a class="has-arrow" href="javascript:;">
-                        <div class="parent-icon"><i class='bx bxs-spreadsheet'></i>
-                        </div>
-                        <div class="menu-title">Inventory Reports</div>
-                    </a>
-                    <ul>
-                        <li>
-                            <a href="{{ route('product.inventory.report') }}">
-                                <i class='bx bx-calculator'></i>Product Inventory
-                            </a>
-                        </li>
-                    </ul>
-                </li>
+                @can('reports.all_access')
+                    <li>
+                        <a href="{{ route('user-activity-logs.index') }}">
+                            <div class="parent-icon"><i class='bx bx-history'></i></div>
+                            <div class="menu-title">User Activity Log</div>
+                        </a>
+                    </li>
+                    <li>
+                        <a class="has-arrow" href="javascript:;">
+                            <div class="parent-icon"><i class='bx bxs-book-open'></i>
+                            </div>
+                            <div class="menu-title">Sale Reports</div>
+                        </a>
+                        <ul>
+                            <li>
+                                <a href="{{ route('sales.report') }}">
+                                    <i class='bx bx-layer'></i>Sales Report
+                                </a>
+                            </li>
+                        </ul>
+                    </li>
+                    <li>
+                        <a class="has-arrow" href="javascript:;">
+                            <div class="parent-icon"><i class='bx bxs-spreadsheet'></i>
+                            </div>
+                            <div class="menu-title">Inventory Reports</div>
+                        </a>
+                        <ul>
+                            <li>
+                                <a href="{{ route('product.inventory.report') }}">
+                                    <i class='bx bx-calculator'></i>Product Inventory
+                                </a>
+                            </li>
+                        </ul>
+                    </li>
+                @endcan
 
             </ul>
             <!--end navigation-->
@@ -395,151 +451,159 @@
                             </li>
 
 
-                            <li class="nav-item dropdown dropdown-large">
-                                <a class="nav-link dropdown-toggle dropdown-toggle-nocaret position-relative"
-                                    href="#" data-bs-toggle="dropdown">
-                                    @if (($expiryNotifications ?? collect())->isNotEmpty())
-                                        <span class="alert-count">{{ $expiryNotifications->count() }}</span>
-                                    @endif
-                                    <i class='bx bx-bell'></i>
-                                </a>
-                                <div class="dropdown-menu dropdown-menu-end">
-                                    <a href="{{ route('product.index') }}">
-                                        <div class="msg-header">
-                                            <p class="msg-header-title">Expiry Notifications</p>
-                                            <p class="msg-header-badge">
-                                                {{ ($expiryNotifications ?? collect())->count() }} New</p>
-                                        </div>
+                            @can('Products')
+                                <li class="nav-item dropdown dropdown-large">
+                                    <a class="nav-link dropdown-toggle dropdown-toggle-nocaret position-relative"
+                                        href="#" data-bs-toggle="dropdown">
+                                        @if (($expiryNotifications ?? collect())->isNotEmpty())
+                                            <span class="alert-count">{{ $expiryNotifications->count() }}</span>
+                                        @endif
+                                        <i class='bx bx-bell'></i>
                                     </a>
-                                    <div class="header-notifications-list">
-                                        @forelse (($expiryNotifications ?? collect()) as $alertProduct)
-                                            <a class="dropdown-item"
-                                                href="{{ route('product.edit', $alertProduct->id) }}">
-                                                <div class="d-flex align-items-center">
-                                                    @if ($alertProduct->isExpired())
-                                                        <div class="notify bg-light-danger text-danger">
-                                                            <i class='bx bx-error-circle'></i>
-                                                        </div>
-                                                    @else
-                                                        <div class="notify bg-light-warning text-warning">
-                                                            <i class='bx bx-time-five'></i>
-                                                        </div>
-                                                    @endif
-                                                    <div class="flex-grow-1">
-                                                        <h6 class="msg-name">
-                                                            {{ $alertProduct->productName }}
-                                                            <span class="msg-time float-end">
-                                                                {{ $alertProduct->expiry_date->diffForHumans() }}
-                                                            </span>
-                                                        </h6>
-                                                        <p class="msg-info">
-                                                            @if ($alertProduct->isExpired())
-                                                                Expired on
-                                                                {{ $alertProduct->expiry_date->format('Y-m-d') }}
-                                                            @else
-                                                                Expires within one month
-                                                                ({{ $alertProduct->expiry_date->format('Y-m-d') }})
-                                                            @endif
-                                                        </p>
-                                                    </div>
-                                                </div>
-                                            </a>
-                                        @empty
-                                            <a class="dropdown-item" href="{{ route('product.index') }}">
-                                                <div class="d-flex align-items-center">
-                                                    <div class="notify bg-light-success text-success">
-                                                        <i class='bx bx-check-circle'></i>
-                                                    </div>
-                                                    <div class="flex-grow-1">
-                                                        <h6 class="msg-name">No expiry alerts</h6>
-                                                        <p class="msg-info">No products are expired or expiring within
-                                                            one month</p>
-                                                    </div>
-                                                </div>
-                                            </a>
-                                        @endforelse
-                                    </div>
-                                    <a href="{{ route('product.index') }}">
-                                        <div class="text-center msg-footer">
-                                            <button class="btn btn-primary w-100">View All Products</button>
-                                        </div>
-                                    </a>
-                                </div>
-                            </li>
-
-                            <li class="nav-item dropdown dropdown-large">
-                                <a class="nav-link dropdown-toggle dropdown-toggle-nocaret position-relative"
-                                    href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">
-                                    @if (($lowStockNotifications ?? collect())->isNotEmpty())
-                                        <span class="alert-count">{{ $lowStockNotifications->count() }}</span>
-                                    @endif
-                                    <i class='bx bx-shopping-bag'></i>
-                                </a>
-                                <div class="dropdown-menu dropdown-menu-end">
-                                    <a href="{{ route('product.index') }}">
-                                        <div class="msg-header">
-                                            <p class="msg-header-title">Stock Alert</p>
-                                            <p class="msg-header-badge">
-                                                {{ ($lowStockNotifications ?? collect())->count() }} Low Stock</p>
-                                        </div>
-                                    </a>
-                                    <div class="header-message-list">
-                                        @forelse (($lowStockNotifications ?? collect()) as $stockProduct)
-                                            <a class="dropdown-item"
-                                                href="{{ route('product.edit', $stockProduct->id) }}">
-                                                <div class="gap-3 d-flex align-items-center">
-                                                    <div class="position-relative">
-                                                        <div class="cart-product rounded-circle bg-light">
-                                                            @if ($stockProduct->img_url && file_exists(public_path('uploads/products/' . $stockProduct->img_url)))
-                                                                <img src="{{ asset('uploads/products/' . $stockProduct->img_url) }}"
-                                                                    alt="{{ $stockProduct->productName }}">
-                                                            @else
-                                                                <img src="{{ asset('assets/images/products/11.png') }}"
-                                                                    alt="{{ $stockProduct->productName }}">
-                                                            @endif
-                                                        </div>
-                                                    </div>
-                                                    <div class="flex-grow-1">
-                                                        <h6 class="mb-0 cart-product-title">
-                                                            {{ $stockProduct->productName }}</h6>
-                                                        <p class="mb-0 cart-product-price">
-                                                            @if ($stockProduct->isOutOfStock())
-                                                                Out of Stock
-                                                            @else
-                                                                Low Stock: {{ $stockProduct->stockQuantity() }} Units
-                                                            @endif
-                                                        </p>
-                                                    </div>
-                                                    <div class="">
-                                                        <p class="mb-0 cart-price">
-                                                            ৳{{ number_format((float) $stockProduct->price, 2) }}</p>
-                                                    </div>
-                                                </div>
-                                            </a>
-                                        @empty
-                                            <a class="dropdown-item" href="{{ route('product.index') }}">
-                                                <div class="gap-3 d-flex align-items-center">
-                                                    <div class="flex-grow-1">
-                                                        <h6 class="mb-0 cart-product-title">No low stock alerts</h6>
-                                                        <p class="mb-0 cart-product-price">All products have more than
-                                                            10 units</p>
-                                                    </div>
-                                                </div>
-                                            </a>
-                                        @endforelse
-                                    </div>
-                                    <a href="{{ route('product.index') }}">
-                                        <div class="text-center msg-footer">
-                                            <div class="mb-3 d-flex align-items-center justify-content-between">
-                                                <h5 class="mb-0">Alerts</h5>
-                                                <h5 class="mb-0 ms-auto">
-                                                    {{ ($lowStockNotifications ?? collect())->count() }}</h5>
+                                    <div class="dropdown-menu dropdown-menu-end">
+                                        <a href="{{ route('product.index') }}">
+                                            <div class="msg-header">
+                                                <p class="msg-header-title">Expiry Notifications</p>
+                                                <p class="msg-header-badge">
+                                                    {{ ($expiryNotifications ?? collect())->count() }} New
+                                                </p>
                                             </div>
-                                            <button class="btn btn-primary w-100">View Products</button>
+                                        </a>
+                                        <div class="header-notifications-list">
+                                            @forelse (($expiryNotifications ?? collect()) as $alertProduct)
+                                                <a class="dropdown-item"
+                                                    href="{{ route('product.edit', $alertProduct->id) }}">
+                                                    <div class="d-flex align-items-center">
+                                                        @if ($alertProduct->isExpired())
+                                                            <div class="notify bg-light-danger text-danger">
+                                                                <i class='bx bx-error-circle'></i>
+                                                            </div>
+                                                        @else
+                                                            <div class="notify bg-light-warning text-warning">
+                                                                <i class='bx bx-time-five'></i>
+                                                            </div>
+                                                        @endif
+                                                        <div class="flex-grow-1">
+                                                            <h6 class="msg-name">
+                                                                {{ $alertProduct->productName }}
+                                                                <span class="msg-time float-end">
+                                                                    {{ $alertProduct->expiry_date->diffForHumans() }}
+                                                                </span>
+                                                            </h6>
+                                                            <p class="msg-info">
+                                                                @if ($alertProduct->isExpired())
+                                                                    Expired on
+                                                                    {{ $alertProduct->expiry_date->format('Y-m-d') }}
+                                                                @else
+                                                                    Expires within one month
+                                                                    ({{ $alertProduct->expiry_date->format('Y-m-d') }})
+                                                                @endif
+                                                            </p>
+                                                        </div>
+                                                    </div>
+                                                </a>
+                                            @empty
+                                                <a class="dropdown-item" href="{{ route('product.index') }}">
+                                                    <div class="d-flex align-items-center">
+                                                        <div class="notify bg-light-success text-success">
+                                                            <i class='bx bx-check-circle'></i>
+                                                        </div>
+                                                        <div class="flex-grow-1">
+                                                            <h6 class="msg-name">No expiry alerts</h6>
+                                                            <p class="msg-info">No products are expired or expiring within
+                                                                one month</p>
+                                                        </div>
+                                                    </div>
+                                                </a>
+                                            @endforelse
                                         </div>
+                                        <a href="{{ route('product.index') }}">
+                                            <div class="text-center msg-footer">
+                                                <button class="btn btn-primary w-100">View All Products</button>
+                                            </div>
+                                        </a>
+                                    </div>
+                                </li>
+                            @endcan
+
+                            @can('Products')
+                                <li class="nav-item dropdown dropdown-large">
+                                    <a class="nav-link dropdown-toggle dropdown-toggle-nocaret position-relative"
+                                        href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                                        @if (($lowStockNotifications ?? collect())->isNotEmpty())
+                                            <span class="alert-count">{{ $lowStockNotifications->count() }}</span>
+                                        @endif
+                                        <i class='bx bx-shopping-bag'></i>
                                     </a>
-                                </div>
-                            </li>
+                                    <div class="dropdown-menu dropdown-menu-end">
+                                        <a href="{{ route('product.index') }}">
+                                            <div class="msg-header">
+                                                <p class="msg-header-title">Stock Alert</p>
+                                                <p class="msg-header-badge">
+                                                    {{ ($lowStockNotifications ?? collect())->count() }} Low Stock
+                                                </p>
+                                            </div>
+                                        </a>
+                                        <div class="header-message-list">
+                                            @forelse (($lowStockNotifications ?? collect()) as $stockProduct)
+                                                <a class="dropdown-item"
+                                                    href="{{ route('product.edit', $stockProduct->id) }}">
+                                                    <div class="gap-3 d-flex align-items-center">
+                                                        <div class="position-relative">
+                                                            <div class="cart-product rounded-circle bg-light">
+                                                                @if ($stockProduct->img_url && file_exists(public_path('uploads/products/' . $stockProduct->img_url)))
+                                                                    <img src="{{ asset('uploads/products/' . $stockProduct->img_url) }}"
+                                                                        alt="{{ $stockProduct->productName }}">
+                                                                @else
+                                                                    <img src="{{ asset('assets/images/products/11.png') }}"
+                                                                        alt="{{ $stockProduct->productName }}">
+                                                                @endif
+                                                            </div>
+                                                        </div>
+                                                        <div class="flex-grow-1">
+                                                            <h6 class="mb-0 cart-product-title">
+                                                                {{ $stockProduct->productName }}
+                                                            </h6>
+                                                            <p class="mb-0 cart-product-price">
+                                                                @if ($stockProduct->isOutOfStock())
+                                                                    Out of Stock
+                                                                @else
+                                                                    Low Stock: {{ $stockProduct->stockQuantity() }} Units
+                                                                @endif
+                                                            </p>
+                                                        </div>
+                                                        <div class="">
+                                                            <p class="mb-0 cart-price">
+                                                                ৳{{ number_format((float) $stockProduct->price, 2) }}</p>
+                                                        </div>
+                                                    </div>
+                                                </a>
+                                            @empty
+                                                <a class="dropdown-item" href="{{ route('product.index') }}">
+                                                    <div class="gap-3 d-flex align-items-center">
+                                                        <div class="flex-grow-1">
+                                                            <h6 class="mb-0 cart-product-title">No low stock alerts</h6>
+                                                            <p class="mb-0 cart-product-price">All products have more than
+                                                                10 units</p>
+                                                        </div>
+                                                    </div>
+                                                </a>
+                                            @endforelse
+                                        </div>
+                                        <a href="{{ route('product.index') }}">
+                                            <div class="text-center msg-footer">
+                                                <div class="mb-3 d-flex align-items-center justify-content-between">
+                                                    <h5 class="mb-0">Alerts</h5>
+                                                    <h5 class="mb-0 ms-auto">
+                                                        {{ ($lowStockNotifications ?? collect())->count() }}
+                                                    </h5>
+                                                </div>
+                                                <button class="btn btn-primary w-100">View Products</button>
+                                            </div>
+                                        </a>
+                                    </div>
+                                </li>
+                            @endcan
 
                         </ul>
                     </div>
@@ -548,7 +612,7 @@
                         <a class="gap-3 d-flex align-items-center nav-link dropdown-toggle dropdown-toggle-nocaret"
                             href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">
                             {{-- <img src="{{ asset('assets/images/avatars/avatar-2.png') }}" class="user-img"
-                                alt="user avatar"> --}}
+                            alt="user avatar"> --}}
                             {{-- -- ---------------------------------------------- --}}
                             <!-- এখানে আমরা ইফ কন্ডিশন লজিক ব্যবহার করে ব্লেডে লোগো দেখাবো -->
                             @if (Auth::user()->image !== null)
@@ -582,10 +646,12 @@
                             </div>
                         </a>
                         <ul class="dropdown-menu dropdown-menu-end">
-                            <li><a class="dropdown-item d-flex align-items-center"
-                                    href="{{ route('user.show', Auth::user()->id) }}"><i
-                                        class="bx bx-user fs-5"></i><span>Profile</span></a>
-                            </li>
+                            @can('employee.view')
+                                <li><a class="dropdown-item d-flex align-items-center"
+                                        href="{{ route('user.show', Auth::user()->id) }}"><i
+                                            class="bx bx-user fs-5"></i><span>Profile</span></a>
+                                </li>
+                            @endcan
                             <li><a class="dropdown-item d-flex align-items-center" href="javascript:;"><i
                                         class="bx bx-cog fs-5"></i><span>Settings</span></a>
                             </li>

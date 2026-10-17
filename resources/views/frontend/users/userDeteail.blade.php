@@ -27,12 +27,16 @@
                         <a href="{{ route('user.index') }}" class="btn btn-secondary">
                             <i class="bx bx-arrow-back me-1"></i> Back to List
                         </a>
+                        @can('employee.edit')
                         <a href="{{ route('user.edit', $employee->id) }}" class="btn btn-primary">
                             <i class="bx bx-edit me-1"></i> Edit Profile
                         </a>
+                        @endcan
+                        @canany(['reports.vouchers', 'reports.all_access'])
                         <a href="{{ route('employee-payment.ledger', $employee->id) }}" class="btn btn-success">
                             <i class="bx bx-book-open me-1"></i> Employee Ledger
                         </a>
+                        @endcanany
                     </div>
                 </div>
             </div>
@@ -114,11 +118,13 @@
                                     </ul>
 
                                     <div class="mt-4 d-grid gap-2">
+                                        @can('employee.inactive')
                                         <a href="{{ route('user.statusupdate', $employee->id) }}"
                                            class="btn btn-{{ $employee->status == 1 ? 'outline-danger' : 'outline-success' }}">
                                             <i class="bx bx-power-off me-1"></i>
                                             {{ $employee->status == 1 ? 'Deactivate Employee' : 'Activate Employee' }}
                                         </a>
+                                        @endcan
                                     </div>
                                 </div>
                             </div>
@@ -278,9 +284,11 @@
                                         <div class="text-center py-4">
                                             <i class="bx bx-shield-x text-muted font-48"></i>
                                             <p class="text-muted mt-2 mb-0">No roles or permissions assigned to this employee yet.</p>
+                                            @can('employee.edit')
                                             <a href="{{ route('user.edit', $employee->id) }}" class="btn btn-outline-primary btn-sm mt-3">
                                                 <i class="bx bx-plus me-1"></i> Assign Role Now
                                             </a>
+                                            @endcan
                                         </div>
                                     @endforelse
                                 </div>

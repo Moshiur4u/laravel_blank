@@ -13,7 +13,7 @@ class DashboardConrtoller extends Controller
 {
     public function dashboard()
     {
-        return view('dashboard.dashboard');
+        return $this->dashboardbody();
     }
 
     /**

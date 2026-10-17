@@ -16,6 +16,7 @@
                 </div>
             </div>
 
+            @can('sales.create')
             <form id="saleForm" action="{{ route('sales.store') }}" method="POST">
                 @csrf
                 <input type="hidden" name="save_customer" id="save_customer" value="{{ old('save_customer', 'no') }}">
@@ -211,7 +212,9 @@
                     </div>
                 </div>
             </form>
+            @endcan
 
+            @can('sales.view')
             <div class="mt-4 border-0 shadow-sm card radius-10">
                 <div class="py-3 bg-transparent card-header border-bottom">
                     <h5 class="mb-0 fw-bold text-dark"><i class="bx bx-history text-primary me-2"></i>Recent Invoices</h5>
@@ -238,6 +241,7 @@
                         </tbody>
                     </table>
                 </div>
+                @endcan
             </div>
         </div>
     </div>

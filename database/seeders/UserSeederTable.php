@@ -18,7 +18,7 @@ class UserSeederTable extends Seeder
         // এখানে উজার তৈরি করা হলো ডাটাবেজের ইউজার টেবিলে সুপার এডমিন এবং এডমিন উজার তৈরি করা হলো
         $supperAdmin = User::create([
             'name' => 'Supper Admin',
-            'email' => '[EMAIL_ADDRESS]',
+            'email' => 'supperadmin@example.com',
             // পাসওয়ার্ড হ্যাশ করার জন্য ফাসস ফংশন ব্যবহার করা হলো
             'password' => Hash::make('password'),
 
@@ -32,7 +32,7 @@ class UserSeederTable extends Seeder
         ]);
         // রোল তৈরি করা হলো স্পাটিয়ার ব্যবহার করে ডাটাবেজে রোল টেবিলে
         // স্পাটিয়ার package ব্যবহার করার জন্য Role এবং Permission মডেল ইম্পোর্ট করা হলো
-        $role = Role::create(['name' => 'admin']);
+        $role = Role::firstOrCreate(['name' => 'admin', 'guard_name' => 'web']);
 
         // পারমিশন মডেল কল করা হলো প্লক ফাংশন ব্যবহার করে আই ডী নিয়ে আসা হলো
         $permissions = Permission::pluck('id')->all();
@@ -43,6 +43,5 @@ class UserSeederTable extends Seeder
         // রোল এসাইন করা হলো সুপার এডমিন এবং এডমিনের সিঙ্ক করা হলও কারন এক সাথে দুটা উজার রোল এসাইন করা যায় না ।
         $supperAdmin->assignRole($role);
         $admin->syncRoles($role);
-
     }
 }

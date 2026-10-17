@@ -24,9 +24,11 @@
                     </nav>
                 </div>
                 <div class="ms-auto">
+                    @can('brand_category.create')
                     <a href="{{ route('brand.create') }}" class="btn btn-primary px-3 shadow-sm">
                         <i class="bx bx-plus-circle me-1"></i> Add New Brand
                     </a>
+                    @endcan
                 </div>
             </div>
             <!-- End Breadcrumb -->
@@ -105,9 +107,11 @@
                         </h5>
                         <p class="text-muted small mb-0">Manage all registered product brands in the system</p>
                     </div>
+                    @can('brand_category.create')
                     <a href="{{ route('brand.create') }}" class="btn btn-sm btn-outline-primary">
                         <i class="bx bx-plus me-1"></i>New Brand
                     </a>
+                    @endcan
                 </div>
 
                 <div class="card-body">
@@ -170,13 +174,16 @@
                                                 </button>
 
                                                 <!-- Edit Button -->
+                                                @can('brand_category.edit')
                                                 <a href="{{ route('brand.edit', $brand->id) }}"
                                                     class="btn btn-sm btn-outline-primary"
                                                     title="Edit Brand">
                                                     <i class="bx bx-edit-alt"></i>
                                                 </a>
+                                                @endcan
 
                                                 <!-- Delete Button -->
+                                                @can('brand_category.delete')
                                                 <a href="{{ route('brand.destroy', $brand->id) }}"
                                                     class="btn btn-sm btn-outline-danger"
                                                     data-swal-delete
@@ -184,6 +191,7 @@
                                                     title="Delete Brand">
                                                     <i class="bx bx-trash"></i>
                                                 </a>
+                                                @endcan
                                             </div>
 
                                             <!-- Brand Details Modal -->
@@ -226,9 +234,11 @@
                                                             </div>
                                                         </div>
                                                         <div class="modal-footer border-top">
+                                                            @can('brand_category.edit')
                                                             <a href="{{ route('brand.edit', $brand->id) }}" class="btn btn-primary btn-sm">
                                                                 <i class="bx bx-edit me-1"></i>Edit Brand
                                                             </a>
+                                                            @endcan
                                                             <button type="button" class="btn btn-secondary btn-sm" data-bs-dismiss="modal">Close</button>
                                                         </div>
                                                     </div>

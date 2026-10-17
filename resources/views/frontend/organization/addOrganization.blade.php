@@ -33,29 +33,9 @@
                             <h5 class="mb-0"><i class="bx bx-buildings me-1"></i> Organization Information</h5>
                         </div>
                         <div class="card-body p-4">
-                            <form action="{{ route('organization.update') }}" method="POST"
-                                enctype="multipart/form-data">
+                            <form action="{{ route('organization.update') }}" method="POST" enctype="multipart/form-data">
                                 @csrf
                                 @method('PUT')
-
-                                <div class="mb-4">
-                                    <label for="logo" class="form-label fw-semibold">Organization Logo</label>
-                                    <input type="file" name="logo" id="logo"
-                                        class="form-control @error('logo') is-invalid @enderror"
-                                        accept=".jpg,.jpeg,.png,.webp,image/jpeg,image/png,image/webp">
-                                    <small class="text-muted">JPG, PNG, or WebP; maximum 2 MB.</small>
-                                    @error('logo')
-                                        <div class="text-danger small">{{ $message }}</div>
-                                    @enderror
-                                    @if ($organization->logo)
-                                        <div class="mt-3">
-                                            <div class="small text-muted mb-2">Current Logo</div>
-                                            <img src="{{ asset('uploads/organizations/' . $organization->logo) }}"
-                                                alt="{{ $organization->name }} logo"
-                                                style="max-width: 180px; max-height: 120px; object-fit: contain;">
-                                        </div>
-                                    @endif
-                                </div>
 
                                 <div class="mb-3">
                                     <label for="name" class="form-label fw-semibold">
@@ -98,6 +78,24 @@
                                     @enderror
                                 </div>
 
+                                <div class="mb-4">
+                                    <label for="logo" class="form-label fw-semibold">Organization Logo</label>
+                                    <input type="file" name="logo" id="logo"
+                                        class="form-control @error('logo') is-invalid @enderror"
+                                        accept=".jpg,.jpeg,.png,.webp,image/jpeg,image/png,image/webp">
+                                    <small class="text-muted">JPG, PNG, or WebP; maximum 2 MB.</small>
+                                    @error('logo')
+                                        <div class="text-danger small">{{ $message }}</div>
+                                    @enderror
+                                    @if ($organization->logo)
+                                        <div class="mt-3">
+                                            <div class="small text-muted mb-2">Current Logo</div>
+                                            <img src="{{ asset('uploads/organizations/' . $organization->logo) }}"
+                                                alt="{{ $organization->name }} logo"
+                                                style="max-width: 180px; max-height: 120px; object-fit: contain;">
+                                        </div>
+                                    @endif
+                                </div>
                                 <button type="submit" class="btn btn-primary">
                                     <i class="bx bx-save me-1"></i> Save Organization Information
                                 </button>

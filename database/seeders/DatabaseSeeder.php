@@ -24,6 +24,8 @@ class DatabaseSeeder extends Seeder
         // পারমিশন সিডার কল করা হলো ডাটাবেজে পারমিশন টেবিলের জন্য
         $this->call([
             PermissionSeederTable::class,
+            // Standard role presets are synchronized only after their permissions exist.
+            RolePermissionSeeder::class,
             // ইউজার সিডার কল করা হলো ডাটাবেজে ইউজার টেবিলের জন্য
             UserSeederTable::class,
             // প্রোডাক্ট ক্যাটাগরি সিডার কল করা হলো ডাটাবেজে প্রোডাক্ট ক্যাটাগরি টেবিলের জন্য

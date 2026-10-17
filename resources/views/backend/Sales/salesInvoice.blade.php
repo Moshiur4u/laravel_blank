@@ -5,7 +5,9 @@
     <div class="page-wrapper">
         <div class="page-content">
             <div class="d-flex justify-content-end gap-2 mb-3 no-print">
+                @canany(['sales.create', 'sales.view'])
                 <a href="{{ route('sales.index') }}" class="btn btn-outline-secondary"><i class="bx bx-arrow-back me-1"></i>New Sale</a>
+                @endcanany
                 <button type="button" class="btn btn-primary" onclick="window.print()"><i class="bx bx-printer me-1"></i>Print Invoice</button>
             </div>
 

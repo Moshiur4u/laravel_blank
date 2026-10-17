@@ -10,9 +10,11 @@
                     <div class="breadcrumb-title pe-3">Accounts</div>
                     <h4 class="mb-0 mt-2">Debit/Credit Voucher Entries</h4>
                 </div>
+                @canany(['reports.vouchers', 'reports.all_access'])
                 <a href="{{ route('voucher-entries.report') }}" class="btn btn-outline-primary">
                     <i class="bx bx-bar-chart-alt-2 me-1"></i>Voucher Report
                 </a>
+                @endcanany
             </div>
 
             @if (session('success'))

@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 use Illuminate\Http\Request;
+use Illuminate\Validation\Rule;
 use Spatie\Permission\Models\Role;
 use Spatie\Permission\Models\Permission;
 
@@ -22,7 +23,10 @@ class RoleController extends Controller
      */
     public function create()
     {
-        $permissions = Permission::latest()->get();
+        // Only offer permissions the current user may delegate to a new role.
+        $permissions = Permission::whereIn('id', auth()->user()->getAllPermissions()->modelKeys())
+            ->latest()
+            ->get();
         return view('backend.roles.role-create',compact('permissions'));
     }
 
@@ -31,14 +35,14 @@ class RoleController extends Controller
      */
     public function store(Request $request)
     {
-        // dd($request->all());
-        $request->validate([
+        $permissionIds = $request->user()->getAllPermissions()->modelKeys();
+        $validated = $request->validate([
             'name' => 'required|unique:roles,name',
-            'permission'=>'required'
+            'permission' => ['required', 'array', 'min:1'],
+            'permission.*' => ['required', 'integer', 'distinct', Rule::in($permissionIds)],
         ]);
-        $PermissionId = array_map('intval',($request->input('permission')));
-        $role = Role::create(['name'=> $request->input('name')]);
-        $role->syncPermissions($PermissionId);
+        $role = Role::create(['name' => $validated['name']]);
+        $role->syncPermissions(array_map('intval', $validated['permission']));
         flash()->success('Role Create successfully!');
         return redirect()->route('roles.index');
     }
@@ -68,16 +72,20 @@ class RoleController extends Controller
      */
     public function update(Request $request, $id)
     {
-        $request->validate([
-            'name'=>'required|unique:roles,name,'.$id,
-            'permission'=>'required'
+        $role = Role::with('permissions')->findOrFail($id);
+        $permissionIds = array_unique(array_merge(
+            $request->user()->getAllPermissions()->modelKeys(),
+            $role->permissions->modelKeys()
+        ));
+        $validated = $request->validate([
+            'name' => 'required|unique:roles,name,'.$id,
+            'permission' => ['required', 'array', 'min:1'],
+            'permission.*' => ['required', 'integer', 'distinct', Rule::in($permissionIds)],
         ]);
-        $role = Role::find($id);
-        $role->name = $request->input('name');
+        $role->name = $validated['name'];
         $role->save();
 
-        $PermissionId = array_map('intval',($request->input('permission')));
-        $role->syncPermissions($PermissionId);
+        $role->syncPermissions(array_map('intval', $validated['permission']));
         flash()->success('Role Update successfully!');
         return redirect()->route('roles.index');
 

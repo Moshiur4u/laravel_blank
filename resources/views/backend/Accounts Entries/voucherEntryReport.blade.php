@@ -12,9 +12,11 @@
                     <h4 class="mb-0 mt-2">Daily Debit/Credit Voucher Report</h4>
                 </div>
                 <div class="d-flex gap-2">
+                    @canany(['voucher', 'All Vouchers'])
                     <a href="{{ route('voucher-entries.index') }}" class="btn btn-outline-primary">
                         <i class="bx bx-plus me-1"></i>Create Voucher
                     </a>
+                    @endcanany
                     <a href="{{ route('voucher-entries.report.export', request()->except('page')) }}" class="btn btn-success">
                         <i class="bx bx-spreadsheet me-1"></i>Export Excel
                     </a>

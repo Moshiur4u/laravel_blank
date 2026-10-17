@@ -4,6 +4,10 @@ namespace App\Providers;
 
 use App\Models\Organization;
 use App\Models\Product;
+use App\Models\UserActivityLog;
+use Illuminate\Auth\Events\Login;
+use Illuminate\Auth\Events\Logout;
+use Illuminate\Support\Facades\Event;
 use Illuminate\Support\Facades\View;
 use Illuminate\Support\ServiceProvider;
 
@@ -22,6 +26,36 @@ class AppServiceProvider extends ServiceProvider
      */
     public function boot(): void
     {
+        Event::listen(Login::class, function (Login $event): void {
+            UserActivityLog::create([
+                'user_id' => $event->user->id,
+                'user_name' => $event->user->name,
+                'user_email' => $event->user->email,
+                'event' => 'login',
+                'description' => 'Signed in',
+                'properties' => ['guard' => $event->guard],
+                'ip_address' => request()->ip(),
+                'user_agent' => request()->userAgent(),
+            ]);
+        });
+
+        Event::listen(Logout::class, function (Logout $event): void {
+            if (! $event->user) {
+                return;
+            }
+
+            UserActivityLog::create([
+                'user_id' => $event->user->id,
+                'user_name' => $event->user->name,
+                'user_email' => $event->user->email,
+                'event' => 'logout',
+                'description' => 'Signed out',
+                'properties' => ['guard' => $event->guard],
+                'ip_address' => request()->ip(),
+                'user_agent' => request()->userAgent(),
+            ]);
+        });
+
         // invoice/report-গুলোর print header-এ একই organization profile সরবরাহ করে।
         View::composer([
             'backend.Sales.salesInvoice',
