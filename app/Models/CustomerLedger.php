@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\HasMany; // payment history-র typed Eloquent relation।
 
 class CustomerLedger extends Model
 {
@@ -49,5 +50,11 @@ class CustomerLedger extends Model
     public function receiver()
     {
         return $this->belongsTo(User::class, 'received_by');
+    }
+
+    // একটি sale ledger row-তে পরবর্তী প্রতিটি আদায় আলাদা payment history হিসেবে থাকে।
+    public function payments(): HasMany
+    {
+        return $this->hasMany(CustomerLedgerPayment::class)->orderByDesc('payment_date')->orderByDesc('id'); // সাম্প্রতিক কিস্তি আগে ফেরায়।
     }
 }

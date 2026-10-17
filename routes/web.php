@@ -208,6 +208,16 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::get('/customer/{id}/ledger', [CustomerController::class, 'ledger'])->middleware('permission:customer.ledger')->name('customer.ledger');
     Route::post('/customer/ledger/store', [CustomerController::class, 'ledgerStore'])->middleware('permission:Customer.ledger.payment') // seeder-এর নতুন casing অনুযায়ী ledger payment permission।
         ->name('customer.ledger.store');
+    Route::get('/customer/ledger/{id}/invoice', [CustomerController::class, 'ledgerInvoice'])->middleware('permission:customer.ledger') // customer sale বা payment-এর printable invoice/receipt দেখায়।
+        ->name('customer.ledger.invoice'); // invoice/receipt link-এর named route।
+    Route::post('/customer/ledger/{id}/payments', [CustomerController::class, 'ledgerPaymentStore'])->middleware('permission:Customer.ledger.payment') // sale-এর due-তে date-সহ payment যোগের অনুমতি যাচাই।
+        ->name('customer.ledger.payments.store'); // sale installment form-এর named route।
+    Route::get('/customer/ledger/{id}/edit', [CustomerController::class, 'ledgerEdit'])->middleware('permission:Customer.ledger.edit') // customer ledger edit permission যাচাই।
+        ->name('customer.ledger.edit'); // edit link-এর named route।
+    Route::put('/customer/ledger/{id}/update', [CustomerController::class, 'ledgerUpdate'])->middleware('permission:Customer.ledger.edit') // একই edit permission দিয়ে validated ledger update করে।
+        ->name('customer.ledger.update'); // edit form-এর update route।
+    Route::delete('/customer/ledger/{id}', [CustomerController::class, 'ledgerDestroy'])->middleware('permission:Customer.ledger.delete') // ledger delete permission যাচাই এবং DELETE method বাধ্যতামূলক।
+        ->name('customer.ledger.destroy'); // delete form-এর named route।
     Route::get('/customer/{id}/edit', [CustomerController::class, 'edit'])->middleware('permission:customer.edit')->name('customer.edit');
     Route::put('/customer/{id}/update', [CustomerController::class, 'update'])->middleware('permission:customer.edit') // update operation-এ seeder-এর customer.edit permission।
         ->name('customer.update');

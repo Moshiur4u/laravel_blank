@@ -71,6 +71,105 @@
                 </div>
             </div>
 
+            {{-- Edit mode-এ supplier ledger-এর মতো editable entry form দেখানো হয়। --}}
+            @if (isset($ledger))
+                <div class="row mt-4">
+                    <div class="col-12">
+                        <div class="card border-0 shadow-sm">
+                            <div class="card-header bg-primary text-white">
+                                <h5 class="mb-0"><i class="bx bx-edit-alt me-1"></i>Edit Ledger Entry</h5>
+                            </div>
+                            <div class="card-body">
+                                <form action="{{ route('customer.ledger.update', $ledger->id) }}" method="POST">
+                                    @csrf
+                                    @method('PUT')
+                                    <div class="row g-3">
+                                        <div class="col-md-3">
+                                            <label class="form-label fw-semibold">Date</label>
+                                            <input type="date" name="sale_date" class="form-control" value="{{ old('sale_date', $ledger->sale_date->format('Y-m-d')) }}" required>
+                                            @error('sale_date') <span class="text-danger">{{ $message }}</span> @enderror
+                                        </div>
+                                        <div class="col-md-3">
+                                            <label class="form-label fw-semibold">Invoice No.</label>
+                                            <input type="text" name="invoice_no" class="form-control" value="{{ old('invoice_no', $ledger->invoice_no) }}">
+                                            @error('invoice_no') <span class="text-danger">{{ $message }}</span> @enderror
+                                        </div>
+                                        @if ($ledger->entry_type === 'sale')
+                                            <div class="col-md-3">
+                                                <label class="form-label fw-semibold">Product Name</label>
+                                                <input type="text" name="product_name" class="form-control" value="{{ old('product_name', $ledger->product_name) }}" required>
+                                                @error('product_name') <span class="text-danger">{{ $message }}</span> @enderror
+                                            </div>
+                                            <div class="col-md-1">
+                                                <label class="form-label fw-semibold">Qty</label>
+                                                <input type="number" name="quantity" class="form-control" min="1" value="{{ old('quantity', $ledger->quantity) }}" required>
+                                                @error('quantity') <span class="text-danger">{{ $message }}</span> @enderror
+                                            </div>
+                                            <div class="col-md-2">
+                                                <label class="form-label fw-semibold">Unit Price</label>
+                                                <input type="number" name="unit_price" class="form-control" min="0" step="0.01" value="{{ old('unit_price', $ledger->unit_price) }}" required>
+                                                @error('unit_price') <span class="text-danger">{{ $message }}</span> @enderror
+                                            </div>
+                                            <div class="col-md-3">
+                                                <label class="form-label fw-semibold">Payment Type</label>
+                                                <input type="text" class="form-control" value="{{ ucfirst(str_replace('_', ' ', $ledger->payment_type)) }}" readonly>
+                                            </div>
+                                            <div class="col-md-3">
+                                                <label class="form-label fw-semibold">Employee</label>
+                                                <select name="employee_id" class="form-select">
+                                                    <option value="">Select employee</option>
+                                                    @foreach ($employees as $employee)
+                                                        <option value="{{ $employee->id }}" @selected((string) old('employee_id', $ledger->employee_id) === (string) $employee->id)>{{ $employee->name }}</option>
+                                                    @endforeach
+                                                </select>
+                                            </div>
+                                        @else
+                                            <div class="col-md-3">
+                                                <label class="form-label fw-semibold">Payment Amount</label>
+                                                <input type="number" name="payment_amount" class="form-control" min="0.01" step="0.01" value="{{ old('payment_amount', $ledger->payment_amount) }}" required>
+                                                @error('payment_amount') <span class="text-danger">{{ $message }}</span> @enderror
+                                            </div>
+                                            <div class="col-md-3">
+                                                <label class="form-label fw-semibold">Paid By</label>
+                                                <input type="text" name="paid_by" class="form-control" value="{{ old('paid_by', $ledger->paid_by) }}">
+                                                @error('paid_by') <span class="text-danger">{{ $message }}</span> @enderror
+                                            </div>
+                                        @endif
+                                        <div class="col-md-3">
+                                            <label class="form-label fw-semibold">Received By</label>
+                                            <select name="received_by" class="form-select">
+                                                <option value="">Select receiver</option>
+                                                @foreach ($employees as $employee)
+                                                    <option value="{{ $employee->id }}" @selected((string) old('received_by', $ledger->received_by) === (string) $employee->id)>{{ $employee->name }}</option>
+                                                @endforeach
+                                            </select>
+                                            @error('received_by') <span class="text-danger">{{ $message }}</span> @enderror
+                                        </div>
+                                        <div class="col-12">
+                                            <label class="form-label fw-semibold">Notes</label>
+                                            <textarea name="notes" class="form-control" rows="2">{{ old('notes', $ledger->notes) }}</textarea>
+                                            @error('notes') <span class="text-danger">{{ $message }}</span> @enderror
+                                        </div>
+                                        <div class="col-12 d-flex gap-2">
+                                            <button type="submit" class="btn btn-primary"><i class="bx bx-check me-1"></i>Update Entry</button>
+                                            <a href="{{ route('customer.ledger', $customer->id) }}" class="btn btn-secondary"><i class="bx bx-x me-1"></i>Cancel</a>
+                                        </div>
+                                    </div>
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            @endif
+
+            {{-- Controller redirect-এর session message দেখানো হয়। --}}
+            @if (session('success'))
+                <div class="alert alert-success alert-dismissible fade show mt-3" role="alert">
+                    {{ session('success') }}
+                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                </div>
+            @endif
+
             <div class="row mt-4">
                 @can('Customer.ledger.payment') {{-- seeder-এর নতুন casing অনুযায়ী ledger payment permission। --}}
                 <div class="col-lg-4">
@@ -128,7 +227,7 @@
 
                                 <div class="mb-3 sale-entry-field">
                                     <label class="form-label fw-semibold">Payment Type</label>
-                                    <select name="payment_type" class="form-select" required>
+                                    <select name="payment_type" id="payment_type" class="form-select" required>
                                         <option value="cash">Cash</option>
                                         <option value="due">Due</option>
                                         <option value="full_payment">Full Payment</option>
@@ -181,6 +280,11 @@
                                 </div>
 
                                 <div class="mb-3">
+                                    <label class="form-label fw-semibold">Payment Entry Note</label>
+                                    <small class="form-text text-muted">Standalone payment can be used for opening due or unallocated customer balance.</small>
+                                </div>
+
+                                <div class="mb-3">
                                     <label class="form-label fw-semibold">Notes</label>
                                     <textarea name="notes" class="form-control" rows="3" placeholder="Sale note..."></textarea>
                                 </div>
@@ -193,7 +297,6 @@
                     </div>
                 </div>
                 @endcan
-
                 <div class="col-lg-8">
                     <div class="card border-0 shadow-sm">
                         <div class="card-header bg-transparent border-bottom py-3">
@@ -215,6 +318,7 @@
                                             <th>Method</th>
                                             <th>Employee</th>
                                             <th>Received By</th>
+                                            <th>Action</th>
                                         </tr>
                                     </thead>
                                     <tbody>
@@ -245,10 +349,71 @@
                                                 <td>{{ $ledger->payment_method ? ucfirst($ledger->payment_method) : 'N/A' }}</td>
                                                 <td>{{ $ledger->employee ? $ledger->employee->name : 'N/A' }}</td>
                                                 <td>{{ $ledger->receiver ? $ledger->receiver->name : 'N/A' }}</td>
+                                                <td>
+                                                    <div class="d-flex flex-wrap gap-1">
+                                                        @if ($ledger->payments->isNotEmpty())
+                                                            <details class="w-100">
+                                                                <summary class="btn btn-sm btn-outline-secondary">Payment History</summary>
+                                                                <div class="mt-2">
+                                                                    @foreach ($ledger->payments as $payment)
+                                                                        <div class="small border-bottom py-1">
+                                                                            {{ $payment->payment_date->format('d M Y') }}:
+                                                                            ৳{{ number_format((float) $payment->amount, 2) }}
+                                                                            ({{ $payment->receiver->name ?? 'N/A' }})
+                                                                            @if ($payment->notes)
+                                                                                <span class="text-muted">— {{ $payment->notes }}</span>
+                                                                            @endif
+                                                                        </div>
+                                                                    @endforeach
+                                                                </div>
+                                                            </details>
+                                                        @endif
+                                                        @if ($ledger->entry_type === 'sale' && (float) $ledger->due_amount > 0)
+                                                            @can('Customer.ledger.payment')
+                                                                <details class="w-100">
+                                                                    <summary class="btn btn-sm btn-outline-success">Receive Payment</summary>
+                                                                    <form action="{{ route('customer.ledger.payments.store', $ledger->id) }}" method="POST" class="mt-2">
+                                                                        @csrf
+                                                                        <label class="form-label small">Payment Date</label>
+                                                                        <input type="date" name="payment_date" class="form-control form-control-sm mb-2" value="{{ date('Y-m-d') }}" max="{{ date('Y-m-d') }}" required>
+                                                                        <label class="form-label small">Amount (Due: ৳{{ number_format($ledger->due_amount, 2) }})</label>
+                                                                        <input type="number" name="amount" class="form-control form-control-sm mb-2" min="0.01" max="{{ number_format((float) $ledger->due_amount, 2, '.', '') }}" step="0.01" required>
+                                                                        <label class="form-label small">Received By</label>
+                                                                        <select name="received_by" class="form-select form-select-sm mb-2">
+                                                                            <option value="">Select receiver</option>
+                                                                            @foreach ($employees as $employee)
+                                                                                <option value="{{ $employee->id }}">{{ $employee->name }}</option>
+                                                                            @endforeach
+                                                                        </select>
+                                                                        <textarea name="notes" class="form-control form-control-sm mb-2" rows="2" placeholder="Payment note"></textarea>
+                                                                        <button type="submit" class="btn btn-sm btn-success w-100">Save Payment</button>
+                                                                    </form>
+                                                                </details>
+                                                            @endcan
+                                                        @endif
+                                                        <a href="{{ route('customer.ledger.invoice', $ledger->id) }}" class="btn btn-sm btn-outline-success" title="Print invoice or receipt">
+                                                            <i class="bx bx-printer"></i>
+                                                        </a>
+                                                        @can('Customer.ledger.edit')
+                                                            <a href="{{ route('customer.ledger.edit', $ledger->id) }}" class="btn btn-sm btn-primary" title="Edit ledger entry">
+                                                                <i class="bx bx-edit"></i>
+                                                            </a>
+                                                        @endcan
+                                                        @can('Customer.ledger.delete')
+                                                            <form action="{{ route('customer.ledger.destroy', $ledger->id) }}" method="POST" onsubmit="return confirm('Delete this customer ledger entry and its payment history?');">
+                                                                @csrf
+                                                                @method('DELETE')
+                                                                <button type="submit" class="btn btn-sm btn-danger" title="Delete ledger entry">
+                                                                    <i class="bx bx-trash"></i>
+                                                                </button>
+                                                            </form>
+                                                        @endcan
+                                                    </div>
+                                                </td>
                                             </tr>
                                         @empty
                                             <tr>
-                                                <td colspan="11" class="text-center py-4 text-muted">No ledger records yet.</td>
+                                                <td colspan="12" class="text-center py-4 text-muted">No ledger records yet.</td>
                                             </tr>
                                         @endforelse
                                     </tbody>
@@ -263,10 +428,18 @@
     <script>
         document.addEventListener('DOMContentLoaded', function () {
             const entryType = document.getElementById('entry_type');
-            const paymentAmount = document.querySelector('[name="payment_amount"]');
+            if (!entryType) {
+                return;
+            }
+            const entryForm = entryType.closest('form');
+            const paymentAmount = entryForm.querySelector('[name="payment_amount"]');
             const receivedBy = document.getElementById('received_by');
+            const paymentType = document.getElementById('payment_type');
             const saleFields = document.querySelectorAll('.sale-entry-field');
             const paymentFields = document.querySelectorAll('.payment-entry-field');
+            if (!paymentAmount || !receivedBy || !paymentType) {
+                return;
+            }
 
             function updateEntryFields() {
                 const isPayment = entryType.value === 'payment';
@@ -275,6 +448,7 @@
                 paymentAmount.required = isPayment;
                 paymentAmount.min = isPayment ? '0.01' : '0';
                 receivedBy.required = isPayment;
+                paymentType.required = !isPayment;
             }
 
             entryType.addEventListener('change', updateEntryFields);
