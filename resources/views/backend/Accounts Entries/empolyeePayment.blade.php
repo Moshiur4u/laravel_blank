@@ -21,7 +21,7 @@
             </div>
 
             <div class="mb-3 d-flex justify-content-end">
-                @canany(['reports.vouchers', 'reports.all_access'])
+                @canany(['voucher.report.employee', 'reports.all_access']) {{-- employee voucher report-এর নতুন permission। --}}
                 <a href="{{ route('employee-payment.report') }}" class="btn btn-outline-primary">
                     <i class="bx bx-bar-chart-alt-2 me-1"></i> Daily Voucher Report
                 </a>
@@ -210,7 +210,7 @@
                                         <td>{{ $voucher->notes ?: '—' }}</td>
                                         <td>
                                             @if ($voucher->employee_id)
-                                                @canany(['reports.vouchers', 'reports.all_access'])
+                                                @canany(['voucher.report.employee', 'reports.all_access']) {{-- employee voucher report-এর নতুন permission। --}}
                                                 <a href="{{ route('employee-payment.ledger', $voucher->employee_id) }}"
                                                     class="btn btn-sm btn-outline-primary">
                                                     <i class="bx bx-book-open me-1"></i>View Ledger

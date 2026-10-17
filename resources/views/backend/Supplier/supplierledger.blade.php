@@ -107,7 +107,7 @@
             </div>
 
             {{-- ============== Edit Ledger Entry Form ============== --}}
-            @if (isset($ledger) && $ledger !== null && auth()->user()->can('supplier.ledger.edit'))
+            @if (isset($ledger) && $ledger !== null && auth()->user()->can('Supplier.ledger.edit')) {{-- নতুন casing-এর ledger edit permission। --}}
                 <div class="row">
                     <div class="col-lg-12">
                         <div class="border-0 shadow-sm card">
@@ -297,7 +297,7 @@
                                                 <td class="text-danger fw-bold">৳{{ number_format($entry->due, 2) }}</td>
                                                 <td>
                                                     {{-- প্রতিটি entry-র জন্য date ও amount-সহ আলাদা payment যোগ করার form। --}}
-                                                    @if ((float) $entry->due > 0 && auth()->user()->can('ledger.payment'))
+                                                    @if ((float) $entry->due > 0 && auth()->user()->can('Supplier.ledger.payment')) {{-- supplier payment-এর নতুন permission। --}}
                                                         <details class="mb-1">
                                                             <summary class="text-white btn btn-sm btn-success">
                                                                 <i class="bx bx-money me-1"></i>Payment
@@ -331,13 +331,13 @@
                                                         class="btn btn-sm btn-outline-success" title="Print Invoice">
                                                         <i class="bx bx-printer"></i>
                                                     </a>
-                                                    @can('supplier.ledger.edit')
+                                                    @can('Supplier.ledger.edit') {{-- নতুন casing-এর ledger edit permission। --}}
                                                     <a href="{{ route('supplier.ledger.edit', $entry->id) }}"
                                                         class="btn btn-sm btn-primary">
                                                         <i class="bx bx-edit"></i>
                                                     </a>
                                                     @endcan
-                                                    @can('supplier.ledger.delete')
+                                                    @can('Supplier.ledger.delete') {{-- নতুন casing-এর ledger delete permission। --}}
                                                     <a href="{{ route('supplier.ledger.destroy', $entry->id) }}"
                                                         class="btn btn-sm btn-danger"
                                                         data-swal-delete

@@ -24,7 +24,7 @@
                     </nav>
                 </div>
                 <div class="ms-auto">
-                    @can('create-role')
+                    @can('roles.create') {{-- role তৈরির নতুন permission। --}}
                     <a href="{{ route('roles.create') }}" class="btn btn-primary px-3 shadow-sm">
                         <i class="bx bx-shield-plus me-1"></i> Add New Role
                     </a>
@@ -103,7 +103,7 @@
                         </h5>
                         <p class="text-muted small mb-0">Manage roles and authorize granular access rights</p>
                     </div>
-                    @can('create-role')
+                    @can('roles.create') {{-- role তৈরির নতুন permission। --}}
                     <a href="{{ route('roles.create') }}" class="btn btn-sm btn-outline-primary">
                         <i class="bx bx-plus me-1"></i>New Role
                     </a>
@@ -172,7 +172,7 @@
                                                 @endcan
 
                                                 <!-- Edit Role -->
-                                                @can('edit-role-permissions')
+                                                @can('role.edit') {{-- role সম্পাদনার নতুন permission। --}}
                                                 <a href="{{ route('roles.edit', $role->id) }}"
                                                     class="btn btn-sm btn-outline-primary"
                                                     title="Edit Role">
@@ -181,7 +181,7 @@
                                                 @endcan
 
                                                 <!-- Delete Role -->
-                                                @can('delete-role')
+                                                @can('role.delete') {{-- role মুছতে নতুন permission। --}}
                                                 <a href="{{ route('roles.destroy', $role->id) }}"
                                                     class="btn btn-sm btn-outline-danger"
                                                     data-swal-delete
@@ -243,7 +243,7 @@
                                                         </div>
 
                                                         <div class="modal-footer border-top">
-                                                            @can('edit-role-permissions')
+                                                            @can('role.edit') {{-- role permission সম্পাদনার নতুন permission। --}}
                                                             <a href="{{ route('roles.edit', $role->id) }}" class="btn btn-primary btn-sm">
                                                                 <i class="bx bx-edit me-1"></i>Edit Permissions
                                                             </a>

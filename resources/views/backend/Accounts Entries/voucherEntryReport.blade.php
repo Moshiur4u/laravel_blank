@@ -12,7 +12,7 @@
                     <h4 class="mb-0 mt-2">Daily Debit/Credit Voucher Report</h4>
                 </div>
                 <div class="d-flex gap-2">
-                    @canany(['voucher', 'All Vouchers'])
+                    @canany(['voucher', 'voucher.report.miscellaneous', 'reports.all_access']) {{-- পুরোনো All Vouchers-এর বদলে miscellaneous report permission। --}}
                     <a href="{{ route('voucher-entries.index') }}" class="btn btn-outline-primary">
                         <i class="bx bx-plus me-1"></i>Create Voucher
                     </a>

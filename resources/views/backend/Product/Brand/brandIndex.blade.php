@@ -24,7 +24,7 @@
                     </nav>
                 </div>
                 <div class="ms-auto">
-                    @can('brand_category.create')
+                    @can('brand.create') {{-- brand তৈরির নতুন permission। --}}
                     <a href="{{ route('brand.create') }}" class="btn btn-primary px-3 shadow-sm">
                         <i class="bx bx-plus-circle me-1"></i> Add New Brand
                     </a>
@@ -107,7 +107,7 @@
                         </h5>
                         <p class="text-muted small mb-0">Manage all registered product brands in the system</p>
                     </div>
-                    @can('brand_category.create')
+                    @can('brand.create') {{-- brand তৈরির নতুন permission। --}}
                     <a href="{{ route('brand.create') }}" class="btn btn-sm btn-outline-primary">
                         <i class="bx bx-plus me-1"></i>New Brand
                     </a>
@@ -174,7 +174,7 @@
                                                 </button>
 
                                                 <!-- Edit Button -->
-                                                @can('brand_category.edit')
+                                                @can('brand.edit') {{-- brand সম্পাদনার নতুন permission। --}}
                                                 <a href="{{ route('brand.edit', $brand->id) }}"
                                                     class="btn btn-sm btn-outline-primary"
                                                     title="Edit Brand">
@@ -183,7 +183,7 @@
                                                 @endcan
 
                                                 <!-- Delete Button -->
-                                                @can('brand_category.delete')
+                                                @can('brand.delete') {{-- brand মুছতে নতুন permission। --}}
                                                 <a href="{{ route('brand.destroy', $brand->id) }}"
                                                     class="btn btn-sm btn-outline-danger"
                                                     data-swal-delete
@@ -234,7 +234,7 @@
                                                             </div>
                                                         </div>
                                                         <div class="modal-footer border-top">
-                                                            @can('brand_category.edit')
+                                                            @can('brand.edit') {{-- brand সম্পাদনার নতুন permission। --}}
                                                             <a href="{{ route('brand.edit', $brand->id) }}" class="btn btn-primary btn-sm">
                                                                 <i class="bx bx-edit me-1"></i>Edit Brand
                                                             </a>

@@ -72,7 +72,7 @@
             </div>
 
             <div class="row mt-4">
-                @can('customer.ledger.payment')
+                @can('Customer.ledger.payment') {{-- seeder-এর নতুন casing অনুযায়ী ledger payment permission। --}}
                 <div class="col-lg-4">
                     <div class="card border-0 shadow-sm">
                         <div class="card-header bg-primary text-white">

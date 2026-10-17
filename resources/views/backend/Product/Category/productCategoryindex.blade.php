@@ -24,7 +24,7 @@
                     </nav>
                 </div>
                 <div class="ms-auto">
-                    @can('brand_category.create')
+                    @can('product.category.create') {{-- category তৈরির নতুন permission। --}}
                     <a href="{{ route('category.create') }}" class="px-3 shadow-sm btn btn-primary">
                         <i class="bx bx-plus-circle me-1"></i> Add New Category
                     </a>
@@ -110,7 +110,7 @@
                         </h5>
                         <p class="mb-0 text-muted small">Manage all registered product categories in the system</p>
                     </div>
-                    @can('brand_category.create')
+                    @can('product.category.create') {{-- category তৈরির নতুন permission। --}}
                     <a href="{{ route('category.create') }}" class="btn btn-sm btn-outline-primary">
                         <i class="bx bx-plus me-1"></i>New Category
                     </a>
@@ -183,14 +183,14 @@
                                                     <i class="bx bx-show"></i>
                                                 </button>
 
-                                                @can('brand_category.edit')
+                                                @can('product.category.edit') {{-- category সম্পাদনার নতুন permission। --}}
                                                 <a href="{{ route('category.edit', $category->id) }}"
                                                     class="btn btn-sm btn-outline-primary" title="Edit Category">
                                                     <i class="bx bx-edit-alt"></i>
                                                 </a>
                                                 @endcan
 
-                                                @can('brand_category.delete')
+                                                @can('product.category.delete') {{-- category মুছতে নতুন permission। --}}
                                                 <a href="{{ route('category.destroy', $category->id) }}"
                                                     class="btn btn-sm btn-outline-danger"
                                                     data-swal-delete
@@ -256,7 +256,7 @@
                                                         <div class="modal-footer border-top">
                                                             <button type="button" class="btn btn-light"
                                                                 data-bs-dismiss="modal">Close</button>
-                                                            @can('brand_category.edit')
+                                                            @can('product.category.edit') {{-- category সম্পাদনার নতুন permission। --}}
                                                             <a href="{{ route('category.edit', $category->id) }}"
                                                                 class="btn btn-primary">Edit Category</a>
                                                             @endcan

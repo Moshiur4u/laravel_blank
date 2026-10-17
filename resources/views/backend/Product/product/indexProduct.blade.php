@@ -24,7 +24,7 @@
                     </nav>
                 </div>
                 <div class="ms-auto">
-                    @can('create-product')
+                    @can('product.create') {{-- product তৈরির নতুন permission। --}}
                     <a href="{{ route('product.create') }}" class="btn btn-primary px-3 shadow-sm">
                         <i class="bx bx-plus-circle me-1"></i> Add New Product
                     </a>
@@ -145,7 +145,7 @@
                         </h5>
                         <p class="text-muted small mb-0">Detailed view of products, categories, stock, and pricing</p>
                     </div>
-                    @can('create-product')
+                    @can('product.create') {{-- product তৈরির নতুন permission। --}}
                     <a href="{{ route('product.create') }}" class="btn btn-sm btn-outline-primary">
                         <i class="bx bx-plus me-1"></i>Add Product
                     </a>
@@ -244,7 +244,7 @@
                                                 </button>
 
                                                 <!-- Edit Button -->
-                                                @can('edit-product-details')
+                                                @can('product.edit') {{-- product সম্পাদনার নতুন permission। --}}
                                                 <a href="{{ route('product.edit', $product->id) }}"
                                                     class="btn btn-sm btn-outline-primary"
                                                     title="Edit Product">
@@ -253,7 +253,7 @@
                                                 @endcan
 
                                                 <!-- Delete Button -->
-                                                @can('archive-product')
+                                                @can('product.delete') {{-- product মুছতে নতুন permission। --}}
                                                 <a href="{{ route('product.destroy', $product->id) }}"
                                                     class="btn btn-sm btn-outline-danger"
                                                     data-swal-delete
@@ -402,7 +402,7 @@
                                                         </div>
 
                                                         <div class="modal-footer border-top">
-                                                            @can('edit-product-details')
+                                                            @can('product.edit') {{-- product সম্পাদনার নতুন permission। --}}
                                                             <a href="{{ route('product.edit', $product->id) }}" class="btn btn-primary btn-sm">
                                                                 <i class="bx bx-edit me-1"></i>Edit Product
                                                             </a>

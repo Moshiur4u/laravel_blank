@@ -32,7 +32,7 @@
                             <i class="bx bx-edit me-1"></i> Edit Profile
                         </a>
                         @endcan
-                        @canany(['reports.vouchers', 'reports.all_access'])
+                        @canany(['voucher.report.employee', 'reports.all_access']) {{-- employee voucher report-এর নতুন permission। --}}
                         <a href="{{ route('employee-payment.ledger', $employee->id) }}" class="btn btn-success">
                             <i class="bx bx-book-open me-1"></i> Employee Ledger
                         </a>

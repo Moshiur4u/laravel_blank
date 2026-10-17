@@ -24,28 +24,34 @@ class RolePermissionSeeder extends Seeder
             'manager' => [
                 'Dashboard',
                 'sales.create',
-                'Brands',
-                'brand_category.create',
-                'brand_category.edit',
-                'brand_category.update',
-                'brand_category.delete',
-                'Categories',
-                'reports.vouchers',
-                'All Vouchers',
+                'brand.index', // পুরোনো Brands-এর বদলে নতুন brand list permission।
+                'brand.create', // নতুন brand create permission।
+                'brand.edit', // নতুন brand edit permission।
+                'brand.update', // নতুন brand update permission।
+                'brand.delete', // নতুন brand delete permission।
+                'category.index', // পুরোনো Categories-এর বদলে category list permission।
+                'product.category.create', // নতুন category create permission।
+                'product.category.edit', // নতুন category edit permission।
+                'product.category.update', // নতুন category update permission।
+                'product.category.delete', // নতুন category delete permission।
+                'voucher.report.view', // পুরোনো reports.vouchers এবং All Vouchers-এর বদলে report permission।
                 'voucher',
                 'voucher.entry',
                 'employee_payment_voucher.entry',
+                'voucher.report.employee', // employee payment report দেখার permission।
+                'voucher.report.miscellaneous', // miscellaneous voucher report permission।
                 'supplier.index',
                 'supplier.create',
                 'supplier.edit',
                 'supplier.ledger',
-                'ledger.payment',
+                'Supplier.ledger.payment', // পুরোনো ledger.payment-এর বদলে নির্দিষ্ট permission।
                 'employee.create',
                 'employee.index',
-                'employee.view',
+                'view-employee-details', // পুরোনো employee.view-এর বদলে নতুন permission।
                 'employee.edit',
-                'role-menu',
-                'create-role',
+                'employee.role.assign', // Manager-কে সীমাবদ্ধ ও অনুমোদিত role update করার সুযোগ।
+                'role.index', // পুরোনো role-menu-এর বদলে role list permission।
+                'roles.create', // পুরোনো create-role-এর বদলে নতুন role create permission।
                 'role.view_all_permissions',
             ],
             'projector' => [

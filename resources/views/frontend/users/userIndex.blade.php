@@ -167,7 +167,7 @@
                                             </td>
                                             <td class="text-center">
                                                 <div class="d-flex gap-1 justify-content-center">
-                                                    @can('employee.view')
+                                                    @can('view-employee-details') {{-- employee details দেখার নতুন permission। --}}
                                                     <a href="{{ route('user.show', $User->id) }}"
                                                         class="btn btn-sm btn-info text-white" title="View Profile">
                                                         <i class="bx bx-show"></i>

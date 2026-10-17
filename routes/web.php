@@ -19,8 +19,8 @@ use App\Http\Controllers\UserActivityLogController;
 use App\Http\Controllers\VoucherEntryController;
 use Illuminate\Support\Facades\Route;
 
-Route::middleware(['auth', 'verified', 'permission:reports.all_access'])->group(function () {
-    Route::get('/user-activity-logs', [UserActivityLogController::class, 'index'])
+Route::middleware(['auth', 'verified'])->group(function () { // নির্দিষ্ট Activity Log permission অথবা আগের broad report access অনুমোদিত।
+    Route::get('/user-activity-logs', [UserActivityLogController::class, 'index'])->middleware('permission:user.activity.logs') // dedicated Activity Log permission এবং broad report access।
         ->name('user-activity-logs.index');
 });
 
@@ -45,16 +45,16 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::get('/voucher-entries', [VoucherEntryController::class, 'index'])->middleware('permission:voucher')->name('voucher-entries.index');
     Route::post('/voucher-entries', [VoucherEntryController::class, 'store'])->middleware('permission:voucher.entry')->name('voucher-entries.store');
     Route::get('/voucher-entries/report/export', [VoucherEntryController::class, 'exportReport'])
-        ->middleware('permission:reports.vouchers|reports.all_access')
+        ->middleware('permission:voucher.report.miscellaneous|reports.all_access') // miscellaneous voucher report-এর নির্দিষ্ট permission।
         ->name('voucher-entries.report.export');
     Route::get('/voucher-entries/report', [VoucherEntryController::class, 'report'])
-        ->middleware('permission:reports.vouchers|reports.all_access')
+        ->middleware('permission:voucher.report.miscellaneous|reports.all_access') // miscellaneous voucher report দেখার নতুন permission।
         ->name('voucher-entries.report');
     Route::get('/voucher-report/combined/export', [CombinedVoucherReportController::class, 'export'])
-        ->middleware('permission:reports.vouchers|reports.all_access')
+        ->middleware('permission:voucher.report.view|reports.all_access') // combined report-এর নতুন permission।
         ->name('voucher-report.combined.export');
     Route::get('/voucher-report/combined', [CombinedVoucherReportController::class, 'index'])
-        ->middleware('permission:reports.vouchers|reports.all_access')
+        ->middleware('permission:voucher.report.view|reports.all_access') // combined report export-এর নতুন permission।
         ->name('voucher-report.combined');
 });
 // কর্মী ব্যয়ের voucher দেখানো ও জমা দেওয়া—দুই route-ই login এবং email verification চায়।
@@ -66,18 +66,18 @@ Route::middleware(['auth', 'verified'])->group(function () {
         ->middleware('permission:employee_payment_voucher.entry')
         ->name('employee-payment.store');
     Route::get('/employee-payment-vouchers/report/export', [EmployeePaymentVoucherController::class, 'exportReport'])
-        ->middleware('permission:reports.vouchers|reports.all_access')
+        ->middleware('permission:voucher.report.employee|reports.all_access') // employee payment report-এর নতুন permission।
         ->name('employee-payment.report.export');
     Route::get('/employee-payment-vouchers/report', [EmployeePaymentVoucherController::class, 'report'])
-        ->middleware('permission:reports.vouchers|reports.all_access')
+        ->middleware('permission:voucher.report.employee|reports.all_access') // employee payment report export-এর নতুন permission।
         ->name('employee-payment.report');
     Route::get('/employee-payment-vouchers/{employee}/ledger/export', [EmployeePaymentVoucherController::class, 'exportLedger'])
         ->whereNumber('employee')
-        ->middleware('permission:reports.vouchers|reports.all_access')
+        ->middleware('permission:voucher.report.employee|reports.all_access') // employee ledger report export-এর নতুন permission।
         ->name('employee-payment.ledger.export');
     Route::get('/employee-payment-vouchers/{employee}/ledger', [EmployeePaymentVoucherController::class, 'ledger'])
         ->whereNumber('employee')
-        ->middleware('permission:reports.vouchers|reports.all_access')
+        ->middleware('permission:voucher.report.employee|reports.all_access') // employee ledger report-এর নতুন permission।
         ->name('employee-payment.ledger');
 });
 // মিডলওয়্যার সহ ইউজার রাউট শুরু
@@ -85,39 +85,58 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::get('/user/index', [UserController::class, 'index'])->middleware('permission:employee.index')->name('user.index');
     Route::get('/user/create', [UserController::class, 'create'])->middleware('permission:employee.create')->name('user.create');
     Route::post('/user/store', [UserController::class, 'store'])->middleware('permission:employee.create')->name('user.store');
-    Route::get('/user/show/{id}', [UserController::class, 'show'])->middleware('permission:employee.view')->name('user.show');
-    Route::get('/user/edit/{id}', [UserController::class, 'edit'])->middleware('permission:employee.edit')->name('user.edit');
-    Route::put('/user/update/{id}', [UserController::class, 'update'])->middleware('permission:employee.edit')->name('user.update');
+    Route::get('/user/show/{id}', [UserController::class, 'show'])->middleware('permission:view-employee-details') // নতুন employee details permission।
+        ->name('user.show');
+    Route::get('/user/edit/{id}', [UserController::class, 'edit'])->middleware('permission:employee.edit|employee.role.assign')->name('user.edit');
+    Route::put('/user/update/{id}', [UserController::class, 'update'])->middleware('permission:employee.edit|employee.role.assign')->name('user.update');
     Route::get('/user/statusupdate/{status_id}', [UserController::class, 'userstatusupdate'])->middleware('permission:employee.inactive')->name('user.statusupdate');
     Route::get('/user/destroy/{id}', [UserController::class, 'destroy'])->middleware('permission:employee.delete')->name('user.destroy');
 });
 // মিডলওয়্যার সহ রোল রাউট শুরু
 Route::middleware(['auth', 'verified'])->group(function () {
-    Route::get('/roles', [RoleController::class, 'index'])->middleware('permission:role-menu')->name('roles.index');
-    Route::get('/roles.create', [RoleController::class, 'create'])->middleware('permission:create-role')->name('roles.create');
-    Route::post('/roles.store', [RoleController::class, 'store'])->middleware('permission:create-role')->name('roles.store');
-    Route::get('/roles/{id}/edit', [RoleController::class, 'edit'])->middleware('permission:edit-role-permissions')->name('roles.edit');
-    Route::put('/roles/{id}/update', [RoleController::class, 'update'])->middleware('permission:edit-role-permissions')->name('roles.update');
-    Route::get('/roles.destroy/{id}', [RoleController::class, 'destroy'])->middleware('permission:delete-role')->name('roles.destroy');
+    Route::get('/roles', [RoleController::class, 'index'])->middleware('permission:role.index') // role list-এর নতুন permission।
+        ->name('roles.index');
+    Route::get('/roles.create', [RoleController::class, 'create'])->middleware('permission:roles.create') // role তৈরির নতুন permission।
+        ->name('roles.create');
+    Route::post('/roles.store', [RoleController::class, 'store'])->middleware('permission:roles.create') // role সংরক্ষণেও create permission।
+        ->name('roles.store');
+    Route::get('/roles/{id}/edit', [RoleController::class, 'edit'])->middleware('permission:role.edit') // role সম্পাদনার নতুন permission।
+        ->name('roles.edit');
+    Route::put('/roles/{id}/update', [RoleController::class, 'update'])->middleware('permission:role.edit') // role update-এর নতুন permission।
+        ->name('roles.update');
+    Route::get('/roles.destroy/{id}', [RoleController::class, 'destroy'])->middleware('permission:role.delete') // role মুছতে নতুন permission।
+        ->name('roles.destroy');
 });
 // মিডলওয়্যার সহ প্রোডক্ট ক্যাটাগরি রাউট শুরু
 Route::middleware(['auth', 'verified'])->group(function () {
-    Route::get('/productCategory/index', [ProductCategoryController::class, 'index'])->middleware('permission:Categories')->name('category.index');
-    Route::get('/productCategory/create', [ProductCategoryController::class, 'create'])->middleware('permission:brand_category.create')->name('category.create');
-    Route::post('/productCategory/store', [ProductCategoryController::class, 'store'])->middleware('permission:brand_category.create')->name('category.store');
-    Route::get('/productCategory/{id}', [ProductCategoryController::class, 'edit'])->middleware('permission:brand_category.edit')->name('category.edit');
-    Route::put('/productCategory/{id}/update', [ProductCategoryController::class, 'update'])->middleware('permission:brand_category.update')->name('category.update');
-    Route::get('/productCategory/destroy/{id}', [ProductCategoryController::class, 'destroy'])->middleware('permission:brand_category.delete')->name('category.destroy');
+    Route::get('/productCategory/index', [ProductCategoryController::class, 'index'])->middleware('permission:category.index') // category তালিকার নতুন permission।
+        ->name('category.index');
+    Route::get('/productCategory/create', [ProductCategoryController::class, 'create'])->middleware('permission:product.category.create') // category তৈরির নতুন permission।
+        ->name('category.create');
+    Route::post('/productCategory/store', [ProductCategoryController::class, 'store'])->middleware('permission:product.category.create') // category সংরক্ষণেও create permission।
+        ->name('category.store');
+    Route::get('/productCategory/{id}', [ProductCategoryController::class, 'edit'])->middleware('permission:product.category.edit') // category সম্পাদনার নতুন permission।
+        ->name('category.edit');
+    Route::put('/productCategory/{id}/update', [ProductCategoryController::class, 'update'])->middleware('permission:product.category.update') // category update-এর নতুন permission।
+        ->name('category.update');
+    Route::get('/productCategory/destroy/{id}', [ProductCategoryController::class, 'destroy'])->middleware('permission:product.category.delete') // category মুছতে নতুন permission।
+        ->name('category.destroy');
 });
 
 // মিডলওয়্যার সহ প্রোডক্ট ব্রান্ড রাউট শুরু
 Route::middleware(['auth', 'verified'])->group(function () {
-    Route::get('/product/brand/index', [BrandController::class, 'index'])->middleware('permission:Brands')->name('brand.index');
-    Route::get('/product/brand/create', [BrandController::class, 'create'])->middleware('permission:brand_category.create')->name('brand.create');
-    Route::Post('/product/brand/store', [BrandController::class, 'store'])->middleware('permission:brand_category.create')->name('brand.store');
-    Route::get('/product/brand/{id}/edit', [BrandController::class, 'edit'])->middleware('permission:brand_category.edit')->name('brand.edit');
-    Route::put('/product/brand/{id}/update', [BrandController::class, 'update'])->middleware('permission:brand_category.update')->name('brand.update');
-    Route::get('/product/brand/{id}/destroy', [BrandController::class, 'destroy'])->middleware('permission:brand_category.delete')->name('brand.destroy');
+    Route::get('/product/brand/index', [BrandController::class, 'index'])->middleware('permission:brand.index') // brand তালিকার নতুন permission।
+        ->name('brand.index');
+    Route::get('/product/brand/create', [BrandController::class, 'create'])->middleware('permission:brand.create') // brand তৈরির নতুন permission।
+        ->name('brand.create');
+    Route::Post('/product/brand/store', [BrandController::class, 'store'])->middleware('permission:brand.create') // brand সংরক্ষণেও create permission।
+        ->name('brand.store');
+    Route::get('/product/brand/{id}/edit', [BrandController::class, 'edit'])->middleware('permission:brand.edit') // brand সম্পাদনার নতুন permission।
+        ->name('brand.edit');
+    Route::put('/product/brand/{id}/update', [BrandController::class, 'update'])->middleware('permission:brand.update') // brand update-এর নতুন permission।
+        ->name('brand.update');
+    Route::get('/product/brand/{id}/destroy', [BrandController::class, 'destroy'])->middleware('permission:brand.delete') // brand মুছতে নতুন permission।
+        ->name('brand.destroy');
 });
 // মিডলওয়্যার সহ সাপ্লায়ার রাউট শুরু
 Route::middleware(['auth', 'verified'])->group(function () {
@@ -134,28 +153,39 @@ Route::middleware(['auth', 'verified'])->group(function () {
     // নির্দিষ্ট লেজার এন্ট্রির জন্য প্রিন্টযোগ্য সাপ্লায়ার ইনভয়েস দেখায়; কোনো ডেটা পরিবর্তন করে না।
     Route::get('/supplier/ledger/{id}/invoice', [SupplierledgerController::class, 'invoice'])->middleware('permission:supplier.ledger')->name('supplier.ledger.invoice');
     // তারিখসহ supplier payment জমা ও ledger-এর payment/due update করে।
-    Route::post('/supplier/ledger/{id}/payments', [SupplierledgerController::class, 'storePayment'])->middleware('permission:ledger.payment')->name('supplier.ledger.payments.store');
-    Route::post('/supplier/ledger/store', [SupplierledgerController::class, 'store'])->middleware('permission:supplier.ledger.create')->name('supplier.ledger.store');
-    Route::get('/supplier/ledger/{id}/edit', [SupplierledgerController::class, 'edit'])->middleware('permission:supplier.ledger.edit')->name('supplier.ledger.edit');
-    Route::put('/supplier/ledger/{id}/update', [SupplierledgerController::class, 'update'])->middleware('permission:supplier.ledger.edit')->name('supplier.ledger.update');
-    Route::get('/supplier/ledger/{id}/destroy', [SupplierledgerController::class, 'destroy'])->middleware('permission:supplier.ledger.delete')->name('supplier.ledger.destroy');
+    Route::post('/supplier/ledger/{id}/payments', [SupplierledgerController::class, 'storePayment'])->middleware('permission:Supplier.ledger.payment') // নতুন casing-এর supplier ledger payment permission।
+        ->name('supplier.ledger.payments.store');
+    Route::post('/supplier/ledger/store', [SupplierledgerController::class, 'store'])->middleware('permission:Supplier.ledger.create') // supplier ledger তৈরি করার নতুন permission।
+        ->name('supplier.ledger.store');
+    Route::get('/supplier/ledger/{id}/edit', [SupplierledgerController::class, 'edit'])->middleware('permission:Supplier.ledger.edit') // নতুন casing-এর supplier ledger edit permission।
+        ->name('supplier.ledger.edit');
+    Route::put('/supplier/ledger/{id}/update', [SupplierledgerController::class, 'update'])->middleware('permission:Supplier.ledger.edit') // update-এ একই নতুন edit permission।
+        ->name('supplier.ledger.update');
+    Route::get('/supplier/ledger/{id}/destroy', [SupplierledgerController::class, 'destroy'])->middleware('permission:Supplier.ledger.delete') // নতুন casing-এর supplier ledger delete permission।
+        ->name('supplier.ledger.destroy');
 });
 
 // মিডলওয়্যার সহ প্রোডক্ট রাউট শুরু
 Route::middleware(['auth', 'verified'])->group(function () {
-    Route::get('/product/index', [ProductController::class, 'index'])->middleware('permission:Products')->name('product.index');
-    Route::get('/product/create', [ProductController::class, 'create'])->middleware('permission:create-product')->name('product.create');
-    Route::Post('/product/store', [ProductController::class, 'store'])->middleware('permission:create-product')->name('product.store');
-    Route::get('/product/edit/{id}', [ProductController::class, 'edit'])->middleware('permission:edit-product-details')->name('product.edit');
-    Route::put('/product/update/{id}', [ProductController::class, 'update'])->middleware('permission:edit-product-details')->name('product.update');
-    Route::get('/product/destroy/{id}', [ProductController::class, 'destroy'])->middleware('permission:archive-product')->name('product.destroy');
+    Route::get('/product/index', [ProductController::class, 'index'])->middleware('permission:product.index') // product তালিকার নতুন permission।
+        ->name('product.index');
+    Route::get('/product/create', [ProductController::class, 'create'])->middleware('permission:product.create') // product তৈরির নতুন permission।
+        ->name('product.create');
+    Route::Post('/product/store', [ProductController::class, 'store'])->middleware('permission:product.create') // product সংরক্ষণেও create permission।
+        ->name('product.store');
+    Route::get('/product/edit/{id}', [ProductController::class, 'edit'])->middleware('permission:product.edit') // product সম্পাদনার নতুন permission।
+        ->name('product.edit');
+    Route::put('/product/update/{id}', [ProductController::class, 'update'])->middleware('permission:product.update') // product update-এর নতুন permission।
+        ->name('product.update');
+    Route::get('/product/destroy/{id}', [ProductController::class, 'destroy'])->middleware('permission:product.delete') // product মুছতে নতুন permission।
+        ->name('product.destroy');
 
     // লগইন করা ও verified ব্যবহারকারীদের জন্য পণ্যভিত্তিক ক্রয় ও মজুত রিপোর্ট।
     Route::get('/reports/product-inventory', [ProductInventoryReportController::class, 'index'])
-        ->middleware('permission:reports.all_access')
+        ->middleware('permission:product.report.inventory|reports.all_access') // inventory report-এর নতুন permission এবং broad access।
         ->name('product.inventory.report');
     Route::get('/reports/product-inventory/export', [ProductInventoryReportController::class, 'export'])
-        ->middleware('permission:reports.all_access')
+        ->middleware('permission:product.report.inventory|reports.all_access') // inventory export-এও একই access policy।
         ->name('product.inventory.report.export');
 });
 
@@ -164,9 +194,10 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::get('/sales', [SaleController::class, 'index'])->middleware('permission:sales.create|sales.view')->name('sales.index');
     Route::get('/sales/customer-lookup', [SaleController::class, 'customerByPhone'])->middleware('permission:sales.create')->name('sales.customer.lookup');
     Route::post('/sales', [SaleController::class, 'store'])->middleware('permission:sales.create')->name('sales.store');
-    Route::get('/sales/invoice/{id}', [SaleController::class, 'invoice'])->middleware('permission:sales.view|reports.all_access')->name('sales.invoice');
-    Route::get('/sales/report/export', [SalesReportController::class, 'export'])->middleware('permission:reports.all_access')->name('sales.report.export');
-    Route::get('/sales/report', [SalesReportController::class, 'index'])->middleware('permission:reports.all_access')->name('sales.report');
+    Route::get('/sales/invoice/{id}', [SaleController::class, 'invoice'])->middleware('permission:sales.report')->name('sales.invoice');
+    Route::get('/sales/report/export', [SalesReportController::class, 'export'])->middleware('permission:sales.view')->name('sales.report.export');
+    Route::get('/sales/report', [SalesReportController::class, 'index'])->middleware('permission:reports.all_access|sales.report') // পুরোনো dashboard permission-এর বদলে sales.report।
+        ->name('sales.report');
 });
 
 // মিডলওয়্যার সহ কাস্টমার রাউট শুরু
@@ -175,9 +206,11 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::get('/customer/create', [CustomerController::class, 'create'])->middleware('permission:customer.create')->name('customer.create');
     Route::post('/customer/store', [CustomerController::class, 'store'])->middleware('permission:customer.create')->name('customer.store');
     Route::get('/customer/{id}/ledger', [CustomerController::class, 'ledger'])->middleware('permission:customer.ledger')->name('customer.ledger');
-    Route::post('/customer/ledger/store', [CustomerController::class, 'ledgerStore'])->middleware('permission:customer.ledger.payment')->name('customer.ledger.store');
+    Route::post('/customer/ledger/store', [CustomerController::class, 'ledgerStore'])->middleware('permission:Customer.ledger.payment') // seeder-এর নতুন casing অনুযায়ী ledger payment permission।
+        ->name('customer.ledger.store');
     Route::get('/customer/{id}/edit', [CustomerController::class, 'edit'])->middleware('permission:customer.edit')->name('customer.edit');
-    Route::put('/customer/{id}/update', [CustomerController::class, 'update'])->middleware('permission:customer.update')->name('customer.update');
+    Route::put('/customer/{id}/update', [CustomerController::class, 'update'])->middleware('permission:customer.edit') // update operation-এ seeder-এর customer.edit permission।
+        ->name('customer.update');
     Route::get('/customer/{id}/destroy', [CustomerController::class, 'destroy'])->middleware('permission:customer.delete')->name('customer.destroy');
 });
 

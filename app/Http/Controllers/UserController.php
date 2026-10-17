@@ -115,7 +115,7 @@ class UserController extends Controller
     {
         // ইউজারকে খুঁজে বের করা হলো
         $Users = User::find($id);
-        $Roles = auth()->user()->canAny(['assign-role-to-user', 'assign-user-role'])
+        $Roles = auth()->user()->can('employee.role.assign') // পুরোনো role assignment permission-এর বদলে নতুন permission।
             ? Role::whereIn('name', $this->assignableRoleNames())->latest()->get()
             : collect();
         // ইউজারকে রোল এসাইন করা হলো
@@ -131,7 +131,8 @@ class UserController extends Controller
     public function update(Request $request, string $id)
     {
         // ১. ভ্যালিডেশন ঠিক করা হলো (email ignore এবং nullable)
-        $canAssignRole = $request->user()->canAny(['assign-role-to-user', 'assign-user-role']);
+        $canAssignRole = $request->user()->can('employee.role.assign'); // পুরোনো role assignment permission-এর বদলে নতুন permission।
+        abort_if($request->exists('roles') && ! $canAssignRole, 403); // অনুমতি ছাড়া পাঠানো role পরিবর্তন নীরবে উপেক্ষা না করে নিষিদ্ধ করে।
         $rules = [
             'name' => 'required|string|max:255',
             'email' => 'required|email|unique:users,email,'.$id, // বর্তমান ইউজারকে ইগনোর করবে

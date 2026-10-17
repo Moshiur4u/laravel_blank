@@ -1,0 +1,49 @@
+ব্যবহারকারীর Role Update সমস্যার কারণ ও সমাধান
+================================================
+
+সমস্যা
+------
+User Edit পৃষ্ঠায় role dropdown দেখা যাচ্ছিল না বা role পরিবর্তনের পর সংরক্ষিত
+হচ্ছিল না। User Edit Blade, controller এবং role seeder—এই তিন জায়গাতেই
+employee.role.assign permission-কে role পরিবর্তনের অনুমতি হিসেবে ব্যবহার করা
+হয়। কিন্তু manager role-এর seeder preset-এ এই permission দেওয়া ছিল না। ফলে
+manager-এর জন্য Blade-এ role dropdown লুকানো থাকত এবং controller role field
+validate বা sync করত না। একই permission database-এ seed না থাকলে admin-এর
+জন্যও selector permission gate পার হতো না।
+
+আরেকটি UI সমস্যা ছিল: একক role select-এ user-এর একাধিক role থাকলে in_array()
+দিয়ে একাধিক option-এ selected attribute বসতে পারত। Browser ভুল option বেছে
+নিতে পারত বা আগের role পরিষ্কারভাবে দেখাতে পারত না।
+
+সমাধান
+------
+1. PermissionSeederTable-এ থাকা employee.role.assign permission-টি
+   RolePermissionSeeder-এর manager preset-এ যোগ করা হয়েছে। admin role seeder-এ
+   থাকা সব permission পায়।
+2. UserController edit() role list-টি employee.role.assign permission থাকলেই
+   পাঠায়; update() একই permission দিয়ে roles field validate করে এবং
+   syncRoles() দিয়ে সংরক্ষণ করে।
+3. Role list ইচ্ছাকৃতভাবে সীমাবদ্ধ: assignableRoleNames() কেবল সেসব role দেখায়
+   যাদের প্রত্যেক permission বর্তমান ব্যবহারকারীর effective permissions-এর
+   অন্তর্ভুক্ত। এতে manager নিজের সীমার বাইরে permission অন্য user-কে দিতে পারে
+   না।
+4. User Edit Blade-এ এখন old('roles', বর্তমান role-এর প্রথম নাম) দিয়ে একটি মাত্র
+   option selected হয়। Validation ব্যর্থ হলে ব্যবহারকারীর সদ্য বাছা role-টি
+   form-এ থেকে যায়।
+5. Role assignment permission না থাকা ব্যবহারকারী request-এ roles field পাঠালে
+   UserController এখন 403 দেয়; role পরিবর্তন নীরবে বাদ দিয়ে success দেখায় না।
+6. User Activity Log-এর জন্য user-activity-log.view নামে dedicated permission
+   যোগ করা হয়েছে। Route middleware-তে এই permission অথবা reports.all_access
+   থাকলে Activity Log খোলা যায়; sidebar-ও একই নিয়ম মেনে link দেখায়।
+
+ডেটাবেসে প্রয়োগ
+--------------
+নতুন permission এবং manager role grant database-এ যুক্ত করতে project root থেকে
+নিচের command-গুলো চালান:
+
+php artisan db:seed --class=PermissionSeederTable
+php artisan db:seed --class=RolePermissionSeeder
+
+এরপর User Edit পৃষ্ঠায় অনুমোদিত role বাছুন এবং Update User চাপুন। Permission
+না থাকা role বা বর্তমান user-এর চেয়ে বেশি permission-যুক্ত role selector-এ
+দেখানো হবে না; এটি নিরাপত্তার জন্য নির্ধারিত সীমা।

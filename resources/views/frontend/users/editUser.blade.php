@@ -68,7 +68,7 @@
                                         @enderror
                                     </div>
 
-                                    @canany(['assign-role-to-user', 'assign-user-role'])
+                                    @can('employee.role.assign') {{-- নতুন employee role assignment permission। --}}
                                     <div class="col-md-6">
                                         <label for="roles" class="form-label fw-semibold">
                                             Role <span class="text-danger">*</span>
@@ -79,7 +79,7 @@
                                                 <option value="" disabled>-- Select Role --</option>
                                                 @foreach ($Roles as $role)
                                                     <option value="{{ $role->name }}"
-                                                        {{ in_array($role->name, $userRole) ? 'selected' : '' }}>
+                                                        {{ old('roles', $userRole[0] ?? '') === $role->name ? 'selected' : '' }}> {{-- একক role selector-এ কেবল একটি current/old role selected থাকে। --}}
                                                         {{ ucfirst($role->name) }}
                                                     </option>
                                                 @endforeach
@@ -94,7 +94,7 @@
                                         <label class="form-label fw-semibold">Role</label>
                                         <div class="form-control-plaintext">{{ implode(', ', $userRole) }}</div>
                                     </div>
-                                    @endcanany
+                                    @endcan {{-- নতুন role assignment permission-এর Blade scope বন্ধ। --}}
                                 </div>
 
                                 {{-- Email, Password, Confirm Password --}}
