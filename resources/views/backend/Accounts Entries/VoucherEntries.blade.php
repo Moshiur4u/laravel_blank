@@ -11,9 +11,11 @@
                     <h4 class="mb-0 mt-2">Daily Employee Voucher Report</h4>
                 </div>
                 <div class="d-flex gap-2">
+                    @can('employee_payment_voucher.entry')
                     <a href="{{ route('employee-payment.index') }}" class="btn btn-outline-primary">
                         <i class="bx bx-plus me-1"></i>Create Voucher
                     </a>
+                    @endcan
                     <a href="{{ route('employee-payment.report.export', request()->except('page')) }}" class="btn btn-success">
                         <i class="bx bx-spreadsheet me-1"></i>Export Excel
                     </a>

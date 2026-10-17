@@ -56,9 +56,9 @@
                                             ৳{{ number_format(round($metrics['yearly']['profit'])) }}
                                         </h4>
                                         <p class="mb-0 font-13 text-muted">
-                                            Daily ৳{{ number_format(round($metrics['daily']['profit'])) }}
-                                            <span class="mx-1">|</span>
                                             Weekly ৳{{ number_format(round($metrics['weekly']['profit'])) }}
+                                            <span class="mx-1">|</span>
+                                            Daily ৳{{ number_format(round($metrics['daily']['profit'])) }}
                                             {{-- <span class="mx-1">|</span>
                                             Monthly ৳{{ number_format(round($metrics['monthly']['profit'])) }} --}}
                                         </p>
@@ -68,9 +68,9 @@
                                             ৳{{ number_format(round($metrics['monthly'][$metricKey])) }}
                                         </h4>
                                         <p class="mb-0 font-13 text-muted">
-                                            Daily ৳{{ number_format(round($metrics['daily'][$metricKey])) }}
-                                            <span class="mx-1">|</span>
                                             Weekly ৳{{ number_format(round($metrics['weekly'][$metricKey])) }}
+                                            <span class="mx-1">|</span>
+                                            Daily ৳{{ number_format(round($metrics['daily'][$metricKey])) }}
                                             {{-- <span class="mx-1">|</span>
                                             Monthly ৳{{ number_format(round($metrics['monthly'][$metricKey])) }} --}}
                                         </p>

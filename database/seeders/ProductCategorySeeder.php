@@ -18,12 +18,12 @@ class ProductCategorySeeder extends Seeder
             'Pre-Built Systems',
             'Peripherals & Displays',
             'Networking',
-            'Printers & Office',
+            'Printers & Toner',
             'Software',
             'Power & Accessories'
         ];
         foreach ($Categories as $Category) {
-            ProductCategory::Create(['category_name'=>$Category]);
+            ProductCategory::Create(['category_name' => $Category]);
         };
     }
 }

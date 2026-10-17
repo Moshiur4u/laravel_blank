@@ -24,9 +24,11 @@
                     </nav>
                 </div>
                 <div class="ms-auto">
+                    @can('create-role')
                     <a href="{{ route('roles.create') }}" class="btn btn-primary px-3 shadow-sm">
                         <i class="bx bx-shield-plus me-1"></i> Add New Role
                     </a>
+                    @endcan
                 </div>
             </div>
             <!-- End Breadcrumb -->
@@ -101,9 +103,11 @@
                         </h5>
                         <p class="text-muted small mb-0">Manage roles and authorize granular access rights</p>
                     </div>
+                    @can('create-role')
                     <a href="{{ route('roles.create') }}" class="btn btn-sm btn-outline-primary">
                         <i class="bx bx-plus me-1"></i>New Role
                     </a>
+                    @endcan
                 </div>
 
                 <div class="card-body">
@@ -113,7 +117,9 @@
                                 <tr>
                                     <th class="text-center" style="width: 60px;">SL</th>
                                     <th style="width: 220px;">Role Name</th>
+                                    @can('role.view_all_permissions')
                                     <th>Assigned Permissions</th>
+                                    @endcan
                                     <th class="text-center" style="width: 140px;">Total Perms</th>
                                     <th class="text-center" style="width: 160px;">Actions</th>
                                 </tr>
@@ -122,6 +128,7 @@
                                 @forelse ($roles as $key => $role)
                                     <tr>
                                         <td class="text-center text-muted fw-bold">{{ $key + 1 }}</td>
+                                        @can('role.view_all_permissions')
                                         <td>
                                             <div class="d-flex align-items-center">
                                                 <div class="rounded-circle bg-light-primary text-primary d-flex align-items-center justify-content-center me-3"
@@ -134,6 +141,7 @@
                                                 </div>
                                             </div>
                                         </td>
+                                        @endcan
                                         <td>
                                             <div class="d-flex flex-wrap gap-1 align-items-center" style="max-height: 85px; overflow-y: auto;">
                                                 @forelse ($role->permissions as $permission)
@@ -155,20 +163,25 @@
                                         <td class="text-center">
                                             <div class="d-inline-flex gap-2">
                                                 <!-- View Role Modal Trigger -->
+                                                @can('role.view_all_permissions')
                                                 <button type="button" class="btn btn-sm btn-outline-info"
                                                     data-bs-toggle="modal" data-bs-target="#viewRoleModal{{ $role->id }}"
                                                     title="View All Permissions">
                                                     <i class="bx bx-show"></i>
                                                 </button>
+                                                @endcan
 
                                                 <!-- Edit Role -->
+                                                @can('edit-role-permissions')
                                                 <a href="{{ route('roles.edit', $role->id) }}"
                                                     class="btn btn-sm btn-outline-primary"
                                                     title="Edit Role">
                                                     <i class="bx bx-edit-alt"></i>
                                                 </a>
+                                                @endcan
 
                                                 <!-- Delete Role -->
+                                                @can('delete-role')
                                                 <a href="{{ route('roles.destroy', $role->id) }}"
                                                     class="btn btn-sm btn-outline-danger"
                                                     data-swal-delete
@@ -176,9 +189,11 @@
                                                     title="Delete Role">
                                                     <i class="bx bx-trash"></i>
                                                 </a>
+                                                @endcan
                                             </div>
 
                                             <!-- Role Details Modal -->
+                                            @can('role.view_all_permissions')
                                             <div class="modal fade" id="viewRoleModal{{ $role->id }}" tabindex="-1" aria-hidden="true">
                                                 <div class="modal-dialog modal-dialog-centered modal-lg">
                                                     <div class="modal-content text-start">
@@ -228,11 +243,14 @@
                                                         </div>
 
                                                         <div class="modal-footer border-top">
+                                                            @can('edit-role-permissions')
                                                             <a href="{{ route('roles.edit', $role->id) }}" class="btn btn-primary btn-sm">
                                                                 <i class="bx bx-edit me-1"></i>Edit Permissions
                                                             </a>
+                                                            @endcan
                                                             <button type="button" class="btn btn-secondary btn-sm" data-bs-dismiss="modal">Close</button>
                                                         </div>
+                                                        @endcan
                                                     </div>
                                                 </div>
                                             </div>

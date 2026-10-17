@@ -23,8 +23,10 @@
                 </div>
                 <div class="ms-auto">
                     <div class="btn-group">
+                        @can('supplier.create')
                         <a href="{{ route('supplier.create') }}" class="btn btn-primary"><i class="bx bx-plus-medical"></i>
                             Add New Supplier</a>
+                        @endcan
                     </div>
                 </div>
             </div>
@@ -175,9 +177,13 @@
                                                     @endif
                                                     <div>
                                                         <h6 class="mb-0 fw-bold">
+                                                            @can('supplier.ledger')
                                                             <a href="{{ route('supplier.ledger', $supplier->id) }}" class="text-dark">
                                                                 {{ $supplier->name }}
                                                             </a>
+                                                            @else
+                                                                {{ $supplier->name }}
+                                                            @endcan
                                                         </h6>
                                                         <small class="text-muted"><i class="bx bx-receipt"></i> {{ $ledgerCount }} Transactions</small>
                                                     </div>
@@ -206,14 +212,19 @@
                                             <td class="text-center">
                                                 <div class="d-flex gap-1 justify-content-center">
                                                     {{-- লিঙ্ক টু সাপ্লায়ার লেজার অ্যান্ড ডিটেইলস --}}
+                                                    @can('supplier.ledger')
                                                     <a href="{{ route('supplier.ledger', $supplier->id) }}"
                                                         class="btn btn-sm btn-info text-white" title="Supplier Details & Ledger">
                                                         <i class="bx bx-file"></i> Ledger
                                                     </a>
+                                                    @endcan
+                                                    @can('supplier.edit')
                                                     <a href="{{ route('supplier.edit', $supplier->id) }}"
                                                         class="btn btn-sm btn-primary" title="Edit Supplier">
                                                         <i class="bx bx-edit"></i> Edit
                                                     </a>
+                                                    @endcan
+                                                    @can('supplier.delete')
                                                     <a href="{{ route('supplier.destroy', $supplier->id) }}"
                                                         class="btn btn-sm btn-danger"
                                                         data-swal-delete
@@ -221,6 +232,7 @@
                                                         title="Delete Supplier">
                                                         <i class="bx bx-trash"></i> Delete
                                                     </a>
+                                                    @endcan
                                                 </div>
                                             </td>
                                         </tr>

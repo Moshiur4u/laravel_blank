@@ -17,9 +17,11 @@
                     </nav>
                 </div>
                 <div class="ms-auto">
+                    @can('customer.create')
                     <a href="{{ route('customer.create') }}" class="btn btn-primary px-3 shadow-sm">
                         <i class="bx bx-plus-circle me-1"></i> Add Customer
                     </a>
+                    @endcan
                 </div>
             </div>
 
@@ -77,9 +79,11 @@
                         <h5 class="mb-0 text-dark fw-bold"><i class="bx bx-user-pin text-primary me-2"></i>Customer Directory</h5>
                         <p class="text-muted small mb-0">Temporary and permanent customer records with payment ledger</p>
                     </div>
+                    @can('customer.create')
                     <a href="{{ route('customer.create') }}" class="btn btn-sm btn-outline-primary">
                         <i class="bx bx-plus me-1"></i>New Customer
                     </a>
+                    @endcan
                 </div>
                 <div class="card-body">
                     <div class="table-responsive">
@@ -139,12 +143,17 @@
                                         </td>
                                         <td class="text-center">
                                             <div class="d-inline-flex gap-2">
+                                                @can('customer.ledger')
                                                 <a href="{{ route('customer.ledger', $customer->id) }}" class="btn btn-sm btn-outline-info" title="Ledger">
                                                     <i class="bx bx-book-open"></i>
                                                 </a>
+                                                @endcan
+                                                @can('customer.edit')
                                                 <a href="{{ route('customer.edit', $customer->id) }}" class="btn btn-sm btn-outline-primary" title="Edit">
                                                     <i class="bx bx-edit-alt"></i>
                                                 </a>
+                                                @endcan
+                                                @can('customer.delete')
                                                 <a href="{{ route('customer.destroy', $customer->id) }}"
                                                     class="btn btn-sm btn-outline-danger"
                                                     title="Delete"
@@ -152,6 +161,7 @@
                                                     data-delete-message="Customer: {{ $customer->name }}">
                                                     <i class="bx bx-trash"></i>
                                                 </a>
+                                                @endcan
                                             </div>
                                         </td>
                                     </tr>

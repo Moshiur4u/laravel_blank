@@ -68,6 +68,7 @@
                                         @enderror
                                     </div>
 
+                                    @canany(['assign-role-to-user', 'assign-user-role'])
                                     <div class="col-md-6">
                                         <label for="roles" class="form-label fw-semibold">
                                             Role <span class="text-danger">*</span>
@@ -88,6 +89,12 @@
                                             <span class="text-danger small d-block mt-1">{{ $message }}</span>
                                         @enderror
                                     </div>
+                                    @else
+                                    <div class="col-md-6">
+                                        <label class="form-label fw-semibold">Role</label>
+                                        <div class="form-control-plaintext">{{ implode(', ', $userRole) }}</div>
+                                    </div>
+                                    @endcanany
                                 </div>
 
                                 {{-- Email, Password, Confirm Password --}}
@@ -185,6 +192,7 @@
 
                                 {{-- Status and Remark --}}
                                 <div class="row g-3 mb-3">
+                                    @can('employee.inactive')
                                     <div class="col-md-6">
                                         <label for="status" class="form-label fw-semibold">
                                             Account Status <span class="text-danger">*</span>
@@ -200,6 +208,7 @@
                                             <span class="text-danger small d-block mt-1">{{ $message }}</span>
                                         @enderror
                                     </div>
+                                    @endcan
 
                                     <div class="col-md-6">
                                         <label for="remark" class="form-label fw-semibold">Remark / Note</label>

@@ -24,9 +24,11 @@
                     </nav>
                 </div>
                 <div class="ms-auto">
+                    @can('create-product')
                     <a href="{{ route('product.create') }}" class="btn btn-primary px-3 shadow-sm">
                         <i class="bx bx-plus-circle me-1"></i> Add New Product
                     </a>
+                    @endcan
                 </div>
             </div>
             <!-- End Breadcrumb -->
@@ -143,9 +145,11 @@
                         </h5>
                         <p class="text-muted small mb-0">Detailed view of products, categories, stock, and pricing</p>
                     </div>
+                    @can('create-product')
                     <a href="{{ route('product.create') }}" class="btn btn-sm btn-outline-primary">
                         <i class="bx bx-plus me-1"></i>Add Product
                     </a>
+                    @endcan
                 </div>
 
                 <div class="card-body">
@@ -240,13 +244,16 @@
                                                 </button>
 
                                                 <!-- Edit Button -->
+                                                @can('edit-product-details')
                                                 <a href="{{ route('product.edit', $product->id) }}"
                                                     class="btn btn-sm btn-outline-primary"
                                                     title="Edit Product">
                                                     <i class="bx bx-edit-alt"></i>
                                                 </a>
+                                                @endcan
 
                                                 <!-- Delete Button -->
+                                                @can('archive-product')
                                                 <a href="{{ route('product.destroy', $product->id) }}"
                                                     class="btn btn-sm btn-outline-danger"
                                                     data-swal-delete
@@ -254,6 +261,7 @@
                                                     title="Delete Product">
                                                     <i class="bx bx-trash"></i>
                                                 </a>
+                                                @endcan
                                             </div>
 
                                             <!-- Product Details Modal -->
@@ -394,9 +402,11 @@
                                                         </div>
 
                                                         <div class="modal-footer border-top">
+                                                            @can('edit-product-details')
                                                             <a href="{{ route('product.edit', $product->id) }}" class="btn btn-primary btn-sm">
                                                                 <i class="bx bx-edit me-1"></i>Edit Product
                                                             </a>
+                                                            @endcan
                                                             <button type="button" class="btn btn-secondary btn-sm" data-bs-dismiss="modal">Close</button>
                                                         </div>
                                                     </div>

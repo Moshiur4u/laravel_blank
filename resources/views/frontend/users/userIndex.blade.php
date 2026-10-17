@@ -21,9 +21,11 @@
                 </div>
                 <div class="ms-auto">
                     <div class="btn-group">
+                        @can('employee.create')
                         <a href="{{ route('user.create') }}" class="btn btn-primary">
                             <i class="bx bx-plus-medical me-1"></i> Add New Employee
                         </a>
+                        @endcan
                     </div>
                 </div>
             </div>
@@ -147,26 +149,37 @@
                                                 <i class="bx bx-envelope text-muted me-1"></i>{{ $User->email }}
                                             </td>
                                             <td>
+                                                @can('employee.inactive')
                                                 <a href="{{ route('user.statusupdate', $User->id) }}"
                                                     class="badge {{ $User->status == 1 ? 'bg-success' : 'bg-danger' }} text-decoration-none px-2 py-1"
                                                     title="Click to toggle status">
                                                     <i class="bx {{ $User->status == 1 ? 'bx-check-circle' : 'bx-x-circle' }} me-1"></i>
                                                     {{ $User->status == 1 ? 'Active' : 'Inactive' }}
                                                 </a>
+                                                @else
+                                                    <span class="badge {{ $User->status == 1 ? 'bg-success' : 'bg-danger' }}">
+                                                        {{ $User->status == 1 ? 'Active' : 'Inactive' }}
+                                                    </span>
+                                                @endcan
                                             </td>
                                             <td>
                                                 <span class="text-muted small">{{ $User->remark ?? '-' }}</span>
                                             </td>
                                             <td class="text-center">
                                                 <div class="d-flex gap-1 justify-content-center">
+                                                    @can('employee.view')
                                                     <a href="{{ route('user.show', $User->id) }}"
                                                         class="btn btn-sm btn-info text-white" title="View Profile">
                                                         <i class="bx bx-show"></i>
                                                     </a>
+                                                    @endcan
+                                                    @can('employee.edit')
                                                     <a href="{{ route('user.edit', $User->id) }}"
                                                         class="btn btn-sm btn-primary" title="Edit Employee">
                                                         <i class="bx bx-edit"></i>
                                                     </a>
+                                                    @endcan
+                                                    @can('employee.delete')
                                                     <a href="{{ route('user.destroy', $User->id) }}"
                                                         class="btn btn-sm btn-danger"
                                                         data-swal-delete
@@ -174,6 +187,7 @@
                                                         title="Delete Employee">
                                                         <i class="bx bx-trash"></i>
                                                     </a>
+                                                    @endcan
                                                 </div>
                                             </td>
                                         </tr>

@@ -6,6 +6,7 @@ use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Validation\Rule;
 use Spatie\Permission\Models\Role;
 
 class UserController extends Controller
@@ -27,8 +28,8 @@ class UserController extends Controller
      */
     public function create()
     {
-        // রোলে ভিউ করা হলো
-        $Roles = Role::latest()->get();
+        // Only roles whose permissions are a subset of the current user's access can be assigned.
+        $Roles = Role::whereIn('name', $this->assignableRoleNames())->latest()->get();
 
         // রোলে ভিউ করা হলো
         return view('frontend.users.addUser', compact('Roles'));
@@ -44,7 +45,7 @@ class UserController extends Controller
         // রেকুয়েস্ট ডেটা ভ্যালিডেশন
         $request->validate([
             'name' => 'required',
-            'roles' => 'required',
+            'roles' => ['required', 'string', Rule::in($this->assignableRoleNames())],
             'email' => 'required|unique:users,email',
             'password' => 'required|same:confarmPassword',
             'image' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:1048',
@@ -114,8 +115,9 @@ class UserController extends Controller
     {
         // ইউজারকে খুঁজে বের করা হলো
         $Users = User::find($id);
-        // রোলে ভিউ করা হলো
-        $Roles = Role::latest()->get();
+        $Roles = auth()->user()->canAny(['assign-role-to-user', 'assign-user-role'])
+            ? Role::whereIn('name', $this->assignableRoleNames())->latest()->get()
+            : collect();
         // ইউজারকে রোল এসাইন করা হলো
         $userRole = $Users->Roles->pluck('name')->all();
 
@@ -129,9 +131,9 @@ class UserController extends Controller
     public function update(Request $request, string $id)
     {
         // ১. ভ্যালিডেশন ঠিক করা হলো (email ignore এবং nullable)
-        $request->validate([
+        $canAssignRole = $request->user()->canAny(['assign-role-to-user', 'assign-user-role']);
+        $rules = [
             'name' => 'required|string|max:255',
-            'roles' => 'required',
             'email' => 'required|email|unique:users,email,'.$id, // বর্তমান ইউজারকে ইগনোর করবে
             'password' => 'nullable|same:confirmPassword|min:6', // nullable করা হলো
             'image' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048', // nullable করা হলো
@@ -140,7 +142,11 @@ class UserController extends Controller
             'salary' => 'nullable|numeric|min:0|max:9999999999.99',
             'nid_number' => ['nullable', 'regex:/^(?:[0-9]{10}|[0-9]{17})$/'],
             'phone' => 'nullable|string|max:30',
-        ], [
+        ];
+        if ($canAssignRole) {
+            $rules['roles'] = ['required', 'string', Rule::in($this->assignableRoleNames())];
+        }
+        $request->validate($rules, [
             'nid_number.regex' => 'The NID / Smart Card number must contain exactly 10 or 17 digits.',
         ]);
         // ডেটা আপডেট করার জন্য ইউজারকে খুজে বের করা হলো
@@ -155,11 +161,8 @@ class UserController extends Controller
             'nid_number' => $request->input('nid_number'),
             'phone' => $request->input('phone'),
         ];
-        // স্ট্যাটাস আপডেট লজিক
-        if ($request->has('status')) {
-            $updateData['status'] = $request->input('status');
-        } else {
-            $updateData['status'] = 0;
+        if ($request->user()->can('employee.inactive')) {
+            $updateData['status'] = $request->input('status', 0);
         }
 
         // ২. ইমেজ আপডেট লজিক
@@ -200,8 +203,10 @@ class UserController extends Controller
         // ৪. একবারেই ডেটা আপডেট করা (Efficient)
         $user->update($updateData);
 
-        // ৫. রোল সিঙ্ক করা
-        $user->syncRoles($request->roles);
+        // Only users with the dedicated permission may change an existing employee's role.
+        if ($canAssignRole) {
+            $user->syncRoles($request->roles);
+        }
 
         sweetalert()->success('User updated successfully!');
         return redirect()->route('user.index');
@@ -258,5 +263,21 @@ class UserController extends Controller
         $request->session()->regenerateToken();
 
         return redirect('/');
+    }
+
+    /**
+     * Prevent role assignment from granting permissions the acting user does not possess.
+     */
+    private function assignableRoleNames(): array
+    {
+        $permissions = auth()->user()->getAllPermissions()->pluck('name')->all();
+
+        return Role::with('permissions')
+            ->get()
+            ->filter(fn (Role $role) => $role->permissions->every(
+                fn ($permission) => in_array($permission->name, $permissions, true)
+            ))
+            ->pluck('name')
+            ->all();
     }
 }
