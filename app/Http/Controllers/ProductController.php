@@ -41,15 +41,15 @@ class ProductController extends Controller
     public function store(Request $request)
     {
         $request->validate([
-            'productName' => 'required',
-            'product_categorie_id' => 'required',
-            'brand_id' => 'required',
-            'price' => 'required',
+            'productName' => 'nullable',
+            'product_categorie_id' => 'nullable',
+            'brand_id' => 'nullable',
+            'price' => 'nullable',
             // দুটো field-ই একসঙ্গে ঐচ্ছিক; supplier দিলে purchase price-ও দিতে হবে।
-            'supplier_id' => 'nullable|required_with:purchase_price|exists:suppliers,id',
-            'purchase_price' => 'nullable|required_with:supplier_id|numeric|min:0',
+            'supplier_id' => 'nullable',
+            'purchase_price' => 'nullable',
             // ledger-এর quantity গণনায় সঠিক numeric পরিমাণ নিশ্চিত করা হয়।
-            'unit' => 'required|numeric|min:0',
+            'unit' => 'nullable',
             'purchase_date' => 'nullable|date',
             'menufecher_date' => 'nullable|date',
             'expire_date' => 'nullable|date',
@@ -140,11 +140,11 @@ class ProductController extends Controller
     {
         // ১. ভ্যালিডেশন
         $request->validate([
-            'productName' => 'required',
-            'product_categorie_id' => 'required',
-            'brand_id' => 'required',
-            'price' => 'required',
-            'unit' => 'required',
+            'productName' => 'nullable',
+            'product_categorie_id' => 'nullable',
+            'brand_id' => 'nullable',
+            'price' => 'nullable',
+            'unit' => 'nullable',
             'purchase_date' => 'nullable|date',
             'menufecher_date' => 'nullable|date',
             'expire_date' => 'nullable|date',

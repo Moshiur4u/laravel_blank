@@ -18,7 +18,7 @@ return new class extends Migration
             $table->foreignId('brand_id')->constrained()->cascadeOnDelete();
             $table->decimal('price');
             $table->string('unit', 100);
-            $table->string('stock_unit', 100)->default(0);
+            $table->string('stock_unit', 100)->nullable();
             $table->date('purchase_date')->nullable();
             $table->string('mfg_date')->nullable();
             $table->date('expiry_date')->nullable();

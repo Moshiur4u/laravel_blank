@@ -4,24 +4,23 @@
 @section('content')
     <div class="page-wrapper">
         <div class="page-content">
-            <div class="d-flex justify-content-end gap-2 mb-3 no-print">
+            <div class="gap-2 mb-3 d-flex justify-content-end no-print">
                 @canany(['sales.create', 'sales.view'])
                 <a href="{{ route('sales.index') }}" class="btn btn-outline-secondary"><i class="bx bx-arrow-back me-1"></i>New Sale</a>
                 @endcanany
                 <button type="button" class="btn btn-primary" onclick="window.print()"><i class="bx bx-printer me-1"></i>Print Invoice</button>
             </div>
 
-            <div class="card border-0 shadow-sm">
-                <div class="card-body p-4 p-md-5">
-                    @include('backend.partials.organizationHeader')
-                    <div class="row align-items-start mb-4">
+            <div class="border-0 shadow-sm card">
+                <div class="p-4 card-body p-md-5">
+                    <div class="mb-4 row align-items-start">
                         <div class="col-7">
-                            <h2 class="text-primary fw-bold mb-1">Sales Invoice</h2>
+                            <h2 class="mb-1 text-primary fw-bold">Sales Invoice</h2>
                             <div class="text-muted">Invoice: <strong>{{ $invoice->invoice_no }}</strong></div>
                             <div class="text-muted">Date: {{ $invoice->invoice_date->format('d M Y, h:i A') }}</div>
                         </div>
                         <div class="col-5 text-end">
-                            <h5 class="fw-bold mb-1">Customer</h5>
+                            <h5 class="mb-1 fw-bold">Customer</h5>
                             @if ($invoice->customer_name)
                                 <div>{{ $invoice->customer_name }}</div>
                             @endif
@@ -30,7 +29,7 @@
                     </div>
 
                     <div class="table-responsive">
-                        <table class="table table-bordered align-middle">
+                        <table class="table align-middle table-bordered">
                             <thead class="table-light">
                                 <tr>
                                     <th>#</th>
@@ -55,30 +54,30 @@
                         </table>
                     </div>
 
-                    <div class="row justify-content-end mt-4">
+                    <div class="mt-4 row justify-content-end">
                         <div class="col-md-6 col-lg-5">
-                            <div class="d-flex justify-content-between py-1"><span>Subtotal</span><span>৳{{ number_format($invoice->subtotal, 2) }}</span></div>
-                            <div class="d-flex justify-content-between py-1"><span>Discount{{ ($invoice->discount_type === 'percentage' && (float) $invoice->discount_value > 0) ? ' (' . rtrim(rtrim(number_format((float) $invoice->discount_value, 2), '0'), '.') . '%)' : '' }}</span><span>- ৳{{ number_format($invoice->discount_amount, 2) }}</span></div>
-                            <div class="d-flex justify-content-between py-1"><span>VAT</span><span>৳{{ number_format($invoice->vat_amount, 2) }}</span></div>
+                            <div class="py-1 d-flex justify-content-between"><span>Subtotal</span><span>৳{{ number_format($invoice->subtotal, 2) }}</span></div>
+                            <div class="py-1 d-flex justify-content-between"><span>Discount{{ ($invoice->discount_type === 'percentage' && (float) $invoice->discount_value > 0) ? ' (' . rtrim(rtrim(number_format((float) $invoice->discount_value, 2), '0'), '.') . '%)' : '' }}</span><span>- ৳{{ number_format($invoice->discount_amount, 2) }}</span></div>
+                            <div class="py-1 d-flex justify-content-between"><span>VAT</span><span>৳{{ number_format($invoice->vat_amount, 2) }}</span></div>
                             @if ($invoice->include_previous_due)
-                                <div class="d-flex justify-content-between py-1"><span>Previous Due</span><span>৳{{ number_format($invoice->previous_due, 2) }}</span></div>
+                                <div class="py-1 d-flex justify-content-between"><span>Previous Due</span><span>৳{{ number_format($invoice->previous_due, 2) }}</span></div>
                             @endif
                             <hr>
-                            <div class="d-flex justify-content-between py-1 fw-bold fs-5"><span>Total</span><span>৳{{ number_format($invoice->total_amount, 2) }}</span></div>
-                            <div class="d-flex justify-content-between py-1"><span>Amount Paid</span><span>৳{{ number_format($invoice->amount_paid, 2) }}</span></div>
-                            <div class="d-flex justify-content-between py-1 text-danger fw-bold"><span>Due</span><span>৳{{ number_format($invoice->due_amount, 2) }}</span></div>
-                            <div class="d-flex justify-content-between py-1"><span>Payment Method</span><span>{{ $invoice->payment_method ? ucfirst($invoice->payment_method) : 'Unpaid' }}</span></div>
+                            <div class="py-1 d-flex justify-content-between fw-bold fs-5"><span>Total</span><span>৳{{ number_format($invoice->total_amount, 2) }}</span></div>
+                            <div class="py-1 d-flex justify-content-between"><span>Amount Paid</span><span>৳{{ number_format($invoice->amount_paid, 2) }}</span></div>
+                            <div class="py-1 d-flex justify-content-between text-danger fw-bold"><span>Due</span><span>৳{{ number_format($invoice->due_amount, 2) }}</span></div>
+                            <div class="py-1 d-flex justify-content-between"><span>Payment Method</span><span>{{ $invoice->payment_method ? ucfirst($invoice->payment_method) : 'Unpaid' }}</span></div>
                         </div>
                     </div>
 
                     @if ($invoice->notes)
                         <div class="mt-4"><strong>Notes:</strong> {{ $invoice->notes }}</div>
                     @endif
-                    <div class="row mt-5 pt-4">
-                        <div class="col-6"><div class="border-top pt-2">Customer Signature</div></div>
-                        <div class="col-6 text-end"><div class="border-top pt-2">Processed by {{ $invoice->employee->name ?? 'N/A' }}</div></div>
+                    <div class="pt-4 mt-5 row">
+                        <div class="col-6"><div class="pt-2 border-top">Customer Signature</div></div>
+                        <div class="col-6 text-end"><div class="pt-2 border-top">Processed by {{ $invoice->employee->name ?? 'N/A' }}</div></div>
                     </div>
-                    <p class="text-center text-muted small mt-4 mb-0">Thank you for your business.</p>
+                    <p class="mt-4 mb-0 text-center text-muted small">Thank you for your business.</p>
                 </div>
             </div>
         </div>

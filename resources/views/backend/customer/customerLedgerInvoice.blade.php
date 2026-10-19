@@ -5,7 +5,7 @@
     <div class="page-wrapper">
         <div class="page-content">
             {{-- প্রিন্ট বা লেজারে ফেরার control কাগজে দেখানো হয় না। --}}
-            <div class="d-flex justify-content-end gap-2 mb-3 no-print">
+            <div class="gap-2 mb-3 d-flex justify-content-end no-print">
                 <a href="{{ route('customer.ledger', $ledger->customer_id) }}" class="btn btn-outline-secondary">
                     <i class="bx bx-arrow-back me-1"></i>Back to Customer Ledger
                 </a>
@@ -14,11 +14,11 @@
                 </button>
             </div>
 
-            <div class="card border-0 shadow-sm">
-                <div class="card-body p-4 p-md-5">
-                    <div class="row align-items-start mb-4">
+            <div class="border-0 shadow-sm card">
+                <div class="p-4 card-body p-md-5">
+                    <div class="mb-4 row align-items-start">
                         <div class="col-7">
-                            <h2 class="text-primary fw-bold mb-1">{{ $ledger->entry_type === 'payment' ? 'Customer Payment Receipt' : 'Customer Invoice' }}</h2>
+                            <h2 class="mb-1 text-primary fw-bold">{{ $ledger->entry_type === 'payment' ? 'Customer Payment Receipt' : 'Customer Invoice' }}</h2>
                             <div class="text-muted">Reference: <strong>{{ $invoiceNumber }}</strong></div>
                             <div class="text-muted">Date: {{ $ledger->sale_date->format('d M Y') }}</div>
                         </div>
@@ -41,7 +41,7 @@
 
                     @if ($ledger->entry_type === 'sale')
                         <div class="table-responsive">
-                            <table class="table table-bordered align-middle">
+                            <table class="table align-middle table-bordered">
                                 <thead class="table-light">
                                     <tr>
                                         <th>#</th>
@@ -88,17 +88,17 @@
                             </div>
                         @endif
 
-                        <div class="row justify-content-end mt-4">
+                        <div class="mt-4 row justify-content-end">
                             <div class="col-md-6 col-lg-5">
-                                <div class="d-flex justify-content-between py-1">
+                                <div class="py-1 d-flex justify-content-between">
                                     <span class="fw-bold fs-5">Total</span>
                                     <span class="fw-bold fs-5">৳{{ number_format((float) $ledger->total_amount, 2) }}</span>
                                 </div>
-                                <div class="d-flex justify-content-between py-1">
+                                <div class="py-1 d-flex justify-content-between">
                                     <span>Total Received</span>
                                     <span>৳{{ number_format((float) $ledger->payment_amount, 2) }}</span>
                                 </div>
-                                <div class="d-flex justify-content-between py-1 text-danger fw-bold">
+                                <div class="py-1 d-flex justify-content-between text-danger fw-bold">
                                     <span>Due</span>
                                     <span>৳{{ number_format((float) $ledger->due_amount, 2) }}</span>
                                 </div>
@@ -132,11 +132,11 @@
                         </div>
                     @endif
 
-                    <div class="row mt-5 pt-4">
-                        <div class="col-6"><div class="border-top pt-2">Customer Signature</div></div>
-                        <div class="col-6 text-end"><div class="border-top pt-2">Authorized Signature</div></div>
+                    <div class="pt-4 mt-5 row">
+                        <div class="col-6"><div class="pt-2 border-top">Customer Signature</div></div>
+                        <div class="col-6 text-end"><div class="pt-2 border-top">Authorized Signature</div></div>
                     </div>
-                    <p class="text-center text-muted small mt-4 mb-0">Thank you for your business.</p>
+                    <p class="mt-4 mb-0 text-center text-muted small">Thank you for your business.</p>
                 </div>
             </div>
         </div>
