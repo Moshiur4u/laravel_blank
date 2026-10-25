@@ -43,16 +43,16 @@
                             <div class="card-header bg-transparent border-bottom py-3">
                                 <div class="d-flex align-items-center justify-content-between">
                                     <div class="d-flex align-items-center">
-                                        <div class="widgets-icons-2 rounded-circle bg-light-warning text-warning me-3">
-                                            <i class="bx bx-edit-alt"></i>
+                                        <div class="widgets-icons-2 rounded-circle bg-light-primary text-primary me-3">
+                                            <i class="bx bx-info-circle"></i>
                                         </div>
                                         <div>
-                                            <h5 class="mb-0 text-dark fw-bold">Update Product Information</h5>
-                                            <p class="text-muted small mb-0">Modify details for SKU #PRD-{{ str_pad($product->id, 5, '0', STR_PAD_LEFT) }}</p>
+                                            <h5 class="mb-0 text-dark fw-bold">General Information</h5>
+                                            <p class="text-muted small mb-0">Update core product identifiers, supplier, and pricing</p>
                                         </div>
                                     </div>
                                     <span class="badge bg-light-primary text-primary px-3 py-2 rounded-pill font-13">
-                                        ID: #{{ $product->id }}
+                                        SKU: #PRD-{{ str_pad($product->id, 5, '0', STR_PAD_LEFT) }}
                                     </span>
                                 </div>
                             </div>
@@ -72,6 +72,7 @@
                                                 name="productName"
                                                 id="productName"
                                                 class="form-control border-start-0 @error('productName') is-invalid @enderror"
+                                                placeholder="e.g. Wireless Ergonomic Mouse"
                                                 value="{{ old('productName', $product->productName) }}"
                                                 required>
                                         </div>
@@ -85,7 +86,7 @@
                                     <!-- Category -->
                                     <div class="col-md-6">
                                         <label for="category_id" class="form-label fw-semibold text-secondary">
-                                            Select Category <span class="text-danger">*</span>
+                                            Category <span class="text-danger">*</span>
                                         </label>
                                         <div class="input-group">
                                             <span class="input-group-text bg-light text-secondary border-end-0">
@@ -114,7 +115,7 @@
                                     <!-- Brand -->
                                     <div class="col-md-6">
                                         <label for="brand_id" class="form-label fw-semibold text-secondary">
-                                            Select Brand <span class="text-danger">*</span>
+                                            Brand <span class="text-danger">*</span>
                                         </label>
                                         <div class="input-group">
                                             <span class="input-group-text bg-light text-secondary border-end-0">
@@ -140,10 +141,61 @@
                                         @enderror
                                     </div>
 
-                                    <!-- Price -->
+                                    <!-- Supplier -->
+                                    <div class="col-md-6">
+                                        <label for="supplier_id" class="form-label fw-semibold text-secondary">
+                                            Supplier
+                                        </label>
+                                        <div class="input-group">
+                                            <span class="input-group-text bg-light text-secondary border-end-0">
+                                                <i class="bx bx-store"></i>
+                                            </span>
+                                            <select class="form-select border-start-0 @error('supplier_id') is-invalid @enderror"
+                                                name="supplier_id"
+                                                id="supplier_id">
+                                                <option value="">Select Supplier (Optional)</option>
+                                                @foreach ($suppliers as $supplier)
+                                                    <option value="{{ $supplier->id }}"
+                                                        {{ (old('supplier_id', $product->supplier_id) == $supplier->id) ? 'selected' : '' }}>
+                                                        {{ $supplier->name }}
+                                                    </option>
+                                                @endforeach
+                                            </select>
+                                        </div>
+                                        @error('supplier_id')
+                                            <div class="text-danger small mt-1">
+                                                <i class="bx bx-error-circle me-1"></i>{{ $message }}
+                                            </div>
+                                        @enderror
+                                    </div>
+
+                                    <!-- Purchase Order Price -->
+                                    <div class="col-md-6">
+                                        <label for="purchase_price" class="form-label fw-semibold text-secondary">
+                                            Purchase Order Price (৳)
+                                        </label>
+                                        <div class="input-group">
+                                            <span class="input-group-text bg-light text-secondary border-end-0">৳</span>
+                                            <input type="number"
+                                                step="0.01"
+                                                min="0"
+                                                name="purchase_price"
+                                                id="purchase_price"
+                                                class="form-control border-start-0 @error('purchase_price') is-invalid @enderror"
+                                                placeholder="0.00"
+                                                value="{{ old('purchase_price', $product->purchase_price) }}">
+                                        </div>
+                                        @error('purchase_price')
+                                            <div class="text-danger small mt-1">
+                                                <i class="bx bx-error-circle me-1"></i>{{ $message }}
+                                            </div>
+                                        @enderror
+                                    </div>
+
+                                    <!-- Product Selling Price -->
                                     <div class="col-md-6">
                                         <label for="price" class="form-label fw-semibold text-secondary">
-                                            Unit Price (৳) <span class="text-danger">*</span>
+                                            Product Selling Price (৳) <span class="text-danger">*</span>
                                         </label>
                                         <div class="input-group">
                                             <span class="input-group-text bg-light text-secondary border-end-0">৳</span>
@@ -152,6 +204,7 @@
                                                 name="price"
                                                 id="price"
                                                 class="form-control border-start-0 @error('price') is-invalid @enderror"
+                                                placeholder="0.00"
                                                 value="{{ old('price', $product->price) }}"
                                                 required>
                                         </div>
@@ -175,6 +228,7 @@
                                                 name="unit"
                                                 id="unit"
                                                 class="form-control border-start-0 @error('unit') is-invalid @enderror"
+                                                placeholder="e.g. 50"
                                                 value="{{ old('unit', $product->unit) }}"
                                                 required>
                                         </div>
@@ -271,7 +325,7 @@
                                     </div>
                                     <div>
                                         <h5 class="mb-0 text-dark fw-bold">Product Description</h5>
-                                        <p class="text-muted small mb-0">Specifications, notes, or highlights</p>
+                                        <p class="text-muted small mb-0">Optional details and notes about this item</p>
                                     </div>
                                 </div>
                             </div>
@@ -282,7 +336,7 @@
                                         id="description"
                                         rows="4"
                                         class="form-control"
-                                        placeholder="Enter detailed specifications...">{{ old('description', $product->description) }}</textarea>
+                                        placeholder="Enter detailed specifications, warranty notes, or product highlights...">{{ old('description', $product->description) }}</textarea>
                                 </div>
                             </div>
                         </div>
@@ -350,7 +404,7 @@
                         <div class="card radius-10 border-0 shadow-sm">
                             <div class="card-body p-4">
                                 <h6 class="fw-bold text-dark mb-3">Save Changes</h6>
-                                <p class="text-muted small mb-4">Ensure all information is accurate before submitting.</p>
+                                <p class="text-muted small mb-4">Ensure all mandatory fields marked with (<span class="text-danger">*</span>) are filled correctly.</p>
 
                                 <div class="d-grid gap-2">
                                     <button type="submit" class="btn btn-primary py-2 shadow-sm fw-semibold">

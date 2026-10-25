@@ -126,23 +126,27 @@ class ProductController extends Controller
      */
     public function edit($id)
     {
-        $product = Product::find($id);
+        $product = Product::findOrFail($id);
         $ProductCategories = ProductCategory::latest()->get();
         $brands = Brand::all();
+        $suppliers = Supplier::orderBy('name')->get();
 
-        return view('backend.Product.product.editProduct', compact('product', 'ProductCategories', 'brands'));
+        return view('backend.Product.product.editProduct', compact('product', 'ProductCategories', 'brands', 'suppliers'));
     }
 
     /**
      * Update the specified resource in storage.
+     * পণ্য আপডেটের সময় supplier ledger ও inventory স্বয়ংক্রিয়ভাবে সমন্বয় করা হয়।
      */
     public function update(Request $request, $id)
     {
         // ১. ভ্যালিডেশন
         $request->validate([
-            'productName' => 'nullable',
+            'productName' => 'nullable|string|max:255',
             'product_categorie_id' => 'nullable',
             'brand_id' => 'nullable',
+            'supplier_id' => 'nullable',
+            'purchase_price' => 'nullable',
             'price' => 'nullable',
             'unit' => 'nullable',
             'purchase_date' => 'nullable|date',
@@ -163,7 +167,7 @@ class ProductController extends Controller
 
             // পুরাতন ইমেজ ডিলিট করা (যদি ডেটাবেজে থাকে এবং ফাইলে বিদ্যমান থাকে)
             if ($product->img_url && file_exists(public_path('uploads/products/'.$product->img_url))) {
-                unlink(public_path('uploads/products'.$product->img_url));
+                unlink(public_path('uploads/products/'.$product->img_url));
             }
 
             // নতুন ইমেজ সেভ করা
@@ -177,19 +181,75 @@ class ProductController extends Controller
             $productImage->move(public_path('uploads/products'), $productImageName);
         }
 
-        // ৪. ডেটাবেজ আপডেট করা ($product ক্ষেত্র ব্যবহার করে)
-        $product->update([
-            'productName' => $request->productName,
-            'product_categorie_id' => $request->product_categorie_id,
-            'brand_id' => $request->brand_id,
-            'price' => $request->price,
-            'unit' => $request->unit,
-            'purchase_date' => $request->purchase_date,
-            'mfg_date' => $request->menufecher_date,
-            'expiry_date' => $request->expire_date,
-            'description' => $request->description,
-            'img_url' => $productImageName,
-        ]);
+        // ৪. DB transaction-এ product ও supplier ledger একসঙ্গে আপডেট করা
+        // এর ফলে product ও ledger সবসময় একই অবস্থায় (consistent) থাকে।
+        DB::transaction(function () use ($request, $product, $productImageName) {
+
+            // ৪.১ products টেবিল আপডেট — inventory-র stock (unit) এখান থেকেই আসে
+            $product->update([
+                'productName'          => $request->productName,
+                'product_categorie_id' => $request->product_categorie_id,
+                'brand_id'             => $request->brand_id,
+                'supplier_id'          => $request->supplier_id,
+                'purchase_price'       => $request->purchase_price,
+                'price'                => $request->price,
+                'unit'                 => $request->unit,
+                'purchase_date'        => $request->purchase_date,
+                'mfg_date'             => $request->menufecher_date,
+                'expiry_date'          => $request->expire_date,
+                'description'          => $request->description,
+                'img_url'              => $productImageName,
+            ]);
+
+            // ৪.২ Supplier Ledger সমন্বয়:
+            // supplier_id ও purchase_price উভয়ই থাকলে ledger sync করা হবে।
+            $newSupplierId    = $request->supplier_id;
+            $newPurchasePrice = $request->purchase_price;
+            $newUnit          = (float) ($request->unit ?? 0);
+
+            if ($newSupplierId && $newPurchasePrice) {
+
+                // নতুন মোট ক্রয়মূল্য হিসাব: price × quantity
+                $newTotal = round((float) $newPurchasePrice * $newUnit, 2);
+
+                // এই product-এর সবচেয়ে পুরনো ledger entry খোঁজা
+                // (product তৈরির সময় store() মেথড যে entry তৈরি করেছিল)
+                $existingLedger = Supplierledger::where('product_id', (string) $product->id)
+                    ->oldest()
+                    ->first();
+
+                if ($existingLedger) {
+                    // ইতোমধ্যে পরিশোধিত অর্থ সংরক্ষণ করা (payment অপরিবর্তিত থাকবে)
+                    $paidAmount = (float) $existingLedger->payment;
+
+                    // due = নতুন total - পরিশোধিত অর্থ (কখনো ঋণাত্মক হবে না)
+                    $newDue = max(0.0, $newTotal - $paidAmount);
+
+                    // বিদ্যমান ledger entry আপডেট করা
+                    $existingLedger->update([
+                        'supplier_id' => $newSupplierId,
+                        'product_id'  => (string) $product->id,
+                        'quantity'    => (string) $newUnit,
+                        'price'       => (string) $newPurchasePrice,
+                        'total'       => number_format($newTotal, 2, '.', ''),
+                        'due'         => number_format($newDue, 2, '.', ''),
+                        // payment ইচ্ছাকৃতভাবে অপরিবর্তিত রাখা হয়েছে
+                    ]);
+                } else {
+                    // কোনো ledger entry না থাকলে নতুন entry তৈরি করা
+                    Supplierledger::create([
+                        'supplier_id' => $newSupplierId,
+                        'product_id'  => (string) $product->id,
+                        'quantity'    => (string) $newUnit,
+                        'price'       => (string) $newPurchasePrice,
+                        'total'       => number_format($newTotal, 2, '.', ''),
+                        'payment'     => '0.00',
+                        'due'         => number_format($newTotal, 2, '.', ''),
+                    ]);
+                }
+            }
+            // যদি supplier_id বা purchase_price না থাকে তাহলে ledger-এ কোনো পরিবর্তন করা হয় না।
+        });
 
         return redirect()->route('product.index')->with('success', 'Product Updated Successfully');
     }

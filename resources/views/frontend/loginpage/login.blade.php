@@ -55,12 +55,18 @@
                             <div class="card-body p-sm-5">
                                 <div class="">
                                     <div class="mb-3 text-center">
-                                        <img src="{{ asset('assets/images/logo-icon.png') }}" width="60"
-                                            alt="">
+                                        @if ($organization?->logo)
+                                            <img src="{{ asset('uploads/organizations/' . $organization->logo) }}"
+                                                alt="{{ $organization->name ?: 'Organization Logo' }}"
+                                                style="max-width: 140px; max-height: 80px; object-fit: contain;">
+                                        @else
+                                            <img src="{{ asset('assets/images/logo-icon.png') }}" width="60"
+                                                alt="logo icon">
+                                        @endif
                                     </div>
                                     <div class="mb-4 text-center">
                                         <h6 class="">Welcome to</h6>
-                                        <h5 class="">My-POS</h5>
+                                        <h5 class="">{{ $organization?->name ?: 'My-POS' }}</h5>
                                         <p class="mb-0">Please log in to your account</p>
                                     </div>
                                     <div class="form-body">

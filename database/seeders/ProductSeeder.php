@@ -680,30 +680,21 @@ class ProductSeeder extends Seeder
             'YESPRINT TONER CARTRIDGE PC 216'
         ];
         foreach ($Products as $Product) {
-            Product::Create([
+            Product::create([
                 'productName' => $Product,
-                'product_categorie_id' => rand(1, 50),
-                'brand_id' => rand(1, 50),
-                'price' => rand(10, 10000),
-                'purchase_price' => rand(10, 10000),
-                'unit' => rand(1, 100),
-                'purchase_date' => Carbon::today()->subDays(rand(1, 365))->toDateString(),
-                'mfg_date' => Carbon::today()->subDays(rand(1, 365))->toDateString(),
-                'expiry_date' => Carbon::today()->subDays(rand(1, 365))->toDateString(),
-                'description' => 'test',
-                'img_url' => $Product,
+                'product_categorie_id' => null,
+                'brand_id' => null,
+                'supplier_id' => null,
+                'purchase_price' => null,
+                'price' => null,
+                'unit' => null,
+                'stock_unit' => null,
+                'purchase_date' => null,
+                'mfg_date' => null,
+                'expiry_date' => null,
+                'description' => null,
+                'img_url' => null,
             ]);
-
-            $category = ProductCategorie::where('name', 'like', "%$categoryName%")->first();
-        if (!$category) {
-            $category = ProductCategorie::create(['name' => $categoryName]);
         }
-
-        $brand = Brand::where('name', $brandName)->first();
-        if (!$brand) {
-            $brand = Brand::create(['name' => $brandName]);
-        }
-            
-        };
     }
 }

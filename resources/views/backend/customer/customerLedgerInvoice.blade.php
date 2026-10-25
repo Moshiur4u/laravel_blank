@@ -16,6 +16,21 @@
 
             <div class="border-0 shadow-sm card">
                 <div class="p-4 card-body p-md-5">
+                    @if ($organization?->logo || $organization?->name)
+                        <div class="d-flex align-items-center gap-3 mb-4 pb-3 border-bottom">
+                            @if ($organization?->logo)
+                                <img src="{{ asset('uploads/organizations/' . $organization->logo) }}"
+                                    alt="{{ $organization->name ?: 'Organization logo' }}"
+                                    style="max-width: 90px; max-height: 65px; object-fit: contain;">
+                            @endif
+                            <div>
+                                <h4 class="mb-0 fw-bold text-dark">{{ $organization?->name }}</h4>
+                                @if ($organization?->address)<div class="small text-muted">{{ $organization->address }}</div>@endif
+                                @if ($organization?->phone)<div class="small text-muted">Phone: {{ $organization->phone }}</div>@endif
+                                @if ($organization?->email)<div class="small text-muted">Email: {{ $organization->email }}</div>@endif
+                            </div>
+                        </div>
+                    @endif
                     <div class="mb-4 row align-items-start">
                         <div class="col-7">
                             <h2 class="mb-1 text-primary fw-bold">{{ $ledger->entry_type === 'payment' ? 'Customer Payment Receipt' : 'Customer Invoice' }}</h2>
