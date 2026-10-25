@@ -103,7 +103,13 @@
         <div class="sidebar-wrapper" data-simplebar="true">
             <div class="sidebar-header">
                 <div>
-                    <img src="{{ asset('assets/images/logo-icon.png') }}" class="logo-icon" alt="logo icon">
+                    @if ($organization?->logo)
+                        <img src="{{ asset('uploads/organizations/' . $organization->logo) }}"
+                            alt="{{ $organization->name ?: 'Organization Logo' }}"
+                            style="max-width: 140px; max-height: 80px; object-fit: contain;">
+                    @else
+                        <img src="{{ asset('assets/images/logo-icon.png') }}" width="60" alt="logo icon">
+                    @endif
                 </div>
                 <div>
                     <h4 class="logo-text">{{ $organization?->name ?: 'myPOS Software' }}</h4>
@@ -146,7 +152,8 @@
                         </a>
                         <ul>
                             <li>
-                                <a href="{{ route('quotation.create') }}"><i class='bx bx-plus-circle'></i>Get Quotation</a>
+                                <a href="{{ route('quotation.create') }}"><i class='bx bx-plus-circle'></i>Get
+                                    Quotation</a>
                             </li>
                             <li>
                                 <a href="{{ route('quotation.index') }}"><i class='bx bx-list-ul'></i>All Quotations</a>
