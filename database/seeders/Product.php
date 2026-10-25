@@ -2,6 +2,7 @@
 
 namespace Database\Seeders;
 
+use App\Models\Product as ProductModel;
 use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
 
@@ -679,8 +680,22 @@ class Product extends Seeder
         ];
         
         foreach ($Products as $Product) {
-            Product::Create(['productName' => $Product]);
-        };
+            ProductModel::create([
+                'productName' => $Product,
+                'product_categorie_id' => null,
+                'brand_id' => null,
+                'supplier_id' => null,
+                'purchase_price' => null,
+                'price' => null,
+                'unit' => null,
+                'stock_unit' => null,
+                'purchase_date' => null,
+                'mfg_date' => null,
+                'expiry_date' => null,
+                'description' => null,
+                'img_url' => null,
+            ]);
+        }
     }
 }
 

@@ -1,0 +1,437 @@
+@extends('dashboard.dashboard')
+@section('title', 'Get Quotation')
+
+@section('content')
+    <div class="page-wrapper">
+        <div class="page-content">
+            <!-- Breadcrumb -->
+            <div class="mb-3 page-breadcrumb d-none d-sm-flex align-items-center">
+                <div class="breadcrumb-title pe-3">Quotation</div>
+                <div class="ps-3">
+                    <nav aria-label="breadcrumb">
+                        <ol class="p-0 mb-0 breadcrumb">
+                            <li class="breadcrumb-item"><a href="{{ route('dashboardbody') }}"><i class="bx bx-home-alt"></i></a></li>
+                            <li class="breadcrumb-item"><a href="{{ route('quotation.index') }}">Quotations</a></li>
+                            <li class="breadcrumb-item active" aria-current="page">Get Quotation</li>
+                        </ol>
+                    </nav>
+                </div>
+                <div class="ms-auto">
+                    <a href="{{ route('quotation.index') }}" class="btn btn-outline-primary px-3 shadow-sm">
+                        <i class="bx bx-list-ul me-1"></i> View All Quotations
+                    </a>
+                </div>
+            </div>
+
+            <form id="quotationForm" action="{{ route('quotation.store') }}" method="POST">
+                @csrf
+
+                <!-- Top Row: Customer Info on Left, Organization Info on Right (Invoice Layout Style) -->
+                <div class="row g-3 mb-4">
+                    <!-- Customer Information Section -->
+                    <div class="col-12 col-lg-7">
+                        <div class="card border-0 shadow-sm radius-10 h-100">
+                            <div class="card-header bg-transparent border-bottom py-3">
+                                <h5 class="mb-0 fw-bold text-primary"><i class="bx bx-user-pin me-2"></i>Customer Information</h5>
+                            </div>
+                            <div class="card-body">
+                                <div class="row g-3">
+                                    <div class="col-md-6">
+                                        <label class="form-label fw-semibold">Customer Name <span class="text-danger">*</span></label>
+                                        <div class="input-group">
+                                            <span class="input-group-text bg-light"><i class="bx bx-user"></i></span>
+                                            <input type="text" name="customer_name" id="customer_name" class="form-control"
+                                                placeholder="Enter customer or company name" value="{{ old('customer_name') }}" required>
+                                        </div>
+                                        @error('customer_name') <span class="text-danger small">{{ $message }}</span> @enderror
+                                    </div>
+
+                                    <div class="col-md-6">
+                                        <label class="form-label fw-semibold">Mobile Number <span class="text-danger">*</span></label>
+                                        <div class="input-group">
+                                            <span class="input-group-text bg-light"><i class="bx bx-phone"></i></span>
+                                            <input type="text" name="customer_phone" id="customer_phone" class="form-control"
+                                                placeholder="Enter mobile or contact number" value="{{ old('customer_phone') }}" required>
+                                        </div>
+                                        @error('customer_phone') <span class="text-danger small">{{ $message }}</span> @enderror
+                                    </div>
+
+                                    <div class="col-md-6">
+                                        <label class="form-label fw-semibold">Quotation Date <span class="text-danger">*</span></label>
+                                        <div class="input-group">
+                                            <span class="input-group-text bg-light"><i class="bx bx-calendar"></i></span>
+                                            <input type="date" name="quotation_date" id="quotation_date" class="form-control"
+                                                value="{{ old('quotation_date', date('Y-m-d')) }}" required>
+                                        </div>
+                                        @error('quotation_date') <span class="text-danger small">{{ $message }}</span> @enderror
+                                    </div>
+
+                                    <div class="col-md-6">
+                                        <label class="form-label fw-semibold">Quotation Reference</label>
+                                        <div class="input-group">
+                                            <span class="input-group-text bg-light"><i class="bx bx-hash"></i></span>
+                                            <input type="text" class="form-control bg-light" value="{{ $generatedQuotationNo }}" readonly>
+                                        </div>
+                                    </div>
+
+                                    <div class="col-12">
+                                        <label class="form-label fw-semibold">Customer Address</label>
+                                        <textarea name="customer_address" id="customer_address" class="form-control" rows="2"
+                                            placeholder="Enter customer address or delivery location">{{ old('customer_address') }}</textarea>
+                                        @error('customer_address') <span class="text-danger small">{{ $message }}</span> @enderror
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Organization Info Displayed on the Side (Invoice Layout) -->
+                    <div class="col-12 col-lg-5">
+                        <div class="card border-0 shadow-sm radius-10 h-100 bg-light">
+                            <div class="card-header bg-transparent border-bottom py-3">
+                                <h5 class="mb-0 fw-bold text-dark"><i class="bx bx-buildings me-2 text-primary"></i>Organization Information</h5>
+                            </div>
+                            <div class="card-body">
+                                <div class="d-flex align-items-center gap-3 mb-3">
+                                    @if ($organization?->logo)
+                                        <img src="{{ asset('uploads/organizations/' . $organization->logo) }}"
+                                            alt="{{ $organization->name ?: 'Logo' }}"
+                                            class="rounded border bg-white p-1"
+                                            style="max-width: 85px; max-height: 60px; object-fit: contain;">
+                                    @else
+                                        <img src="{{ asset('assets/images/logo-icon.png') }}"
+                                            alt="Logo" class="rounded border bg-white p-1"
+                                            style="max-width: 60px; max-height: 60px; object-fit: contain;">
+                                    @endif
+                                    <div>
+                                        <h5 class="mb-1 fw-bold text-primary">{{ $organization?->name ?: 'My-POS Enterprise' }}</h5>
+                                        <span class="badge bg-light-primary text-primary">Issuer Organization</span>
+                                    </div>
+                                </div>
+
+                                <ul class="list-unstyled mb-0 small text-secondary">
+                                    @if ($organization?->phone)
+                                        <li class="mb-2 d-flex align-items-center">
+                                            <i class="bx bx-phone me-2 text-primary fs-6"></i>
+                                            <strong>Phone:</strong>&nbsp;{{ $organization->phone }}
+                                        </li>
+                                    @endif
+                                    @if ($organization?->email)
+                                        <li class="mb-2 d-flex align-items-center">
+                                            <i class="bx bx-envelope me-2 text-primary fs-6"></i>
+                                            <strong>Email:</strong>&nbsp;{{ $organization->email }}
+                                        </li>
+                                    @endif
+                                    @if ($organization?->address)
+                                        <li class="mb-2 d-flex align-items-start">
+                                            <i class="bx bx-map-pin me-2 text-primary fs-6 mt-1"></i>
+                                            <span><strong>Address:</strong> {{ $organization->address }}</span>
+                                        </li>
+                                    @endif
+                                </ul>
+                                <div class="mt-3 p-2 rounded bg-white border small text-muted">
+                                    <i class="bx bx-info-circle me-1 text-info"></i> This organization header will be formatted on the quotation document similar to your customer invoices.
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Product Items Section -->
+                <div class="card border-0 shadow-sm radius-10 mb-4">
+                    <div class="card-header bg-transparent border-bottom py-3 d-flex justify-content-between align-items-center">
+                        <h5 class="mb-0 fw-bold text-dark"><i class="bx bx-cart text-primary me-2"></i>Quotation Items</h5>
+                        <button type="button" id="addItemBtn" class="btn btn-sm btn-primary px-3">
+                            <i class="bx bx-plus me-1"></i> Add Product
+                        </button>
+                    </div>
+                    <div class="card-body">
+                        <div class="table-responsive">
+                            <table class="table table-bordered align-middle">
+                                <thead class="table-light">
+                                    <tr>
+                                        <th style="min-width: 280px;">Product Name <span class="text-danger">*</span></th>
+                                        <th style="width: 140px;" class="text-end">Unit Price (৳) <span class="text-danger">*</span></th>
+                                        <th style="width: 120px;" class="text-center">Quantity <span class="text-danger">*</span></th>
+                                        <th style="width: 150px;" class="text-end">Line Total (৳)</th>
+                                        <th style="width: 60px;" class="text-center">Action</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="itemsTableBody">
+                                    <tr class="item-row">
+                                        <td>
+                                            <input type="text" class="form-control product-name-input"
+                                                name="items[0][product_name]" list="quotationProductOptions"
+                                                placeholder="Type or select product..." autocomplete="off" required>
+                                            <input type="hidden" name="items[0][product_id]" class="product-id-hidden" value="">
+                                        </td>
+                                        <td>
+                                            <input type="number" step="0.01" min="0" class="form-control text-end item-unit-price"
+                                                name="items[0][unit_price]" placeholder="0.00" value="0.00" required>
+                                        </td>
+                                        <td>
+                                            <input type="number" min="1" class="form-control text-center item-quantity"
+                                                name="items[0][quantity]" value="1" required>
+                                        </td>
+                                        <td class="text-end fw-bold">
+                                            <span class="item-line-total text-dark">0.00</span>
+                                        </td>
+                                        <td class="text-center">
+                                            <button type="button" class="btn btn-sm btn-outline-danger remove-item-btn" title="Remove Item">
+                                                <i class="bx bx-trash"></i>
+                                            </button>
+                                        </td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+
+                        <!-- Datalist for fast searchable product auto-fill -->
+                        <datalist id="quotationProductOptions">
+                            @foreach ($products as $product)
+                                <option value="{{ $product->productName }}"
+                                    data-id="{{ $product->id }}"
+                                    data-price="{{ $product->price ?? 0 }}">
+                                    PRD-{{ str_pad($product->id, 5, '0', STR_PAD_LEFT) }} | Price: ৳{{ number_format((float)$product->price, 2) }}
+                                </option>
+                            @endforeach
+                        </datalist>
+                    </div>
+                </div>
+
+                <!-- Bottom Row: Terms & Conditions on Left, Totals Calculation on Right -->
+                <div class="row g-3 mb-4">
+                    <!-- Terms and Conditions Input Section -->
+                    <div class="col-12 col-lg-7">
+                        <div class="card border-0 shadow-sm radius-10 h-100">
+                            <div class="card-header bg-transparent border-bottom py-3">
+                                <h5 class="mb-0 fw-bold text-dark"><i class="bx bx-file-blank text-primary me-2"></i>Terms & Conditions</h5>
+                            </div>
+                            <div class="card-body">
+                                <label class="form-label fw-semibold">Quotation Terms and Conditions</label>
+                                <textarea name="terms_conditions" id="terms_conditions" rows="5" class="form-control"
+                                    placeholder="Input terms and conditions to be displayed on this quotation...">{{ old('terms_conditions', $defaultTerms) }}</textarea>
+                                <div class="form-text text-muted">
+                                    These terms will be rendered clearly at the bottom of the generated Quotation document.
+                                </div>
+
+                                <div class="mt-3">
+                                    <label class="form-label fw-semibold">Additional Notes (Optional)</label>
+                                    <textarea name="notes" id="notes" rows="2" class="form-control"
+                                        placeholder="Any additional remarks or delivery notes...">{{ old('notes') }}</textarea>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Automatic Price Calculation Box -->
+                    <div class="col-12 col-lg-5">
+                        <div class="card border-0 shadow-sm radius-10 h-100">
+                            <div class="card-header bg-transparent border-bottom py-3">
+                                <h5 class="mb-0 fw-bold text-dark"><i class="bx bx-calculator text-primary me-2"></i>Price Summary</h5>
+                            </div>
+                            <div class="card-body">
+                                <div class="py-2 d-flex justify-content-between align-items-center border-bottom">
+                                    <span class="text-secondary fw-semibold">Subtotal:</span>
+                                    <span class="fs-6 fw-bold text-dark">৳<span id="displaySubtotal">0.00</span></span>
+                                </div>
+
+                                <!-- Discount section -->
+                                <div class="py-2 border-bottom">
+                                    <div class="d-flex justify-content-between align-items-center mb-2">
+                                        <span class="text-secondary fw-semibold">Discount:</span>
+                                        <span class="text-danger fw-bold">- ৳<span id="displayDiscountAmount">0.00</span></span>
+                                    </div>
+                                    <div class="row g-2">
+                                        <div class="col-6">
+                                            <select name="discount_type" id="discount_type" class="form-select form-select-sm">
+                                                <option value="flat">Fixed (৳)</option>
+                                                <option value="percentage">Percentage (%)</option>
+                                            </select>
+                                        </div>
+                                        <div class="col-6">
+                                            <input type="number" step="0.01" min="0" name="discount_value" id="discount_value"
+                                                class="form-control form-control-sm text-end" value="0" placeholder="0">
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!-- VAT section -->
+                                <div class="py-2 border-bottom">
+                                    <div class="d-flex justify-content-between align-items-center mb-2">
+                                        <span class="text-secondary fw-semibold">VAT:</span>
+                                        <span class="text-dark fw-bold">+ ৳<span id="displayVatAmount">0.00</span></span>
+                                    </div>
+                                    <div class="row g-2">
+                                        <div class="col-12">
+                                            <div class="input-group input-group-sm">
+                                                <span class="input-group-text bg-light">VAT Rate (%)</span>
+                                                <input type="number" step="0.01" min="0" max="100" name="vat_percentage" id="vat_percentage"
+                                                    class="form-control text-end" value="0" placeholder="0">
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!-- Grand Total -->
+                                <div class="py-3 d-flex justify-content-between align-items-center bg-light-primary rounded p-3 mt-3">
+                                    <span class="fs-5 fw-bold text-primary">Total Price:</span>
+                                    <span class="fs-4 fw-bolder text-primary">৳<span id="displayGrandTotal">0.00</span></span>
+                                </div>
+
+                                <div class="mt-4">
+                                    <button type="submit" class="btn btn-primary w-100 py-2 fs-6 shadow-sm">
+                                        <i class="bx bx-check-circle me-1"></i> Generate Quotation
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+@endsection
+
+@section('scripts')
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        let rowIndex = 1;
+        const tableBody = document.getElementById('itemsTableBody');
+        const addItemBtn = document.getElementById('addItemBtn');
+        const productDatalist = document.getElementById('quotationProductOptions');
+
+        const displaySubtotal = document.getElementById('displaySubtotal');
+        const displayDiscountAmount = document.getElementById('displayDiscountAmount');
+        const displayVatAmount = document.getElementById('displayVatAmount');
+        const displayGrandTotal = document.getElementById('displayGrandTotal');
+
+        const discountTypeSelect = document.getElementById('discount_type');
+        const discountValueInput = document.getElementById('discount_value');
+        const vatPercentageInput = document.getElementById('vat_percentage');
+
+        // Product map from datalist options
+        const productMap = {};
+        if (productDatalist) {
+            Array.from(productDatalist.options).forEach(opt => {
+                productMap[opt.value.trim().toLowerCase()] = {
+                    id: opt.getAttribute('data-id'),
+                    price: parseFloat(opt.getAttribute('data-price')) || 0
+                };
+            });
+        }
+
+        // Attach event listeners to a row
+        function attachRowEvents(row) {
+            const nameInput = row.querySelector('.product-name-input');
+            const hiddenId = row.querySelector('.product-id-hidden');
+            const unitPriceInput = row.querySelector('.item-unit-price');
+            const quantityInput = row.querySelector('.item-quantity');
+            const removeBtn = row.querySelector('.remove-item-btn');
+
+            nameInput.addEventListener('input', function () {
+                const val = this.value.trim().toLowerCase();
+                if (productMap[val]) {
+                    hiddenId.value = productMap[val].id;
+                    if (!parseFloat(unitPriceInput.value) || parseFloat(unitPriceInput.value) === 0) {
+                        unitPriceInput.value = productMap[val].price.toFixed(2);
+                    }
+                } else {
+                    hiddenId.value = '';
+                }
+                updateTotals();
+            });
+
+            unitPriceInput.addEventListener('input', updateTotals);
+            quantityInput.addEventListener('input', updateTotals);
+
+            removeBtn.addEventListener('click', function () {
+                const totalRows = tableBody.querySelectorAll('.item-row').length;
+                if (totalRows > 1) {
+                    row.remove();
+                    updateTotals();
+                } else {
+                    alert('At least one item is required in the quotation.');
+                }
+            });
+        }
+
+        // Add new item row
+        addItemBtn.addEventListener('click', function () {
+            const newRow = document.createElement('tr');
+            newRow.classList.add('item-row');
+            newRow.innerHTML = `
+                <td>
+                    <input type="text" class="form-control product-name-input"
+                        name="items[${rowIndex}][product_name]" list="quotationProductOptions"
+                        placeholder="Type or select product..." autocomplete="off" required>
+                    <input type="hidden" name="items[${rowIndex}][product_id]" class="product-id-hidden" value="">
+                </td>
+                <td>
+                    <input type="number" step="0.01" min="0" class="form-control text-end item-unit-price"
+                        name="items[${rowIndex}][unit_price]" placeholder="0.00" value="0.00" required>
+                </td>
+                <td>
+                    <input type="number" min="1" class="form-control text-center item-quantity"
+                        name="items[${rowIndex}][quantity]" value="1" required>
+                </td>
+                <td class="text-end fw-bold">
+                    <span class="item-line-total text-dark">0.00</span>
+                </td>
+                <td class="text-center">
+                    <button type="button" class="btn btn-sm btn-outline-danger remove-item-btn" title="Remove Item">
+                        <i class="bx bx-trash"></i>
+                    </button>
+                </td>
+            `;
+            tableBody.appendChild(newRow);
+            attachRowEvents(newRow);
+            rowIndex++;
+            newRow.querySelector('.product-name-input').focus();
+        });
+
+        // Initialize events on existing rows
+        tableBody.querySelectorAll('.item-row').forEach(row => attachRowEvents(row));
+
+        // Listen for discount & VAT adjustments
+        discountTypeSelect.addEventListener('change', updateTotals);
+        discountValueInput.addEventListener('input', updateTotals);
+        vatPercentageInput.addEventListener('input', updateTotals);
+
+        // Core calculation function
+        function updateTotals() {
+            let subtotal = 0;
+
+            tableBody.querySelectorAll('.item-row').forEach(row => {
+                const qty = parseFloat(row.querySelector('.item-quantity').value) || 0;
+                const price = parseFloat(row.querySelector('.item-unit-price').value) || 0;
+                const lineTotal = Math.round(qty * price * 100) / 100;
+                row.querySelector('.item-line-total').textContent = lineTotal.toFixed(2);
+                subtotal += lineTotal;
+            });
+
+            const discountType = discountTypeSelect.value;
+            const discountVal = parseFloat(discountValueInput.value) || 0;
+            let discountAmount = 0;
+
+            if (discountType === 'percentage') {
+                discountAmount = Math.round((subtotal * discountVal / 100) * 100) / 100;
+            } else {
+                discountAmount = Math.min(discountVal, subtotal);
+            }
+
+            const vatPercent = parseFloat(vatPercentageInput.value) || 0;
+            const taxableAmount = Math.max(subtotal - discountAmount, 0);
+            const vatAmount = Math.round((taxableAmount * vatPercent / 100) * 100) / 100;
+            const grandTotal = Math.round((taxableAmount + vatAmount) * 100) / 100;
+
+            displaySubtotal.textContent = subtotal.toFixed(2);
+            displayDiscountAmount.textContent = discountAmount.toFixed(2);
+            displayVatAmount.textContent = vatAmount.toFixed(2);
+            displayGrandTotal.textContent = grandTotal.toFixed(2);
+        }
+
+        updateTotals();
+    });
+</script>
+@endsection

@@ -1,6 +1,11 @@
 $(function() {
 	"use strict";
-	new PerfectScrollbar(".header-message-list"), new PerfectScrollbar(".header-notifications-list"),
+	if ($(".header-message-list").length) {
+		new PerfectScrollbar(".header-message-list");
+	}
+	if ($(".header-notifications-list").length) {
+		new PerfectScrollbar(".header-notifications-list");
+	}
 
 
 	    $(".mobile-search-icon").on("click", function() {

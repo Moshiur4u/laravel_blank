@@ -21,7 +21,27 @@
                 <div class="ms-auto">
                     <a href="{{ route('customer.index') }}" class="btn btn-primary"><i class="bx bx-arrow-back me-1"></i>Back</a>
                 </div>
-            </div>
+            @if ($organization?->logo || $organization?->name)
+                <div class="card border-0 shadow-sm mb-3">
+                    <div class="card-body py-3">
+                        <div class="d-flex align-items-center gap-3">
+                            @if ($organization?->logo)
+                                <img src="{{ asset('uploads/organizations/' . $organization->logo) }}"
+                                    alt="{{ $organization->name ?: 'Organization logo' }}"
+                                    style="max-width: 90px; max-height: 60px; object-fit: contain;">
+                            @endif
+                            <div>
+                                <h5 class="mb-0 fw-bold text-dark">{{ $organization?->name }}</h5>
+                                <div class="small text-muted">
+                                    @if ($organization?->phone) Phone: {{ $organization->phone }} @endif
+                                    @if ($organization?->email) | Email: {{ $organization->email }} @endif
+                                    @if ($organization?->address) | {{ $organization->address }} @endif
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            @endif
 
             <div class="row">
                 <div class="col-lg-12">

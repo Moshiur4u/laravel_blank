@@ -139,6 +139,20 @@
                             @endcan
                         </ul>
                     </li>
+                    <li>
+                        <a href="javascript:;" class="has-arrow">
+                            <div class="parent-icon"><i class='bx bx-file'></i></div>
+                            <div class="menu-title">Quotation</div>
+                        </a>
+                        <ul>
+                            <li>
+                                <a href="{{ route('quotation.create') }}"><i class='bx bx-plus-circle'></i>Get Quotation</a>
+                            </li>
+                            <li>
+                                <a href="{{ route('quotation.index') }}"><i class='bx bx-list-ul'></i>All Quotations</a>
+                            </li>
+                        </ul>
+                    </li>
                 @endcan
                 @canany(['product.index', 'product.create', 'product.edit', 'brand.index', 'brand.create', 'brand.edit',
                     'brand.update', 'brand.delete', 'supplier.index', 'supplier.create', 'category.index', 'customer.index',
@@ -727,28 +741,37 @@
     <script src="{{ asset('assets/plugins/sweetalert2/sweetalert2.min.js') }}"></script>
     <script src="{{ asset('assets/js/delete-confirmation.js') }}"></script>
     <script>
-        new PerfectScrollbar(".app-container");
+        if (document.querySelector(".app-container")) {
+            new PerfectScrollbar(".app-container");
+        }
     </script>
     <script>
-        let table = new DataTable('#myTable', {
-            "pageLength": 5,
-            "lengthMenu": [
-                [5, 10, 25, 50, -1],
-                [5, 10, 25, 50, "All"]
-            ]
-        });
+        if (document.getElementById('myTable')) {
+            let table = new DataTable('#myTable', {
+                "pageLength": 5,
+                "lengthMenu": [
+                    [5, 10, 25, 50, -1],
+                    [5, 10, 25, 50, "All"]
+                ]
+            });
+        }
     </script>
 
-    @section('scripts')
-        <script>
-            document.getElementById('imageInput').onchange = function(evt) {
+    <script>
+        const imageInput = document.getElementById('imageInput');
+        if (imageInput) {
+            imageInput.onchange = function(evt) {
                 const [file] = this.files;
                 if (file) {
-                    document.getElementById('preview').src = URL.createObjectURL(file);
+                    const preview = document.getElementById('preview');
+                    if (preview) {
+                        preview.src = URL.createObjectURL(file);
+                    }
                 }
             };
-        </script>
-    @endsection
+        }
+    </script>
+    @yield('scripts')
 </body>
 
 </html>

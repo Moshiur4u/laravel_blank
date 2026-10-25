@@ -54,6 +54,7 @@
                         <div class="m-3 mb-0 bg-transparent shadow-none card rounded-0">
                             <div class="card-body p-sm-5">
                                 <div class="">
+<<<<<<< HEAD
                                     {{-- <div>
                                         @if ($organization?->logo)
                                             <img src="{{ asset('uploads/organizations/' . $organization->logo) }}"
@@ -68,9 +69,21 @@
                                     <div><img src="{{ asset('assets/images/logo-icon.png') }}" class="logo-icon"
                                             alt="logo icon"></div>
 
+=======
+                                    <div class="mb-3 text-center">
+                                        @if ($organization?->logo)
+                                            <img src="{{ asset('uploads/organizations/' . $organization->logo) }}"
+                                                alt="{{ $organization->name ?: 'Organization Logo' }}"
+                                                style="max-width: 140px; max-height: 80px; object-fit: contain;">
+                                        @else
+                                            <img src="{{ asset('assets/images/logo-icon.png') }}" width="60"
+                                                alt="logo icon">
+                                        @endif
+                                    </div>
+>>>>>>> da64874e13ae9dfc8b87dcfe6da520d2528d7a5c
                                     <div class="mb-4 text-center">
                                         <h6 class="">Welcome to</h6>
-                                        <h5 class="">My-POS</h5>
+                                        <h5 class="">{{ $organization?->name ?: 'My-POS' }}</h5>
                                         <p class="mb-0">Please log in to your account</p>
                                     </div>
                                     <div class="form-body">

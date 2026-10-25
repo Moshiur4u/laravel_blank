@@ -9,6 +9,7 @@ use App\Http\Controllers\OrganizationController;
 use App\Http\Controllers\ProductCategoryController;
 use App\Http\Controllers\ProductController;
 use App\Http\Controllers\ProductInventoryReportController;
+use App\Http\Controllers\QuotationController;
 use App\Http\Controllers\RoleController;
 use App\Http\Controllers\SaleController;
 use App\Http\Controllers\SalesReportController;
@@ -198,6 +199,15 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::get('/sales/report/export', [SalesReportController::class, 'export'])->middleware('permission:sales.view')->name('sales.report.export');
     Route::get('/sales/report', [SalesReportController::class, 'index'])->middleware('permission:reports.all_access|sales.report') // পুরোনো dashboard permission-এর বদলে sales.report।
         ->name('sales.report');
+});
+
+// মিডলওয়্যার সহ কোটেশন (Quotation) রাউট শুরু
+Route::middleware(['auth', 'verified'])->group(function () {
+    Route::get('/quotations', [QuotationController::class, 'index'])->middleware('permission:sales.create|sales.view')->name('quotation.index');
+    Route::get('/quotations/create', [QuotationController::class, 'create'])->middleware('permission:sales.create')->name('quotation.create');
+    Route::post('/quotations', [QuotationController::class, 'store'])->middleware('permission:sales.create')->name('quotation.store');
+    Route::get('/quotations/{id}', [QuotationController::class, 'show'])->middleware('permission:sales.create|sales.view')->name('quotation.show');
+    Route::delete('/quotations/{id}', [QuotationController::class, 'destroy'])->middleware('permission:sales.create')->name('quotation.destroy');
 });
 
 // মিডলওয়্যার সহ কাস্টমার রাউট শুরু

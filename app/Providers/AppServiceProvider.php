@@ -66,7 +66,10 @@ class AppServiceProvider extends ServiceProvider
             'backend.Accounts Entries.VoucherEntries',
             'backend.Accounts Entries.employeePaymentLedger',
             'backend.customer.customerLedger',
+            'backend.customer.customerLedgerInvoice',
             'backend.Supplier.supplierledger',
+            'frontend.loginpage.login',
+            'backend.quotation.*',
         ], function ($view) {
             $view->with('organization', Organization::query()->find(1));
         });
