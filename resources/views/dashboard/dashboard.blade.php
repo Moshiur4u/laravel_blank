@@ -103,13 +103,7 @@
         <div class="sidebar-wrapper" data-simplebar="true">
             <div class="sidebar-header">
                 <div>
-                    @if ($organization?->logo)
-                        <img src="{{ asset('uploads/organizations/' . $organization->logo) }}" class="logo-icon"
-                            alt="{{ $organization->name ?: 'Organization logo' }}"
-                            style="max-height: 45px; object-fit: contain;">
-                    @else
-                        <img src="{{ asset('assets/images/logo-icon.png') }}" class="logo-icon" alt="logo icon">
-                    @endif
+                    <img src="{{ asset('assets/images/logo-icon.png') }}" class="logo-icon" alt="logo icon">
                 </div>
                 <div>
                     <h4 class="logo-text">{{ $organization?->name ?: 'myPOS Software' }}</h4>
@@ -146,9 +140,9 @@
                         </ul>
                     </li>
                 @endcan
-                @canany(['product.index', 'product.create', 'product.edit', 'brand.index', 'brand.create',
-                    'brand.edit', 'brand.update', 'brand.delete', 'supplier.index', 'supplier.create',
-                    'category.index', 'customer.index', 'customer.create']) {{-- sidebar group নতুন module permission দিয়ে দেখায়। --}}
+                @canany(['product.index', 'product.create', 'product.edit', 'brand.index', 'brand.create', 'brand.edit',
+                    'brand.update', 'brand.delete', 'supplier.index', 'supplier.create', 'category.index', 'customer.index',
+                    'customer.create']) {{-- sidebar group নতুন module permission দিয়ে দেখায়। --}}
                     <li class="menu-label">Managerial Operations</li>
                 @endcanany
                 @canany(['product.index', 'product.create', 'product.edit']) {{-- Product menu-তে নতুন permission key ব্যবহৃত। --}}
@@ -159,12 +153,14 @@
                             <div class="menu-title">Product</div>
                         </a>
                         <ul>
-                            @can('product.index') {{-- product list-এর নতুন permission। --}}
+                            @can('product.index')
+                                {{-- product list-এর নতুন permission। --}}
                                 <li>
                                     <a href="{{ route('product.index') }}"><i class='bx bx-food-menu'></i>All Product</a>
                                 </li>
                             @endcan
-                            @can('product.create') {{-- product তৈরির নতুন permission। --}}
+                            @can('product.create')
+                                {{-- product তৈরির নতুন permission। --}}
                                 <li>
                                     <a href="{{ route('product.create') }}"><i class='bx bx-plus-medical'></i>Create
                                         Product</a>
@@ -182,12 +178,14 @@
                             <div class="menu-title">Product Categories</div>
                         </a>
                         <ul>
-                            @can('category.index') {{-- category list-এর নতুন permission। --}}
+                            @can('category.index')
+                                {{-- category list-এর নতুন permission। --}}
                                 <li>
                                     <a href="{{ route('category.index') }}"><i class='bx bx-food-menu'></i>All Category</a>
                                 </li>
                             @endcan
-                            @can('product.category.create') {{-- category তৈরির নতুন permission। --}}
+                            @can('product.category.create')
+                                {{-- category তৈরির নতুন permission। --}}
                                 <li>
                                     <a href="{{ route('category.create') }}"><i class='bx bx-plus-medical'></i>Create
                                         Category</a>
@@ -218,19 +216,22 @@
                         </ul>
                     </li>
                 @endcan
-                @canany(['brand.index', 'brand.create', 'brand.edit', 'brand.update', 'brand.delete']) {{-- Brand menu-তে নতুন permission key ব্যবহৃত। --}}
+                @canany(['brand.index', 'brand.create', 'brand.edit', 'brand.update', 'brand.delete'])
+                    {{-- Brand menu-তে নতুন permission key ব্যবহৃত। --}}
                     <li>
                         <a href="javascript:;" class="has-arrow">
                             <div class="parent-icon"><i class="bx bxl-bootstrap "></i></div>
                             <div class="menu-title">Brand</div>
                         </a>
                         <ul>
-                            @can('brand.index') {{-- brand list-এর নতুন permission। --}}
+                            @can('brand.index')
+                                {{-- brand list-এর নতুন permission। --}}
                                 <li>
                                     <a href="{{ route('brand.index') }}"><i class='bx bx-food-menu'></i>Brand List</a>
                                 </li>
                             @endcan
-                            @can('brand.create') {{-- brand তৈরির নতুন permission। --}}
+                            @can('brand.create')
+                                {{-- brand তৈরির নতুন permission। --}}
                                 <li>
                                     <a href="{{ route('brand.create') }}"><i class=' bx bx-plus-medical'></i>New Brand Entry
                                     </a>
@@ -314,12 +315,14 @@
                             <div class="menu-title">Role and Permission</div>
                         </a>
                         <ul>
-                            @can('role.index') {{-- role list-এর নতুন permission। --}}
+                            @can('role.index')
+                                {{-- role list-এর নতুন permission। --}}
                                 <li>
                                     <a href="{{ route('roles.index') }}"><i class='bx bxs-door-open'></i>All Roles</a>
                                 </li>
                             @endcan
-                            @can('roles.create') {{-- role তৈরির নতুন permission। --}}
+                            @can('roles.create')
+                                {{-- role তৈরির নতুন permission। --}}
                                 <li>
                                     <a href="{{ route('roles.create') }}"><i class='bx bx-user-plus'></i>Create Role</a>
                                 </li>
@@ -346,49 +349,53 @@
                 @endcan
 
                 @canany(['voucher.report.view', 'voucher.report.employee', 'voucher.report.miscellaneous',
-                    'reports.all_access', 'product.report.inventory', 'sales.report',
-                    'user.activity.logs']) {{-- Reports menu-তে নতুন report ও Activity Log permission key ব্যবহৃত। --}}
+                    'reports.all_access', 'product.report.inventory', 'sales.report', 'user.activity.logs'])
+                    {{-- Reports menu-তে নতুন report ও Activity Log permission key ব্যবহৃত। --}}
                     <li class="menu-label">Reports</li>
 
                     @canany(['voucher.report.view', 'voucher.report.employee', 'voucher.report.miscellaneous',
                         'reports.all_access']) {{-- Voucher report link কেবল voucher report access থাকলে দেখায়। --}}
-                    <li>
-                        <a class="has-arrow" href="javascript:;">
-                            <div class="parent-icon"><i class='bx bxs-bookmark-alt-plus'></i>
-                            </div>
-                            <div class="menu-title">Voucher</div>
-                        </a>
-                        <ul>
-                            @canany(['voucher.report.view', 'reports.all_access']) {{-- combined voucher report-এর নির্দিষ্ট permission। --}}
-                            <li>
-                                <a href="{{ route('voucher-report.combined') }}">
-                                    <div class="parent-icon"><i class="bx bx-receipt"></i></div>
-                                    <div class="menu-title">Voucher</div>
-                                </a>
-                            </li>
-                            @endcanany
-                            @canany(['voucher.report.employee', 'reports.all_access']) {{-- employee payment report-এর নির্দিষ্ট permission। --}}
+                        <li>
+                            <a class="has-arrow" href="javascript:;">
+                                <div class="parent-icon"><i class='bx bxs-bookmark-alt-plus'></i>
+                                </div>
+                                <div class="menu-title">Voucher</div>
+                            </a>
+                            <ul>
+                                @canany(['voucher.report.view', 'reports.all_access'])
+                                    {{-- combined voucher report-এর নির্দিষ্ট permission। --}}
+                                    <li>
+                                        <a href="{{ route('voucher-report.combined') }}">
+                                            <div class="parent-icon"><i class="bx bx-receipt"></i></div>
+                                            <div class="menu-title">Voucher</div>
+                                        </a>
+                                    </li>
+                                @endcanany
+                                @canany(['voucher.report.employee', 'reports.all_access'])
+                                    {{-- employee payment report-এর নির্দিষ্ট permission। --}}
 
-                            <li>
-                                <a href="{{ route('employee-payment.report') }}">
-                                    <div class="parent-icon"><i class="bx bx-receipt"></i></div>
-                                    <div class="menu-title">Employee Payment</div>
-                                </a>
-                            </li>
-                            @endcanany
-                            @canany(['voucher.report.miscellaneous', 'reports.all_access']) {{-- miscellaneous voucher report-এর নির্দিষ্ট permission। --}}
-                            <li>
-                                <a href="{{ route('voucher-entries.report') }}">
-                                    <div class="parent-icon"><i class="bx bx-receipt"></i></div>
-                                    <div class="menu-title">Miscellaneous Voucher</div>
-                                </a>
-                            </li>
-                            @endcanany
-                        </ul>
-                    </li>
+                                    <li>
+                                        <a href="{{ route('employee-payment.report') }}">
+                                            <div class="parent-icon"><i class="bx bx-receipt"></i></div>
+                                            <div class="menu-title">Employee Payment</div>
+                                        </a>
+                                    </li>
+                                @endcanany
+                                @canany(['voucher.report.miscellaneous', 'reports.all_access'])
+                                    {{-- miscellaneous voucher report-এর নির্দিষ্ট permission। --}}
+                                    <li>
+                                        <a href="{{ route('voucher-entries.report') }}">
+                                            <div class="parent-icon"><i class="bx bx-receipt"></i></div>
+                                            <div class="menu-title">Miscellaneous Voucher</div>
+                                        </a>
+                                    </li>
+                                @endcanany
+                            </ul>
+                        </li>
                     @endcanany {{-- Voucher report-এর permission scope বন্ধ করা হয়েছে। --}}
                 @endcanany
-                @can('sales.report') {{-- Sales report link নতুন sales.report permission দিয়ে রক্ষিত। --}}
+                @can('sales.report')
+                    {{-- Sales report link নতুন sales.report permission দিয়ে রক্ষিত। --}}
                     <li>
                         <a class="has-arrow" href="javascript:;">
                             <div class="parent-icon"><i class='bx bxs-book-open'></i>
@@ -421,7 +428,7 @@
                     </li>
                 @endcanany
 
-                @canany(['user.activity.logs','reports.all_access']) {{-- dedicated Activity Log permission ও আগের broad access menu দেখায়। --}}
+                @canany(['user.activity.logs', 'reports.all_access']) {{-- dedicated Activity Log permission ও আগের broad access menu দেখায়। --}}
                     <li>
                         <a href="{{ route('user-activity-logs.index') }}">
                             <div class="parent-icon"><i class='bx bx-history'></i></div>
@@ -660,7 +667,8 @@
                             </div>
                         </a>
                         <ul class="dropdown-menu dropdown-menu-end">
-                            @can('view-employee-details') {{-- employee profile-এর নতুন details permission। --}}
+                            @can('view-employee-details')
+                                {{-- employee profile-এর নতুন details permission। --}}
                                 <li><a class="dropdown-item d-flex align-items-center"
                                         href="{{ route('user.show', Auth::user()->id) }}"><i
                                             class="bx bx-user fs-5"></i><span>Profile</span></a>
