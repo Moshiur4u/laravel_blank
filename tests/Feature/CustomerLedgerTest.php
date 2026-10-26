@@ -4,6 +4,7 @@ use App\Models\Customer;
 use App\Models\CustomerLedger;
 use App\Models\CustomerLedgerPayment;
 use App\Models\User;
+use App\Models\VoucherEntry;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Spatie\Permission\Models\Permission;
 
@@ -39,6 +40,15 @@ test('customer ledger records sale payments and prevents payments above the outs
     expect((float) $ledger->total_amount)->toBe(100.0) // sale total ১০০ টাকা যাচাই করে।
         ->and((float) $ledger->payment_amount)->toBe(30.0) // initial payment ৩০ টাকা যাচাই করে।
         ->and((float) $ledger->due_amount)->toBe(70.0); // বাকি due ৭০ টাকা যাচাই করে।
+    $this->assertDatabaseHas('voucher_entries', [
+        'voucher_type' => 'credit',
+        'expense_income_type' => $customer->name,
+        'voucher_date' => now()->toDateString(),
+        'amount' => '30.00',
+        'created_by' => $user->id,
+        'voucherable_type' => CustomerLedger::class,
+        'voucherable_id' => $ledger->id,
+    ]);
 
     $this->actingAs($user)->post(route('customer.ledger.payments.store', $ledger->id), [ // sale due-তে অতিরিক্ত payment নেয়।
         'payment_date' => now()->toDateString(), // payment date দেয়।
@@ -48,6 +58,12 @@ test('customer ledger records sale payments and prevents payments above the outs
     expect((float) $ledger->fresh()->payment_amount)->toBe(50.0) // aggregate received ৫০ টাকা হয়।
         ->and((float) $ledger->fresh()->due_amount)->toBe(50.0) // অবশিষ্ট sale due ৫০ টাকা হয়।
         ->and(CustomerLedgerPayment::where('customer_ledger_id', $ledger->id)->count())->toBe(1); // payment history row সংরক্ষিত হয়।
+    $this->assertDatabaseHas('voucher_entries', [
+        'voucher_type' => 'credit',
+        'expense_income_type' => $customer->name,
+        'amount' => '20.00',
+        'created_by' => $user->id,
+    ]);
 
     $this->actingAs($user)->get(route('customer.ledger.edit', $ledger->id)) // edit permission-সহ edit form খোলে।
         ->assertOk() // edit page সফলভাবে render হয়।
@@ -110,4 +126,51 @@ test('customer ledger edits preserve payment totals and deleting a sale cascades
 
     expect(CustomerLedger::find($ledger->id))->toBeNull() // sale row মুছে গেছে।
         ->and(CustomerLedgerPayment::where('customer_ledger_id', $ledger->id)->exists())->toBeFalse(); // cascade-এ payment history মুছে গেছে।
+});
+
+test('deleting a customer ledger entry removes its vouchers from the combined report', function () {
+    $user = customerLedgerUserWithPermissions([
+        'Customer.ledger.delete',
+        'voucher.report.view',
+    ]);
+    $customer = Customer::create([
+        'name' => 'Voucher Delete Customer',
+        'customer_type' => 'temporary',
+        'status' => 1,
+    ]);
+    $ledger = CustomerLedger::create([
+        'customer_id' => $customer->id,
+        'entry_type' => 'sale',
+        'sale_date' => '2026-10-26',
+        'invoice_no' => 'INV-VOUCHER-DELETE-001',
+        'product_name' => 'Voucher Delete Product',
+        'quantity' => 1,
+        'unit_price' => 50,
+        'total_amount' => 50,
+        'payment_type' => 'cash',
+        'payment_amount' => 50,
+        'due_amount' => 0,
+    ]);
+    $voucher = VoucherEntry::create([
+        'voucher_code' => 'CRV-20261026-000006',
+        'voucher_type' => 'credit',
+        'expense_income_type' => $customer->name,
+        'voucher_date' => '2026-10-26',
+        'amount' => '50.00',
+        'reference' => $ledger->invoice_no,
+        'description' => 'Payment received from customer '.$customer->name,
+        'created_by' => $user->id,
+        'created_by_name' => $user->name,
+    ]);
+
+    $this->actingAs($user)
+        ->delete(route('customer.ledger.destroy', $ledger->id))
+        ->assertRedirect(route('customer.ledger', $customer->id));
+
+    $this->assertDatabaseMissing('voucher_entries', ['id' => $voucher->id]);
+    $this->assertDatabaseMissing('customer_ledgers', ['id' => $ledger->id]);
+    $this->actingAs($user)
+        ->get(route('voucher-report.combined', ['period' => 'daily', 'date' => '2026-10-26']))
+        ->assertOk()
+        ->assertDontSee('CRV-20261026-000006');
 });

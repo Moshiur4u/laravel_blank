@@ -55,6 +55,7 @@
                             <div class="card-body p-sm-5">
                                 <div class="">
                                     <div class="mb-3 text-center">
+                                        {{-- organization logo --}}
                                         @if ($organization?->logo)
                                             <img src="{{ asset('uploads/organizations/' . $organization->logo) }}"
                                                 alt="{{ $organization->name ?: 'Organization Logo' }}"

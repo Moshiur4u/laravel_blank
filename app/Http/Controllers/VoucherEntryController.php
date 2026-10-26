@@ -53,22 +53,12 @@ class VoucherEntryController extends Controller
         $creator = $request->user();
 
         $voucher = DB::transaction(function () use ($validated, $creator) {
-            $voucher = VoucherEntry::create([
+            return VoucherEntry::createWithCode([
                 ...$validated,
-                'voucher_code' => null,
                 'amount' => number_format((float) $validated['amount'], 2, '.', ''),
                 'created_by' => $creator->id,
                 'created_by_name' => $creator->name,
             ]);
-
-            // Primary key makes each automatically generated code unique.
-            $prefix = $validated['voucher_type'] === 'debit' ? 'DBV' : 'CRV';
-            $voucher->update([
-                'voucher_code' => $prefix.'-'.Carbon::parse($validated['voucher_date'])->format('Ymd')
-                    .'-'.str_pad((string) $voucher->id, 6, '0', STR_PAD_LEFT),
-            ]);
-
-            return $voucher;
         });
 
         return redirect()->route('voucher-entries.index')

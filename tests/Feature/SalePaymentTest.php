@@ -4,6 +4,7 @@ use App\Models\Customer;
 use App\Models\Product;
 use App\Models\SaleInvoice;
 use App\Models\User;
+use App\Models\VoucherEntry;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\DB;
 
@@ -41,6 +42,13 @@ test('walk-in sales receive the full invoice amount and existing customers can p
         ->and((float) $walkInInvoice->total_amount)->toBe(200.0)
         ->and((float) $walkInInvoice->amount_paid)->toBe(200.0)
         ->and((float) $walkInInvoice->due_amount)->toBe(0.0);
+    $this->assertDatabaseHas('voucher_entries', [
+        'voucher_type' => 'credit',
+        'expense_income_type' => 'Walk-in Customer',
+        'amount' => '200.00',
+        'reference' => $walkInInvoice->invoice_no,
+        'created_by' => $employee->id,
+    ]);
 
     $customer = Customer::create([
         'name' => 'Partial Payment Customer',
@@ -68,4 +76,11 @@ test('walk-in sales receive the full invoice amount and existing customers can p
         ->and((float) $customerInvoice->total_amount)->toBe(100.0)
         ->and((float) $customerInvoice->amount_paid)->toBe(40.0)
         ->and((float) $customerInvoice->due_amount)->toBe(60.0);
+    $this->assertDatabaseHas('voucher_entries', [
+        'voucher_type' => 'credit',
+        'expense_income_type' => $customer->name,
+        'amount' => '40.00',
+        'reference' => $customerInvoice->invoice_no,
+        'created_by' => $employee->id,
+    ]);
 });

@@ -6,6 +6,7 @@ use App\Models\Product;
 use App\Models\Supplier;
 use App\Models\SupplierLedgerPayment;
 use App\Models\Supplierledger;
+use App\Models\VoucherEntry;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Validation\ValidationException;
@@ -45,7 +46,7 @@ class SupplierledgerController extends Controller
     public function invoice($id)
     {
         // supplier, product ও payment history একসঙ্গে আনা হয়, যেন invoice view-তে query বারবার না চলে।
-        $ledger = Supplierledger::with(['supplier', 'product', 'payments'])->findOrFail($id);
+        $ledger = Supplierledger::with(['supplier', 'product', 'payments.createdBy'])->findOrFail($id);
 
         // invoice_id না থাকলে ledger ID দিয়ে স্থায়ী display number বানানো হয়, database-এ কিছু লেখা হয় না।
         $invoiceNumber = $ledger->invoice_id ?: 'SUP-' . str_pad((string) $ledger->id, 6, '0', STR_PAD_LEFT);
@@ -70,16 +71,36 @@ class SupplierledgerController extends Controller
             'due' => 'nullable|numeric|min:0',
         ]);
 
-        Supplierledger::create([
-            'supplier_id' => $request->supplier_id,
-            'invoice_id' => $request->invoice_id,
-            'product_id' => $request->product_id,
-            'quantity' => $request->quantity,
-            'price' => $request->price,
-            'total' => $request->total,
-            'payment' => $request->payment,
-            'due' => $request->due,
-        ]);
+        $creator = $request->user();
+
+        DB::transaction(function () use ($request, $creator) {
+            $ledger = Supplierledger::create([
+                'supplier_id' => $request->supplier_id,
+                'invoice_id' => $request->invoice_id,
+                'product_id' => $request->product_id,
+                'quantity' => $request->quantity,
+                'price' => $request->price,
+                'total' => $request->total,
+                'payment' => $request->payment,
+                'due' => $request->due,
+            ]);
+
+            if ((float) $ledger->payment > 0) {
+                $supplier = Supplier::findOrFail($ledger->supplier_id);
+                VoucherEntry::createWithCode([
+                    'voucher_type' => 'debit',
+                    'expense_income_type' => 'Supplier Payment ('.$supplier->name.')',
+                    'voucher_date' => today(),
+                    'amount' => number_format((float) $ledger->payment, 2, '.', ''),
+                    'reference' => $ledger->invoice_id,
+                    'description' => 'Payment to supplier '.$supplier->name,
+                    'created_by' => $creator?->id,
+                    'created_by_name' => $creator?->name ?? 'System',
+                    'voucherable_type' => Supplierledger::class,
+                    'voucherable_id' => $ledger->id,
+                ]);
+            }
+        });
 
         return redirect()->route('supplier.ledger', $request->supplier_id)
             ->with('success', 'Ledger entry added successfully!');
@@ -168,8 +189,10 @@ class SupplierledgerController extends Controller
         ]);
 
         // একই ledger-এ একযোগে payment এলে lock ব্যবহার করে due অতিক্রম করা ঠেকানো হয়।
-        $supplierId = DB::transaction(function () use ($validated, $id) {
+        $creator = $request->user();
+        $supplierId = DB::transaction(function () use ($validated, $id, $creator) {
             $ledger = Supplierledger::query()->lockForUpdate()->findOrFail($id);
+            $supplier = Supplier::findOrFail($ledger->supplier_id);
             $amountInCents = (int) round((float) $validated['amount'] * 100);
             $dueInCents = (int) round((float) $ledger->due * 100);
 
@@ -185,6 +208,20 @@ class SupplierledgerController extends Controller
                 'supplierledger_id' => $ledger->id,
                 'payment_date' => $validated['payment_date'],
                 'amount' => number_format($amountInCents / 100, 2, '.', ''),
+                'created_by' => $creator?->id,
+            ]);
+
+            VoucherEntry::createWithCode([
+                'voucher_type' => 'debit',
+                'expense_income_type' => 'Supplier Payment ('.$supplier->name.')',
+                'voucher_date' => $validated['payment_date'],
+                'amount' => number_format($amountInCents / 100, 2, '.', ''),
+                'reference' => $ledger->invoice_id,
+                'description' => 'Payment to supplier '.$supplier->name,
+                'created_by' => $creator?->id,
+                'created_by_name' => $creator?->name ?? 'System',
+                'voucherable_type' => Supplierledger::class,
+                'voucherable_id' => $ledger->id,
             ]);
 
             $paidInCents = (int) round((float) $ledger->payment * 100) + $amountInCents;
@@ -208,9 +245,40 @@ class SupplierledgerController extends Controller
      */
     public function destroy($id)
     {
-        $ledger = Supplierledger::findOrFail($id);
-        $supplierId = $ledger->supplier_id;
-        $ledger->delete();
+        $supplierId = DB::transaction(function () use ($id) {
+            $ledger = Supplierledger::with('payments')->findOrFail($id);
+            $supplier = Supplier::findOrFail($ledger->supplier_id);
+            $supplierId = $ledger->supplier_id;
+            $paymentRows = $ledger->payments
+                ->map(fn (SupplierLedgerPayment $payment) => [
+                    'date' => $payment->payment_date->toDateString(),
+                    'amount' => number_format((float) $payment->amount, 2, '.', ''),
+                ])
+                ->all();
+            $initialPayment = round(
+                (float) $ledger->payment - $ledger->payments->sum(fn (SupplierLedgerPayment $payment) => (float) $payment->amount),
+                2
+            );
+
+            if ($initialPayment > 0) {
+                $paymentRows[] = [
+                    'date' => $ledger->created_at->toDateString(),
+                    'amount' => number_format($initialPayment, 2, '.', ''),
+                ];
+            }
+
+            VoucherEntry::deleteForSource(
+                $ledger,
+                'debit',
+                'Supplier Payment ('.$supplier->name.')',
+                'Payment to supplier '.$supplier->name,
+                $ledger->invoice_id,
+                $paymentRows
+            );
+            $ledger->delete();
+
+            return $supplierId;
+        });
 
         return redirect()->route('supplier.ledger', $supplierId)
             ->with('success', 'Ledger entry deleted successfully!');

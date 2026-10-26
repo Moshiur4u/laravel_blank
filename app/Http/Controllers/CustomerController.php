@@ -6,6 +6,7 @@ use App\Models\Customer;
 use App\Models\CustomerLedger;
 use App\Models\CustomerLedgerPayment; // customer ledger-এর অতিরিক্ত payment history সংরক্ষণ করে।
 use App\Models\User;
+use App\Models\VoucherEntry;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Validation\ValidationException; // অসম্ভব balance update-কে validation error হিসেবে ফেরায়।
@@ -111,6 +112,7 @@ class CustomerController extends Controller
      */
     public function ledgerStore(Request $request)
     {
+        $creator = $request->user();
         $validated = $request->validate([
             'customer_id' => 'required|exists:customers,id', // ledger entry-র customer বাধ্যতামূলক।
             'entry_type' => 'required|in:sale,payment', // কেবল sale বা standalone payment entry গ্রহণ করা হয়।
@@ -127,7 +129,7 @@ class CustomerController extends Controller
             'notes' => 'nullable|string', // ঐচ্ছিক entry note।
         ]);
 
-        $customerId = DB::transaction(function () use ($validated) { // entry ও due validation একই transaction-এ সম্পন্ন হয়।
+        $customerId = DB::transaction(function () use ($validated, $creator) { // entry ও due validation একই transaction-এ সম্পন্ন হয়।
             $customer = Customer::query()->lockForUpdate()->findOrFail($validated['customer_id']); // একই customer-এ concurrent payment হলে row lock দেয়।
             $entryType = $validated['entry_type']; // পরবর্তী হিসাবের জন্য entry type স্থানীয়ভাবে রাখা হয়।
             $quantity = $entryType === 'sale' ? (int) $validated['quantity'] : 0; // payment row-তে quantity শূন্য থাকে।
@@ -155,7 +157,7 @@ class CustomerController extends Controller
                 }
             }
 
-            CustomerLedger::create([ // validated sale/payment ledger row তৈরি করে।
+            $ledger = CustomerLedger::create([ // validated sale/payment ledger row তৈরি করে।
                 'customer_id' => $customer->id, // entry-র parent customer।
                 'employee_id' => $validated['employee_id'] ?? $customer->employee_id, // submitted employee না থাকলে customer-এর assigned employee।
                 'received_by' => $validated['received_by'] ?? null, // entry-র receiver user।
@@ -172,6 +174,21 @@ class CustomerController extends Controller
                 'due_amount' => ($totalCents - ($entryType === 'sale' ? $paymentCents : 0)) / 100, // sale due; standalone payment-এ শূন্য।
                 'notes' => $validated['notes'] ?? null, // ঐচ্ছিক entry note।
             ]);
+
+            if ($paymentCents > 0) {
+                VoucherEntry::createWithCode([
+                    'voucher_type' => 'credit',
+                    'expense_income_type' => $customer->name,
+                    'voucher_date' => $validated['sale_date'],
+                    'amount' => number_format($paymentCents / 100, 2, '.', ''),
+                    'reference' => $validated['invoice_no'] ?? null,
+                    'description' => 'Payment received from customer '.$customer->name,
+                    'created_by' => $creator?->id,
+                    'created_by_name' => $creator?->name ?? 'System',
+                    'voucherable_type' => CustomerLedger::class,
+                    'voucherable_id' => $ledger->id,
+                ]);
+            }
 
             return $customer->id; // transaction শেষে customer ledger route-এ ফেরার ID।
         });
@@ -277,6 +294,7 @@ class CustomerController extends Controller
      */
     public function ledgerPaymentStore(Request $request, $id)
     {
+        $creator = $request->user();
         $validated = $request->validate([ // payment form-এর input যাচাই।
             'payment_date' => 'required|date|before_or_equal:today', // ভবিষ্যতের payment date গ্রহণ করা হয় না।
             'amount' => 'required|numeric|min:0.01', // payment amount ধনাত্মক হতে হবে।
@@ -284,7 +302,7 @@ class CustomerController extends Controller
             'notes' => 'nullable|string', // payment note ঐচ্ছিক।
         ]);
 
-        $customerId = DB::transaction(function () use ($validated, $id) { // child payment ও parent totals একই transaction-এ লেখে।
+        $customerId = DB::transaction(function () use ($validated, $id, $creator) { // child payment ও parent totals একই transaction-এ লেখে।
             $ledger = CustomerLedger::query()->findOrFail($id); // সংশ্লিষ্ট sale ledger row খুঁজে।
             $customer = Customer::query()->lockForUpdate()->findOrFail($ledger->customer_id); // customer balance-এ concurrent payment serialize করে।
             $ledger = CustomerLedger::query()->lockForUpdate()->findOrFail($id); // sale row-তে concurrent payment serialize করে।
@@ -308,6 +326,19 @@ class CustomerController extends Controller
                 'notes' => $validated['notes'] ?? null, // payment-specific note।
             ]);
 
+            VoucherEntry::createWithCode([
+                'voucher_type' => 'credit',
+                'expense_income_type' => $customer->name,
+                'voucher_date' => $validated['payment_date'],
+                'amount' => number_format($amountCents / 100, 2, '.', ''),
+                'reference' => $ledger->invoice_no,
+                'description' => 'Payment received from customer '.$customer->name,
+                'created_by' => $creator?->id,
+                'created_by_name' => $creator?->name ?? 'System',
+                'voucherable_type' => CustomerLedger::class,
+                'voucherable_id' => $ledger->id,
+            ]);
+
             $ledger->update([ // parent sale-এর aggregate payment ও due হালনাগাদ করে।
                 'payment_amount' => ($this->moneyToCents($ledger->payment_amount) + $amountCents) / 100, // initial payment-এ নতুন amount যোগ করে।
                 'due_amount' => ($dueCents - $amountCents) / 100, // নতুন payment বাদে due।
@@ -324,9 +355,40 @@ class CustomerController extends Controller
      */
     public function ledgerDestroy($id)
     {
-        $ledger = CustomerLedger::findOrFail($id); // মুছতে চাওয়া ledger row খুঁজে।
-        $customerId = $ledger->customer_id; // delete-এর আগে redirect-এর customer ID ধরে রাখে।
-        $ledger->delete(); // entry মুছে এবং foreign-key cascade-এ তার payment history-ও সরায়।
+        $customerId = DB::transaction(function () use ($id) {
+            $ledger = CustomerLedger::with('payments')->findOrFail($id);
+            $customer = Customer::findOrFail($ledger->customer_id);
+            $customerId = $ledger->customer_id;
+            $paymentRows = $ledger->payments
+                ->map(fn (CustomerLedgerPayment $payment) => [
+                    'date' => $payment->payment_date->toDateString(),
+                    'amount' => number_format((float) $payment->amount, 2, '.', ''),
+                ])
+                ->all();
+            $initialPayment = round(
+                (float) $ledger->payment_amount - $ledger->payments->sum(fn (CustomerLedgerPayment $payment) => (float) $payment->amount),
+                2
+            );
+
+            if ($initialPayment > 0) {
+                $paymentRows[] = [
+                    'date' => $ledger->sale_date->toDateString(),
+                    'amount' => number_format($initialPayment, 2, '.', ''),
+                ];
+            }
+
+            VoucherEntry::deleteForSource(
+                $ledger,
+                'credit',
+                $customer->name,
+                'Payment received from customer '.$customer->name,
+                $ledger->invoice_no,
+                $paymentRows
+            );
+            $ledger->delete();
+
+            return $customerId;
+        });
 
         return redirect()->route('customer.ledger', $customerId)->with('success', 'Ledger entry deleted successfully.'); // delete শেষে customer ledger-এ ফেরায়।
     }

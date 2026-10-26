@@ -75,6 +75,7 @@
                                 <thead class="table-light">
                                     <tr>
                                         <th>Payment Date</th>
+                                        <th>Paid By</th>
                                         <th class="text-end">Amount Paid</th>
                                     </tr>
                                 </thead>
@@ -82,6 +83,7 @@
                                     @foreach ($ledger->payments as $paymentRecord)
                                         <tr>
                                             <td>{{ $paymentRecord->payment_date->format('d M Y') }}</td>
+                                            <td>{{ $paymentRecord->createdBy->name ?? 'N/A' }}</td>
                                             <td class="text-end">৳{{ number_format((float) $paymentRecord->amount, 2) }}</td>
                                         </tr>
                                     @endforeach

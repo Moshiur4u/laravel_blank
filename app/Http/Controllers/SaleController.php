@@ -7,6 +7,7 @@ use App\Models\CustomerLedger;
 use App\Models\Product;
 use App\Models\SaleInvoice;
 use App\Models\SaleItem;
+use App\Models\VoucherEntry;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
@@ -88,8 +89,9 @@ class SaleController extends Controller
 
         $customerPhone = trim($validated['customer_phone']);
         $requestedPaymentAmount = round((float) ($validated['amount_paid'] ?? 0), 2);
+        $creator = $request->user();
 
-        $invoice = DB::transaction(function () use ($validated, $customerPhone, $requestedPaymentAmount) {
+        $invoice = DB::transaction(function () use ($validated, $customerPhone, $requestedPaymentAmount, $creator) {
             // একই পণ্যের একাধিক কার্ট লাইনের মজুত একসাথে যাচাই করতে পণ্যগুলো ID অনুযায়ী lock করা হয়।
             $quantities = collect($validated['items'])
                 ->groupBy('product_id')
@@ -220,13 +222,16 @@ class SaleController extends Controller
                 $product->save();
             }
 
+            $voucherableType = SaleInvoice::class;
+            $voucherableId = $invoice->id;
+
             if ($customer) {
                 $totalQuantity = collect($lineItems)->sum('quantity');
                 $productsSummary = collect($lineItems)
                     ->map(fn ($lineItem) => $lineItem['product']->productName . ' × ' . $lineItem['quantity'])
                     ->implode(', ');
 
-                CustomerLedger::create([
+                $customerLedger = CustomerLedger::create([
                     'customer_id' => $customer->id,
                     'sale_invoice_id' => $invoice->id,
                     'employee_id' => $userId,
@@ -243,6 +248,24 @@ class SaleController extends Controller
                     'payment_amount' => $paymentAmount,
                     'due_amount' => $invoice->due_amount,
                     'notes' => $validated['notes'] ?? null,
+                ]);
+                $voucherableType = CustomerLedger::class;
+                $voucherableId = $customerLedger->id;
+            }
+
+            if ($paymentAmount > 0) {
+                $customerName = $customer?->name ?? $validated['customer_name'] ?? 'Walk-in Customer';
+                VoucherEntry::createWithCode([
+                    'voucher_type' => 'credit',
+                    'expense_income_type' => $customerName,
+                    'voucher_date' => today(),
+                    'amount' => number_format($paymentAmount, 2, '.', ''),
+                    'reference' => $invoice->invoice_no,
+                    'description' => 'Payment received from customer '.$customerName,
+                    'created_by' => $creator?->id,
+                    'created_by_name' => $creator?->name ?? 'System',
+                    'voucherable_type' => $voucherableType,
+                    'voucherable_id' => $voucherableId,
                 ]);
             }
 

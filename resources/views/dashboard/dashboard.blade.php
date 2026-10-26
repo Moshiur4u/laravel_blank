@@ -102,13 +102,14 @@
         <!--sidebar wrapper -->
         <div class="sidebar-wrapper" data-simplebar="true">
             <div class="sidebar-header">
+                {{-- Organization Info --}}
                 <div>
                     @if ($organization?->logo)
-                        <img src="{{ asset('uploads/organizations/' . $organization->logo) }}"
-                            alt="{{ $organization->name ?: 'Organization Logo' }}"
-                            style="max-width: 140px; max-height: 80px; object-fit: contain;">
+                        <img src="{{ asset('uploads/organizations/' . $organization->logo) }}" class="logo-icon"
+                            alt="{{ $organization->name ?: 'Organization logo' }}"
+                            style="max-height: 45px; object-fit: contain;">
                     @else
-                        <img src="{{ asset('assets/images/logo-icon.png') }}" width="60" alt="logo icon">
+                        <img src="{{ asset('assets/images/logo-icon.png') }}" class="logo-icon" alt="logo icon">
                     @endif
                 </div>
                 <div>
@@ -156,7 +157,8 @@
                                     Quotation</a>
                             </li>
                             <li>
-                                <a href="{{ route('quotation.index') }}"><i class='bx bx-list-ul'></i>All Quotations</a>
+                                <a href="{{ route('quotation.index') }}"><i class='bx bx-list-ul'></i>All
+                                    Quotations</a>
                             </li>
                         </ul>
                     </li>
@@ -225,7 +227,8 @@
                         <ul>
                             @can('customer.index')
                                 <li>
-                                    <a href="{{ route('customer.index') }}"><i class=' bx bx-id-card'></i>All Customer</a>
+                                    <a href="{{ route('customer.index') }}"><i class=' bx bx-id-card'></i>All
+                                        Customer</a>
                                 </li>
                             @endcan
                             @can('customer.create')
@@ -254,7 +257,8 @@
                             @can('brand.create')
                                 {{-- brand তৈরির নতুন permission। --}}
                                 <li>
-                                    <a href="{{ route('brand.create') }}"><i class=' bx bx-plus-medical'></i>New Brand Entry
+                                    <a href="{{ route('brand.create') }}"><i class=' bx bx-plus-medical'></i>New Brand
+                                        Entry
                                     </a>
                                 </li>
                             @endcan
@@ -270,7 +274,8 @@
                         <ul>
                             @can('supplier.index')
                                 <li>
-                                    <a href="{{ route('supplier.index') }}"><i class='bx bx-food-menu'></i> Supplier List</a>
+                                    <a href="{{ route('supplier.index') }}"><i class='bx bx-food-menu'></i> Supplier
+                                        List</a>
                                 </li>
                             @endcan
                             @can('supplier.create')
@@ -322,7 +327,8 @@
                             @endcan
                             @can('employee.create')
                                 <li>
-                                    <a href="{{ route('user.create') }}"><i class='bx bx-user-plus '></i>Create Empolyee</a>
+                                    <a href="{{ route('user.create') }}"><i class='bx bx-user-plus '></i>Create
+                                        Empolyee</a>
                                 </li>
                             @endcan
                         </ul>
@@ -552,7 +558,8 @@
                                                         </div>
                                                         <div class="flex-grow-1">
                                                             <h6 class="msg-name">No expiry alerts</h6>
-                                                            <p class="msg-info">No products are expired or expiring within
+                                                            <p class="msg-info">No products are expired or expiring
+                                                                within
                                                                 one month</p>
                                                         </div>
                                                     </div>
@@ -610,13 +617,15 @@
                                                                 @if ($stockProduct->isOutOfStock())
                                                                     Out of Stock
                                                                 @else
-                                                                    Low Stock: {{ $stockProduct->stockQuantity() }} Units
+                                                                    Low Stock: {{ $stockProduct->stockQuantity() }}
+                                                                    Units
                                                                 @endif
                                                             </p>
                                                         </div>
                                                         <div class="">
                                                             <p class="mb-0 cart-price">
-                                                                ৳{{ number_format((float) $stockProduct->price, 2) }}</p>
+                                                                ৳{{ number_format((float) $stockProduct->price, 2) }}
+                                                            </p>
                                                         </div>
                                                     </div>
                                                 </a>
@@ -624,8 +633,10 @@
                                                 <a class="dropdown-item" href="{{ route('product.index') }}">
                                                     <div class="gap-3 d-flex align-items-center">
                                                         <div class="flex-grow-1">
-                                                            <h6 class="mb-0 cart-product-title">No low stock alerts</h6>
-                                                            <p class="mb-0 cart-product-price">All products have more than
+                                                            <h6 class="mb-0 cart-product-title">No low stock alerts
+                                                            </h6>
+                                                            <p class="mb-0 cart-product-price">All products have more
+                                                                than
                                                                 10 units</p>
                                                         </div>
                                                     </div>

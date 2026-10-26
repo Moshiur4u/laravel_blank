@@ -11,6 +11,7 @@ class SupplierLedgerPayment extends Model
         'supplierledger_id',
         'payment_date',
         'amount',
+        'created_by',
     ];
 
     protected $casts = [
@@ -24,5 +25,10 @@ class SupplierLedgerPayment extends Model
     public function supplierledger(): BelongsTo
     {
         return $this->belongsTo(Supplierledger::class, 'supplierledger_id');
+    }
+
+    public function createdBy(): BelongsTo
+    {
+        return $this->belongsTo(User::class, 'created_by');
     }
 }
