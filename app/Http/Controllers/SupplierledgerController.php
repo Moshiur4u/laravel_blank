@@ -241,6 +241,73 @@ class SupplierledgerController extends Controller
     }
 
     /**
+     * একটি supplier payment receipt edit করে ledger balance ও সংশ্লিষ্ট debit voucher মিলিয়ে দেয়।
+     */
+    public function updatePayment(Request $request, $paymentId)
+    {
+        $validated = $request->validate([
+            'payment_date' => 'required|date|before_or_equal:today',
+            'amount' => 'required|numeric|min:0.01',
+        ]);
+
+        $supplierId = DB::transaction(function () use ($validated, $paymentId) {
+            $payment = SupplierLedgerPayment::query()->lockForUpdate()->findOrFail($paymentId);
+            $ledger = Supplierledger::query()->lockForUpdate()->findOrFail($payment->supplierledger_id);
+            $supplier = Supplier::findOrFail($ledger->supplier_id);
+            $oldAmountCents = (int) round((float) $payment->amount * 100);
+            $newAmountCents = (int) round((float) $validated['amount'] * 100);
+            $dueCents = (int) round((float) $ledger->due * 100);
+
+            if ($newAmountCents > $dueCents + $oldAmountCents) {
+                throw ValidationException::withMessages([
+                    'amount' => 'Payment cannot be greater than the current due plus this receipt.',
+                ]);
+            }
+
+            $voucher = VoucherEntry::query()
+                ->where('voucherable_type', Supplierledger::class)
+                ->where('voucherable_id', $ledger->id)
+                ->where('voucher_type', 'debit')
+                ->whereDate('voucher_date', $payment->payment_date->toDateString())
+                ->where('amount', number_format($oldAmountCents / 100, 2, '.', ''))
+                ->orderBy('id')
+                ->first();
+
+            if (! $voucher) {
+                $voucher = VoucherEntry::query()
+                    ->whereNull('voucherable_type')
+                    ->whereNull('voucherable_id')
+                    ->where('voucher_type', 'debit')
+                    ->where('expense_income_type', 'Supplier Payment ('.$supplier->name.')')
+                    ->where('description', 'Payment to supplier '.$supplier->name)
+                    ->where('reference', $ledger->invoice_id)
+                    ->whereDate('voucher_date', $payment->payment_date->toDateString())
+                    ->where('amount', number_format($oldAmountCents / 100, 2, '.', ''))
+                    ->orderBy('id')
+                    ->firstOrFail();
+            }
+
+            $voucher->update([
+                'voucher_date' => $validated['payment_date'],
+                'amount' => number_format($newAmountCents / 100, 2, '.', ''),
+            ]);
+            $payment->update([
+                'payment_date' => $validated['payment_date'],
+                'amount' => number_format($newAmountCents / 100, 2, '.', ''),
+            ]);
+            $ledger->update([
+                'payment' => number_format(((int) round((float) $ledger->payment * 100) - $oldAmountCents + $newAmountCents) / 100, 2, '.', ''),
+                'due' => number_format(($dueCents + $oldAmountCents - $newAmountCents) / 100, 2, '.', ''),
+            ]);
+
+            return $ledger->supplier_id;
+        });
+
+        return redirect()->route('supplier.ledger', $supplierId)
+            ->with('success', 'Supplier payment updated successfully!');
+    }
+
+    /**
      * Remove the specified ledger entry from storage.
      */
     public function destroy($id)

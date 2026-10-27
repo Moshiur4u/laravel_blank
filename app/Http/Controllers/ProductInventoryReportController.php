@@ -57,6 +57,7 @@ class ProductInventoryReportController extends Controller
             $writeRow(['Expired Products', $totalExpiredProducts]);
             $writeRow([]);
             $writeRow([
+                'Product ID',
                 'Product',
                 'Purchase Price',
                 'Avg Selling Price',
@@ -75,6 +76,7 @@ class ProductInventoryReportController extends Controller
 
             foreach ($rows as $row) {
                 $writeRow([
+                    'SKU: #PRD-'.str_pad((string) $row['id'], 5, '0', STR_PAD_LEFT),
                     $row['name'],
                     number_format((float) $row['purchase_price'], 2, '.', ''),
                     number_format((float) $row['avg_selling_price'], 2, '.', ''),
@@ -142,6 +144,7 @@ class ProductInventoryReportController extends Controller
             }
 
             return [
+                'id' => $product->id,
                 'name' => $product->productName,
                 'purchased_quantity' => $purchaseLedgers->sum(
                     static fn (Supplierledger $ledger): float => (float) $ledger->quantity

@@ -97,6 +97,7 @@
                             <thead class="table-light">
                                 <tr>
                                     <th scope="col">#</th>
+                                    <th scope="col">Product ID</th>
                                     <th scope="col">Product</th>
                                     <th scope="col" class="text-end">Purchased Qty</th>
                                     <th scope="col" class="text-end">Purchase Amount</th>
@@ -113,6 +114,7 @@
                                 @forelse ($rows as $index => $row)
                                     <tr>
                                         <td>{{ $index + 1 }}</td>
+                                        <td class="text-nowrap">SKU: #PRD-{{ str_pad((string) $row['id'], 5, '0', STR_PAD_LEFT) }}</td>
                                         <td class="fw-semibold">{{ $row['name'] }}</td>
                                         <td class="text-end">{{ number_format($row['purchased_quantity'], 2) }}</td>
                                         <td class="text-end">৳{{ number_format($row['purchase_amount'], 2) }}</td>
@@ -161,21 +163,20 @@
                                     </tr>
                                 @empty
                                     <tr>
-                                        <td colspan="11" class="py-4 text-center text-muted">No products found.</td>
+                                        <td colspan="12" class="py-4 text-center text-muted">No products found.</td>
                                     </tr>
                                 @endforelse
                             </tbody>
                             @if ($rows->isNotEmpty())
                                 <tfoot class="table-light fw-bold">
                                     <tr>
-                                        <td colspan="2" class="text-end">Total:</td>
+                                        <td colspan="3" class="text-end">Total:</td>
                                         <td class="text-end">{{ number_format($rows->sum('purchased_quantity'), 2) }}</td>
                                         <td class="text-end">৳{{ number_format($rows->sum('purchase_amount'), 2) }}</td>
                                         <td class="text-end">{{ number_format($rows->sum('quantity_sold'), 2) }}</td>
                                         <td class="text-end">৳{{ number_format($rows->sum('revenue'), 2) }}</td>
-                                        <td class="text-end text-success">৳{{ number_format($rows->sum('profit'), 2) }}
+                                        <td class="text-end text-success">৳{{ number_format($rows->sum('profit'), 2) }}</td>
                                         <td class="text-end">{{ number_format($rows->sum('stock'), 2) }}</td>
-                                        </td>
                                         <td colspan="3"></td>
                                     </tr>
                                 </tfoot>

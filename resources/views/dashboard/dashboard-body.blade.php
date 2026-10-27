@@ -2,7 +2,7 @@
 @section('content')
     <div class="page-wrapper">
         <div class="page-content">
-            {{-- আগের dashboard card layout-এ Profit Card যুক্ত করে মোট ৫টি KPI প্রদর্শিত হয়। --}}
+            {{-- Dashboard-এর পাঁচটি KPI-তে মাসিক, সাপ্তাহিক ও দৈনিক মোট দেখানো হয়। --}}
             <div class="row row-cols-1 row-cols-sm-2 row-cols-md-3 row-cols-xl-5 g-3">
                 @php
                     $cards = [
@@ -50,31 +50,14 @@
                                 </div>
                                 <div>
                                     <p class="mb-1 text-secondary fw-semibold">{{ $card['title'] }}</p>
-                                    @if ($metricKey === 'profit')
-                                        {{-- Profit Card: বড় ফন্টে বাৎসরিক লাভ এবং ছোট ফন্টে দৈনিক, সাপ্তাহিক ও মাসিক লাভ (রাউন্ডেড অ্যামাউন্ট) --}}
-                                        <h4 class="my-1 text-{{ $card['color'] }} fw-bold">
-                                            ৳{{ number_format(round($metrics['yearly']['profit'])) }}
-                                        </h4>
-                                        <p class="mb-0 font-13 text-muted">
-                                            Weekly ৳{{ number_format(round($metrics['weekly']['profit'])) }}
-                                            <span class="mx-1">|</span>
-                                            Daily ৳{{ number_format(round($metrics['daily']['profit'])) }}
-                                            {{-- <span class="mx-1">|</span>
-                                            Monthly ৳{{ number_format(round($metrics['monthly']['profit'])) }} --}}
-                                        </p>
-                                    @else
-                                        {{-- অন্যান্য কার্ডে বড় ফন্টে মাসিক মোট এবং ছোট ফন্টে দৈনিক ও সাপ্তাহিক মান (রাউন্ডেড অ্যামাউন্ট) --}}
-                                        <h4 class="my-1 text-{{ $card['color'] }} fw-bold">
-                                            ৳{{ number_format(round($metrics['monthly'][$metricKey])) }}
-                                        </h4>
-                                        <p class="mb-0 font-13 text-muted">
-                                            Weekly ৳{{ number_format(round($metrics['weekly'][$metricKey])) }}
-                                            <span class="mx-1">|</span>
-                                            Daily ৳{{ number_format(round($metrics['daily'][$metricKey])) }}
-                                            {{-- <span class="mx-1">|</span>
-                                            Monthly ৳{{ number_format(round($metrics['monthly'][$metricKey])) }} --}}
-                                        </p>
-                                    @endif
+                                    <h4 class="my-1 text-{{ $card['color'] }} fw-bold">
+                                        ৳{{ number_format(round($metrics['monthly'][$metricKey])) }}
+                                    </h4>
+                                    <p class="mb-0 font-13 text-muted">
+                                        Weekly ৳{{ number_format(round($metrics['weekly'][$metricKey])) }}
+                                        <span class="mx-1">|</span>
+                                        Daily ৳{{ number_format(round($metrics['daily'][$metricKey])) }}
+                                    </p>
                                 </div>
                             </div>
                         </div>

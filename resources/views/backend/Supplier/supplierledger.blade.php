@@ -290,6 +290,38 @@
                                                                     {{ $paymentRecord->payment_date->format('d M Y') }}:
                                                                     ৳{{ number_format((float) $paymentRecord->amount, 2) }}
                                                                 </div>
+                                                                @can('Supplier.ledger.payment.edit')
+                                                                    <details class="mb-2">
+                                                                        <summary class="text-primary">Edit receipt</summary>
+                                                                        <form
+                                                                            action="{{ route('supplier.ledger.payments.update', $paymentRecord->id) }}"
+                                                                            method="POST" class="p-2 mt-1 border rounded bg-light">
+                                                                            @csrf
+                                                                            @method('PUT')
+                                                                            <label class="form-label small"
+                                                                                for="supplier_payment_date_{{ $paymentRecord->id }}">Payment
+                                                                                Date</label>
+                                                                            <input type="date" name="payment_date"
+                                                                                id="supplier_payment_date_{{ $paymentRecord->id }}"
+                                                                                class="mb-2 form-control form-control-sm"
+                                                                                value="{{ $paymentRecord->payment_date->toDateString() }}"
+                                                                                max="{{ now()->toDateString() }}" required>
+                                                                            <label class="form-label small"
+                                                                                for="supplier_payment_amount_{{ $paymentRecord->id }}">Amount
+                                                                                (৳)</label>
+                                                                            <input type="number" name="amount"
+                                                                                id="supplier_payment_amount_{{ $paymentRecord->id }}"
+                                                                                class="mb-2 form-control form-control-sm"
+                                                                                min="0.01"
+                                                                                max="{{ number_format((float) $entry->due + (float) $paymentRecord->amount, 2, '.', '') }}"
+                                                                                step="0.01"
+                                                                                value="{{ number_format((float) $paymentRecord->amount, 2, '.', '') }}"
+                                                                                required>
+                                                                            <button type="submit"
+                                                                                class="btn btn-sm btn-primary w-100">Update Receipt</button>
+                                                                        </form>
+                                                                    </details>
+                                                                @endcan
                                                             @endforeach
                                                         </details>
                                                     @endif

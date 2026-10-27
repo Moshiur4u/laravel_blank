@@ -21,8 +21,12 @@ function customerLedgerUserWithPermissions(array $permissions): User
     return $user; // test request-এ ব্যবহারের user ফেরায়।
 }
 
-test('customer ledger records sale payments and prevents payments above the outstanding balance', function () {
-    $user = customerLedgerUserWithPermissions(['customer.ledger', 'Customer.ledger.payment']); // ledger দেখা ও payment লেখার access দেয়।
+test('customer ledger records and edits sale payments while preventing overpayments', function () {
+    $user = customerLedgerUserWithPermissions([
+        'customer.ledger',
+        'Customer.ledger.payment',
+        'Customer.ledger.edit',
+    ]); // ledger দেখা ও payment লেখার access দেয়; edit permission আলাদাভাবে যাচাই হয়।
     $customer = Customer::create(['name' => 'Ledger Test Customer', 'customer_type' => 'temporary', 'status' => 1]); // payment flow-এর customer তৈরি করে।
 
     $this->actingAs($user)->post(route('customer.ledger.store'), [ // due sale entry তৈরি করে।
@@ -58,10 +62,28 @@ test('customer ledger records sale payments and prevents payments above the outs
     expect((float) $ledger->fresh()->payment_amount)->toBe(50.0) // aggregate received ৫০ টাকা হয়।
         ->and((float) $ledger->fresh()->due_amount)->toBe(50.0) // অবশিষ্ট sale due ৫০ টাকা হয়।
         ->and(CustomerLedgerPayment::where('customer_ledger_id', $ledger->id)->count())->toBe(1); // payment history row সংরক্ষিত হয়।
+
+    $payment = CustomerLedgerPayment::query()->where('customer_ledger_id', $ledger->id)->firstOrFail();
+    $this->actingAs($user)->put(route('customer.ledger.payments.update', $payment->id), [
+        'payment_date' => now()->toDateString(),
+        'amount' => 25,
+    ])->assertForbidden();
+
+    $user->givePermissionTo(Permission::findOrCreate('Customer.ledger.payment.edit', 'web'));
+    $this->actingAs($user)->put(route('customer.ledger.payments.update', $payment->id), [
+        'payment_date' => now()->toDateString(),
+        'amount' => 25,
+        'received_by' => $user->id,
+        'notes' => 'Updated receipt',
+    ])->assertRedirect(route('customer.ledger', $customer->id));
+    expect((float) $ledger->fresh()->payment_amount)->toBe(55.0)
+        ->and((float) $ledger->fresh()->due_amount)->toBe(45.0)
+        ->and((float) $payment->fresh()->amount)->toBe(25.0)
+        ->and($payment->fresh()->notes)->toBe('Updated receipt');
     $this->assertDatabaseHas('voucher_entries', [
         'voucher_type' => 'credit',
         'expense_income_type' => $customer->name,
-        'amount' => '20.00',
+        'amount' => '25.00',
         'created_by' => $user->id,
     ]);
 
@@ -73,7 +95,7 @@ test('customer ledger records sale payments and prevents payments above the outs
         'customer_id' => $customer->id, // একই customer-এর balance লক্ষ্য করে।
         'entry_type' => 'payment', // standalone receipt entry চায়।
         'sale_date' => now()->toDateString(), // payment date দেয়।
-        'payment_amount' => 51, // outstanding ৫০ টাকার বেশি পাঠায়।
+        'payment_amount' => 46, // outstanding ৪৫ টাকার বেশি পাঠায়।
         'received_by' => $user->id, // receiver নির্ধারণ করে।
     ])->assertSessionHasErrors('payment_amount'); // overpayment validation error নিশ্চিত করে।
 

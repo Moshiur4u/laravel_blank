@@ -253,6 +253,16 @@
                 </div>
             @endif
 
+            @if ($errors->any())
+                <div class="alert alert-danger mt-3" role="alert">
+                    <ul class="mb-0">
+                        @foreach ($errors->all() as $error)
+                            <li>{{ $error }}</li>
+                        @endforeach
+                    </ul>
+                </div>
+            @endif
+
             <div class="row mt-4">
                 @can('Customer.ledger.payment')
                     {{-- seeder-এর নতুন casing অনুযায়ী ledger payment permission। --}}
@@ -466,6 +476,56 @@
                                                                                     {{ $payment->notes }}</span>
                                                                             @endif
                                                                         </div>
+                                                                        @can('Customer.ledger.payment.edit')
+                                                                            <details class="mb-2">
+                                                                                <summary class="text-primary small">Edit receipt</summary>
+                                                                                <form
+                                                                                    action="{{ route('customer.ledger.payments.update', $payment->id) }}"
+                                                                                    method="POST" class="p-2 mt-1 border rounded bg-light">
+                                                                                    @csrf
+                                                                                    @method('PUT')
+                                                                                    <label class="form-label small"
+                                                                                        for="customer_payment_date_{{ $payment->id }}">Payment
+                                                                                        Date</label>
+                                                                                    <input type="date" name="payment_date"
+                                                                                        id="customer_payment_date_{{ $payment->id }}"
+                                                                                        class="form-control form-control-sm mb-2"
+                                                                                        value="{{ $payment->payment_date->toDateString() }}"
+                                                                                        max="{{ now()->toDateString() }}" required>
+                                                                                    <label class="form-label small"
+                                                                                        for="customer_payment_amount_{{ $payment->id }}">Amount
+                                                                                        (৳)</label>
+                                                                                    <input type="number" name="amount"
+                                                                                        id="customer_payment_amount_{{ $payment->id }}"
+                                                                                        class="form-control form-control-sm mb-2"
+                                                                                        min="0.01"
+                                                                                        max="{{ number_format((float) $ledger->due_amount + (float) $payment->amount, 2, '.', '') }}"
+                                                                                        step="0.01"
+                                                                                        value="{{ number_format((float) $payment->amount, 2, '.', '') }}"
+                                                                                        required>
+                                                                                    <label class="form-label small"
+                                                                                        for="customer_payment_receiver_{{ $payment->id }}">Received
+                                                                                        By</label>
+                                                                                    <select name="received_by"
+                                                                                        id="customer_payment_receiver_{{ $payment->id }}"
+                                                                                        class="form-select form-select-sm mb-2">
+                                                                                        <option value="">Select receiver</option>
+                                                                                        @foreach ($employees as $employee)
+                                                                                            <option value="{{ $employee->id }}"
+                                                                                                @selected((int) $payment->received_by === (int) $employee->id)>
+                                                                                                {{ $employee->name }}
+                                                                                            </option>
+                                                                                        @endforeach
+                                                                                    </select>
+                                                                                    <label class="form-label small"
+                                                                                        for="customer_payment_notes_{{ $payment->id }}">Notes</label>
+                                                                                    <textarea name="notes" id="customer_payment_notes_{{ $payment->id }}"
+                                                                                        class="form-control form-control-sm mb-2" rows="2">{{ $payment->notes }}</textarea>
+                                                                                    <button type="submit"
+                                                                                        class="btn btn-sm btn-primary w-100">Update Receipt</button>
+                                                                                </form>
+                                                                            </details>
+                                                                        @endcan
                                                                     @endforeach
                                                                 </div>
                                                             </details>

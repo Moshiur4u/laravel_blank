@@ -351,6 +351,87 @@ class CustomerController extends Controller
     }
 
     /**
+     * একটি customer receipt edit করে sale-এর আদায়/বকেয়া এবং সংশ্লিষ্ট credit voucher হালনাগাদ করে।
+     */
+    public function ledgerPaymentUpdate(Request $request, $paymentId)
+    {
+        $validated = $request->validate([
+            'payment_date' => 'required|date|before_or_equal:today',
+            'amount' => 'required|numeric|min:0.01',
+            'received_by' => 'nullable|exists:users,id',
+            'notes' => 'nullable|string',
+        ]);
+
+        $paymentLedgerId = CustomerLedgerPayment::query()->findOrFail($paymentId)->customer_ledger_id;
+
+        $customerId = DB::transaction(function () use ($validated, $paymentId, $paymentLedgerId) {
+            $ledger = CustomerLedger::query()->findOrFail($paymentLedgerId);
+            $customer = Customer::query()->lockForUpdate()->findOrFail($ledger->customer_id);
+            $ledger = CustomerLedger::query()->lockForUpdate()->findOrFail($paymentLedgerId);
+            $payment = CustomerLedgerPayment::query()->lockForUpdate()->findOrFail($paymentId);
+
+            if ($ledger->entry_type !== 'sale') {
+                throw ValidationException::withMessages([
+                    'amount' => 'Receipt history can only be edited for a sale.',
+                ]);
+            }
+
+            $oldAmountCents = $this->moneyToCents($payment->amount);
+            $newAmountCents = $this->moneyToCents($validated['amount']);
+            $dueCents = $this->moneyToCents($ledger->due_amount);
+
+            if ($newAmountCents > $dueCents + $oldAmountCents) {
+                throw ValidationException::withMessages([
+                    'amount' => 'Payment cannot be greater than the current due plus this receipt.',
+                ]);
+            }
+
+            $voucher = VoucherEntry::query()
+                ->where('voucherable_type', CustomerLedger::class)
+                ->where('voucherable_id', $ledger->id)
+                ->where('voucher_type', 'credit')
+                ->whereDate('voucher_date', $payment->payment_date->toDateString())
+                ->where('amount', number_format($oldAmountCents / 100, 2, '.', ''))
+                ->orderBy('id')
+                ->first();
+
+            if (! $voucher) {
+                $voucher = VoucherEntry::query()
+                    ->whereNull('voucherable_type')
+                    ->whereNull('voucherable_id')
+                    ->where('voucher_type', 'credit')
+                    ->where('expense_income_type', $customer->name)
+                    ->where('description', 'Payment received from customer '.$customer->name)
+                    ->where('reference', $ledger->invoice_no)
+                    ->whereDate('voucher_date', $payment->payment_date->toDateString())
+                    ->where('amount', number_format($oldAmountCents / 100, 2, '.', ''))
+                    ->orderBy('id')
+                    ->firstOrFail();
+            }
+
+            $voucher->update([
+                'voucher_date' => $validated['payment_date'],
+                'amount' => number_format($newAmountCents / 100, 2, '.', ''),
+            ]);
+            $payment->update([
+                'payment_date' => $validated['payment_date'],
+                'amount' => number_format($newAmountCents / 100, 2, '.', ''),
+                'received_by' => $validated['received_by'] ?? null,
+                'notes' => $validated['notes'] ?? null,
+            ]);
+            $ledger->update([
+                'payment_amount' => ($this->moneyToCents($ledger->payment_amount) - $oldAmountCents + $newAmountCents) / 100,
+                'due_amount' => ($dueCents + $oldAmountCents - $newAmountCents) / 100,
+            ]);
+
+            return $customer->id;
+        });
+
+        return redirect()->route('customer.ledger', $customerId)
+            ->with('success', 'Customer payment updated successfully.');
+    }
+
+    /**
      * নির্দিষ্ট customer ledger row মুছে দেয়; payment child migration-এ cascade হয়।
      */
     public function ledgerDestroy($id)

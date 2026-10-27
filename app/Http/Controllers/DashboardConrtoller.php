@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\EmployeePaymentVoucher;
+use App\Models\CustomerLedger;
 use App\Models\SaleInvoice;
 use App\Models\Supplierledger;
 use App\Models\VoucherEntry;
@@ -38,15 +39,45 @@ class DashboardConrtoller extends Controller
         foreach (['daily', 'weekly', 'monthly', 'yearly'] as $period) {
             [$start, $end] = $periods[$period];
 
-            // আগের বকেয়া নতুন বিক্রির আয় নয়, তাই revenue থেকে তা বাদ দিয়ে বিক্রি, discount ও VAT ধরা হয়।
+            // Customer ledger-এর invoice-linked sale invoice totals-এ আছে; শুধু standalone ledger sale আলাদা যোগ হয়।
             $invoiceTotals = SaleInvoice::query()
                 ->where('invoice_date', '>=', $start)
                 ->where('invoice_date', '<', $end);
 
-            $revenue = (clone $invoiceTotals)
+            $invoiceRevenue = (clone $invoiceTotals)
                 ->selectRaw('COALESCE(SUM(subtotal - discount_amount + vat_amount), 0) as total')
                 ->value('total');
-            $due = (clone $invoiceTotals)->sum('due_amount');
+            $customerSales = DB::table('customer_ledgers')
+                ->where('entry_type', 'sale')
+                ->where('sale_date', '>=', $start->toDateString())
+                ->where('sale_date', '<', $end->toDateString());
+            $customerRevenue = (clone $customerSales)
+                ->whereNull('sale_invoice_id')
+                ->sum('total_amount');
+            $customerDue = (clone $customerSales)->sum('due_amount');
+            $invoiceDue = (clone $invoiceTotals)
+                ->whereNotIn('id', DB::table('customer_ledgers')
+                    ->select('sale_invoice_id')
+                    ->where('entry_type', 'sale')
+                    ->whereNotNull('sale_invoice_id'))
+                ->sum('due_amount');
+
+            $creditVoucherTotals = VoucherEntry::query()
+                ->where('voucher_date', '>=', $start->toDateString())
+                ->where('voucher_date', '<', $end->toDateString())
+                ->where('voucher_type', 'credit');
+            $nonCustomerCreditTotal = (clone $creditVoucherTotals)
+                ->where(function ($query) {
+                    $query->whereNull('voucherable_type')
+                        ->orWhere('voucherable_type', '!=', CustomerLedger::class);
+                })
+                ->where(function ($query) {
+                    $query->whereNull('description')
+                        ->orWhere('description', 'not like', 'Payment received from customer %');
+                })
+                ->sum('amount');
+            $revenue = (float) $invoiceRevenue + (float) $customerRevenue + (float) $nonCustomerCreditTotal;
+            $due = $invoiceDue + $customerDue;
 
             // supplier ledger-এর total-কে entry creation date অনুযায়ী ঐ সময়ের purchase order ধরা হয়।
             $purchaseTotal = Supplierledger::query()
@@ -64,18 +95,23 @@ class DashboardConrtoller extends Controller
                 ->where('voucher_date', '<', $end->toDateString())
                 ->where('voucher_type', 'debit')
                 ->sum('amount');
-            $creditVoucherTotal = VoucherEntry::query()
+            $nonSupplierDebitTotal = VoucherEntry::query()
                 ->where('voucher_date', '>=', $start->toDateString())
                 ->where('voucher_date', '<', $end->toDateString())
-                ->where('voucher_type', 'credit')
+                ->where('voucher_type', 'debit')
+                ->where(function ($query) {
+                    $query->whereNull('voucherable_type')
+                        ->orWhere('voucherable_type', '!=', Supplierledger::class);
+                })
+                ->where(function ($query) {
+                    $query->whereNull('expense_income_type')
+                        ->orWhere('expense_income_type', 'not like', 'Supplier Payment (%');
+                })
                 ->sum('amount');
-            $expenses = (float) $employeeVoucherTotal
-                + (float) $debitVoucherTotal
-                - (float) $creditVoucherTotal;
+            $expenses = (float) $employeeVoucherTotal + (float) $debitVoucherTotal;
+            $purchaseCosts = (float) $purchaseTotal + (float) $nonSupplierDebitTotal;
             $profit = round(
-                (float) $revenue
-                    - (float) $purchaseTotal
-                    - $expenses,
+                (float) $revenue - $purchaseCosts,
                 2
             );
 
@@ -93,12 +129,23 @@ class DashboardConrtoller extends Controller
         $chartStart = $periods['weekly'][0]->lt($yearStart)
             ? $periods['weekly'][0]
             : $yearStart;
+        $customerRevenueTotals = DB::table('customer_ledgers')
+            ->where('entry_type', 'sale')
+            ->whereNull('sale_invoice_id')
+            ->where('sale_date', '>=', $chartStart->toDateString())
+            ->where('sale_date', '<', $yearEnd->toDateString())
+            ->selectRaw('DATE(sale_date) as date_key')
+            ->selectRaw('SUM(total_amount) as total')
+            ->groupByRaw('DATE(sale_date)')
+            ->pluck('total', 'date_key')
+            ->map(fn ($total) => (float) $total)
+            ->all();
         $dailyTotals = [
-            'revenue' => $this->dailyTotals('sale_invoices', 'invoice_date', 'subtotal - discount_amount + vat_amount', $chartStart, $yearEnd),
+            'invoice_revenue' => $this->dailyTotals('sale_invoices', 'invoice_date', 'subtotal - discount_amount + vat_amount', $chartStart, $yearEnd),
+            'customer_revenue' => $customerRevenueTotals,
             'purchase' => $this->dailyTotals('supplierledgers', 'created_at', 'total', $chartStart, $yearEnd),
-            'employee_vouchers' => $this->dailyTotals('employee_payment_vouchers', 'payment_date', 'amount', $chartStart, $yearEnd),
-            'debit_vouchers' => $this->dailyTotals('voucher_entries', 'voucher_date', 'amount', $chartStart, $yearEnd, 'debit'),
-            'credit_vouchers' => $this->dailyTotals('voucher_entries', 'voucher_date', 'amount', $chartStart, $yearEnd, 'credit'),
+            'non_supplier_debit_vouchers' => $this->dailyTotals('voucher_entries', 'voucher_date', 'amount', $chartStart, $yearEnd, 'debit', null, null, Supplierledger::class, 'Supplier Payment (%'),
+            'non_customer_credit_vouchers' => $this->dailyTotals('voucher_entries', 'voucher_date', 'amount', $chartStart, $yearEnd, 'credit', null, null, CustomerLedger::class, 'Payment received from customer %'),
         ];
 
         $profitChart = [];
@@ -137,15 +184,15 @@ class DashboardConrtoller extends Controller
                 $bucketKey = $bucket['key'];
                 $labels[] = $isYearly ? $bucketDate->format('M Y') : $bucketDate->format('d M');
 
-                $revenue = $sumForBucket($dailyTotals['revenue'], $bucketKey);
+                $revenue = $sumForBucket($dailyTotals['invoice_revenue'], $bucketKey)
+                    + $sumForBucket($dailyTotals['customer_revenue'], $bucketKey)
+                    + $sumForBucket($dailyTotals['non_customer_credit_vouchers'], $bucketKey);
                 $purchase = $sumForBucket($dailyTotals['purchase'], $bucketKey);
-                $employeeVouchers = $sumForBucket($dailyTotals['employee_vouchers'], $bucketKey);
-                $debitVouchers = $sumForBucket($dailyTotals['debit_vouchers'], $bucketKey);
-                $creditVouchers = $sumForBucket($dailyTotals['credit_vouchers'], $bucketKey);
+                $nonSupplierDebitVouchers = $sumForBucket($dailyTotals['non_supplier_debit_vouchers'], $bucketKey);
+                $nonCustomerCreditVouchers = $sumForBucket($dailyTotals['non_customer_credit_vouchers'], $bucketKey);
 
-                $expenses = $employeeVouchers + $debitVouchers - $creditVouchers;
                 $revenueValues[] = round($revenue, 2);
-                $profitValues[] = round($revenue - $purchase - $expenses, 2);
+                $profitValues[] = round($revenue - $purchase - $nonSupplierDebitVouchers, 2);
             }
 
             $profitChart[$period] = [
@@ -192,7 +239,11 @@ class DashboardConrtoller extends Controller
         string $amountExpression,
         Carbon $start,
         Carbon $end,
-        ?string $voucherType = null
+        ?string $voucherType = null,
+        ?string $filterColumn = null,
+        ?string $filterValue = null,
+        ?string $excludedVoucherableType = null,
+        ?string $excludedVoucherHeadPattern = null
     ): array {
         $query = DB::table($table)
             ->where($dateColumn, '>=', $start->toDateString())
@@ -200,6 +251,24 @@ class DashboardConrtoller extends Controller
 
         if ($voucherType !== null) {
             $query->where('voucher_type', $voucherType);
+        }
+
+        if ($filterColumn !== null && $filterValue !== null) {
+            $query->where($filterColumn, $filterValue);
+        }
+
+        if ($excludedVoucherableType !== null) {
+            $query->where(function ($query) use ($excludedVoucherableType) {
+                $query->whereNull('voucherable_type')
+                    ->orWhere('voucherable_type', '!=', $excludedVoucherableType);
+            });
+        }
+
+        if ($excludedVoucherHeadPattern !== null) {
+            $query->where(function ($query) use ($excludedVoucherHeadPattern) {
+                $query->whereNull('expense_income_type')
+                    ->orWhere('expense_income_type', 'not like', $excludedVoucherHeadPattern);
+            });
         }
 
         return $query

@@ -61,6 +61,32 @@ test('supplier payments create debit vouchers and print the paying user name', f
 
     $payment = SupplierLedgerPayment::query()->where('supplierledger_id', $ledger->id)->sole();
     $this->actingAs($user)
+        ->put(route('supplier.ledger.payments.update', $payment->id), [
+            'payment_date' => now()->toDateString(),
+            'amount' => '30.00',
+        ])
+        ->assertForbidden();
+
+    $user->givePermissionTo(Permission::findOrCreate('Supplier.ledger.payment.edit', 'web'));
+    $this->actingAs($user)
+        ->put(route('supplier.ledger.payments.update', $payment->id), [
+            'payment_date' => now()->toDateString(),
+            'amount' => '35.00',
+        ])
+        ->assertRedirect(route('supplier.ledger', $supplier->id))
+        ->assertSessionHasNoErrors();
+
+    expect((float) $ledger->fresh()->payment)->toBe(35.0)
+        ->and((float) $ledger->fresh()->due)->toBe(65.0)
+        ->and((float) $payment->fresh()->amount)->toBe(35.0);
+    $this->assertDatabaseHas('voucher_entries', [
+        'voucherable_type' => Supplierledger::class,
+        'voucherable_id' => $ledger->id,
+        'voucher_type' => 'debit',
+        'amount' => '35.00',
+    ]);
+
+    $this->actingAs($user)
         ->get(route('supplier.ledger.invoice', $ledger->id))
         ->assertOk()
         ->assertSee('Payment History')

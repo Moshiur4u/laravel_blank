@@ -156,6 +156,9 @@ Route::middleware(['auth', 'verified'])->group(function () {
     // তারিখসহ supplier payment জমা ও ledger-এর payment/due update করে।
     Route::post('/supplier/ledger/{id}/payments', [SupplierledgerController::class, 'storePayment'])->middleware('permission:Supplier.ledger.payment') // নতুন casing-এর supplier ledger payment permission।
         ->name('supplier.ledger.payments.store');
+    Route::put('/supplier/ledger/payments/{paymentId}', [SupplierledgerController::class, 'updatePayment'])
+        ->middleware('permission:Supplier.ledger.payment.edit')
+        ->name('supplier.ledger.payments.update');
     Route::post('/supplier/ledger/store', [SupplierledgerController::class, 'store'])->middleware('permission:Supplier.ledger.create') // supplier ledger তৈরি করার নতুন permission।
         ->name('supplier.ledger.store');
     Route::get('/supplier/ledger/{id}/edit', [SupplierledgerController::class, 'edit'])->middleware('permission:Supplier.ledger.edit') // নতুন casing-এর supplier ledger edit permission।
@@ -222,6 +225,9 @@ Route::middleware(['auth', 'verified'])->group(function () {
         ->name('customer.ledger.invoice'); // invoice/receipt link-এর named route।
     Route::post('/customer/ledger/{id}/payments', [CustomerController::class, 'ledgerPaymentStore'])->middleware('permission:Customer.ledger.payment') // sale-এর due-তে date-সহ payment যোগের অনুমতি যাচাই।
         ->name('customer.ledger.payments.store'); // sale installment form-এর named route।
+    Route::put('/customer/ledger/payments/{paymentId}', [CustomerController::class, 'ledgerPaymentUpdate'])
+        ->middleware('permission:Customer.ledger.payment.edit')
+        ->name('customer.ledger.payments.update');
     Route::get('/customer/ledger/{id}/edit', [CustomerController::class, 'ledgerEdit'])->middleware('permission:Customer.ledger.edit') // customer ledger edit permission যাচাই।
         ->name('customer.ledger.edit'); // edit link-এর named route।
     Route::put('/customer/ledger/{id}/update', [CustomerController::class, 'ledgerUpdate'])->middleware('permission:Customer.ledger.edit') // একই edit permission দিয়ে validated ledger update করে।

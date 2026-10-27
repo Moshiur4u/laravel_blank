@@ -28,6 +28,7 @@ class PermissionSeederTable extends Seeder
             'customer.delete',
             'customer.ledger',
             'Customer.ledger.payment',
+            'Customer.ledger.payment.edit',
             'Customer.ledger.edit',
             'Customer.ledger.delete',
             //Suppliers all parmissions,
@@ -39,6 +40,7 @@ class PermissionSeederTable extends Seeder
             'supplier.ledger',
             'Supplier.ledger.create', // নতুন supplier ledger entry তৈরির permission।
             'Supplier.ledger.payment',
+            'Supplier.ledger.payment.edit',
             'Supplier.ledger.edit',
             'Supplier.ledger.delete',
             //Product all parmissions,

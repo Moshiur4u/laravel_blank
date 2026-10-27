@@ -89,6 +89,7 @@ class ProductInventoryReportTest extends TestCase
         $row = $data['rows']->firstWhere('name', 'Rice');
 
         $this->assertSame('backend.reports.productinventory', $view->name());
+        $this->assertSame($product->id, $row['id']);
         $this->assertEquals(15, $row['purchased_quantity']);
         $this->assertEquals(310, $row['purchase_amount']);
         $this->assertEquals(7, $row['stock']);
