@@ -60,6 +60,9 @@
                             @endforeach
                         </div>
                     @endif
+                    @if (session('success'))
+                        <div class="alert alert-success mt-3 mb-0" role="status">{{ session('success') }}</div>
+                    @endif
                 </div>
             </div>
 
@@ -135,6 +138,9 @@
                         </div>
                     </div>
 
+                    @php
+                        $canManageVouchers = auth()->user()->canAny(['voucher.edit', 'voucher.delete', 'reports.all_access']);
+                    @endphp
                     <div class="table-responsive">
                         <table class="table table-bordered table-striped align-middle">
                             <thead class="table-light">
@@ -148,10 +154,20 @@
                                     <th>Employee</th>
                                     <th>Created By</th>
                                     <th>Reference / Description</th>
+                                    @if ($canManageVouchers)
+                                        <th class="no-print">Actions</th>
+                                    @endif
                                 </tr>
                             </thead>
                             <tbody>
                                 @forelse ($vouchers as $voucher)
+                                    @php
+                                        $isEmployeeVoucher = $voucher->voucher_category === 'employee';
+                                        $isLinkedVoucher = in_array($voucher->voucherable_type, [
+                                            \App\Models\Supplierledger::class,
+                                            \App\Models\CustomerLedger::class,
+                                        ], true);
+                                    @endphp
                                     <tr>
                                         <td>{{ \Illuminate\Support\Carbon::parse($voucher->report_date)->format('d M Y') }}</td>
                                         <td class="fw-semibold">{{ $voucher->voucher_code ?: '—' }}</td>
@@ -186,10 +202,74 @@
                                         <td>{{ $voucher->employee_name ?: '—' }}</td>
                                         <td>{{ $voucher->created_by_name }}</td>
                                         <td>{{ $voucher->reference ?: $voucher->description ?: '—' }}</td>
+                                        @if ($canManageVouchers)
+                                        <td class="no-print">
+                                            @canany(['voucher.edit', 'reports.all_access'])
+                                            <details>
+                                                <summary class="btn btn-sm btn-outline-primary">Edit</summary>
+                                                <form method="POST"
+                                                    action="{{ route('voucher-report.combined.update', [$voucher->voucher_category, $voucher->voucher_id]) }}"
+                                                    class="mt-2" style="min-width: 240px">
+                                                    @csrf
+                                                    @method('PUT')
+                                                    <input type="hidden" name="period" value="{{ $period }}">
+                                                    <input type="hidden" name="date" value="{{ $period === 'daily' ? $startDate : '' }}">
+                                                    <input type="hidden" name="month" value="{{ $period === 'monthly' ? $selectedMonth : '' }}">
+                                                    <label class="form-label small mb-1">Date</label>
+                                                    <input type="date" name="{{ $isEmployeeVoucher ? 'payment_date' : 'voucher_date' }}"
+                                                        class="form-control form-control-sm mb-2"
+                                                        value="{{ \Illuminate\Support\Carbon::parse($voucher->report_date)->toDateString() }}"
+                                                        @if ($isEmployeeVoucher) max="{{ today()->toDateString() }}" @endif required>
+                                                    <label class="form-label small mb-1">Amount</label>
+                                                    <input type="number" name="amount" class="form-control form-control-sm mb-2"
+                                                        min="0.01" max="9999999999.99" step="0.01"
+                                                        value="{{ number_format((float) $voucher->amount, 2, '.', '') }}" required>
+                                                    @if ($isEmployeeVoucher)
+                                                        <label class="form-label small mb-1">Expense Type</label>
+                                                        <select name="expense_type" class="form-select form-select-sm mb-2" required>
+                                                            @foreach ($expenseTypes as $type => $label)
+                                                                <option value="{{ $type }}" @selected($voucher->voucher_head === $type)>{{ $label }}</option>
+                                                            @endforeach
+                                                        </select>
+                                                        <label class="form-label small mb-1">Reference</label>
+                                                        <input type="text" name="reference" maxlength="100"
+                                                            class="form-control form-control-sm mb-2" value="{{ $voucher->reference }}">
+                                                        <label class="form-label small mb-1">Notes</label>
+                                                        <textarea name="notes" maxlength="2000" rows="2"
+                                                            class="form-control form-control-sm mb-2">{{ $voucher->description }}</textarea>
+                                                    @elseif (! $isLinkedVoucher)
+                                                        <label class="form-label small mb-1">Voucher Head</label>
+                                                        <input type="text" name="expense_income_type" maxlength="100"
+                                                            class="form-control form-control-sm mb-2" value="{{ $voucher->voucher_head }}">
+                                                        <label class="form-label small mb-1">Reference</label>
+                                                        <input type="text" name="reference" maxlength="100"
+                                                            class="form-control form-control-sm mb-2" value="{{ $voucher->reference }}">
+                                                        <label class="form-label small mb-1">Description</label>
+                                                        <textarea name="description" maxlength="2000" rows="2"
+                                                            class="form-control form-control-sm mb-2">{{ $voucher->description }}</textarea>
+                                                    @endif
+                                                    <button type="submit" class="btn btn-sm btn-primary">Save Changes</button>
+                                                </form>
+                                            </details>
+                                            @endcanany
+                                            @canany(['voucher.delete', 'reports.all_access'])
+                                            <form method="POST"
+                                                action="{{ route('voucher-report.combined.destroy', [$voucher->voucher_category, $voucher->voucher_id]) }}"
+                                                class="mt-2" onsubmit="return confirm('Delete this voucher? This change will update related ledger balances.');">
+                                                @csrf
+                                                @method('DELETE')
+                                                <input type="hidden" name="period" value="{{ $period }}">
+                                                <input type="hidden" name="date" value="{{ $period === 'daily' ? $startDate : '' }}">
+                                                <input type="hidden" name="month" value="{{ $period === 'monthly' ? $selectedMonth : '' }}">
+                                                <button type="submit" class="btn btn-sm btn-outline-danger">Delete</button>
+                                            </form>
+                                            @endcanany
+                                        </td>
+                                        @endif
                                     </tr>
                                 @empty
                                     <tr>
-                                        <td colspan="9" class="text-center text-muted py-4">No vouchers found for this period.</td>
+                                        <td colspan="{{ $canManageVouchers ? 10 : 9 }}" class="text-center text-muted py-4">No vouchers found for this period.</td>
                                     </tr>
                                 @endforelse
                             </tbody>

@@ -155,7 +155,7 @@ test('dashboard calculates profit from sales purchases and voucher totals', func
                     || $metrics[$period]['due'] !== 65.0
                     || $metrics[$period]['purchase'] !== 20.0
                     || $metrics[$period]['expenses'] !== 37.0
-                    || $metrics[$period]['profit'] !== 105.0
+                    || $metrics[$period]['profit'] !== 95.0
                 ) {
                     return false;
                 }
@@ -166,7 +166,7 @@ test('dashboard calculates profit from sales purchases and voucher totals', func
         ->assertViewHas('profitChart', function (array $chart) {
             return $chart['daily']['labels'] === [today()->format('d M')]
                 && $chart['daily']['revenue'] === [147.0]
-                && $chart['daily']['profit'] === [105.0]
+                && $chart['daily']['profit'] === [95.0]
                 && count($chart['weekly']['labels']) === 7
                 && count($chart['monthly']['labels']) === today()->daysInMonth
                 && count($chart['yearly']['labels']) === 12;

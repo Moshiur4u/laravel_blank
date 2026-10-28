@@ -37,6 +37,8 @@ class RolePermissionSeeder extends Seeder
                 'voucher.report.view', // পুরোনো reports.vouchers এবং All Vouchers-এর বদলে report permission।
                 'voucher',
                 'voucher.entry',
+                'voucher.edit',
+                'voucher.delete',
                 'employee_payment_voucher.entry',
                 'voucher.report.employee', // employee payment report দেখার permission।
                 'voucher.report.miscellaneous', // miscellaneous voucher report permission।

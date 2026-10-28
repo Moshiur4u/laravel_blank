@@ -57,6 +57,16 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::get('/voucher-report/combined', [CombinedVoucherReportController::class, 'index'])
         ->middleware('permission:voucher.report.view|reports.all_access') // combined report export-এর নতুন permission।
         ->name('voucher-report.combined');
+    Route::put('/voucher-report/combined/{category}/{voucherId}', [CombinedVoucherReportController::class, 'update'])
+        ->whereIn('category', ['employee', 'debit', 'credit'])
+        ->whereNumber('voucherId')
+        ->middleware('permission:voucher.edit|reports.all_access')
+        ->name('voucher-report.combined.update');
+    Route::delete('/voucher-report/combined/{category}/{voucherId}', [CombinedVoucherReportController::class, 'destroy'])
+        ->whereIn('category', ['employee', 'debit', 'credit'])
+        ->whereNumber('voucherId')
+        ->middleware('permission:voucher.delete|reports.all_access')
+        ->name('voucher-report.combined.destroy');
 });
 // কর্মী ব্যয়ের voucher দেখানো ও জমা দেওয়া—দুই route-ই login এবং email verification চায়।
 Route::middleware(['auth', 'verified'])->group(function () {

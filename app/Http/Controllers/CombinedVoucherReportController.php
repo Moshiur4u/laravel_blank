@@ -3,6 +3,11 @@
 namespace App\Http\Controllers;
 
 use App\Models\EmployeePaymentVoucher;
+use App\Models\CustomerLedger;
+use App\Models\CustomerLedgerPayment;
+use App\Models\SupplierLedgerPayment;
+use App\Models\Supplierledger;
+use App\Models\User;
 use App\Models\VoucherEntry;
 use App\Support\ExcelCsvExport;
 use Carbon\Carbon;
@@ -11,6 +16,7 @@ use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Validator;
+use Illuminate\Validation\ValidationException;
 use Illuminate\View\View;
 use Symfony\Component\HttpFoundation\StreamedResponse;
 
@@ -76,6 +82,111 @@ class CombinedVoucherReportController extends Controller
             'expenseTypes' => EmployeePaymentVoucher::EXPENSE_TYPES,
             'voucherTypes' => VoucherEntry::TYPES,
         ]);
+    }
+
+    /**
+     * Combined report row-এর মূল voucher এবং linked ledger payment একই transaction-এ update করে।
+     */
+    public function update(Request $request, string $category, int $voucherId): RedirectResponse
+    {
+        if ($category === 'employee') {
+            $validated = $request->validate([
+                'expense_type' => ['required', 'in:'.implode(',', array_keys(EmployeePaymentVoucher::EXPENSE_TYPES))],
+                'payment_date' => ['required', 'date', 'before_or_equal:today'],
+                'amount' => ['required', 'numeric', 'decimal:0,2', 'min:0.01', 'max:9999999999.99'],
+                'reference' => ['nullable', 'string', 'max:100'],
+                'notes' => ['required_if:expense_type,other', 'nullable', 'string', 'max:2000'],
+            ]);
+
+            DB::transaction(function () use ($validated, $voucherId) {
+                $voucher = EmployeePaymentVoucher::query()->lockForUpdate()->findOrFail($voucherId);
+
+                if ($validated['expense_type'] === 'salary') {
+                    $employee = User::query()->lockForUpdate()->findOrFail($voucher->employee_id);
+                    $salaryInCents = $this->moneyToCents($employee->salary ?? 0);
+
+                    if ($this->moneyToCents($validated['amount']) > $salaryInCents) {
+                        throw ValidationException::withMessages([
+                            'amount' => $employee->salary
+                                ? 'Salary voucher cannot exceed the employee salary of ৳'.number_format((float) $employee->salary, 2).'.'
+                                : 'This employee has no salary set. Add the employee salary before saving a salary voucher.',
+                        ]);
+                    }
+                }
+
+                $voucher->update([
+                    'expense_type' => $validated['expense_type'],
+                    'payment_date' => $validated['payment_date'],
+                    'amount' => number_format($this->moneyToCents($validated['amount']) / 100, 2, '.', ''),
+                    'reference' => $validated['reference'] ?? null,
+                    'notes' => $validated['notes'] ?? null,
+                ]);
+            });
+        } else {
+            $validated = $request->validate([
+                'voucher_date' => ['required', 'date'],
+                'amount' => ['required', 'numeric', 'decimal:0,2', 'min:0.01', 'max:9999999999.99'],
+                'expense_income_type' => ['nullable', 'string', 'max:100'],
+                'reference' => ['nullable', 'string', 'max:100'],
+                'description' => ['nullable', 'string', 'max:2000'],
+            ]);
+
+            DB::transaction(function () use ($validated, $category, $voucherId) {
+                $voucher = VoucherEntry::query()
+                    ->where('voucher_type', $category)
+                    ->lockForUpdate()
+                    ->findOrFail($voucherId);
+                $amount = number_format($this->moneyToCents($validated['amount']) / 100, 2, '.', '');
+
+                if ($voucher->voucherable_type === Supplierledger::class) {
+                    $this->updateSupplierPayment($voucher, $validated['voucher_date'], $amount);
+                } elseif ($voucher->voucherable_type === CustomerLedger::class) {
+                    $this->updateCustomerPayment($voucher, $validated['voucher_date'], $amount);
+                } else {
+                    $voucher->expense_income_type = $validated['expense_income_type'] ?? $voucher->expense_income_type;
+                    $voucher->reference = $validated['reference'] ?? null;
+                    $voucher->description = $validated['description'] ?? null;
+                }
+
+                $voucher->update([
+                    'voucher_date' => $validated['voucher_date'],
+                    'amount' => $amount,
+                ]);
+            });
+        }
+
+        return redirect()->route('voucher-report.combined', $request->only(['period', 'date', 'month']))
+            ->with('success', 'Voucher updated successfully.');
+    }
+
+    /**
+     * Combined report row মুছে দেওয়ার আগে linked supplier/customer payment ও balance সমন্বয় করে।
+     */
+    public function destroy(Request $request, string $category, int $voucherId): RedirectResponse
+    {
+        DB::transaction(function () use ($category, $voucherId) {
+            if ($category === 'employee') {
+                EmployeePaymentVoucher::query()->lockForUpdate()->findOrFail($voucherId)->delete();
+
+                return;
+            }
+
+            $voucher = VoucherEntry::query()
+                ->where('voucher_type', $category)
+                ->lockForUpdate()
+                ->findOrFail($voucherId);
+
+            if ($voucher->voucherable_type === Supplierledger::class) {
+                $this->deleteSupplierPayment($voucher);
+            } elseif ($voucher->voucherable_type === CustomerLedger::class) {
+                $this->deleteCustomerPayment($voucher);
+            }
+
+            $voucher->delete();
+        });
+
+        return redirect()->route('voucher-report.combined', $request->only(['period', 'date', 'month']))
+            ->with('success', 'Voucher deleted successfully.');
     }
 
     /**
@@ -166,9 +277,9 @@ class CombinedVoucherReportController extends Controller
     {
         $employeeVouchers = DB::table('employee_payment_vouchers')
             ->leftJoin('users as creators', 'creators.id', '=', 'employee_payment_vouchers.created_by')
-            ->whereDate('employee_payment_vouchers.created_at', '>=', $startDate)
-            ->whereDate('employee_payment_vouchers.created_at', '<=', $endDate)
-            ->selectRaw('DATE(employee_payment_vouchers.created_at) as report_date')
+            ->whereBetween('employee_payment_vouchers.payment_date', [$startDate, $endDate])
+            ->select('employee_payment_vouchers.payment_date as report_date')
+            ->addSelect('employee_payment_vouchers.id as voucher_id')
             ->addSelect('employee_payment_vouchers.voucher_no as voucher_code')
             ->selectRaw("'employee' as voucher_category")
             ->addSelect('employee_payment_vouchers.expense_type as voucher_head')
@@ -176,11 +287,14 @@ class CombinedVoucherReportController extends Controller
             ->selectRaw("COALESCE(creators.name, 'Unknown / legacy voucher') as created_by_name")
             ->addSelect('employee_payment_vouchers.amount')
             ->addSelect('employee_payment_vouchers.reference')
-            ->addSelect('employee_payment_vouchers.notes as description');
+            ->addSelect('employee_payment_vouchers.notes as description')
+            ->selectRaw('NULL as voucherable_type')
+            ->selectRaw('NULL as voucherable_id');
 
         $generalVouchers = DB::table('voucher_entries')
             ->whereBetween('voucher_date', [$startDate, $endDate])
             ->select('voucher_date as report_date')
+            ->addSelect('id as voucher_id')
             ->addSelect('voucher_code')
             ->addSelect('voucher_type as voucher_category')
             ->addSelect('expense_income_type as voucher_head')
@@ -188,8 +302,153 @@ class CombinedVoucherReportController extends Controller
             ->addSelect('created_by_name')
             ->addSelect('amount')
             ->addSelect('reference')
-            ->addSelect('description');
+            ->addSelect('description')
+            ->addSelect('voucherable_type')
+            ->addSelect('voucherable_id');
 
         return DB::query()->fromSub($employeeVouchers->unionAll($generalVouchers), 'combined_vouchers');
+    }
+
+    private function updateSupplierPayment(VoucherEntry $voucher, string $date, string $amount): void
+    {
+        $ledger = Supplierledger::query()->lockForUpdate()->findOrFail($voucher->voucherable_id);
+        $payment = SupplierLedgerPayment::query()
+            ->where('supplierledger_id', $ledger->id)
+            ->whereDate('payment_date', $voucher->voucher_date)
+            ->where('amount', $voucher->amount)
+            ->orderBy('id')
+            ->lockForUpdate()
+            ->first();
+
+        $oldCents = $this->moneyToCents($voucher->amount);
+        $newCents = $this->moneyToCents($amount);
+        $paidCents = $this->moneyToCents($ledger->payment);
+        $dueCents = $this->moneyToCents($ledger->due);
+
+        if ($newCents > 9_999_999_999) {
+            throw ValidationException::withMessages([
+                'amount' => 'Supplier payment cannot exceed ৳99,999,999.99.',
+            ]);
+        }
+
+        if ($newCents > $dueCents + $oldCents) {
+            throw ValidationException::withMessages([
+                'amount' => 'Payment cannot be greater than the current due plus this payment.',
+            ]);
+        }
+
+        if ($payment) {
+            $payment->update([
+                'payment_date' => $date,
+                'amount' => $amount,
+            ]);
+        } elseif ($paidCents - $this->moneyToCents(DB::table('supplier_ledger_payments')->where('supplierledger_id', $ledger->id)->sum('amount')) < $oldCents) {
+            throw ValidationException::withMessages([
+                'amount' => 'The linked supplier payment could not be matched to its ledger history.',
+            ]);
+        }
+
+        $ledger->update([
+            'payment' => number_format(($paidCents - $oldCents + $newCents) / 100, 2, '.', ''),
+            'due' => number_format(($dueCents + $oldCents - $newCents) / 100, 2, '.', ''),
+        ]);
+    }
+
+    private function deleteSupplierPayment(VoucherEntry $voucher): void
+    {
+        $ledger = Supplierledger::query()->lockForUpdate()->findOrFail($voucher->voucherable_id);
+        $payment = SupplierLedgerPayment::query()
+            ->where('supplierledger_id', $ledger->id)
+            ->whereDate('payment_date', $voucher->voucher_date)
+            ->where('amount', $voucher->amount)
+            ->orderBy('id')
+            ->lockForUpdate()
+            ->first();
+        $oldCents = $this->moneyToCents($voucher->amount);
+        $paidCents = $this->moneyToCents($ledger->payment);
+
+        if ($payment) {
+            $payment->delete();
+        } elseif ($paidCents - $this->moneyToCents(DB::table('supplier_ledger_payments')->where('supplierledger_id', $ledger->id)->sum('amount')) < $oldCents) {
+            throw ValidationException::withMessages([
+                'amount' => 'The linked supplier payment could not be matched to its ledger history.',
+            ]);
+        }
+
+        $ledger->update([
+            'payment' => number_format(($paidCents - $oldCents) / 100, 2, '.', ''),
+            'due' => number_format(($this->moneyToCents($ledger->due) + $oldCents) / 100, 2, '.', ''),
+        ]);
+    }
+
+    private function updateCustomerPayment(VoucherEntry $voucher, string $date, string $amount): void
+    {
+        $ledger = CustomerLedger::query()->lockForUpdate()->findOrFail($voucher->voucherable_id);
+        $payment = CustomerLedgerPayment::query()
+            ->where('customer_ledger_id', $ledger->id)
+            ->whereDate('payment_date', $voucher->voucher_date)
+            ->where('amount', $voucher->amount)
+            ->orderBy('id')
+            ->lockForUpdate()
+            ->first();
+
+        $oldCents = $this->moneyToCents($voucher->amount);
+        $newCents = $this->moneyToCents($amount);
+        $receivedCents = $this->moneyToCents($ledger->payment_amount);
+        $dueCents = $this->moneyToCents($ledger->due_amount);
+
+        if ($newCents > $dueCents + $oldCents) {
+            throw ValidationException::withMessages([
+                'amount' => 'Payment cannot be greater than the current due plus this payment.',
+            ]);
+        }
+
+        if ($payment) {
+            $payment->update([
+                'payment_date' => $date,
+                'amount' => $amount,
+            ]);
+        } elseif ($receivedCents - $this->moneyToCents(DB::table('customer_ledger_payments')->where('customer_ledger_id', $ledger->id)->sum('amount')) < $oldCents) {
+            throw ValidationException::withMessages([
+                'amount' => 'The linked customer payment could not be matched to its ledger history.',
+            ]);
+        }
+
+        $ledger->update([
+            'payment_amount' => number_format(($receivedCents - $oldCents + $newCents) / 100, 2, '.', ''),
+            'due_amount' => number_format(($dueCents + $oldCents - $newCents) / 100, 2, '.', ''),
+        ]);
+    }
+
+    private function deleteCustomerPayment(VoucherEntry $voucher): void
+    {
+        $ledger = CustomerLedger::query()->lockForUpdate()->findOrFail($voucher->voucherable_id);
+        $payment = CustomerLedgerPayment::query()
+            ->where('customer_ledger_id', $ledger->id)
+            ->whereDate('payment_date', $voucher->voucher_date)
+            ->where('amount', $voucher->amount)
+            ->orderBy('id')
+            ->lockForUpdate()
+            ->first();
+        $oldCents = $this->moneyToCents($voucher->amount);
+        $receivedCents = $this->moneyToCents($ledger->payment_amount);
+
+        if ($payment) {
+            $payment->delete();
+        } elseif ($receivedCents - $this->moneyToCents(DB::table('customer_ledger_payments')->where('customer_ledger_id', $ledger->id)->sum('amount')) < $oldCents) {
+            throw ValidationException::withMessages([
+                'amount' => 'The linked customer payment could not be matched to its ledger history.',
+            ]);
+        }
+
+        $ledger->update([
+            'payment_amount' => number_format(($receivedCents - $oldCents) / 100, 2, '.', ''),
+            'due_amount' => number_format(($this->moneyToCents($ledger->due_amount) + $oldCents) / 100, 2, '.', ''),
+        ]);
+    }
+
+    private function moneyToCents(mixed $amount): int
+    {
+        return (int) round((float) $amount * 100);
     }
 }

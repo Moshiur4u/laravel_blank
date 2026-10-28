@@ -109,7 +109,7 @@ class DashboardConrtoller extends Controller
                 })
                 ->sum('amount');
             $expenses = (float) $employeeVoucherTotal + (float) $debitVoucherTotal;
-            $purchaseCosts = (float) $purchaseTotal + (float) $nonSupplierDebitTotal;
+            $purchaseCosts = (float) $purchaseTotal + (float) $nonSupplierDebitTotal + (float) $employeeVoucherTotal;
             $profit = round(
                 (float) $revenue - $purchaseCosts,
                 2
@@ -144,6 +144,7 @@ class DashboardConrtoller extends Controller
             'invoice_revenue' => $this->dailyTotals('sale_invoices', 'invoice_date', 'subtotal - discount_amount + vat_amount', $chartStart, $yearEnd),
             'customer_revenue' => $customerRevenueTotals,
             'purchase' => $this->dailyTotals('supplierledgers', 'created_at', 'total', $chartStart, $yearEnd),
+            'employee_vouchers' => $this->dailyTotals('employee_payment_vouchers', 'payment_date', 'amount', $chartStart, $yearEnd),
             'non_supplier_debit_vouchers' => $this->dailyTotals('voucher_entries', 'voucher_date', 'amount', $chartStart, $yearEnd, 'debit', null, null, Supplierledger::class, 'Supplier Payment (%'),
             'non_customer_credit_vouchers' => $this->dailyTotals('voucher_entries', 'voucher_date', 'amount', $chartStart, $yearEnd, 'credit', null, null, CustomerLedger::class, 'Payment received from customer %'),
         ];
@@ -188,11 +189,12 @@ class DashboardConrtoller extends Controller
                     + $sumForBucket($dailyTotals['customer_revenue'], $bucketKey)
                     + $sumForBucket($dailyTotals['non_customer_credit_vouchers'], $bucketKey);
                 $purchase = $sumForBucket($dailyTotals['purchase'], $bucketKey);
+                $employeeVouchers = $sumForBucket($dailyTotals['employee_vouchers'], $bucketKey);
                 $nonSupplierDebitVouchers = $sumForBucket($dailyTotals['non_supplier_debit_vouchers'], $bucketKey);
                 $nonCustomerCreditVouchers = $sumForBucket($dailyTotals['non_customer_credit_vouchers'], $bucketKey);
 
                 $revenueValues[] = round($revenue, 2);
-                $profitValues[] = round($revenue - $purchase - $nonSupplierDebitVouchers, 2);
+                $profitValues[] = round($revenue - $purchase - $employeeVouchers - $nonSupplierDebitVouchers, 2);
             }
 
             $profitChart[$period] = [
