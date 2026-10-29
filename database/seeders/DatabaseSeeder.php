@@ -30,7 +30,7 @@ class DatabaseSeeder extends Seeder
             UserSeederTable::class,
             // প্রোডাক্ট ক্যাটাগরি সিডার কল করা হলো ডাটাবেজে প্রোডাক্ট ক্যাটাগরি টেবিলের জন্য
             ProductCategorySeeder::class,
-            ProductSeeder::class,
+            //ProductSeeder::class,
         ]);
     }
 }
