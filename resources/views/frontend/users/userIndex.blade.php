@@ -37,9 +37,9 @@
                 $activeUsers = $Users->where('status', 1)->count();
                 $inactiveUsers = $Users->where('status', 0)->count();
             @endphp
-            <div class="row row-cols-1 row-cols-md-3 g-3 mb-3">
+            <div class="mb-3 row row-cols-1 row-cols-md-3 g-3">
                 <div class="col">
-                    <div class="card radius-10 border-start border-0 border-3 border-primary mb-0">
+                    <div class="mb-0 border-0 card radius-10 border-start border-3 border-primary">
                         <div class="card-body">
                             <div class="d-flex align-items-center">
                                 <div>
@@ -54,7 +54,7 @@
                     </div>
                 </div>
                 <div class="col">
-                    <div class="card radius-10 border-start border-0 border-3 border-success mb-0">
+                    <div class="mb-0 border-0 card radius-10 border-start border-3 border-success">
                         <div class="card-body">
                             <div class="d-flex align-items-center">
                                 <div>
@@ -69,7 +69,7 @@
                     </div>
                 </div>
                 <div class="col">
-                    <div class="card radius-10 border-start border-0 border-3 border-danger mb-0">
+                    <div class="mb-0 border-0 card radius-10 border-start border-3 border-danger">
                         <div class="card-body">
                             <div class="d-flex align-items-center">
                                 <div>
@@ -85,8 +85,8 @@
                 </div>
             </div>
 
-            <div class="card border-0 shadow-sm">
-                <div class="card-header bg-transparent d-flex align-items-center justify-content-between py-3">
+            <div class="border-0 shadow-sm card">
+                <div class="py-3 bg-transparent card-header d-flex align-items-center justify-content-between">
                     <h6 class="mb-0 text-uppercase fw-bold"><i class="bx bx-user-pin me-1"></i> All Employee & User Accounts
                     </h6>
                     <span class="badge bg-primary">{{ $totalUsers }} Total</span>
@@ -94,13 +94,13 @@
                 <div class="card-body">
                     <div class="table-responsive">
                         <div id="example_wrapper" class="dataTables_wrapper dt-bootstrap5">
-                            <table id="myTable" class="table display table-striped align-middle table-hover">
+                            <table id="myTable" class="table align-middle display table-striped table-hover">
                                 <thead class="table-light">
                                     <tr>
                                         <th>No</th>
                                         <th>Photo</th>
                                         <th>Name</th>
-                                        {{-- <th>Roles</th> --}}
+                                        <th>Roles</th>
                                         <th>Phone</th>
                                         <th>Status</th>
                                         <th>Remark</th>
@@ -139,14 +139,14 @@
                                             <td>
                                                 <h6 class="mb-0 fw-bold">{{ $User->name }}</h6>
                                             </td>
-                                            {{-- <td>
+                                            <td>
                                                 @forelse ($User->roles as $role)
                                                     <span
                                                         class="badge bg-primary text-uppercase">{{ $role->name }}</span>
                                                 @empty
                                                     <span class="badge bg-secondary">No Role</span>
                                                 @endforelse
-                                            </td> --}}
+                                            </td>
                                             <td>
                                                 <i class="bx bx-phone text-muted me-1"></i>{{ $User->phone }}
                                             </td>
@@ -169,11 +169,11 @@
                                                 <span class="text-muted small">{{ $User->remark ?? '-' }}</span>
                                             </td>
                                             <td class="text-center">
-                                                <div class="d-flex gap-1 justify-content-center">
+                                                <div class="gap-1 d-flex justify-content-center">
                                                     @can('view-employee-details')
                                                         {{-- employee details দেখার নতুন permission। --}}
                                                         <a href="{{ route('user.show', $User->id) }}"
-                                                            class="btn btn-sm btn-info text-white" title="View Profile">
+                                                            class="text-white btn btn-sm btn-info" title="View Profile">
                                                             <i class="bx bx-show"></i>
                                                         </a>
                                                     @endcan
