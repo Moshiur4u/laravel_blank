@@ -96,7 +96,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::get('/user/index', [UserController::class, 'index'])->middleware('permission:employee.index')->name('user.index');
     Route::get('/user/create', [UserController::class, 'create'])->middleware('permission:employee.create')->name('user.create');
     Route::post('/user/store', [UserController::class, 'store'])->middleware('permission:employee.create')->name('user.store');
-    Route::get('/user/show/{id}', [UserController::class, 'show'])->middleware('permission:view-employee-details') // নতুন employee details permission।
+    Route::get('/user/show/{id}', [UserController::class, 'show'])->middleware('permission:view-employee-details|view-employee-details-permission') // নতুন employee details permission।
         ->name('user.show');
     Route::get('/user/edit/{id}', [UserController::class, 'edit'])->middleware('permission:employee.edit|employee.role.assign')->name('user.edit');
     Route::put('/user/update/{id}', [UserController::class, 'update'])->middleware('permission:employee.edit|employee.role.assign')->name('user.update');

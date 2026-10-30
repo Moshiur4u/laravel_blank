@@ -50,6 +50,7 @@ class RolePermissionSeeder extends Seeder
                 'employee.create',
                 'employee.index',
                 'view-employee-details', // পুরোনো employee.view-এর বদলে নতুন permission।
+                'view-employee-details-permission', // পুরোনো employee.view-এর বদলে নতুন permission।
                 'employee.edit',
                 'employee.role.assign', // Manager-কে সীমাবদ্ধ ও অনুমোদিত role update করার সুযোগ।
                 'role.index', // পুরোনো role-menu-এর বদলে role list permission।
