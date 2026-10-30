@@ -66,6 +66,7 @@ class PermissionSeederTable extends Seeder
             'employee.create',
             'employee.index',
             'view-employee-details',
+            'view-employee-details-permission',
             'employee.edit',
             'employee.inactive',
             'employee.delete',

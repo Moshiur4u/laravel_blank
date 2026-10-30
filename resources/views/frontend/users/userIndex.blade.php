@@ -22,9 +22,9 @@
                 <div class="ms-auto">
                     <div class="btn-group">
                         @can('employee.create')
-                        <a href="{{ route('user.create') }}" class="btn btn-primary">
-                            <i class="bx bx-plus-medical me-1"></i> Add New Employee
-                        </a>
+                            <a href="{{ route('user.create') }}" class="btn btn-primary">
+                                <i class="bx bx-plus-medical me-1"></i> Add New Employee
+                            </a>
                         @endcan
                     </div>
                 </div>
@@ -87,7 +87,8 @@
 
             <div class="card border-0 shadow-sm">
                 <div class="card-header bg-transparent d-flex align-items-center justify-content-between py-3">
-                    <h6 class="mb-0 text-uppercase fw-bold"><i class="bx bx-user-pin me-1"></i> All Employee & User Accounts</h6>
+                    <h6 class="mb-0 text-uppercase fw-bold"><i class="bx bx-user-pin me-1"></i> All Employee & User Accounts
+                    </h6>
                     <span class="badge bg-primary">{{ $totalUsers }} Total</span>
                 </div>
                 <div class="card-body">
@@ -99,8 +100,8 @@
                                         <th>No</th>
                                         <th>Photo</th>
                                         <th>Name</th>
-                                        <th>Roles</th>
-                                        <th>Email</th>
+                                        {{-- <th>Roles</th> --}}
+                                        <th>Phone</th>
                                         <th>Status</th>
                                         <th>Remark</th>
                                         <th class="text-center">Action</th>
@@ -138,24 +139,26 @@
                                             <td>
                                                 <h6 class="mb-0 fw-bold">{{ $User->name }}</h6>
                                             </td>
-                                            <td>
+                                            {{-- <td>
                                                 @forelse ($User->roles as $role)
-                                                    <span class="badge bg-primary text-uppercase">{{ $role->name }}</span>
+                                                    <span
+                                                        class="badge bg-primary text-uppercase">{{ $role->name }}</span>
                                                 @empty
                                                     <span class="badge bg-secondary">No Role</span>
                                                 @endforelse
-                                            </td>
+                                            </td> --}}
                                             <td>
-                                                <i class="bx bx-envelope text-muted me-1"></i>{{ $User->email }}
+                                                <i class="bx bx-phone text-muted me-1"></i>{{ $User->phone }}
                                             </td>
                                             <td>
                                                 @can('employee.inactive')
-                                                <a href="{{ route('user.statusupdate', $User->id) }}"
-                                                    class="badge {{ $User->status == 1 ? 'bg-success' : 'bg-danger' }} text-decoration-none px-2 py-1"
-                                                    title="Click to toggle status">
-                                                    <i class="bx {{ $User->status == 1 ? 'bx-check-circle' : 'bx-x-circle' }} me-1"></i>
-                                                    {{ $User->status == 1 ? 'Active' : 'Inactive' }}
-                                                </a>
+                                                    <a href="{{ route('user.statusupdate', $User->id) }}"
+                                                        class="badge {{ $User->status == 1 ? 'bg-success' : 'bg-danger' }} text-decoration-none px-2 py-1"
+                                                        title="Click to toggle status">
+                                                        <i
+                                                            class="bx {{ $User->status == 1 ? 'bx-check-circle' : 'bx-x-circle' }} me-1"></i>
+                                                        {{ $User->status == 1 ? 'Active' : 'Inactive' }}
+                                                    </a>
                                                 @else
                                                     <span class="badge {{ $User->status == 1 ? 'bg-success' : 'bg-danger' }}">
                                                         {{ $User->status == 1 ? 'Active' : 'Inactive' }}
@@ -167,26 +170,26 @@
                                             </td>
                                             <td class="text-center">
                                                 <div class="d-flex gap-1 justify-content-center">
-                                                    @can('view-employee-details') {{-- employee details দেখার নতুন permission। --}}
-                                                    <a href="{{ route('user.show', $User->id) }}"
-                                                        class="btn btn-sm btn-info text-white" title="View Profile">
-                                                        <i class="bx bx-show"></i>
-                                                    </a>
+                                                    @can('view-employee-details')
+                                                        {{-- employee details দেখার নতুন permission। --}}
+                                                        <a href="{{ route('user.show', $User->id) }}"
+                                                            class="btn btn-sm btn-info text-white" title="View Profile">
+                                                            <i class="bx bx-show"></i>
+                                                        </a>
                                                     @endcan
                                                     @can('employee.edit')
-                                                    <a href="{{ route('user.edit', $User->id) }}"
-                                                        class="btn btn-sm btn-primary" title="Edit Employee">
-                                                        <i class="bx bx-edit"></i>
-                                                    </a>
+                                                        <a href="{{ route('user.edit', $User->id) }}"
+                                                            class="btn btn-sm btn-primary" title="Edit Employee">
+                                                            <i class="bx bx-edit"></i>
+                                                        </a>
                                                     @endcan
                                                     @can('employee.delete')
-                                                    <a href="{{ route('user.destroy', $User->id) }}"
-                                                        class="btn btn-sm btn-danger"
-                                                        data-swal-delete
-                                                        data-delete-message="Employee: {{ $User->name }}"
-                                                        title="Delete Employee">
-                                                        <i class="bx bx-trash"></i>
-                                                    </a>
+                                                        <a href="{{ route('user.destroy', $User->id) }}"
+                                                            class="btn btn-sm btn-danger" data-swal-delete
+                                                            data-delete-message="Employee: {{ $User->name }}"
+                                                            title="Delete Employee">
+                                                            <i class="bx bx-trash"></i>
+                                                        </a>
                                                     @endcan
                                                 </div>
                                             </td>

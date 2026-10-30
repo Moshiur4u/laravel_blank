@@ -28,6 +28,8 @@ test('standard roles receive only their intended module permissions', function (
         ->and($sales->hasPermissionTo('customer.delete'))->toBeFalse()
         ->and($manager->hasPermissionTo('brand.delete'))->toBeTrue() // পুরোনো category/brand permission-এর নতুন brand নাম।
         ->and($manager->hasPermissionTo('voucher.report.view'))->toBeTrue() // নতুন voucher report permission।
+        ->and($manager->hasPermissionTo('view-employee-details-permission'))->toBeTrue()
+        ->and(Permission::where('name', 'view-employee-details-permission')->exists())->toBeTrue()
         ->and($manager->hasPermissionTo('supplier.delete'))->toBeFalse()
         ->and($manager->hasPermissionTo('Supplier.ledger.edit'))->toBeFalse() // manager-এর ledger edit অধিকার আগের মতো বন্ধ।
         ->and($manager->hasPermissionTo('employee.delete'))->toBeFalse()
