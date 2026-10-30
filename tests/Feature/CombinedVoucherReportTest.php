@@ -55,7 +55,8 @@ test('combined voucher report shows employee debit and credit entries for a day'
         ->assertSee('DBV-COMBINED-001')
         ->assertSee('CRV-COMBINED-001')
         ->assertSee($employee->name)
-        ->assertViewHas('debitVoucherCount', 2)
+        ->assertViewHas('employeeVoucherCount', 1)
+        ->assertViewHas('debitVoucherCount', 1)
         ->assertViewHas('creditVoucherCount', 1)
         ->assertViewHas('employeeTotal', 100.0)
         ->assertViewHas('debitTotal', 30.0)
@@ -191,7 +192,7 @@ test('combined report updates and deletes supplier-linked vouchers and ledger ba
     $voucher = VoucherEntry::create([
         'voucher_code' => 'DBV-COMBINED-SUPPLIER-001',
         'voucher_type' => 'debit',
-        'expense_income_type' => 'Supplier Payment ('.$supplier->name.')',
+        'expense_income_type' => 'Supplier Payment (' . $supplier->name . ')',
         'voucher_date' => $date,
         'amount' => '25.00',
         'reference' => $ledger->invoice_id,

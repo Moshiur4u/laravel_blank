@@ -74,6 +74,7 @@
                             <div class="py-1 d-flex justify-content-between"><span>Subtotal</span><span>৳{{ number_format($invoice->subtotal, 2) }}</span></div>
                             <div class="py-1 d-flex justify-content-between"><span>Discount{{ ($invoice->discount_type === 'percentage' && (float) $invoice->discount_value > 0) ? ' (' . rtrim(rtrim(number_format((float) $invoice->discount_value, 2), '0'), '.') . '%)' : '' }}</span><span>- ৳{{ number_format($invoice->discount_amount, 2) }}</span></div>
                             <div class="py-1 d-flex justify-content-between"><span>VAT</span><span>৳{{ number_format($invoice->vat_amount, 2) }}</span></div>
+                            <div class="py-1 d-flex justify-content-between"><span>AIT</span><span>৳{{ number_format($invoice->ait_amount, 2) }}</span></div>
                             @if ($invoice->include_previous_due)
                                 <div class="py-1 d-flex justify-content-between"><span>Previous Due</span><span>৳{{ number_format($invoice->previous_due, 2) }}</span></div>
                             @endif

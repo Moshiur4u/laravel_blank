@@ -93,7 +93,7 @@
 
                     <h6 class="mb-3 fw-bold">Stock, Expiry &amp; Supplier Details</h6>
                     <div class="table-responsive">
-                        <table class="table mb-0 align-middle table-bordered table-striped">
+                        <table id="myTable" class="table mb-0 align-middle table-bordered table-striped">
                             <thead class="table-light">
                                 <tr>
                                     <th scope="col">#</th>

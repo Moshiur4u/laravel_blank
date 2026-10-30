@@ -102,20 +102,9 @@
                             <div class="border-0 card bg-light h-100 voucher-count-card">
                                 <div class="card-body">
                                     <div class="mb-2 text-muted">Cash in Hand</div>
-                                    <div class="mb-2 fs-5 fw-bold {{ $cashInHandTotal >= 0 ? 'text-success' : 'text-danger' }}">
+                                    <div
+                                        class="mb-2 fs-5 fw-bold {{ $cashInHandTotal >= 0 ? 'text-success' : 'text-danger' }}">
                                         ৳{{ number_format($cashInHandTotal, 2) }}
-                                    </div>
-                                    <div class="gap-3 d-flex justify-content-between">
-                                        <div>
-                                            <div class="small text-muted">Debit vouchers</div>
-                                            <div class="fs-5 fw-bold text-danger">{{ number_format($debitVoucherCount) }}
-                                            </div>
-                                        </div>
-                                        <div class="text-end">
-                                            <div class="small text-muted">Credit vouchers</div>
-                                            <div class="fs-5 fw-bold text-success">{{ number_format($creditVoucherCount) }}
-                                            </div>
-                                        </div>
                                     </div>
                                 </div>
                             </div>
@@ -123,6 +112,14 @@
                         <div class="col-md-3 summary-card">
                             <div class="border-0 card bg-light h-100">
                                 <div class="card-body">
+
+                                    <div class="gap-3 d-flex justify-content-between">
+                                        <div>
+                                            <div class="small text-muted">Employee vouchers</div>
+                                            <div class="fs-5 fw-bold">{{ number_format($employeeVoucherCount) }}
+                                            </div>
+                                        </div>
+                                    </div>
                                     <div class="text-muted">Employee Payment</div>
                                     <div class="fs-5 fw-bold">৳{{ number_format($employeeTotal, 2) }}</div>
                                 </div>
@@ -131,6 +128,14 @@
                         <div class="col-md-3 summary-card">
                             <div class="border-0 card bg-light h-100">
                                 <div class="card-body">
+
+                                    <div class="gap-3 d-flex justify-content-between">
+                                        <div>
+                                            <div class="small text-muted">Debit vouchers</div>
+                                            <div class="fs-5 fw-bold text-danger">{{ number_format($debitVoucherCount) }}
+                                            </div>
+                                        </div>
+                                    </div>
                                     <div class="text-muted">Other Payment</div>
                                     <div class="fs-5 fw-bold text-danger">৳{{ number_format($debitTotal, 2) }}</div>
                                 </div>
@@ -139,6 +144,14 @@
                         <div class="col-md-3 summary-card">
                             <div class="border-0 card bg-light h-100">
                                 <div class="card-body">
+
+                                    <div class="gap-3 d-flex justify-content-between">
+                                        <div class="text-end">
+                                            <div class="small text-muted">Credit vouchers</div>
+                                            <div class="fs-5 fw-bold text-success">{{ number_format($creditVoucherCount) }}
+                                            </div>
+                                        </div>
+                                    </div>
                                     <div class="text-muted">Total Credit</div>
                                     <div class="fs-5 fw-bold text-success">৳{{ number_format($creditTotal, 2) }}</div>
                                 </div>
@@ -149,7 +162,7 @@
                     @php
                         $canManageVouchers = auth()
                             ->user()
-                            ->canAny(['voucher.edit', 'voucher.delete', 'reports.all_access']);
+                            ->canAny(['voucher.edit', 'voucher.delete']);
                     @endphp
                     <div class="table-responsive">
                         <table class="table align-middle table-bordered table-striped">

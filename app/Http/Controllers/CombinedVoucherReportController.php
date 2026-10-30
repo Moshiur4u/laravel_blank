@@ -55,7 +55,8 @@ class CombinedVoucherReportController extends Controller
         $reportQuery = fn () => $this->combinedVoucherQuery($startDate, $endDate);
 
         $totals = $reportQuery()
-            ->selectRaw("SUM(CASE WHEN voucher_category IN ('employee', 'debit') THEN 1 ELSE 0 END) as debit_voucher_count")
+            ->selectRaw("SUM(CASE WHEN voucher_category = 'employee' THEN 1 ELSE 0 END) as employee_voucher_count")
+            ->selectRaw("SUM(CASE WHEN voucher_category = 'debit' THEN 1 ELSE 0 END) as debit_voucher_count")
             ->selectRaw("SUM(CASE WHEN voucher_category = 'credit' THEN 1 ELSE 0 END) as credit_voucher_count")
             ->selectRaw("SUM(CASE WHEN voucher_category = 'employee' THEN amount ELSE 0 END) as employee_total")
             ->selectRaw("SUM(CASE WHEN voucher_category = 'debit' THEN amount ELSE 0 END) as debit_total")
@@ -78,6 +79,7 @@ class CombinedVoucherReportController extends Controller
             'endDate' => $endDate,
             'selectedMonth' => $selectedMonth,
             'vouchers' => $vouchers,
+            'employeeVoucherCount' => (int) $totals->employee_voucher_count,
             'debitVoucherCount' => (int) $totals->debit_voucher_count,
             'creditVoucherCount' => (int) $totals->credit_voucher_count,
             'employeeTotal' => $employeeTotal,
@@ -225,7 +227,8 @@ class CombinedVoucherReportController extends Controller
         }
 
         $totals = $this->combinedVoucherQuery($startDate, $endDate)
-            ->selectRaw("SUM(CASE WHEN voucher_category IN ('employee', 'debit') THEN 1 ELSE 0 END) as debit_voucher_count")
+            ->selectRaw("SUM(CASE WHEN voucher_category = 'employee' THEN 1 ELSE 0 END) as employee_voucher_count")
+            ->selectRaw("SUM(CASE WHEN voucher_category = 'debit' THEN 1 ELSE 0 END) as debit_voucher_count")
             ->selectRaw("SUM(CASE WHEN voucher_category = 'credit' THEN 1 ELSE 0 END) as credit_voucher_count")
             ->selectRaw("SUM(CASE WHEN voucher_category = 'employee' THEN amount ELSE 0 END) as employee_total")
             ->selectRaw("SUM(CASE WHEN voucher_category = 'debit' THEN amount ELSE 0 END) as debit_total")
@@ -243,6 +246,7 @@ class CombinedVoucherReportController extends Controller
         ): void {
             $writeRow(['Combined Voucher Report']);
             $writeRow(['Period', $periodLabel]);
+            $writeRow(['Employee Voucher Count', (int) $totals->employee_voucher_count]);
             $writeRow(['Debit Voucher Count', (int) $totals->debit_voucher_count]);
             $writeRow(['Credit Voucher Count', (int) $totals->credit_voucher_count]);
             $writeRow(['Employee Voucher Total', number_format((float) $totals->employee_total, 2, '.', '')]);

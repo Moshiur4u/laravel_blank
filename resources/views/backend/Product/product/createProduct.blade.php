@@ -66,10 +66,16 @@
                                                 name="productName"
                                                 id="productName"
                                                 class="form-control border-start-0 @error('productName') is-invalid @enderror"
+                                                list="existingProductNames"
                                                 placeholder="e.g. Wireless Ergonomic Mouse"
                                                 value="{{ old('productName') }}"
                                                 required>
                                         </div>
+                                        <datalist id="existingProductNames">
+                                            @foreach ($existingProductNames as $existingProductName)
+                                                <option value="{{ $existingProductName }}"></option>
+                                            @endforeach
+                                        </datalist>
                                         @error('productName')
                                             <div class="text-danger small mt-1">
                                                 <i class="bx bx-error-circle me-1"></i>{{ $message }}

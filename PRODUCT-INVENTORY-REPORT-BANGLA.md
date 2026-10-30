@@ -75,6 +75,9 @@ stock, expiry ও supplier বিবরণ অপরিবর্তিত রা
 - আগের expiry এবং supplier-সংক্রান্ত তথ্য ও তার আচরণ অপরিবর্তিত আছে।
 - Blade শুধু controller-এর প্রস্তুত করা তথ্য format করে; এতে database query বা
   business calculation নেই।
+- Inventory details টেবিলে `id="myTable"` ব্যবহার করা হয়েছে, যা Product Index
+  টেবিলের একই selector। Dashboard layout-এর বিদ্যমান DataTable initializer তাই
+  inventory-তেও search box, pagination এবং page-size control যোগ করে।
 
 ## যাচাই
 

@@ -24,10 +24,11 @@
                     </nav>
                 </div>
                 <div class="ms-auto">
-                    @can('product.create') {{-- product তৈরির নতুন permission। --}}
-                    <a href="{{ route('product.create') }}" class="btn btn-primary px-3 shadow-sm">
-                        <i class="bx bx-plus-circle me-1"></i> Add New Product
-                    </a>
+                    @can('product.create')
+                        {{-- product তৈরির নতুন permission। --}}
+                        <a href="{{ route('product.create') }}" class="btn btn-primary px-3 shadow-sm">
+                            <i class="bx bx-plus-circle me-1"></i> Add New Product
+                        </a>
                     @endcan
                 </div>
             </div>
@@ -37,12 +38,12 @@
             @php
                 $totalProductsCount = $Products->count();
                 $totalStockUnits = $Products->sum('unit');
-                $totalInventoryVal = $Products->sum(function($p) {
-                    return (float)$p->price * (float)$p->unit;
+                $totalInventoryVal = $Products->sum(function ($p) {
+                    return (float) $p->price * (float) $p->unit;
                 });
                 $avgPrice = $totalProductsCount > 0 ? $Products->avg('price') : 0;
-                $expiringSoonProducts = $Products->filter(fn ($p) => $p->isExpiringSoon());
-                $expiredProducts = $Products->filter(fn ($p) => $p->isExpired());
+                $expiringSoonProducts = $Products->filter(fn($p) => $p->isExpiringSoon());
+                $expiredProducts = $Products->filter(fn($p) => $p->isExpired());
             @endphp
             <div class="row row-cols-1 row-cols-md-2 row-cols-xl-4 g-3 mb-4">
                 <div class="col">
@@ -50,9 +51,9 @@
                         <div class="card-body">
                             <div class="d-flex align-items-center">
                                 <div>
-                                    <p class="mb-0 text-secondary fw-semibold">Total Products</p>
+                                    <p class="mb-0 text-secondary fw-semibold">In-stock Products</p>
                                     <h4 class="my-1 text-primary fw-bold">{{ $totalProductsCount }}</h4>
-                                    <p class="mb-0 font-13 text-muted">Catalog items</p>
+                                    <p class="mb-0 font-13 text-muted">Products with available stock</p>
                                 </div>
                                 <div class="widgets-icons-2 rounded-circle bg-light-primary text-primary ms-auto">
                                     <i class="bx bx-package"></i>
@@ -130,7 +131,7 @@
                         <i class="bx bx-time-five fs-4 me-2"></i>
                         <div>
                             <strong>Expiring within one month:</strong>
-                            {{ $expiringSoonProducts->map(fn ($p) => $p->productName.' ('.$p->expiry_date->format('Y-m-d').')')->join(', ') }}
+                            {{ $expiringSoonProducts->map(fn($p) => $p->productName . ' (' . $p->expiry_date->format('Y-m-d') . ')')->join(', ') }}
                         </div>
                     </div>
                 @endif
@@ -138,17 +139,19 @@
 
             <!-- Product Table Card -->
             <div class="card radius-10 shadow-sm border-0">
-                <div class="card-header bg-transparent border-bottom py-3 d-flex align-items-center justify-content-between">
+                <div
+                    class="card-header bg-transparent border-bottom py-3 d-flex align-items-center justify-content-between">
                     <div>
                         <h5 class="mb-0 text-dark fw-bold">
-                            <i class="bx bx-box text-primary me-2"></i>Product Catalog
+                            <i class="bx bx-box text-primary me-2"></i>Available Product Directory
                         </h5>
                         <p class="text-muted small mb-0">Detailed view of products, categories, stock, and pricing</p>
                     </div>
-                    @can('product.create') {{-- product তৈরির নতুন permission। --}}
-                    <a href="{{ route('product.create') }}" class="btn btn-sm btn-outline-primary">
-                        <i class="bx bx-plus me-1"></i>Add Product
-                    </a>
+                    @can('product.create')
+                        {{-- product তৈরির নতুন permission। --}}
+                        <a href="{{ route('product.create') }}" class="btn btn-sm btn-outline-primary">
+                            <i class="bx bx-plus me-1"></i>Add Product
+                        </a>
                     @endcan
                 </div>
 
@@ -191,17 +194,20 @@
                                                         @if ($product->isExpired())
                                                             <span class="badge bg-danger ms-1">Expired</span>
                                                         @elseif ($product->isExpiringSoon())
-                                                            <span class="badge bg-warning text-dark ms-1">Expires soon</span>
+                                                            <span class="badge bg-warning text-dark ms-1">Expires
+                                                                soon</span>
                                                         @endif
                                                     </h6>
-                                                    <span class="text-muted small">SKU: #PRD-{{ str_pad($product->id, 5, '0', STR_PAD_LEFT) }}</span>
+                                                    <span class="text-muted small">SKU:
+                                                        #PRD-{{ str_pad($product->id, 5, '0', STR_PAD_LEFT) }}</span>
                                                 </div>
                                             </div>
                                         </td>
                                         <td>
                                             @if ($product->productCategory)
                                                 <span class="badge bg-light-danger text-danger px-2 py-1 rounded">
-                                                    <i class="bx bx-category me-1"></i>{{ $product->productCategory->category_name }}
+                                                    <i
+                                                        class="bx bx-category me-1"></i>{{ $product->productCategory->category_name }}
                                                 </span>
                                             @else
                                                 <span class="badge bg-light-secondary text-secondary">N/A</span>
@@ -217,14 +223,15 @@
                                             @endif
                                         </td>
                                         <td>
-                                            <span class="fw-bold text-dark font-15">৳{{ number_format($product->price, 2) }}</span>
+                                            <span
+                                                class="fw-bold text-dark font-15">৳{{ number_format($product->price, 2) }}</span>
                                         </td>
                                         <td class="text-center">
-                                            @if ((int)$product->unit > 10)
+                                            @if ((int) $product->unit > 10)
                                                 <span class="badge bg-light-success text-success px-3 py-1 rounded-pill">
                                                     {{ $product->unit }} Units
                                                 </span>
-                                            @elseif ((int)$product->unit > 0)
+                                            @elseif ((int) $product->unit > 0)
                                                 <span class="badge bg-light-warning text-warning px-3 py-1 rounded-pill">
                                                     {{ $product->unit }} Low Stock
                                                 </span>
@@ -238,47 +245,53 @@
                                             <div class="d-inline-flex gap-2">
                                                 <!-- View Product Details Modal Button -->
                                                 <button type="button" class="btn btn-sm btn-outline-info"
-                                                    data-bs-toggle="modal" data-bs-target="#productDetailModal{{ $product->id }}"
+                                                    data-bs-toggle="modal"
+                                                    data-bs-target="#productDetailModal{{ $product->id }}"
                                                     title="View Details">
                                                     <i class="bx bx-show"></i>
                                                 </button>
 
                                                 <!-- Edit Button -->
-                                                @can('product.edit') {{-- product সম্পাদনার নতুন permission। --}}
-                                                <a href="{{ route('product.edit', $product->id) }}"
-                                                    class="btn btn-sm btn-outline-primary"
-                                                    title="Edit Product">
-                                                    <i class="bx bx-edit-alt"></i>
-                                                </a>
+                                                @can('product.edit')
+                                                    {{-- product সম্পাদনার নতুন permission। --}}
+                                                    <a href="{{ route('product.edit', $product->id) }}"
+                                                        class="btn btn-sm btn-outline-primary" title="Edit Product">
+                                                        <i class="bx bx-edit-alt"></i>
+                                                    </a>
                                                 @endcan
 
                                                 <!-- Delete Button -->
-                                                @can('product.delete') {{-- product মুছতে নতুন permission। --}}
-                                                <a href="{{ route('product.destroy', $product->id) }}"
-                                                    class="btn btn-sm btn-outline-danger"
-                                                    data-swal-delete
-                                                    data-delete-message="Product: {{ $product->productName }}"
-                                                    title="Delete Product">
-                                                    <i class="bx bx-trash"></i>
-                                                </a>
+                                                @can('product.delete')
+                                                    {{-- product মুছতে নতুন permission। --}}
+                                                    <a href="{{ route('product.destroy', $product->id) }}"
+                                                        class="btn btn-sm btn-outline-danger" data-swal-delete
+                                                        data-delete-message="Product: {{ $product->productName }}"
+                                                        title="Delete Product">
+                                                        <i class="bx bx-trash"></i>
+                                                    </a>
                                                 @endcan
                                             </div>
 
                                             <!-- Product Details Modal -->
-                                            <div class="modal fade" id="productDetailModal{{ $product->id }}" tabindex="-1" aria-hidden="true">
+                                            <div class="modal fade" id="productDetailModal{{ $product->id }}"
+                                                tabindex="-1" aria-hidden="true">
                                                 <div class="modal-dialog modal-dialog-centered modal-lg">
                                                     <div class="modal-content text-start">
                                                         <div class="modal-header border-bottom">
                                                             <div class="d-flex align-items-center">
-                                                                <div class="widgets-icons-2 rounded-circle bg-light-primary text-primary me-2">
+                                                                <div
+                                                                    class="widgets-icons-2 rounded-circle bg-light-primary text-primary me-2">
                                                                     <i class="bx bx-box"></i>
                                                                 </div>
                                                                 <div>
-                                                                    <h5 class="modal-title fw-bold text-dark mb-0">Product Details</h5>
-                                                                    <span class="text-muted small">SKU: #PRD-{{ str_pad($product->id, 5, '0', STR_PAD_LEFT) }}</span>
+                                                                    <h5 class="modal-title fw-bold text-dark mb-0">Product
+                                                                        Details</h5>
+                                                                    <span class="text-muted small">SKU:
+                                                                        #PRD-{{ str_pad($product->id, 5, '0', STR_PAD_LEFT) }}</span>
                                                                 </div>
                                                             </div>
-                                                            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                                                            <button type="button" class="btn-close"
+                                                                data-bs-dismiss="modal" aria-label="Close"></button>
                                                         </div>
 
                                                         <div class="modal-body p-4">
@@ -293,22 +306,29 @@
                                                                         <div class="rounded bg-light-secondary text-secondary d-flex align-items-center justify-content-center p-5 mb-2"
                                                                             style="height: 200px;">
                                                                             <div>
-                                                                                <i class="bx bx-image fs-1 d-block mb-1"></i>
-                                                                                <span class="small">No Image Uploaded</span>
+                                                                                <i
+                                                                                    class="bx bx-image fs-1 d-block mb-1"></i>
+                                                                                <span class="small">No Image
+                                                                                    Uploaded</span>
                                                                             </div>
                                                                         </div>
                                                                     @endif
-                                                                    <h5 class="fw-bold text-dark mt-2 mb-1">{{ $product->productName }}</h5>
-                                                                    <div class="h4 text-primary fw-bold mb-0">৳{{ number_format($product->price, 2) }}</div>
+                                                                    <h5 class="fw-bold text-dark mt-2 mb-1">
+                                                                        {{ $product->productName }}</h5>
+                                                                    <div class="h4 text-primary fw-bold mb-0">
+                                                                        ৳{{ number_format($product->price, 2) }}</div>
                                                                 </div>
 
                                                                 <div class="col-md-7">
                                                                     <div class="table-responsive">
-                                                                        <table class="table table-sm table-borderless mb-0">
+                                                                        <table
+                                                                            class="table table-sm table-borderless mb-0">
                                                                             <tbody>
                                                                                 <tr>
-                                                                                    <td class="text-muted py-2" style="width: 140px;">
-                                                                                        <i class="bx bx-category me-1"></i>Category:
+                                                                                    <td class="text-muted py-2"
+                                                                                        style="width: 140px;">
+                                                                                        <i
+                                                                                            class="bx bx-category me-1"></i>Category:
                                                                                     </td>
                                                                                     <td class="fw-semibold text-dark py-2">
                                                                                         {{ $product->productCategory->category_name ?? 'N/A' }}
@@ -316,7 +336,8 @@
                                                                                 </tr>
                                                                                 <tr>
                                                                                     <td class="text-muted py-2">
-                                                                                        <i class="bx bx-tag me-1"></i>Brand:
+                                                                                        <i
+                                                                                            class="bx bx-tag me-1"></i>Brand:
                                                                                     </td>
                                                                                     <td class="fw-semibold text-dark py-2">
                                                                                         {{ $product->brand->name ?? 'N/A' }}
@@ -324,7 +345,9 @@
                                                                                 </tr>
                                                                                 <tr>
                                                                                     <td class="text-muted py-2">
-                                                                                        <i class="bx bx-cuboid me-1"></i>Stock / Units:
+                                                                                        <i
+                                                                                            class="bx bx-cuboid me-1"></i>Stock
+                                                                                        / Units:
                                                                                     </td>
                                                                                     <td class="fw-semibold text-dark py-2">
                                                                                         {{ $product->unit }} Units
@@ -332,7 +355,9 @@
                                                                                 </tr>
                                                                                 <tr>
                                                                                     <td class="text-muted py-2">
-                                                                                        <i class="bx bx-calendar me-1"></i>Purchase Date:
+                                                                                        <i
+                                                                                            class="bx bx-calendar me-1"></i>Purchase
+                                                                                        Date:
                                                                                     </td>
                                                                                     <td class="fw-semibold text-dark py-2">
                                                                                         {{ optional($product->purchase_date)->format('Y-m-d') ?? 'N/A' }}
@@ -340,7 +365,9 @@
                                                                                 </tr>
                                                                                 <tr>
                                                                                     <td class="text-muted py-2">
-                                                                                        <i class="bx bx-calendar-check me-1"></i>Mfg Date:
+                                                                                        <i
+                                                                                            class="bx bx-calendar-check me-1"></i>Mfg
+                                                                                        Date:
                                                                                     </td>
                                                                                     <td class="fw-semibold text-dark py-2">
                                                                                         {{ optional($product->mfg_date)->format('Y-m-d') ?? 'N/A' }}
@@ -348,7 +375,9 @@
                                                                                 </tr>
                                                                                 <tr>
                                                                                     <td class="text-muted py-2">
-                                                                                        <i class="bx bx-calendar-x me-1"></i>Expire Date:
+                                                                                        <i
+                                                                                            class="bx bx-calendar-x me-1"></i>Expire
+                                                                                        Date:
                                                                                     </td>
                                                                                     <td class="fw-semibold text-dark py-2">
                                                                                         {{ optional($product->expiry_date)->format('Y-m-d') ?? 'N/A' }}
@@ -356,40 +385,56 @@
                                                                                 </tr>
                                                                                 <tr>
                                                                                     <td class="text-muted py-2">
-                                                                                        <i class="bx bx-time me-1"></i>Shelf Duration:
+                                                                                        <i
+                                                                                            class="bx bx-time me-1"></i>Shelf
+                                                                                        Duration:
                                                                                     </td>
                                                                                     <td class="fw-semibold text-dark py-2">
-                                                                                        {{ $product->shelfDurationDays() !== null ? $product->shelfDurationDays().' days' : 'N/A' }}
+                                                                                        {{ $product->shelfDurationDays() !== null ? $product->shelfDurationDays() . ' days' : 'N/A' }}
                                                                                     </td>
                                                                                 </tr>
                                                                                 @if ($product->isExpired())
                                                                                     <tr>
                                                                                         <td colspan="2" class="pt-2">
-                                                                                            <div class="alert alert-danger mb-0" role="alert">
-                                                                                                <i class="bx bx-error-circle me-1"></i>
-                                                                                                This product expired on {{ $product->expiry_date->format('Y-m-d') }}.
+                                                                                            <div class="alert alert-danger mb-0"
+                                                                                                role="alert">
+                                                                                                <i
+                                                                                                    class="bx bx-error-circle me-1"></i>
+                                                                                                This product expired on
+                                                                                                {{ $product->expiry_date->format('Y-m-d') }}.
                                                                                             </div>
                                                                                         </td>
                                                                                     </tr>
                                                                                 @elseif ($product->isExpiringSoon())
                                                                                     <tr>
                                                                                         <td colspan="2" class="pt-2">
-                                                                                            <div class="alert alert-warning mb-0" role="alert">
-                                                                                                <i class="bx bx-error-circle me-1"></i>
-                                                                                                This product expires within one month
-                                                                                                ({{ $product->expiry_date->format('Y-m-d') }}).
+                                                                                            <div class="alert alert-warning mb-0"
+                                                                                                role="alert">
+                                                                                                <i
+                                                                                                    class="bx bx-error-circle me-1"></i>
+                                                                                                This product expires within
+                                                                                                one month
+                                                                                                ({{ $product->expiry_date->format('Y-m-d') }})
+                                                                                                .
                                                                                             </div>
                                                                                         </td>
                                                                                     </tr>
                                                                                 @endif
                                                                                 @if ($product->description)
                                                                                     <tr>
-                                                                                        <td class="text-muted py-2" colspan="2">
-                                                                                            <div class="border-top pt-2 mt-1">
-                                                                                                <strong class="d-block text-secondary mb-1">
-                                                                                                    <i class="bx bx-align-left me-1"></i>Description:
+                                                                                        <td class="text-muted py-2"
+                                                                                            colspan="2">
+                                                                                            <div
+                                                                                                class="border-top pt-2 mt-1">
+                                                                                                <strong
+                                                                                                    class="d-block text-secondary mb-1">
+                                                                                                    <i
+                                                                                                        class="bx bx-align-left me-1"></i>Description:
                                                                                                 </strong>
-                                                                                                <p class="small text-muted mb-0">{{ $product->description }}</p>
+                                                                                                <p
+                                                                                                    class="small text-muted mb-0">
+                                                                                                    {{ $product->description }}
+                                                                                                </p>
                                                                                             </div>
                                                                                         </td>
                                                                                     </tr>
@@ -402,12 +447,15 @@
                                                         </div>
 
                                                         <div class="modal-footer border-top">
-                                                            @can('product.edit') {{-- product সম্পাদনার নতুন permission। --}}
-                                                            <a href="{{ route('product.edit', $product->id) }}" class="btn btn-primary btn-sm">
-                                                                <i class="bx bx-edit me-1"></i>Edit Product
-                                                            </a>
+                                                            @can('product.edit')
+                                                                {{-- product সম্পাদনার নতুন permission। --}}
+                                                                <a href="{{ route('product.edit', $product->id) }}"
+                                                                    class="btn btn-primary btn-sm">
+                                                                    <i class="bx bx-edit me-1"></i>Edit Product
+                                                                </a>
                                                             @endcan
-                                                            <button type="button" class="btn btn-secondary btn-sm" data-bs-dismiss="modal">Close</button>
+                                                            <button type="button" class="btn btn-secondary btn-sm"
+                                                                data-bs-dismiss="modal">Close</button>
                                                         </div>
                                                     </div>
                                                 </div>

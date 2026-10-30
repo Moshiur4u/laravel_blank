@@ -51,7 +51,7 @@ class SalesReportController extends Controller
 
         // total_amount may include an older balance; report only revenue from the current sale.
         $totalSalesAmount = (float) ((clone $invoiceQuery)
-            ->selectRaw('COALESCE(SUM(subtotal - discount_amount + vat_amount), 0) as total')
+            ->selectRaw('COALESCE(SUM(subtotal - discount_amount + vat_amount + ait_amount), 0) as total')
             ->value('total') ?? 0);
         $totalDue = (float) (clone $invoiceQuery)->sum('due_amount');
         $totalSalesCount = (clone $invoiceQuery)->count();
@@ -65,7 +65,7 @@ class SalesReportController extends Controller
             ->when($filters['customer_id'] ?? null, fn ($query, $customerId) => $query->where('sale_invoices.customer_id', $customerId))
             ->when($filters['product_id'] ?? null, fn ($query, $productId) => $query->where('sale_items.product_id', $productId));
 
-        // Invoice-এর VAT পণ্যের বিক্রয়মূল্যের অনুপাতে ভাগ করে পণ্যভিত্তিক VAT হিসাব করা হয়।
+        // Invoice-এর VAT ও AIT পণ্যের বিক্রয়মূল্যের অনুপাতে ভাগ করে product-wise tax হিসাব করা হয়।
         $topProducts = (clone $topProductsQuery)
             ->select([
                 'sale_items.product_id',
@@ -78,6 +78,7 @@ class SalesReportController extends Controller
             ->selectRaw('SUM(sale_items.quantity * COALESCE(sale_items.purchase_price, products.purchase_price, 0)) as total_cost')
             ->selectRaw('SUM(sale_items.line_total - (sale_items.quantity * COALESCE(sale_items.purchase_price, products.purchase_price, 0))) as profit')
             ->selectRaw('SUM(CASE WHEN sale_invoices.subtotal > 0 THEN sale_invoices.vat_amount * sale_items.line_total / sale_invoices.subtotal ELSE 0 END) as vat_amount')
+            ->selectRaw('SUM(CASE WHEN sale_invoices.subtotal > 0 THEN sale_invoices.ait_amount * sale_items.line_total / sale_invoices.subtotal ELSE 0 END) as ait_amount')
             ->groupBy('sale_items.product_id', 'sale_items.product_name')
             ->orderByDesc('revenue')
             ->orderBy('sale_items.product_name')
@@ -147,7 +148,7 @@ class SalesReportController extends Controller
             ));
 
         $totalSalesAmount = (float) ((clone $invoiceQuery)
-            ->selectRaw('COALESCE(SUM(subtotal - discount_amount + vat_amount), 0) as total')
+            ->selectRaw('COALESCE(SUM(subtotal - discount_amount + vat_amount + ait_amount), 0) as total')
             ->value('total') ?? 0);
         $totalDue = (float) (clone $invoiceQuery)->sum('due_amount');
         $totalSalesCount = (clone $invoiceQuery)->count();
@@ -170,6 +171,7 @@ class SalesReportController extends Controller
             ->selectRaw('SUM(sale_items.quantity * COALESCE(sale_items.purchase_price, products.purchase_price, 0)) as total_cost')
             ->selectRaw('SUM(sale_items.line_total - (sale_items.quantity * COALESCE(sale_items.purchase_price, products.purchase_price, 0))) as profit')
             ->selectRaw('SUM(CASE WHEN sale_invoices.subtotal > 0 THEN sale_invoices.vat_amount * sale_items.line_total / sale_invoices.subtotal ELSE 0 END) as vat_amount')
+            ->selectRaw('SUM(CASE WHEN sale_invoices.subtotal > 0 THEN sale_invoices.ait_amount * sale_items.line_total / sale_invoices.subtotal ELSE 0 END) as ait_amount')
             ->groupBy('sale_items.product_id', 'sale_items.product_name')
             ->orderByDesc('revenue')
             ->orderBy('sale_items.product_name')
@@ -201,7 +203,7 @@ class SalesReportController extends Controller
             $writeRow(['Total Sales (Invoices)', $totalSalesCount]);
             $writeRow([]);
             $writeRow(['Product-wise Sales & Profit']);
-            $writeRow(['Product', 'Purchase Price', 'Avg Selling Price', 'Quantity Sold', 'Total Sales (Revenue)', 'Total Purchase Cost', 'Profit', 'VAT']);
+            $writeRow(['Product', 'Purchase Price', 'Avg Selling Price', 'Quantity Sold', 'Total Sales (Revenue)', 'Total Purchase Cost', 'Profit', 'VAT', 'AIT']);
             foreach ($topProducts as $product) {
                 $writeRow([
                     $product->product_name,
@@ -212,6 +214,7 @@ class SalesReportController extends Controller
                     number_format((float) $product->total_cost, 2, '.', ''),
                     number_format((float) $product->profit, 2, '.', ''),
                     number_format((float) $product->vat_amount, 2, '.', ''),
+                    number_format((float) $product->ait_amount, 2, '.', ''),
                 ]);
             }
             $writeRow([]);
@@ -226,7 +229,7 @@ class SalesReportController extends Controller
                     $invoice->customer?->name ?? $invoice->customer_name ?? 'Walk-in Customer',
                     $invoice->employee?->name ?? 'N/A',
                     $invoice->items_count,
-                    number_format((float) $invoice->subtotal - (float) $invoice->discount_amount + (float) $invoice->vat_amount, 2, '.', ''),
+                    number_format((float) $invoice->subtotal - (float) $invoice->discount_amount + (float) $invoice->vat_amount + (float) $invoice->ait_amount, 2, '.', ''),
                     number_format((float) $invoiceProfit, 2, '.', ''),
                     number_format((float) $invoice->due_amount, 2, '.', ''),
                 ]);

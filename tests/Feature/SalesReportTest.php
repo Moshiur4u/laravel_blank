@@ -157,8 +157,9 @@ test('sales report allocates invoice VAT to products by their share of invoice s
         'subtotal' => 200,
         'discount_amount' => 0,
         'vat_amount' => 20,
-        'total_amount' => 220,
-        'amount_paid' => 220,
+        'ait_amount' => 10,
+        'total_amount' => 230,
+        'amount_paid' => 230,
         'due_amount' => 0,
     ]);
 
@@ -179,5 +180,9 @@ test('sales report allocates invoice VAT to products by their share of invoice s
         ->assertViewHas('topProducts', fn ($topProducts) => $topProducts->count() === 2
             && (float) $topProducts->firstWhere('product_name', 'VAT Product A')->vat_amount === 5.0
             && (float) $topProducts->firstWhere('product_name', 'VAT Product B')->vat_amount === 15.0
-            && (float) $topProducts->sum('vat_amount') === 20.0);
+            && (float) $topProducts->sum('vat_amount') === 20.0
+            && (float) $topProducts->firstWhere('product_name', 'VAT Product A')->ait_amount === 2.5
+            && (float) $topProducts->firstWhere('product_name', 'VAT Product B')->ait_amount === 7.5
+            && (float) $topProducts->sum('ait_amount') === 10.0)
+        ->assertViewHas('totalSalesAmount', 230.0);
 });

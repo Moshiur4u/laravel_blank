@@ -17,7 +17,9 @@ class ProductController extends Controller
      */
     public function index()
     {
-        $Products = Product::with('productCategory', 'brand')->get();
+        $Products = Product::with('productCategory', 'brand')
+            ->whereRaw('CAST(unit AS DOUBLE) > 0')
+            ->get();
 
         return view('backend.Product.product.indexProduct', compact('Products'));
     }
@@ -29,10 +31,21 @@ class ProductController extends Controller
     {
         $ProductCategories = ProductCategory::all();
         $brands = Brand::all();
+        $existingProductNames = Product::query()
+            ->whereNotNull('productName')
+            ->where('productName', '<>', '')
+            ->distinct()
+            ->orderBy('productName')
+            ->pluck('productName');
         // ফর্মের supplier dropdown-এ দেখানোর জন্য বিদ্যমান supplier-গুলো আনা হয়।
         $suppliers = Supplier::orderBy('name')->get();
 
-        return view('backend.Product.product.createProduct', compact('brands', 'ProductCategories', 'suppliers'));
+        return view('backend.Product.product.createProduct', compact(
+            'brands',
+            'ProductCategories',
+            'suppliers',
+            'existingProductNames'
+        ));
     }
 
     /**

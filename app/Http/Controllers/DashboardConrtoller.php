@@ -45,7 +45,7 @@ class DashboardConrtoller extends Controller
                 ->where('invoice_date', '<', $end);
 
             $invoiceRevenue = (clone $invoiceTotals)
-                ->selectRaw('COALESCE(SUM(subtotal - discount_amount + vat_amount), 0) as total')
+                ->selectRaw('COALESCE(SUM(subtotal - discount_amount + vat_amount + ait_amount), 0) as total')
                 ->value('total');
             $customerSales = DB::table('customer_ledgers')
                 ->where('entry_type', 'sale')
@@ -141,7 +141,7 @@ class DashboardConrtoller extends Controller
             ->map(fn ($total) => (float) $total)
             ->all();
         $dailyTotals = [
-            'invoice_revenue' => $this->dailyTotals('sale_invoices', 'invoice_date', 'subtotal - discount_amount + vat_amount', $chartStart, $yearEnd),
+            'invoice_revenue' => $this->dailyTotals('sale_invoices', 'invoice_date', 'subtotal - discount_amount + vat_amount + ait_amount', $chartStart, $yearEnd),
             'customer_revenue' => $customerRevenueTotals,
             'purchase' => $this->dailyTotals('supplierledgers', 'created_at', 'total', $chartStart, $yearEnd),
             'employee_vouchers' => $this->dailyTotals('employee_payment_vouchers', 'payment_date', 'amount', $chartStart, $yearEnd),

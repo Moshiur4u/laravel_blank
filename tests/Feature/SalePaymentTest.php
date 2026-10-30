@@ -32,7 +32,7 @@ test('walk-in sales receive the full invoice amount and existing customers can p
             'amount_paid' => 0,
             'payment_method' => 'cash',
             'items' => [
-                ['product_id' => $product->id, 'quantity' => 2],
+                ['product_id' => $product->id, 'quantity' => 2, 'unit_price' => 100],
             ],
         ])
         ->assertRedirect();
@@ -66,7 +66,7 @@ test('walk-in sales receive the full invoice amount and existing customers can p
             'amount_paid' => 40,
             'payment_method' => 'cash',
             'items' => [
-                ['product_id' => $product->id, 'quantity' => 1],
+                ['product_id' => $product->id, 'quantity' => 1, 'unit_price' => 100],
             ],
         ])
         ->assertRedirect();
@@ -83,4 +83,45 @@ test('walk-in sales receive the full invoice amount and existing customers can p
         'reference' => $customerInvoice->invoice_no,
         'created_by' => $employee->id,
     ]);
+});
+
+test('sales use entered unit prices for invoices and profit and calculate AIT', function () {
+    $employee = User::factory()->create();
+    $categoryId = DB::table('product_categories')->insertGetId(['category_name' => 'Manual Sale Price Category']);
+    $brandId = DB::table('brands')->insertGetId(['name' => 'Manual Sale Price Brand']);
+    $product = Product::create([
+        'productName' => 'Manual Sale Price Product',
+        'product_categorie_id' => $categoryId,
+        'brand_id' => $brandId,
+        'purchase_price' => '70.00',
+        'price' => 100,
+        'unit' => '10',
+    ]);
+
+    $this->actingAs($employee)
+        ->post(route('sales.store'), [
+            'customer_phone' => '01700000003',
+            'save_customer' => 'no',
+            'discount_type' => 'amount',
+            'discount_value' => 0,
+            'vat_percentage' => 10,
+            'ait_percentage' => 3,
+            'amount_paid' => 0,
+            'payment_method' => 'cash',
+            'items' => [
+                ['product_id' => $product->id, 'quantity' => 2, 'unit_price' => 125],
+            ],
+        ])
+        ->assertRedirect();
+
+    $invoice = SaleInvoice::query()->latest('id')->firstOrFail();
+    $item = $invoice->items()->firstOrFail();
+
+    expect((float) $invoice->subtotal)->toBe(250.0)
+        ->and((float) $invoice->vat_amount)->toBe(25.0)
+        ->and((float) $invoice->ait_amount)->toBe(7.5)
+        ->and((float) $invoice->total_amount)->toBe(282.5)
+        ->and((float) $item->unit_price)->toBe(125.0)
+        ->and((float) $item->line_total)->toBe(250.0)
+        ->and($item->profit)->toBe(110.0);
 });

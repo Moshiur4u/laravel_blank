@@ -176,6 +176,7 @@
                                     <th class="text-end">Purchase Cost </th>
                                     <th class="text-end">Profit</th>
                                     <th class="text-end">VAT</th>
+                                    <th class="text-end">AIT</th>
                                 </tr>
                             </thead>
                             <tbody>
@@ -203,10 +204,13 @@
                                                 ৳{{ number_format((float) ($topProduct->vat_amount ?? 0), 2) }}
                                             </span>
                                         </td>
+                                        <td class="text-end">
+                                            ৳{{ number_format((float) ($topProduct->ait_amount ?? 0), 2) }}
+                                        </td>
                                     </tr>
                                 @empty
                                     <tr>
-                                        <td colspan="9" class="py-4 text-center text-muted">No product sales found for
+                                        <td colspan="10" class="py-4 text-center text-muted">No product sales found for
                                             the selected filters.</td>
                                     </tr>
                                 @endforelse
@@ -222,6 +226,8 @@
                                             ৳{{ number_format($topProducts->sum('profit'), 2) }}</td>
                                         <td class="text-end text-success">
                                             ৳{{ number_format($topProducts->sum('vat_amount'), 2) }}</td>
+                                        <td class="text-end text-success">
+                                            ৳{{ number_format($topProducts->sum('ait_amount'), 2) }}</td>
                                     </tr>
                                 </tfoot>
                             @endif
@@ -263,7 +269,7 @@
                                         <td>{{ $invoice->employee?->name ?? 'N/A' }}</td>
                                         <td class="text-end">{{ number_format($invoice->items_count) }}</td>
                                         <td class="text-end">
-                                            ৳{{ number_format((float) $invoice->subtotal - (float) $invoice->discount_amount + (float) $invoice->vat_amount, 2) }}
+                                            ৳{{ number_format((float) $invoice->subtotal - (float) $invoice->discount_amount + (float) $invoice->vat_amount + (float) $invoice->ait_amount, 2) }}
                                         </td>
                                         <td class="text-end">
                                             <span

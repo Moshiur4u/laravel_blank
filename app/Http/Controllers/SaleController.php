@@ -20,7 +20,10 @@ class SaleController extends Controller
 
     public function index()
     {
-        $products = Product::query()->orderBy('productName')->get();
+        $products = Product::query()
+            ->whereRaw('CAST(unit AS DOUBLE) > 0')
+            ->orderBy('productName')
+            ->get();
         $invoices = SaleInvoice::with('employee')->latest('invoice_date')->limit(10)->get();
 
         return view('backend.Sales.salesIndex', compact('products', 'invoices'));
@@ -78,13 +81,17 @@ class SaleController extends Controller
             'discount_type' => 'nullable|in:amount,percentage',
             'discount_value' => 'nullable|numeric|min:0',
             'discount_amount' => 'nullable|numeric|min:0',
+            'vat_percentage' => 'nullable|numeric|min:0|max:100',
             'vat_amount' => 'nullable|numeric|min:0',
+            'ait_percentage' => 'nullable|numeric|min:0|max:100',
+            'ait_amount' => 'nullable|numeric|min:0',
             'amount_paid' => 'nullable|numeric|min:0',
             'payment_method' => 'nullable|in:' . implode(',', self::PAYMENT_METHODS),
             'notes' => 'nullable|string|max:2000',
             'items' => 'required|array|min:1',
             'items.*.product_id' => 'required|integer|exists:products,id',
             'items.*.quantity' => 'required|integer|min:1',
+            'items.*.unit_price' => 'required|numeric|min:0|max:9999999999999.99',
         ]);
 
         $customerPhone = trim($validated['customer_phone']);
@@ -132,14 +139,13 @@ class SaleController extends Controller
             $includePreviousDue = $customer && ! empty($validated['include_previous_due']);
             $userId = Auth::id();
 
-            // ডিসকাউন্ট, VAT ও আগের বকেয়া সার্ভারেই হিসাব হয়; ব্রাউজারের পাঠানো total বিশ্বাস করা হয় না।
+            // ডিসকাউন্ট, VAT, AIT ও আগের বকেয়া সার্ভারেই হিসাব হয়; ব্রাউজারের total বিশ্বাস করা হয় না।
             $subtotal = 0;
             $lineItems = [];
             foreach ($validated['items'] as $item) {
                 $product = $products->get($item['product_id']);
                 $quantity = (int) $item['quantity'];
-                // Product Create-এর products.price হলো বিক্রয়মূল্য; sale item-এ সেই সময়কার দাম snapshot হিসেবে রাখা হয়।
-                $unitPrice = round((float) $product->price, 2);
+                $unitPrice = round((float) $item['unit_price'], 2);
                 $lineTotal = round($unitPrice * $quantity, 2);
                 $subtotal += $lineTotal;
                 $lineItems[] = compact('product', 'quantity', 'unitPrice', 'lineTotal');
@@ -162,8 +168,14 @@ class SaleController extends Controller
                     'discount_amount' => 'The discount cannot be greater than the subtotal.',
                 ]);
             }
-            $vat = round((float) ($validated['vat_amount'] ?? 0), 2);
-            $saleAmount = round($subtotal - $discount + $vat, 2);
+            $taxableAmount = round($subtotal - $discount, 2);
+            $vat = array_key_exists('vat_percentage', $validated)
+                ? round($taxableAmount * (float) $validated['vat_percentage'] / 100, 2)
+                : round((float) ($validated['vat_amount'] ?? 0), 2);
+            $ait = array_key_exists('ait_percentage', $validated)
+                ? round($taxableAmount * (float) $validated['ait_percentage'] / 100, 2)
+                : round((float) ($validated['ait_amount'] ?? 0), 2);
+            $saleAmount = round($taxableAmount + $vat + $ait, 2);
             $invoiceTotal = round($saleAmount + ($includePreviousDue ? $previousDue : 0), 2);
 
             // Walk-in sales have no customer ledger for later collection, so collect the full invoice total.
@@ -193,6 +205,7 @@ class SaleController extends Controller
                 'discount_value' => $discountValue ?? 0,
                 'discount_amount' => $discount,
                 'vat_amount' => $vat,
+                'ait_amount' => $ait,
                 'previous_due' => $includePreviousDue ? $previousDue : 0,
                 'include_previous_due' => (bool) $includePreviousDue,
                 'total_amount' => $invoiceTotal,
