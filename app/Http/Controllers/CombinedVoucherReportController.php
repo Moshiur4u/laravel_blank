@@ -62,6 +62,10 @@ class CombinedVoucherReportController extends Controller
             ->selectRaw("SUM(CASE WHEN voucher_category = 'credit' THEN amount ELSE 0 END) as credit_total")
             ->first();
 
+        $employeeTotal = (float) $totals->employee_total;
+        $debitTotal = (float) $totals->debit_total;
+        $creditTotal = (float) $totals->credit_total;
+
         $vouchers = $reportQuery()
             ->orderByDesc('report_date')
             ->orderByDesc('voucher_code')
@@ -76,9 +80,10 @@ class CombinedVoucherReportController extends Controller
             'vouchers' => $vouchers,
             'debitVoucherCount' => (int) $totals->debit_voucher_count,
             'creditVoucherCount' => (int) $totals->credit_voucher_count,
-            'employeeTotal' => (float) $totals->employee_total,
-            'debitTotal' => (float) $totals->debit_total,
-            'creditTotal' => (float) $totals->credit_total,
+            'employeeTotal' => $employeeTotal,
+            'debitTotal' => $debitTotal,
+            'creditTotal' => $creditTotal,
+            'cashInHandTotal' => $creditTotal - ($employeeTotal + $debitTotal),
             'expenseTypes' => EmployeePaymentVoucher::EXPENSE_TYPES,
             'voucherTypes' => VoucherEntry::TYPES,
         ]);

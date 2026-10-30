@@ -59,7 +59,9 @@ test('combined voucher report shows employee debit and credit entries for a day'
         ->assertViewHas('creditVoucherCount', 1)
         ->assertViewHas('employeeTotal', 100.0)
         ->assertViewHas('debitTotal', 30.0)
-        ->assertViewHas('creditTotal', 10.0);
+        ->assertViewHas('creditTotal', 10.0)
+        ->assertViewHas('cashInHandTotal', -120.0)
+        ->assertSee('৳-120.00');
 });
 
 test('combined voucher report can show a selected month', function () {

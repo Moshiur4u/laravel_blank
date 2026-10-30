@@ -5,16 +5,17 @@
 @section('content')
     <div class="page-wrapper">
         <div class="page-content">
-            <div class="mb-3 d-flex flex-wrap align-items-center justify-content-between gap-2 no-print">
+            <div class="flex-wrap gap-2 mb-3 d-flex align-items-center justify-content-between no-print">
                 <div>
                     <div class="breadcrumb-title pe-3">Reports</div>
-                    <h4 class="mb-0 mt-2">Combined Voucher Report</h4>
+                    <h4 class="mt-2 mb-0">Cashbook Report</h4>
                 </div>
-                <div class="d-flex gap-2">
+                <div class="gap-2 d-flex">
                     <a href="{{ route('dashboardbody') }}" class="btn btn-outline-secondary">
                         <i class="bx bx-arrow-back me-1"></i>Dashboard
                     </a>
-                    <a href="{{ route('voucher-report.combined.export', request()->except('page')) }}" class="btn btn-success">
+                    <a href="{{ route('voucher-report.combined.export', request()->except('page')) }}"
+                        class="btn btn-success">
                         <i class="bx bx-spreadsheet me-1"></i>Export Excel
                     </a>
                     <button type="button" class="btn btn-primary" onclick="window.print()">
@@ -23,7 +24,7 @@
                 </div>
             </div>
 
-            <div class="card border-0 shadow-sm mb-4 no-print">
+            <div class="mb-4 border-0 shadow-sm card no-print">
                 <div class="card-header">
                     <h5 class="mb-0"><i class="bx bx-filter-alt me-1"></i>Filter Report</h5>
                 </div>
@@ -46,7 +47,7 @@
                             <input type="month" name="month" id="month" class="form-control"
                                 value="{{ $selectedMonth }}">
                         </div>
-                        <div class="col-12 d-flex gap-2">
+                        <div class="gap-2 col-12 d-flex">
                             <button type="submit" class="btn btn-primary">
                                 <i class="bx bx-search me-1"></i>Apply
                             </button>
@@ -54,30 +55,32 @@
                         </div>
                     </form>
                     @if ($errors->any())
-                        <div class="alert alert-danger mt-3 mb-0" role="alert">
+                        <div class="mt-3 mb-0 alert alert-danger" role="alert">
                             @foreach ($errors->all() as $message)
                                 <div>{{ $message }}</div>
                             @endforeach
                         </div>
                     @endif
                     @if (session('success'))
-                        <div class="alert alert-success mt-3 mb-0" role="status">{{ session('success') }}</div>
+                        <div class="mt-3 mb-0 alert alert-success" role="status">{{ session('success') }}</div>
                     @endif
                 </div>
             </div>
 
-            <div class="card border-0 shadow-sm print-report">
-                <div class="card-body p-4 p-md-5">
+            <div class="border-0 shadow-sm card print-report">
+                <div class="p-4 card-body p-md-5">
                     @include('backend.partials.organizationHeader', [
                         'reportTitle' => 'Combined Voucher Report',
-                        'reportSubtitle' => 'Period: ' . ($period === 'daily'
-                            ? \Illuminate\Support\Carbon::parse($startDate)->format('d M Y')
-                            : \Illuminate\Support\Carbon::parse($startDate)->format('F Y')),
+                        'reportSubtitle' =>
+                            'Period: ' .
+                            ($period === 'daily'
+                                ? \Illuminate\Support\Carbon::parse($startDate)->format('d M Y')
+                                : \Illuminate\Support\Carbon::parse($startDate)->format('F Y')),
                         'reportGeneratedAt' => now()->format('d M Y, h:i A'),
                     ])
-                    <div class="row align-items-start mb-4 d-print-none">
+                    <div class="mb-4 row align-items-start d-print-none">
                         <div class="col-7">
-                            <h2 class="text-primary fw-bold mb-1 d-print-none">Combined Voucher Report</h2>
+                            <h2 class="mb-1 text-primary fw-bold d-print-none">Cashbook Report</h2>
                             <div class="text-muted">
                                 Period:
                                 <strong>
@@ -88,48 +91,53 @@
                             </div>
                         </div>
                         <div class="col-5 text-end d-print-none">
-                            <h5 class="fw-bold mb-1">Report Generated</h5>
+                            <h5 class="mb-1 fw-bold">Report Generated</h5>
                             <div>{{ now()->format('d M Y, h:i A') }}</div>
                             <div class="text-muted">{{ ucfirst($period) }} voucher entries</div>
                         </div>
                     </div>
 
-                    <div class="row g-3 mb-4 print-summary">
+                    <div class="mb-4 row g-3 print-summary">
                         <div class="col-md-3 summary-card">
-                            <div class="card border-0 bg-light h-100 voucher-count-card">
+                            <div class="border-0 card bg-light h-100 voucher-count-card">
                                 <div class="card-body">
-                                    <div class="text-muted mb-2">Voucher Count</div>
-                                    <div class="d-flex justify-content-between gap-3">
+                                    <div class="mb-2 text-muted">Cash in Hand</div>
+                                    <div class="mb-2 fs-5 fw-bold {{ $cashInHandTotal >= 0 ? 'text-success' : 'text-danger' }}">
+                                        ৳{{ number_format($cashInHandTotal, 2) }}
+                                    </div>
+                                    <div class="gap-3 d-flex justify-content-between">
                                         <div>
-                                            <div class="small text-muted">Debit</div>
-                                            <div class="fs-5 fw-bold text-danger">{{ number_format($debitVoucherCount) }}</div>
+                                            <div class="small text-muted">Debit vouchers</div>
+                                            <div class="fs-5 fw-bold text-danger">{{ number_format($debitVoucherCount) }}
+                                            </div>
                                         </div>
                                         <div class="text-end">
-                                            <div class="small text-muted">Credit</div>
-                                            <div class="fs-5 fw-bold text-success">{{ number_format($creditVoucherCount) }}</div>
+                                            <div class="small text-muted">Credit vouchers</div>
+                                            <div class="fs-5 fw-bold text-success">{{ number_format($creditVoucherCount) }}
+                                            </div>
                                         </div>
                                     </div>
                                 </div>
                             </div>
                         </div>
                         <div class="col-md-3 summary-card">
-                            <div class="card border-0 bg-light h-100">
+                            <div class="border-0 card bg-light h-100">
                                 <div class="card-body">
-                                    <div class="text-muted">Employee Voucher</div>
+                                    <div class="text-muted">Employee Payment</div>
                                     <div class="fs-5 fw-bold">৳{{ number_format($employeeTotal, 2) }}</div>
                                 </div>
                             </div>
                         </div>
                         <div class="col-md-3 summary-card">
-                            <div class="card border-0 bg-light h-100">
+                            <div class="border-0 card bg-light h-100">
                                 <div class="card-body">
-                                    <div class="text-muted">Total Debit</div>
+                                    <div class="text-muted">Other Payment</div>
                                     <div class="fs-5 fw-bold text-danger">৳{{ number_format($debitTotal, 2) }}</div>
                                 </div>
                             </div>
                         </div>
                         <div class="col-md-3 summary-card">
-                            <div class="card border-0 bg-light h-100">
+                            <div class="border-0 card bg-light h-100">
                                 <div class="card-body">
                                     <div class="text-muted">Total Credit</div>
                                     <div class="fs-5 fw-bold text-success">৳{{ number_format($creditTotal, 2) }}</div>
@@ -139,10 +147,12 @@
                     </div>
 
                     @php
-                        $canManageVouchers = auth()->user()->canAny(['voucher.edit', 'voucher.delete', 'reports.all_access']);
+                        $canManageVouchers = auth()
+                            ->user()
+                            ->canAny(['voucher.edit', 'voucher.delete', 'reports.all_access']);
                     @endphp
                     <div class="table-responsive">
-                        <table class="table table-bordered table-striped align-middle">
+                        <table class="table align-middle table-bordered table-striped">
                             <thead class="table-light">
                                 <tr>
                                     <th>Date</th>
@@ -163,13 +173,15 @@
                                 @forelse ($vouchers as $voucher)
                                     @php
                                         $isEmployeeVoucher = $voucher->voucher_category === 'employee';
-                                        $isLinkedVoucher = in_array($voucher->voucherable_type, [
-                                            \App\Models\Supplierledger::class,
-                                            \App\Models\CustomerLedger::class,
-                                        ], true);
+                                        $isLinkedVoucher = in_array(
+                                            $voucher->voucherable_type,
+                                            [\App\Models\Supplierledger::class, \App\Models\CustomerLedger::class],
+                                            true,
+                                        );
                                     @endphp
                                     <tr>
-                                        <td>{{ \Illuminate\Support\Carbon::parse($voucher->report_date)->format('d M Y') }}</td>
+                                        <td>{{ \Illuminate\Support\Carbon::parse($voucher->report_date)->format('d M Y') }}
+                                        </td>
                                         <td class="fw-semibold">{{ $voucher->voucher_code ?: '—' }}</td>
                                         <td>
                                             @if ($voucher->voucher_category === 'employee')
@@ -203,73 +215,90 @@
                                         <td>{{ $voucher->created_by_name }}</td>
                                         <td>{{ $voucher->reference ?: $voucher->description ?: '—' }}</td>
                                         @if ($canManageVouchers)
-                                        <td class="no-print">
-                                            @canany(['voucher.edit', 'reports.all_access'])
-                                            <details>
-                                                <summary class="btn btn-sm btn-outline-primary">Edit</summary>
-                                                <form method="POST"
-                                                    action="{{ route('voucher-report.combined.update', [$voucher->voucher_category, $voucher->voucher_id]) }}"
-                                                    class="mt-2" style="min-width: 240px">
-                                                    @csrf
-                                                    @method('PUT')
-                                                    <input type="hidden" name="period" value="{{ $period }}">
-                                                    <input type="hidden" name="date" value="{{ $period === 'daily' ? $startDate : '' }}">
-                                                    <input type="hidden" name="month" value="{{ $period === 'monthly' ? $selectedMonth : '' }}">
-                                                    <label class="form-label small mb-1">Date</label>
-                                                    <input type="date" name="{{ $isEmployeeVoucher ? 'payment_date' : 'voucher_date' }}"
-                                                        class="form-control form-control-sm mb-2"
-                                                        value="{{ \Illuminate\Support\Carbon::parse($voucher->report_date)->toDateString() }}"
-                                                        @if ($isEmployeeVoucher) max="{{ today()->toDateString() }}" @endif required>
-                                                    <label class="form-label small mb-1">Amount</label>
-                                                    <input type="number" name="amount" class="form-control form-control-sm mb-2"
-                                                        min="0.01" max="9999999999.99" step="0.01"
-                                                        value="{{ number_format((float) $voucher->amount, 2, '.', '') }}" required>
-                                                    @if ($isEmployeeVoucher)
-                                                        <label class="form-label small mb-1">Expense Type</label>
-                                                        <select name="expense_type" class="form-select form-select-sm mb-2" required>
-                                                            @foreach ($expenseTypes as $type => $label)
-                                                                <option value="{{ $type }}" @selected($voucher->voucher_head === $type)>{{ $label }}</option>
-                                                            @endforeach
-                                                        </select>
-                                                        <label class="form-label small mb-1">Reference</label>
-                                                        <input type="text" name="reference" maxlength="100"
-                                                            class="form-control form-control-sm mb-2" value="{{ $voucher->reference }}">
-                                                        <label class="form-label small mb-1">Notes</label>
-                                                        <textarea name="notes" maxlength="2000" rows="2"
-                                                            class="form-control form-control-sm mb-2">{{ $voucher->description }}</textarea>
-                                                    @elseif (! $isLinkedVoucher)
-                                                        <label class="form-label small mb-1">Voucher Head</label>
-                                                        <input type="text" name="expense_income_type" maxlength="100"
-                                                            class="form-control form-control-sm mb-2" value="{{ $voucher->voucher_head }}">
-                                                        <label class="form-label small mb-1">Reference</label>
-                                                        <input type="text" name="reference" maxlength="100"
-                                                            class="form-control form-control-sm mb-2" value="{{ $voucher->reference }}">
-                                                        <label class="form-label small mb-1">Description</label>
-                                                        <textarea name="description" maxlength="2000" rows="2"
-                                                            class="form-control form-control-sm mb-2">{{ $voucher->description }}</textarea>
-                                                    @endif
-                                                    <button type="submit" class="btn btn-sm btn-primary">Save Changes</button>
-                                                </form>
-                                            </details>
-                                            @endcanany
-                                            @canany(['voucher.delete', 'reports.all_access'])
-                                            <form method="POST"
-                                                action="{{ route('voucher-report.combined.destroy', [$voucher->voucher_category, $voucher->voucher_id]) }}"
-                                                class="mt-2" onsubmit="return confirm('Delete this voucher? This change will update related ledger balances.');">
-                                                @csrf
-                                                @method('DELETE')
-                                                <input type="hidden" name="period" value="{{ $period }}">
-                                                <input type="hidden" name="date" value="{{ $period === 'daily' ? $startDate : '' }}">
-                                                <input type="hidden" name="month" value="{{ $period === 'monthly' ? $selectedMonth : '' }}">
-                                                <button type="submit" class="btn btn-sm btn-outline-danger">Delete</button>
-                                            </form>
-                                            @endcanany
-                                        </td>
+                                            <td class="no-print">
+                                                @canany(['voucher.edit', 'reports.all_access'])
+                                                    <details>
+                                                        <summary class="btn btn-sm btn-outline-primary">Edit</summary>
+                                                        <form method="POST"
+                                                            action="{{ route('voucher-report.combined.update', [$voucher->voucher_category, $voucher->voucher_id]) }}"
+                                                            class="mt-2" style="min-width: 240px">
+                                                            @csrf
+                                                            @method('PUT')
+                                                            <input type="hidden" name="period"
+                                                                value="{{ $period }}">
+                                                            <input type="hidden" name="date"
+                                                                value="{{ $period === 'daily' ? $startDate : '' }}">
+                                                            <input type="hidden" name="month"
+                                                                value="{{ $period === 'monthly' ? $selectedMonth : '' }}">
+                                                            <label class="mb-1 form-label small">Date</label>
+                                                            <input type="date"
+                                                                name="{{ $isEmployeeVoucher ? 'payment_date' : 'voucher_date' }}"
+                                                                class="mb-2 form-control form-control-sm"
+                                                                value="{{ \Illuminate\Support\Carbon::parse($voucher->report_date)->toDateString() }}"
+                                                                @if ($isEmployeeVoucher) max="{{ today()->toDateString() }}" @endif
+                                                                required>
+                                                            <label class="mb-1 form-label small">Amount</label>
+                                                            <input type="number" name="amount"
+                                                                class="mb-2 form-control form-control-sm" min="0.01"
+                                                                max="9999999999.99" step="0.01"
+                                                                value="{{ number_format((float) $voucher->amount, 2, '.', '') }}"
+                                                                required>
+                                                            @if ($isEmployeeVoucher)
+                                                                <label class="mb-1 form-label small">Expense Type</label>
+                                                                <select name="expense_type"
+                                                                    class="mb-2 form-select form-select-sm" required>
+                                                                    @foreach ($expenseTypes as $type => $label)
+                                                                        <option value="{{ $type }}"
+                                                                            @selected($voucher->voucher_head === $type)>{{ $label }}
+                                                                        </option>
+                                                                    @endforeach
+                                                                </select>
+                                                                <label class="mb-1 form-label small">Reference</label>
+                                                                <input type="text" name="reference" maxlength="100"
+                                                                    class="mb-2 form-control form-control-sm"
+                                                                    value="{{ $voucher->reference }}">
+                                                                <label class="mb-1 form-label small">Notes</label>
+                                                                <textarea name="notes" maxlength="2000" rows="2" class="mb-2 form-control form-control-sm">{{ $voucher->description }}</textarea>
+                                                            @elseif (!$isLinkedVoucher)
+                                                                <label class="mb-1 form-label small">Voucher Head</label>
+                                                                <input type="text" name="expense_income_type"
+                                                                    maxlength="100" class="mb-2 form-control form-control-sm"
+                                                                    value="{{ $voucher->voucher_head }}">
+                                                                <label class="mb-1 form-label small">Reference</label>
+                                                                <input type="text" name="reference" maxlength="100"
+                                                                    class="mb-2 form-control form-control-sm"
+                                                                    value="{{ $voucher->reference }}">
+                                                                <label class="mb-1 form-label small">Description</label>
+                                                                <textarea name="description" maxlength="2000" rows="2" class="mb-2 form-control form-control-sm">{{ $voucher->description }}</textarea>
+                                                            @endif
+                                                            <button type="submit" class="btn btn-sm btn-primary">Save
+                                                                Changes</button>
+                                                        </form>
+                                                    </details>
+                                                @endcanany
+                                                @canany(['voucher.delete', 'reports.all_access'])
+                                                    <form method="POST"
+                                                        action="{{ route('voucher-report.combined.destroy', [$voucher->voucher_category, $voucher->voucher_id]) }}"
+                                                        class="mt-2"
+                                                        onsubmit="return confirm('Delete this voucher? This change will update related ledger balances.');">
+                                                        @csrf
+                                                        @method('DELETE')
+                                                        <input type="hidden" name="period" value="{{ $period }}">
+                                                        <input type="hidden" name="date"
+                                                            value="{{ $period === 'daily' ? $startDate : '' }}">
+                                                        <input type="hidden" name="month"
+                                                            value="{{ $period === 'monthly' ? $selectedMonth : '' }}">
+                                                        <button type="submit"
+                                                            class="btn btn-sm btn-outline-danger">Delete</button>
+                                                    </form>
+                                                @endcanany
+                                            </td>
                                         @endif
                                     </tr>
                                 @empty
                                     <tr>
-                                        <td colspan="{{ $canManageVouchers ? 10 : 9 }}" class="text-center text-muted py-4">No vouchers found for this period.</td>
+                                        <td colspan="{{ $canManageVouchers ? 10 : 9 }}"
+                                            class="py-4 text-center text-muted">No vouchers found for this period.</td>
                                     </tr>
                                 @endforelse
                             </tbody>
@@ -381,7 +410,7 @@
     </style>
 
     <script>
-        document.getElementById('period').addEventListener('change', function () {
+        document.getElementById('period').addEventListener('change', function() {
             const isMonthly = this.value === 'monthly';
             document.getElementById('daily-date-field').style.display = isMonthly ? 'none' : 'block';
             document.getElementById('monthly-date-field').style.display = isMonthly ? 'block' : 'none';
