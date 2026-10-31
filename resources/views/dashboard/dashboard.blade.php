@@ -805,6 +805,18 @@
         }
     </script>
     @yield('scripts')
+    {{-- ব্রাউজারের প্রিন্ট হেডার-ফুটার সরিয়ে মূল ডকুমেন্টের চারপাশে প্রিন্ট মার্জিন রাখা হয়। --}}
+    <style>
+        @media print {
+            @page {
+                margin: 0;
+            }
+
+            body {
+                margin: 10mm !important;
+            }
+        }
+    </style>
 </body>
 
 </html>
