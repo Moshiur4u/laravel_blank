@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Customer;
 use App\Models\Organization;
 use App\Models\Product;
 use App\Models\Quotation;
@@ -53,6 +54,38 @@ class QuotationController extends Controller
         $defaultTerms = "1. This quotation is valid for 15 days from the date of issue.\n2. Prices are inclusive/exclusive of applicable taxes as indicated.\n3. Delivery will be scheduled upon confirmation of the order.\n4. Payment terms: 50% advance, balance upon delivery.";
 
         return view('backend.quotation.create', compact('products', 'organization', 'generatedQuotationNo', 'defaultTerms'));
+    }
+
+    /**
+     * Find a saved customer by exact name or phone for the quotation form.
+     */
+    public function customerLookup(Request $request)
+    {
+        $validated = $request->validate([
+            'name' => 'required_without:phone|nullable|string|max:255',
+            'phone' => 'required_without:name|nullable|string|max:50',
+        ]);
+
+        $query = Customer::query();
+
+        if (! empty($validated['phone'])) {
+            $query->where('phone', trim($validated['phone']));
+        } else {
+            $query->whereRaw('LOWER(name) = LOWER(?)', [trim($validated['name'])]);
+        }
+
+        $matches = $query->limit(2)->get(['name', 'phone', 'address']);
+        if ($matches->count() !== 1) {
+            return response()->json([
+                'found' => false,
+                'ambiguous' => $matches->count() > 1,
+            ]);
+        }
+
+        return response()->json([
+            'found' => true,
+            'customer' => $matches->first(),
+        ]);
     }
 
     /**

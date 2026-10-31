@@ -218,6 +218,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
 Route::middleware(['auth', 'verified'])->group(function () {
     Route::get('/quotations', [QuotationController::class, 'index'])->middleware('permission:sales.create|sales.view')->name('quotation.index');
     Route::get('/quotations/create', [QuotationController::class, 'create'])->middleware('permission:sales.create')->name('quotation.create');
+    Route::get('/quotations/customer-lookup', [QuotationController::class, 'customerLookup'])->middleware('permission:sales.create')->name('quotation.customer.lookup');
     Route::post('/quotations', [QuotationController::class, 'store'])->middleware('permission:sales.create')->name('quotation.store');
     Route::get('/quotations/{id}', [QuotationController::class, 'show'])->middleware('permission:sales.create|sales.view')->name('quotation.show');
     Route::delete('/quotations/{id}', [QuotationController::class, 'destroy'])->middleware('permission:sales.create')->name('quotation.destroy');

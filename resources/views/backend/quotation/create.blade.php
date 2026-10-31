@@ -56,6 +56,10 @@
                                         @error('customer_phone') <span class="text-danger small">{{ $message }}</span> @enderror
                                     </div>
 
+                                    <div class="col-12">
+                                        <small id="customerLookupStatus" class="text-muted" aria-live="polite"></small>
+                                    </div>
+
                                     <div class="col-md-6">
                                         <label class="form-label fw-semibold">Quotation Date <span class="text-danger">*</span></label>
                                         <div class="input-group">
@@ -309,6 +313,92 @@
         const discountTypeSelect = document.getElementById('discount_type');
         const discountValueInput = document.getElementById('discount_value');
         const vatPercentageInput = document.getElementById('vat_percentage');
+        const customerNameInput = document.getElementById('customer_name');
+        const customerPhoneInput = document.getElementById('customer_phone');
+        const customerAddressInput = document.getElementById('customer_address');
+        const customerLookupStatus = document.getElementById('customerLookupStatus');
+        let customerLookupTimer;
+        let customerLookupRequest = 0;
+        let autoFilledCustomer = null;
+
+        function clearPreviousCustomerAutofill(activeInput) {
+            if (!autoFilledCustomer) {
+                return;
+            }
+
+            if (activeInput !== customerNameInput && customerNameInput.value === autoFilledCustomer.name) {
+                customerNameInput.value = '';
+            }
+            if (activeInput !== customerPhoneInput && customerPhoneInput.value === autoFilledCustomer.phone) {
+                customerPhoneInput.value = '';
+            }
+            if (activeInput !== customerAddressInput && customerAddressInput.value === autoFilledCustomer.address) {
+                customerAddressInput.value = '';
+            }
+            autoFilledCustomer = null;
+        }
+
+        function scheduleCustomerLookup(input, field) {
+            clearPreviousCustomerAutofill(input);
+            customerLookupRequest++;
+            const requestId = customerLookupRequest;
+            const value = input.value.trim();
+
+            window.clearTimeout(customerLookupTimer);
+            customerLookupStatus.textContent = '';
+            if (value.length < 2) {
+                return;
+            }
+
+            customerLookupStatus.textContent = 'Searching saved customers...';
+            customerLookupTimer = window.setTimeout(async function () {
+                const url = new URL(@json(route('quotation.customer.lookup')), window.location.origin);
+                url.searchParams.set(field, value);
+
+                try {
+                    const response = await fetch(url, {
+                        headers: { 'Accept': 'application/json' }
+                    });
+                    if (!response.ok) {
+                        throw new Error('Customer lookup failed with status ' + response.status);
+                    }
+
+                    const result = await response.json();
+                    if (requestId !== customerLookupRequest || input.value.trim() !== value) {
+                        return;
+                    }
+
+                    if (!result.found) {
+                        customerLookupStatus.textContent = result.ambiguous
+                            ? 'More than one customer matches. Search by phone number instead.'
+                            : 'No saved customer found.';
+                        return;
+                    }
+
+                    customerNameInput.value = result.customer.name || '';
+                    customerPhoneInput.value = result.customer.phone || '';
+                    customerAddressInput.value = result.customer.address || '';
+                    autoFilledCustomer = {
+                        name: customerNameInput.value,
+                        phone: customerPhoneInput.value,
+                        address: customerAddressInput.value
+                    };
+                    customerLookupStatus.textContent = 'Saved customer details filled in.';
+                } catch (error) {
+                    if (requestId === customerLookupRequest) {
+                        customerLookupStatus.textContent = 'Could not load customer details. Please try again.';
+                    }
+                    console.error(error);
+                }
+            }, 350);
+        }
+
+        customerNameInput.addEventListener('input', function () {
+            scheduleCustomerLookup(customerNameInput, 'name');
+        });
+        customerPhoneInput.addEventListener('input', function () {
+            scheduleCustomerLookup(customerPhoneInput, 'phone');
+        });
 
         // Product map from datalist options
         const productMap = {};
