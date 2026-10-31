@@ -106,6 +106,7 @@ class QuotationController extends Controller
             'discount_type' => 'nullable|in:flat,percentage',
             'discount_value' => 'nullable|numeric|min:0',
             'vat_percentage' => 'nullable|numeric|min:0',
+            'ait_percentage' => 'nullable|numeric|min:0|max:100',
             'terms_conditions' => 'nullable|string|max:3000',
             'notes' => 'nullable|string|max:1000',
         ]);
@@ -165,8 +166,10 @@ class QuotationController extends Controller
             $vatPercentage = (float)($validated['vat_percentage'] ?? 0);
             $taxableSubtotal = max($subtotal - $discountAmount, 0);
             $vatAmount = round(($taxableSubtotal * $vatPercentage) / 100, 2);
+            $aitPercentage = (float)($validated['ait_percentage'] ?? 0);
+            $aitAmount = round(($taxableSubtotal * $aitPercentage) / 100, 2);
 
-            $grandTotal = round($taxableSubtotal + $vatAmount, 2);
+            $grandTotal = round($taxableSubtotal + $vatAmount + $aitAmount, 2);
 
             $quotation = Quotation::create([
                 'quotation_no' => $quotationNo,
@@ -180,6 +183,8 @@ class QuotationController extends Controller
                 'discount_amount' => $discountAmount,
                 'vat_percentage' => $vatPercentage,
                 'vat_amount' => $vatAmount,
+                'ait_percentage' => $aitPercentage,
+                'ait_amount' => $aitAmount,
                 'total_amount' => $grandTotal,
                 'terms_conditions' => $validated['terms_conditions'] ?? null,
                 'notes' => $validated['notes'] ?? null,

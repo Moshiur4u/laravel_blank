@@ -129,6 +129,13 @@
                                 </div>
                             @endif
 
+                            @if ((float)$quotation->ait_amount > 0)
+                                <div class="py-1 d-flex justify-content-between text-secondary">
+                                    <span>AIT ({{ rtrim(rtrim(number_format((float)$quotation->ait_percentage, 2), '0'), '.') }}%)</span>
+                                    <span>+ ৳{{ number_format((float)$quotation->ait_amount, 2) }}</span>
+                                </div>
+                            @endif
+
                             <hr class="my-2">
 
                             <div class="py-2 d-flex justify-content-between align-items-center bg-light-primary rounded px-3">

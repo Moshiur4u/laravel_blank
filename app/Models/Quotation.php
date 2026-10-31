@@ -23,6 +23,8 @@ class Quotation extends Model
         'discount_amount',
         'vat_percentage',
         'vat_amount',
+        'ait_percentage',
+        'ait_amount',
         'total_amount',
         'terms_conditions',
         'notes',
@@ -36,6 +38,8 @@ class Quotation extends Model
         'discount_amount' => 'float',
         'vat_percentage' => 'float',
         'vat_amount' => 'float',
+        'ait_percentage' => 'float',
+        'ait_amount' => 'float',
         'total_amount' => 'float',
     ];
 

@@ -277,6 +277,23 @@
                                     </div>
                                 </div>
 
+                                <!-- AIT section -->
+                                <div class="py-2 border-bottom">
+                                    <div class="d-flex justify-content-between align-items-center mb-2">
+                                        <span class="text-secondary fw-semibold">AIT:</span>
+                                        <span class="text-dark fw-bold">+ ৳<span id="displayAitAmount">0.00</span></span>
+                                    </div>
+                                    <div class="row g-2">
+                                        <div class="col-12">
+                                            <div class="input-group input-group-sm">
+                                                <span class="input-group-text bg-light">AIT Rate (%)</span>
+                                                <input type="number" step="0.01" min="0" max="100" name="ait_percentage" id="ait_percentage"
+                                                    class="form-control text-end" value="{{ old('ait_percentage', 0) }}" placeholder="0">
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+
                                 <!-- Grand Total -->
                                 <div class="py-3 d-flex justify-content-between align-items-center bg-light-primary rounded p-3 mt-3">
                                     <span class="fs-5 fw-bold text-primary">Total Price:</span>
@@ -308,11 +325,13 @@
         const displaySubtotal = document.getElementById('displaySubtotal');
         const displayDiscountAmount = document.getElementById('displayDiscountAmount');
         const displayVatAmount = document.getElementById('displayVatAmount');
+        const displayAitAmount = document.getElementById('displayAitAmount');
         const displayGrandTotal = document.getElementById('displayGrandTotal');
 
         const discountTypeSelect = document.getElementById('discount_type');
         const discountValueInput = document.getElementById('discount_value');
         const vatPercentageInput = document.getElementById('vat_percentage');
+        const aitPercentageInput = document.getElementById('ait_percentage');
         const customerNameInput = document.getElementById('customer_name');
         const customerPhoneInput = document.getElementById('customer_phone');
         const customerAddressInput = document.getElementById('customer_address');
@@ -487,6 +506,7 @@
         discountTypeSelect.addEventListener('change', updateTotals);
         discountValueInput.addEventListener('input', updateTotals);
         vatPercentageInput.addEventListener('input', updateTotals);
+        aitPercentageInput.addEventListener('input', updateTotals);
 
         // Core calculation function
         function updateTotals() {
@@ -513,11 +533,14 @@
             const vatPercent = parseFloat(vatPercentageInput.value) || 0;
             const taxableAmount = Math.max(subtotal - discountAmount, 0);
             const vatAmount = Math.round((taxableAmount * vatPercent / 100) * 100) / 100;
-            const grandTotal = Math.round((taxableAmount + vatAmount) * 100) / 100;
+            const aitPercent = parseFloat(aitPercentageInput.value) || 0;
+            const aitAmount = Math.round((taxableAmount * aitPercent / 100) * 100) / 100;
+            const grandTotal = Math.round((taxableAmount + vatAmount + aitAmount) * 100) / 100;
 
             displaySubtotal.textContent = subtotal.toFixed(2);
             displayDiscountAmount.textContent = discountAmount.toFixed(2);
             displayVatAmount.textContent = vatAmount.toFixed(2);
+            displayAitAmount.textContent = aitAmount.toFixed(2);
             displayGrandTotal.textContent = grandTotal.toFixed(2);
         }
 
