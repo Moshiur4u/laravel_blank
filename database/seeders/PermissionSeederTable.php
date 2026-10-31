@@ -20,6 +20,7 @@ class PermissionSeederTable extends Seeder
             'sales.create',
             'sales.view',
             'sales.report',
+            'sales.document.watermark',
             //customer all parmissions,
             'customer.index',
             'customer.create',
@@ -83,6 +84,11 @@ class PermissionSeederTable extends Seeder
             'voucher.report.view',
             'voucher.report.employee',
             'voucher.report.miscellaneous',
+            'voucher.account.index',
+            'voucher.account.create',
+            'voucher.account.edit',
+            'voucher.account.update',
+            'voucher.account.delete',
             'reports.all_access', // সব report-এ পূর্ণ প্রবেশের permission।
             'employee.role.assign', // কর্মীর জন্য অনুমোদিত role বরাদ্দের permission।
             'user-activity-log.view', // User Activity Log দেখার dedicated permission।

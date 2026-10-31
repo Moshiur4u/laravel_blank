@@ -24,6 +24,7 @@ class RolePermissionSeeder extends Seeder
             'manager' => [
                 'Dashboard',
                 'sales.create',
+                'sales.document.watermark',
                 'brand.index', // পুরোনো Brands-এর বদলে নতুন brand list permission।
                 'brand.create', // নতুন brand create permission।
                 'brand.edit', // নতুন brand edit permission।
@@ -42,6 +43,11 @@ class RolePermissionSeeder extends Seeder
                 'employee_payment_voucher.entry',
                 'voucher.report.employee', // employee payment report দেখার permission।
                 'voucher.report.miscellaneous', // miscellaneous voucher report permission।
+                'voucher.account.index',
+                'voucher.account.create',
+                'voucher.account.edit',
+                'voucher.account.update',
+                'voucher.account.delete',
                 'supplier.index',
                 'supplier.create',
                 'supplier.edit',

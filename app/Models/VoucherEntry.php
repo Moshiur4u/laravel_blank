@@ -18,6 +18,7 @@ class VoucherEntry extends Model
         'voucher_code',
         'voucher_type',
         'expense_income_type',
+        'voucher_account_id',
         'voucher_date',
         'amount',
         'reference',
@@ -88,6 +89,11 @@ class VoucherEntry extends Model
     public function voucherable(): MorphTo
     {
         return $this->morphTo();
+    }
+
+    public function voucherAccount(): BelongsTo
+    {
+        return $this->belongsTo(VoucherAccount::class);
     }
 
     /**

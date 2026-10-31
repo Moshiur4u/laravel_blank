@@ -288,7 +288,8 @@
                         </ul>
                     </li>
                 @endcan
-                @canany(['voucher', 'voucher.entry', 'employee_payment_voucher.entry'])
+                @canany(['voucher', 'voucher.entry', 'employee_payment_voucher.entry', 'voucher.account.index',
+                    'voucher.account.create', 'voucher.account.edit', 'voucher.account.update', 'voucher.account.delete'])
                     <li class="menu-label">Administration operations</li>
                     <li>
                         <a class="has-arrow" href="javascript:;">
@@ -303,10 +304,23 @@
                                         Entries</a>
                                 </li>
                             @endcan
+                            {{-- @can('voucher.account.index')
+                                <li>
+                                    <a href="{{ route('voucher-accounts.index') }}"><i class='bx bx-wallet'></i>Voucher
+                                        Account Index</a>
+                                </li>
+                            @endcan --}}
+
                             @can('employee_payment_voucher.entry')
                                 <li>
                                     <a href="{{ route('employee-payment.index') }}"><i class='bx bx-user-plus '></i>Employee
                                         Payment</a>
+                                </li>
+                            @endcan
+                            @can('voucher.account.create')
+                                <li>
+                                    <a href="{{ route('voucher-accounts.create') }}"><i class='bx bx-plus-circle'></i>Voucher
+                                        Account Add</a>
                                 </li>
                             @endcan
                         </ul>

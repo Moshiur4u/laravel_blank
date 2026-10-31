@@ -59,6 +59,7 @@ class AppServiceProvider extends ServiceProvider
         // invoice/report-গুলোর print header-এ একই organization profile সরবরাহ করে।
         View::composer([
             'backend.Sales.salesInvoice',
+            'backend.Sales.deliveryChallan',
             'backend.Sales.salesReport',
             'backend.reports.productinventory',
             'backend.Accounts Entries.combinedVoucherReport',

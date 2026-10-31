@@ -1,18 +1,22 @@
 <?php
 
 use App\Models\User;
+use App\Models\VoucherAccount;
 use App\Models\VoucherEntry;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Spatie\Permission\Models\Permission;
 
 uses(RefreshDatabase::class);
 
 test('a debit voucher saves its generated code, entered type, and creator snapshot', function () {
     $creator = User::factory()->create(['name' => 'Accounts Operator']);
+    $creator->givePermissionTo(Permission::findOrCreate('voucher.entry', 'web'));
+    $account = VoucherAccount::create(['name' => 'Office rent']);
 
     $this->actingAs($creator)
         ->post(route('voucher-entries.store'), [
             'voucher_type' => 'debit',
-            'expense_income_type' => 'Office rent',
+            'voucher_account_id' => $account->id,
             'voucher_date' => '2026-10-12',
             'amount' => '1250.50',
             'reference' => 'RENT-12',
@@ -27,6 +31,7 @@ test('a debit voucher saves its generated code, entered type, and creator snapsh
     $this->assertDatabaseHas('voucher_entries', [
         'id' => $voucher->id,
         'voucher_type' => 'debit',
+        'voucher_account_id' => $account->id,
         'expense_income_type' => 'Office rent',
         'voucher_date' => '2026-10-12',
         'amount' => '1250.50',
@@ -39,11 +44,13 @@ test('a debit voucher saves its generated code, entered type, and creator snapsh
 
 test('a credit voucher receives its own automatic code prefix', function () {
     $creator = User::factory()->create();
+    $creator->givePermissionTo(Permission::findOrCreate('voucher.entry', 'web'));
+    $account = VoucherAccount::create(['name' => 'Product sales']);
 
     $this->actingAs($creator)
         ->post(route('voucher-entries.store'), [
             'voucher_type' => 'credit',
-            'expense_income_type' => 'Product sales',
+            'voucher_account_id' => $account->id,
             'voucher_date' => '2026-10-12',
             'amount' => '800.00',
         ])
@@ -54,6 +61,17 @@ test('a credit voucher receives its own automatic code prefix', function () {
 
     expect($voucher->voucher_code)->toMatch('/^CRV-20261012-\d{6}$/');
     $this->assertSame('credit', $voucher->voucher_type);
+});
+
+test('voucher entry form lists saved voucher accounts', function () {
+    $creator = User::factory()->create();
+    $creator->givePermissionTo(Permission::findOrCreate('voucher', 'web'));
+    VoucherAccount::create(['name' => 'Office rent']);
+
+    $this->actingAs($creator)
+        ->get(route('voucher-entries.index'))
+        ->assertOk()
+        ->assertSee('Office rent');
 });
 
 test('daily voucher report filters by date and creator', function () {

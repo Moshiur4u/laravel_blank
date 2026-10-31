@@ -17,6 +17,7 @@ use Illuminate\Validation\ValidationException;
 class SaleController extends Controller
 {
     private const PAYMENT_METHODS = ['cash', 'bank', 'nagad', 'bkash', 'rocket', 'upay'];
+    private const DEFAULT_TERMS = "1. This quotation is valid for 15 days from the date of issue.\n2. Prices are inclusive/exclusive of applicable taxes as indicated.\n3. Delivery will be scheduled upon confirmation of the order.\n4. Payment terms: 50% advance, balance upon delivery.";
 
     public function index()
     {
@@ -25,8 +26,9 @@ class SaleController extends Controller
             ->orderBy('productName')
             ->get();
         $invoices = SaleInvoice::with('employee')->latest('invoice_date')->limit(10)->get();
+        $defaultTerms = self::DEFAULT_TERMS;
 
-        return view('backend.Sales.salesIndex', compact('products', 'invoices'));
+        return view('backend.Sales.salesIndex', compact('products', 'invoices', 'defaultTerms'));
     }
 
     public function customerByPhone(Request $request)
@@ -88,6 +90,7 @@ class SaleController extends Controller
             'amount_paid' => 'nullable|numeric|min:0',
             'payment_method' => 'nullable|in:' . implode(',', self::PAYMENT_METHODS),
             'notes' => 'nullable|string|max:2000',
+            'terms_conditions' => 'nullable|string|max:5000',
             'items' => 'required|array|min:1',
             'items.*.product_id' => 'required|integer|exists:products,id',
             'items.*.quantity' => 'required|integer|min:1',
@@ -197,7 +200,8 @@ class SaleController extends Controller
                 'invoice_no' => 'INV-' . now()->format('YmdHis') . '-' . Str::upper(Str::random(5)),
                 'customer_id' => $customer?->id,
                 'customer_phone' => $customerPhone,
-                'customer_name' => $customer?->name,
+                'customer_name' => $customer?->name ?? $validated['customer_name'] ?? null,
+                'customer_address' => $customer?->address ?? $validated['customer_address'] ?? null,
                 'user_id' => $userId,
                 'invoice_date' => now(),
                 'subtotal' => $subtotal,
@@ -213,6 +217,7 @@ class SaleController extends Controller
                 'due_amount' => round($invoiceTotal - $paymentAmount, 2),
                 'payment_method' => $paymentAmount > 0 ? $validated['payment_method'] : null,
                 'notes' => $validated['notes'] ?? null,
+                'terms_conditions' => $validated['terms_conditions'] ?? null,
             ]);
 
             foreach ($lineItems as $lineItem) {
@@ -301,7 +306,76 @@ class SaleController extends Controller
     public function invoice($id)
     {
         $invoice = SaleInvoice::with(['items', 'customer', 'employee'])->findOrFail($id);
+        $termsConditions = $invoice->terms_conditions ?: self::DEFAULT_TERMS;
+        $amountInWords = $this->amountInWords((float) $invoice->amount_paid);
 
-        return view('backend.Sales.salesInvoice', compact('invoice'));
+        return view('backend.Sales.salesInvoice', compact('invoice', 'termsConditions', 'amountInWords'));
+    }
+
+    public function deliveryChallan($id)
+    {
+        $invoice = SaleInvoice::with(['items.product', 'customer', 'employee'])->findOrFail($id);
+
+        return view('backend.Sales.deliveryChallan', compact('invoice'));
+    }
+
+    private function amountInWords(float $amount): string
+    {
+        $totalPaisa = (int) round($amount * 100);
+        $taka = intdiv($totalPaisa, 100);
+        $paisa = $totalPaisa % 100;
+        $words = 'Taka '.$this->numberToWords($taka);
+
+        if ($paisa > 0) {
+            $words .= ' and '.$this->numberToWords($paisa).' Paisa';
+        }
+
+        return ucfirst($words).' only.';
+    }
+
+    private function numberToWords(int $number): string
+    {
+        $ones = [
+            'zero', 'one', 'two', 'three', 'four', 'five', 'six', 'seven', 'eight', 'nine',
+            'ten', 'eleven', 'twelve', 'thirteen', 'fourteen', 'fifteen', 'sixteen',
+            'seventeen', 'eighteen', 'nineteen',
+        ];
+        $tens = [
+            2 => 'twenty', 3 => 'thirty', 4 => 'forty', 5 => 'fifty',
+            6 => 'sixty', 7 => 'seventy', 8 => 'eighty', 9 => 'ninety',
+        ];
+
+        if ($number < 20) {
+            return $ones[$number];
+        }
+
+        if ($number < 100) {
+            $words = $tens[intdiv($number, 10)];
+
+            return $number % 10 ? $words.'-'.$ones[$number % 10] : $words;
+        }
+
+        if ($number < 1000) {
+            $words = $ones[intdiv($number, 100)].' hundred';
+
+            return $number % 100 ? $words.' and '.$this->numberToWords($number % 100) : $words;
+        }
+
+        foreach ([
+            1_000_000_000_000 => 'trillion',
+            1_000_000_000 => 'billion',
+            1_000_000 => 'million',
+            1_000 => 'thousand',
+        ] as $value => $scale) {
+            if ($number >= $value) {
+                $whole = intdiv($number, $value);
+                $remainder = $number % $value;
+                $words = $this->numberToWords($whole).' '.$scale;
+
+                return $remainder ? $words.' '.$this->numberToWords($remainder) : $words;
+            }
+        }
+
+        return $ones[0];
     }
 }

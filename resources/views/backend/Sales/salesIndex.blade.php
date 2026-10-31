@@ -278,6 +278,15 @@
                                         <label for="notes" class="form-label">Notes</label>
                                         <textarea name="notes" id="notes" rows="2" class="form-control">{{ old('notes') }}</textarea>
                                     </div>
+                                    <div class="mb-3">
+                                        <label for="terms_conditions" class="form-label fw-semibold">Terms & Conditions</label>
+                                        <textarea name="terms_conditions" id="terms_conditions" rows="5"
+                                            class="form-control @error('terms_conditions') is-invalid @enderror"
+                                            placeholder="Input terms and conditions to be displayed on this invoice...">{{ old('terms_conditions', $defaultTerms) }}</textarea>
+                                        @error('terms_conditions')
+                                            <div class="invalid-feedback">{{ $message }}</div>
+                                        @enderror
+                                    </div>
                                     <hr>
                                     <div class="mb-2 d-flex justify-content-between"><span>Subtotal</span><strong
                                             id="subtotalText">৳0.00</strong></div>
@@ -334,8 +343,17 @@
                                         <td>{{ $invoice->employee->name ?? 'N/A' }}</td>
                                         <td>৳{{ number_format($invoice->total_amount, 2) }}</td>
                                         <td>৳{{ number_format($invoice->due_amount, 2) }}</td>
-                                        <td><a href="{{ route('sales.invoice', $invoice->id) }}"
-                                                class="btn btn-sm btn-outline-primary"><i class="bx bx-show"></i></a></td>
+                                        <td class="text-nowrap">
+                                            <a href="{{ route('sales.invoice', $invoice->id) }}"
+                                                class="btn btn-sm btn-outline-primary" title="View Invoice"
+                                                aria-label="View invoice {{ $invoice->invoice_no }}">
+                                                <i class="bx bx-show"></i>
+                                            </a>
+                                            <a href="{{ route('sales.delivery-challan', $invoice->id) }}"
+                                                class="btn btn-sm btn-outline-success" title="Delivery Challan">
+                                                <i class="bx bx-package me-1"></i>Delivery Challan
+                                            </a>
+                                        </td>
                                     </tr>
                                 @empty
                                     <tr>

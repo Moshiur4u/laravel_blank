@@ -17,6 +17,7 @@ use App\Http\Controllers\SupplierController;
 use App\Http\Controllers\SupplierledgerController;
 use App\Http\Controllers\UserController;
 use App\Http\Controllers\UserActivityLogController;
+use App\Http\Controllers\VoucherAccountController;
 use App\Http\Controllers\VoucherEntryController;
 use Illuminate\Support\Facades\Route;
 
@@ -43,6 +44,25 @@ Route::middleware(['auth', 'verified'])->group(function () {
 });
 // সাধারণ Debit/Credit voucher entry ও দৈনিক report login এবং email verification চায়।
 Route::middleware(['auth', 'verified'])->group(function () {
+    Route::get('/voucher-accounts', [VoucherAccountController::class, 'index'])
+        ->middleware('permission:voucher.account.index')
+        ->name('voucher-accounts.index');
+    Route::get('/voucher-accounts/create', [VoucherAccountController::class, 'create'])
+        ->middleware('permission:voucher.account.create')
+        ->name('voucher-accounts.create');
+    Route::post('/voucher-accounts', [VoucherAccountController::class, 'store'])
+        ->middleware('permission:voucher.account.create')
+        ->name('voucher-accounts.store');
+    Route::get('/voucher-accounts/{voucherAccount}/edit', [VoucherAccountController::class, 'edit'])
+        ->middleware('permission:voucher.account.edit')
+        ->name('voucher-accounts.edit');
+    Route::put('/voucher-accounts/{voucherAccount}', [VoucherAccountController::class, 'update'])
+        ->middleware('permission:voucher.account.update')
+        ->name('voucher-accounts.update');
+    Route::delete('/voucher-accounts/{voucherAccount}', [VoucherAccountController::class, 'destroy'])
+        ->middleware('permission:voucher.account.delete')
+        ->name('voucher-accounts.destroy');
+
     Route::get('/voucher-entries', [VoucherEntryController::class, 'index'])->middleware('permission:voucher')->name('voucher-entries.index');
     Route::post('/voucher-entries', [VoucherEntryController::class, 'store'])->middleware('permission:voucher.entry')->name('voucher-entries.store');
     Route::get('/voucher-entries/report/export', [VoucherEntryController::class, 'exportReport'])
@@ -209,6 +229,9 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::get('/sales/customer-lookup', [SaleController::class, 'customerByPhone'])->middleware('permission:sales.create')->name('sales.customer.lookup');
     Route::post('/sales', [SaleController::class, 'store'])->middleware('permission:sales.create')->name('sales.store');
     Route::get('/sales/invoice/{id}', [SaleController::class, 'invoice'])->middleware('permission:sales.report')->name('sales.invoice');
+    Route::get('/sales/delivery-challan/{id}', [SaleController::class, 'deliveryChallan'])
+        ->middleware('permission:sales.view|sales.report')
+        ->name('sales.delivery-challan');
     Route::get('/sales/report/export', [SalesReportController::class, 'export'])->middleware('permission:sales.view')->name('sales.report.export');
     Route::get('/sales/report', [SalesReportController::class, 'index'])->middleware('permission:reports.all_access|sales.report') // পুরোনো dashboard permission-এর বদলে sales.report।
         ->name('sales.report');

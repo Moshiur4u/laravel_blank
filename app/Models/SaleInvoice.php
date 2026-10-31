@@ -11,6 +11,7 @@ class SaleInvoice extends Model
         'customer_id',
         'customer_phone',
         'customer_name',
+        'customer_address',
         'user_id',
         'invoice_date',
         'subtotal',
@@ -26,6 +27,7 @@ class SaleInvoice extends Model
         'due_amount',
         'payment_method',
         'notes',
+        'terms_conditions',
     ];
 
     protected $casts = [

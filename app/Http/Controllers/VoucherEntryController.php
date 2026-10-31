@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\User;
+use App\Models\VoucherAccount;
 use App\Models\VoucherEntry;
 use App\Support\ExcelCsvExport;
 use Carbon\Carbon;
@@ -30,6 +31,7 @@ class VoucherEntryController extends Controller
 
         return view('backend.Accounts Entries.voucherEntryCreate', [
             'voucherTypes' => VoucherEntry::TYPES,
+            'voucherAccounts' => VoucherAccount::query()->orderBy('name')->get(),
             'vouchers' => $vouchers,
             'todayCount' => $todayCount,
             'todayAmount' => $todayAmount,
@@ -43,7 +45,7 @@ class VoucherEntryController extends Controller
     {
         $validated = $request->validate([
             'voucher_type' => ['required', 'string', 'in:'.implode(',', array_keys(VoucherEntry::TYPES))],
-            'expense_income_type' => ['required', 'string', 'max:100'],
+            'voucher_account_id' => ['required', 'integer', 'exists:voucher_accounts,id'],
             'voucher_date' => ['required', 'date'],
             'amount' => ['required', 'numeric', 'decimal:0,2', 'min:0.01', 'max:9999999999.99'],
             'reference' => ['nullable', 'string', 'max:100'],
@@ -51,10 +53,12 @@ class VoucherEntryController extends Controller
         ]);
 
         $creator = $request->user();
+        $voucherAccount = VoucherAccount::query()->findOrFail($validated['voucher_account_id']);
 
-        $voucher = DB::transaction(function () use ($validated, $creator) {
+        $voucher = DB::transaction(function () use ($validated, $creator, $voucherAccount) {
             return VoucherEntry::createWithCode([
                 ...$validated,
+                'expense_income_type' => $voucherAccount->name,
                 'amount' => number_format((float) $validated['amount'], 2, '.', ''),
                 'created_by' => $creator->id,
                 'created_by_name' => $creator->name,

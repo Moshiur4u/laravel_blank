@@ -27,6 +27,9 @@ test('walk-in sales receive the full invoice amount and existing customers can p
         ->post(route('sales.store'), [
             'customer_phone' => '01700000001',
             'save_customer' => 'no',
+            'customer_name' => 'Walk-in Invoice Customer',
+            'customer_address' => '5 Walk-in Road',
+            'terms_conditions' => 'Deliver within five business days.',
             'discount_amount' => 0,
             'vat_amount' => 0,
             'amount_paid' => 0,
@@ -39,6 +42,9 @@ test('walk-in sales receive the full invoice amount and existing customers can p
 
     $walkInInvoice = SaleInvoice::query()->latest('id')->firstOrFail();
     expect($walkInInvoice->customer_id)->toBeNull()
+        ->and($walkInInvoice->customer_name)->toBe('Walk-in Invoice Customer')
+        ->and($walkInInvoice->customer_address)->toBe('5 Walk-in Road')
+        ->and($walkInInvoice->terms_conditions)->toBe('Deliver within five business days.')
         ->and((float) $walkInInvoice->total_amount)->toBe(200.0)
         ->and((float) $walkInInvoice->amount_paid)->toBe(200.0)
         ->and((float) $walkInInvoice->due_amount)->toBe(0.0);
