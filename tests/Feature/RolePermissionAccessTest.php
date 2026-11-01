@@ -24,10 +24,14 @@ test('standard roles receive only their intended module permissions', function (
 
     expect($sales->hasPermissionTo('Dashboard'))->toBeTrue()
         ->and($sales->hasPermissionTo('sales.create'))->toBeTrue()
+        ->and($sales->hasPermissionTo('money-receipt'))->toBeTrue()
+        ->and($sales->hasPermissionTo('supplier.inactive'))->toBeFalse()
         ->and($sales->hasPermissionTo('customer.ledger'))->toBeTrue()
         ->and($sales->hasPermissionTo('customer.delete'))->toBeFalse()
         ->and($manager->hasPermissionTo('brand.delete'))->toBeTrue() // পুরোনো category/brand permission-এর নতুন brand নাম।
         ->and($manager->hasPermissionTo('voucher.report.view'))->toBeTrue() // নতুন voucher report permission।
+        ->and($manager->hasPermissionTo('money-receipt'))->toBeTrue()
+        ->and($manager->hasPermissionTo('supplier.inactive'))->toBeTrue()
         ->and($manager->hasPermissionTo('view-employee-details-permission'))->toBeTrue()
         ->and(Permission::where('name', 'view-employee-details-permission')->exists())->toBeTrue()
         ->and($manager->hasPermissionTo('supplier.delete'))->toBeFalse()

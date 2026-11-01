@@ -37,6 +37,7 @@ class PermissionSeederTable extends Seeder
             'supplier.create',
             'supplier.details',
             'supplier.edit',
+            'supplier.inactive',
             'supplier.delete',
             'supplier.ledger',
             'Supplier.ledger.create', // নতুন supplier ledger entry তৈরির permission।
@@ -102,7 +103,9 @@ class PermissionSeederTable extends Seeder
             'role.delete',
             'Organization Information',
             'organization info.access',
-            'user.activity.logs'
+            'user.activity.logs',
+            'blank-invoice',
+            'money-receipt',
 
         ];
         foreach ($permissions as $permission) {

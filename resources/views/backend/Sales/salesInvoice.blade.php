@@ -11,7 +11,7 @@
                 @endcanany
                 @can('sales.document.watermark')
                     @if ($organization?->logo)
-                        <label class="btn btn-outline-secondary mb-0">
+                        <label class="mb-0 btn btn-outline-secondary">
                             <input type="checkbox" id="watermark-toggle" class="form-check-input me-1">
                             Print logo watermark
                         </label>
@@ -31,7 +31,7 @@
                             $organization?->phone ||
                             $organization?->email)
                         {{-- প্রতিষ্ঠানের তথ্য টেবিলের বাইরে রাখলে ইনভয়েসের প্রিন্ট হেডার পরিষ্কার থাকে। --}}
-                        <div class="d-flex align-items-center gap-3 mb-4 pb-3 border-bottom invoice-organization">
+                        <div class="gap-3 pb-3 mb-4 d-flex align-items-center border-bottom invoice-organization">
                             @if ($organization?->logo)
                                 <img src="{{ asset('uploads/organizations/' . $organization->logo) }}"
                                     alt="{{ $organization->name ?: 'Organization logo' }}"
@@ -84,15 +84,16 @@
                                 <col style="width: 15%;">
                                 <col style="width: 20%;">
                             </colgroup>
-                            <tbody>
+                            <thead>
                                 <tr>
-                                    <th class="text-center text-white" style="background-color: #14ADE0;">#</th>
-                                    <th class="text-white" style="background-color: #14ADE0;">Product</th>
-                                    <th class="text-end text-white" style="background-color: #14ADE0;">Unit Selling Price
-                                    </th>
-                                    <th class="text-center text-white" style="background-color: #14ADE0;">Quantity</th>
-                                    <th class="text-end text-white" style="background-color: #14ADE0;">Amount</th>
+                                    <th class="text-center">#</th>
+                                    <th>Product</th>
+                                    <th class="text-end">Unit Selling Price</th>
+                                    <th class="text-center">Quantity</th>
+                                    <th class="text-end">Amount</th>
                                 </tr>
+                            </thead>
+                            <tbody>
                                 @foreach ($invoice->items as $key => $item)
                                     <tr>
                                         <td>{{ $key + 1 }}</td>
@@ -134,7 +135,7 @@
                                         <td class="text-end">৳{{ number_format($invoice->previous_due, 2) }}</td>
                                     </tr>
                                 @endif
-                                <tr class="table-light fw-bold fs-5">
+                                <tr class=" fs-5">
                                     <th colspan="4" class="text-end">Total</th>
                                     <td class="text-end">৳{{ number_format($invoice->total_amount, 2) }}</td>
                                 </tr>
@@ -165,7 +166,7 @@
                         <div class="mt-3"><strong>Notes:</strong> {{ $invoice->notes }}</div>
                     @endif
 
-                    <div class="mt-4 p-3 border rounded invoice-terms">
+                    <div class="p-3 mt-4 border rounded invoice-terms">
                         <h6 class="mb-2 fw-bold text-dark">
                             <i class="bx bx-check-shield text-primary me-1"></i>Terms &amp; Conditions
                         </h6>
@@ -173,12 +174,20 @@
                         <div class="invoice-terms-content">{{ $termsConditions }}</div>
                     </div>
 
-                    <div class="pt-4 mt-5 row">
+                    <!-- Signatures Block -->
+                    <div class="pt-5 mt-4 row">
                         <div class="col-6">
-                            <div class="pt-2 border-top">Customer Signature</div>
+                            <div class="pt-2 text-center border-top w-75">
+                                <div class="fw-semibold text-dark">Customer Signature</div>
+                                <div class="small text-muted">Signature & Date</div>
+                            </div>
                         </div>
-                        <div class="col-6 text-end">
-                            <div class="pt-2 border-top">Processed by {{ $invoice->employee->name ?? 'N/A' }}</div>
+                        <div class="col-6 text-end d-flex justify-content-end">
+                            <div class="pt-2 text-center border-top w-75">
+                                <div class="fw-semibold text-dark">Authorized Signature</div>
+                                <div class="small text-muted">Prepared by: {{ $quotation->user->name ?? 'Sales Officer' }}
+                                </div>
+                            </div>
                         </div>
                     </div>
 

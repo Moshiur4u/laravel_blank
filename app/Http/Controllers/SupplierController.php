@@ -3,6 +3,9 @@
 namespace App\Http\Controllers;
 
 use App\Models\Supplier;
+use App\Models\SupplierLedgerPayment;
+use App\Models\Supplierledger;
+use App\Models\VoucherEntry;
 use Illuminate\Http\Request;
 
 class SupplierController extends Controller
@@ -116,11 +119,64 @@ class SupplierController extends Controller
     public function destroy($id)
     {
         $supplier = Supplier::findOrFail($id);
+        $hasVouchers = $supplier->supplierledgers()
+            ->with('payments')
+            ->get()
+            ->contains(function (Supplierledger $ledger) use ($supplier) {
+                $paymentRows = $ledger->payments
+                    ->map(fn (SupplierLedgerPayment $payment) => [
+                        'date' => $payment->payment_date->toDateString(),
+                        'amount' => number_format((float) $payment->amount, 2, '.', ''),
+                    ])
+                    ->all();
+                $initialPayment = round(
+                    (float) $ledger->payment - $ledger->payments->sum(fn (SupplierLedgerPayment $payment) => (float) $payment->amount),
+                    2
+                );
+
+                if ($initialPayment > 0) {
+                    $paymentRows[] = [
+                        'date' => $ledger->created_at->toDateString(),
+                        'amount' => number_format($initialPayment, 2, '.', ''),
+                    ];
+                }
+
+                return VoucherEntry::existsForSource(
+                    $ledger,
+                    'debit',
+                    'Supplier Payment ('.$supplier->name.')',
+                    'Payment to supplier '.$supplier->name,
+                    $ledger->invoice_id,
+                    $paymentRows
+                );
+            });
+
+        if ($hasVouchers) {
+            return redirect()->route('supplier.index')->with(
+                'error',
+                'Delete this supplier’s associated vouchers from the Combined Voucher Report before deleting the supplier.'
+            );
+        }
+
         if ($supplier->logo && file_exists(public_path('uploads/suppliers/'.$supplier->logo))) {
             @unlink(public_path('uploads/suppliers/'.$supplier->logo));
         }
         $supplier->delete();
 
         return redirect()->route('supplier.index')->with('success', 'Supplier deleted successfully!');
+    }
+
+    /**
+     * Supplier-কে active/inactive করে; inactive supplier নতুন product-এ নির্বাচন করা যায় না।
+     */
+    public function toggleStatus($id)
+    {
+        $supplier = Supplier::findOrFail($id);
+        $supplier->update(['is_active' => ! $supplier->is_active]);
+
+        return redirect()->route('supplier.index')->with(
+            'success',
+            $supplier->is_active ? 'Supplier activated successfully!' : 'Supplier marked inactive successfully!'
+        );
     }
 }

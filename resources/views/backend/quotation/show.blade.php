@@ -6,7 +6,7 @@
         <div class="page-content">
             <!-- Action Toolbar (hidden on print) -->
             {{-- ছোট পর্দায় বাটনগুলো গুটিয়ে রাখে এবং অনুমতিপ্রাপ্ত ব্যবহারকারীকে ওয়াটারমার্ক চালু করতে দেয়। --}}
-            <div class="gap-2 mb-3 d-flex flex-wrap justify-content-end no-print">
+            <div class="flex-wrap gap-2 mb-3 d-flex justify-content-end no-print">
                 <a href="{{ route('quotation.index') }}" class="btn btn-outline-secondary">
                     <i class="bx bx-arrow-back me-1"></i> All Quotations
                 </a>
@@ -15,7 +15,7 @@
                 </a>
                 @can('sales.document.watermark')
                     @if ($organization?->logo)
-                        <label class="btn btn-outline-secondary mb-0">
+                        <label class="mb-0 btn btn-outline-secondary">
                             <input type="checkbox" id="watermark-toggle" class="form-check-input me-1">
                             Print logo watermark
                         </label>
@@ -30,7 +30,7 @@
                 @if ($organization?->logo) style="--invoice-watermark: url('{{ asset('uploads/organizations/' . $organization->logo) }}');" @endif>
                 <div class="p-3 card-body p-md-5">
                     {{-- প্রতিষ্ঠানের পরিচিতি আলাদা হেডারে রাখলে প্রিন্টে লোগো ও তথ্য স্পষ্ট থাকে। --}}
-                    <div class="d-flex align-items-center gap-3 mb-4 pb-3 border-bottom quotation-organization">
+                    <div class="gap-3 pb-3 mb-4 d-flex align-items-center border-bottom quotation-organization">
                         @if ($organization?->logo)
                             <img src="{{ asset('uploads/organizations/' . $organization->logo) }}"
                                 alt="{{ $organization->name ?: 'Organization Logo' }}"
@@ -75,8 +75,8 @@
                     </div>
 
                     <!-- Products Table (Customer Invoice Format) -->
-                    <div class="table-responsive mb-4">
-                        <table class="table align-middle table-bordered mb-0 quotation-items">
+                    <div class="mb-4 table-responsive">
+                        <table class="table mb-0 align-middle table-bordered quotation-items">
                             {{-- স্থির কলাম প্রস্থ পণ্যের বর্ণনাকে মূল্য ও পরিমাণের কলাম থেকে আলাদা রাখে। --}}
                             <colgroup>
                                 <col style="width: 6%;">
@@ -90,9 +90,9 @@
                                 <tr>
                                     <th class="text-center text-white" style="background-color: #14ADE0;">#</th>
                                     <th class="text-white" style="background-color: #14ADE0;">Product Description</th>
-                                    <th class="text-end text-white" style="background-color: #14ADE0;">Unit Price</th>
+                                    <th class="text-white text-end" style="background-color: #14ADE0;">Unit Price</th>
                                     <th class="text-center text-white" style="background-color: #14ADE0;">Quantity</th>
-                                    <th class="text-end text-white" style="background-color: #14ADE0;">Total Amount</th>
+                                    <th class="text-white text-end" style="background-color: #14ADE0;">Total Amount</th>
                                 </tr>
                             </thead>
                             <tbody>
@@ -108,7 +108,8 @@
                                         </td>
                                         <td class="text-end">৳{{ number_format((float) $item->unit_price, 2) }}</td>
                                         <td class="text-center">{{ $item->quantity }}</td>
-                                        <td class="text-end fw-bold">৳{{ number_format((float) $item->line_total, 2) }}</td>
+                                        <td class="text-end fw-bold">৳{{ number_format((float) $item->line_total, 2) }}
+                                        </td>
                                     </tr>
                                 @endforeach
                             </tbody>
@@ -116,7 +117,7 @@
                     </div>
 
                     <!-- Totals Section (Customer Invoice Format) -->
-                    <div class="row justify-content-end mb-4">
+                    <div class="mb-4 row justify-content-end">
                         <div class="col-md-6 col-lg-5">
                             <div class="py-1 d-flex justify-content-between">
                                 <span class="text-secondary">Subtotal</span>
@@ -154,7 +155,7 @@
                             <hr class="my-2">
 
                             {{-- মোট মূল্যকে হালকা ব্যাকগ্রাউন্ডে আলাদা করে সহজে চোখে পড়ার ব্যবস্থা করা হয়েছে। --}}
-                            <div class="py-2 d-flex justify-content-between align-items-center bg-light rounded px-3">
+                            <div class="px-3 py-2 rounded d-flex justify-content-between align-items-center">
                                 <span class="fw-bold fs-5 text-primary">Total Price</span>
                                 <span
                                     class="fw-bold fs-4 text-primary">৳{{ number_format((float) $quotation->total_amount, 2) }}</span>
@@ -164,8 +165,8 @@
 
                     <!-- Terms and Conditions Section -->
                     @if ($quotation->terms_conditions)
-                        <div class="mt-4 p-3 rounded bg-light border">
-                            <h6 class="fw-bold text-dark mb-2">
+                        <div class="p-3 mt-4 border rounded">
+                            <h6 class="mb-2 fw-bold text-dark">
                                 <i class="bx bx-check-shield text-primary me-1"></i> Terms & Conditions
                             </h6>
                             <div class="small text-secondary" style="white-space: pre-line; line-height: 1.6;">
@@ -175,8 +176,8 @@
                     @endif
 
                     @if ($quotation->notes)
-                        <div class="mt-3 p-3 rounded bg-light border">
-                            <h6 class="fw-bold text-dark mb-1">
+                        <div class="p-3 mt-3 border rounded bg-light">
+                            <h6 class="mb-1 fw-bold text-dark">
                                 <i class="bx bx-note text-secondary me-1"></i> Special Notes
                             </h6>
                             <div class="small text-muted">{{ $quotation->notes }}</div>
@@ -186,13 +187,13 @@
                     <!-- Signatures Block -->
                     <div class="pt-5 mt-4 row">
                         <div class="col-6">
-                            <div class="pt-2 border-top text-center w-75">
+                            <div class="pt-2 text-center border-top w-75">
                                 <div class="fw-semibold text-dark">Customer Acceptance</div>
                                 <div class="small text-muted">Signature & Date</div>
                             </div>
                         </div>
                         <div class="col-6 text-end d-flex justify-content-end">
-                            <div class="pt-2 border-top text-center w-75">
+                            <div class="pt-2 text-center border-top w-75">
                                 <div class="fw-semibold text-dark">Authorized Signature</div>
                                 <div class="small text-muted">Prepared by: {{ $quotation->user->name ?? 'Sales Officer' }}
                                 </div>

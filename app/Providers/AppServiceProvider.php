@@ -59,6 +59,7 @@ class AppServiceProvider extends ServiceProvider
         // invoice/report-গুলোর print header-এ একই organization profile সরবরাহ করে।
         View::composer([
             'backend.Sales.salesInvoice',
+            'backend.Sales.blankInvoice',
             'backend.Sales.deliveryChallan',
             'backend.Sales.salesReport',
             'backend.reports.productinventory',
@@ -71,6 +72,8 @@ class AppServiceProvider extends ServiceProvider
             'backend.Supplier.supplierledger',
             'frontend.loginpage.login',
             'backend.quotation.*',
+            // Money Receipt view-এ প্রতিষ্ঠানের তথ্য পাঠিয়ে Undefined variable error ঠেকায়।
+            'backend.money-receipts.create',
         ], function ($view) {
             $view->with('organization', Organization::query()->find(1));
         });

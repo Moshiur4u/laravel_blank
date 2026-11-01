@@ -26,7 +26,7 @@
                 @if ($organization?->logo) style="--invoice-watermark: url('{{ asset('uploads/organizations/' . $organization->logo) }}');" @endif>
                 <div class="p-4 card-body p-md-5">
                     @if ($organization?->logo || $organization?->name)
-                        <div class="d-flex align-items-center gap-3 mb-4 pb-3 border-bottom">
+                        <div class="d-flex align-items-center gap-3 mb-4 pb-3 border-bottom invoice-organization">
                             @if ($organization?->logo)
                                 <img src="{{ asset('uploads/organizations/' . $organization->logo) }}"
                                     alt="{{ $organization->name ?: 'Organization logo' }}"

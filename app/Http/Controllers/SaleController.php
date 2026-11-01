@@ -17,7 +17,7 @@ use Illuminate\Validation\ValidationException;
 class SaleController extends Controller
 {
     private const PAYMENT_METHODS = ['cash', 'bank', 'nagad', 'bkash', 'rocket', 'upay'];
-    private const DEFAULT_TERMS = "1. This quotation is valid for 15 days from the date of issue.\n2. Prices are inclusive/exclusive of applicable taxes as indicated.\n3. Delivery will be scheduled upon confirmation of the order.\n4. Payment terms: 50% advance, balance upon delivery.";
+    private const DEFAULT_TERMS = "This is your note where you can write your Note, Terms & Condition. \n1.VAT & Taxes are not included in the above price.\n2.Read the Manual Book supplied with the vehicle with attention and follow the service instruction properly.\n3.Delivery of Registration Document is subject to clearance of all dues (if any).\n4.Tring Some text limit check.";
 
     public function index()
     {
@@ -29,6 +29,11 @@ class SaleController extends Controller
         $defaultTerms = self::DEFAULT_TERMS;
 
         return view('backend.Sales.salesIndex', compact('products', 'invoices', 'defaultTerms'));
+    }
+
+    public function blankInvoice()
+    {
+        return view('backend.Sales.blankInvoice');
     }
 
     public function customerByPhone(Request $request)
@@ -59,7 +64,7 @@ class SaleController extends Controller
                 'email' => $customer->email,
                 'address' => $customer->address,
                 'due' => max(round($due, 2), 0),
-                'ledger' => $customer->ledgers->map(fn (CustomerLedger $ledger) => [
+                'ledger' => $customer->ledgers->map(fn(CustomerLedger $ledger) => [
                     'date' => $ledger->sale_date?->format('Y-m-d'),
                     'type' => $ledger->entry_type,
                     'item' => $ledger->product_name,
@@ -105,7 +110,7 @@ class SaleController extends Controller
             // একই পণ্যের একাধিক কার্ট লাইনের মজুত একসাথে যাচাই করতে পণ্যগুলো ID অনুযায়ী lock করা হয়।
             $quantities = collect($validated['items'])
                 ->groupBy('product_id')
-                ->map(fn ($rows) => $rows->sum(fn ($row) => (int) $row['quantity']));
+                ->map(fn($rows) => $rows->sum(fn($row) => (int) $row['quantity']));
             $products = Product::query()
                 ->whereIn('id', $quantities->keys())
                 ->orderBy('id')
@@ -246,7 +251,7 @@ class SaleController extends Controller
             if ($customer) {
                 $totalQuantity = collect($lineItems)->sum('quantity');
                 $productsSummary = collect($lineItems)
-                    ->map(fn ($lineItem) => $lineItem['product']->productName . ' × ' . $lineItem['quantity'])
+                    ->map(fn($lineItem) => $lineItem['product']->productName . ' × ' . $lineItem['quantity'])
                     ->implode(', ');
 
                 $customerLedger = CustomerLedger::create([
@@ -279,7 +284,7 @@ class SaleController extends Controller
                     'voucher_date' => today(),
                     'amount' => number_format($paymentAmount, 2, '.', ''),
                     'reference' => $invoice->invoice_no,
-                    'description' => 'Payment received from customer '.$customerName,
+                    'description' => 'Payment received from customer ' . $customerName,
                     'created_by' => $creator?->id,
                     'created_by_name' => $creator?->name ?? 'System',
                     'voucherable_type' => $voucherableType,
@@ -292,8 +297,8 @@ class SaleController extends Controller
 
         $invoice->load(['items.product', 'customer', 'employee']);
         $lowStockProducts = $invoice->items
-            ->filter(fn (SaleItem $item) => $item->product && (float) $item->product->unit <= 10)
-            ->map(fn (SaleItem $item) => $item->product_name)
+            ->filter(fn(SaleItem $item) => $item->product && (float) $item->product->unit <= 10)
+            ->map(fn(SaleItem $item) => $item->product_name)
             ->unique()
             ->values()
             ->all();
@@ -324,25 +329,48 @@ class SaleController extends Controller
         $totalPaisa = (int) round($amount * 100);
         $taka = intdiv($totalPaisa, 100);
         $paisa = $totalPaisa % 100;
-        $words = 'Taka '.$this->numberToWords($taka);
+        $words = 'Taka ' . $this->numberToWords($taka);
 
         if ($paisa > 0) {
-            $words .= ' and '.$this->numberToWords($paisa).' Paisa';
+            $words .= ' and ' . $this->numberToWords($paisa) . ' Paisa';
         }
 
-        return ucfirst($words).' only.';
+        return ucfirst($words) . ' only.';
     }
 
     private function numberToWords(int $number): string
     {
         $ones = [
-            'zero', 'one', 'two', 'three', 'four', 'five', 'six', 'seven', 'eight', 'nine',
-            'ten', 'eleven', 'twelve', 'thirteen', 'fourteen', 'fifteen', 'sixteen',
-            'seventeen', 'eighteen', 'nineteen',
+            'zero',
+            'one',
+            'two',
+            'three',
+            'four',
+            'five',
+            'six',
+            'seven',
+            'eight',
+            'nine',
+            'ten',
+            'eleven',
+            'twelve',
+            'thirteen',
+            'fourteen',
+            'fifteen',
+            'sixteen',
+            'seventeen',
+            'eighteen',
+            'nineteen',
         ];
         $tens = [
-            2 => 'twenty', 3 => 'thirty', 4 => 'forty', 5 => 'fifty',
-            6 => 'sixty', 7 => 'seventy', 8 => 'eighty', 9 => 'ninety',
+            2 => 'twenty',
+            3 => 'thirty',
+            4 => 'forty',
+            5 => 'fifty',
+            6 => 'sixty',
+            7 => 'seventy',
+            8 => 'eighty',
+            9 => 'ninety',
         ];
 
         if ($number < 20) {
@@ -352,27 +380,29 @@ class SaleController extends Controller
         if ($number < 100) {
             $words = $tens[intdiv($number, 10)];
 
-            return $number % 10 ? $words.'-'.$ones[$number % 10] : $words;
+            return $number % 10 ? $words . '-' . $ones[$number % 10] : $words;
         }
 
         if ($number < 1000) {
-            $words = $ones[intdiv($number, 100)].' hundred';
+            $words = $ones[intdiv($number, 100)] . ' hundred';
 
-            return $number % 100 ? $words.' and '.$this->numberToWords($number % 100) : $words;
+            return $number % 100 ? $words . ' and ' . $this->numberToWords($number % 100) : $words;
         }
 
-        foreach ([
-            1_000_000_000_000 => 'trillion',
-            1_000_000_000 => 'billion',
-            1_000_000 => 'million',
-            1_000 => 'thousand',
-        ] as $value => $scale) {
+        foreach (
+            [
+                1_000_000_000_000 => 'trillion',
+                1_000_000_000 => 'billion',
+                1_000_000 => 'million',
+                1_000 => 'thousand',
+            ] as $value => $scale
+        ) {
             if ($number >= $value) {
                 $whole = intdiv($number, $value);
                 $remainder = $number % $value;
-                $words = $this->numberToWords($whole).' '.$scale;
+                $words = $this->numberToWords($whole) . ' ' . $scale;
 
-                return $remainder ? $words.' '.$this->numberToWords($remainder) : $words;
+                return $remainder ? $words . ' ' . $this->numberToWords($remainder) : $words;
             }
         }
 

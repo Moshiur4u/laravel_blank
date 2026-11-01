@@ -25,6 +25,14 @@
                 </div>
             </div>
 
+            {{-- voucher থাকায় customer delete বন্ধ হলে স্পষ্ট বার্তা দেখানো হয়। --}}
+            @if (session('error'))
+                <div class="alert alert-danger alert-dismissible fade show">
+                    {{ session('error') }}
+                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                </div>
+            @endif
+
             <div class="row row-cols-1 row-cols-md-3 g-3 mb-4">
                 <div class="col">
                     <div class="card radius-10 border-start border-0 border-3 border-primary shadow-sm mb-0">

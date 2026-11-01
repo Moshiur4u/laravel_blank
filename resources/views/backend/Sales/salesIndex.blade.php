@@ -15,6 +15,20 @@
                         </ol>
                     </nav>
                 </div>
+                @can('blank-invoice')
+                    <div class="ms-auto">
+                        <a href="{{ route('sales.blank-invoice') }}" class="btn btn-outline-primary">
+                            <i class="bx bx-printer me-1"></i>Print Blank Invoice
+                        </a>
+                    </div>
+                @endcan
+                @can('money-receipt')
+                    <div class="{{ auth()->user()->can('blank-invoice') ? '' : 'ms-auto' }}">
+                        <a href="{{ route('money-receipts.create') }}" class="btn btn-outline-success">
+                            <i class="bx bx-receipt me-1"></i>Print Money Receipt
+                        </a>
+                    </div>
+                @endcan
             </div>
 
             @can('sales.create')
@@ -197,7 +211,7 @@
                                         & Payment</h5>
                                 </div>
                                 <div class="card-body">
-                                    <div class="row g-2 mb-3">
+                                    <div class="mb-3 row g-2">
                                         <div class="col-6">
                                             <label for="discount_type" class="form-label fw-semibold text-nowrap">Discount
                                                 Type</label>
@@ -218,13 +232,13 @@
                                                     class="form-control" min="0" step="0.01"
                                                     value="{{ old('discount_value', old('discount_amount', 0)) }}"
                                                     placeholder="0.00">
-                                                <span class="input-group-text px-2" id="discount_symbol">৳</span>
+                                                <span class="px-2 input-group-text" id="discount_symbol">৳</span>
                                             </div>
                                             <input type="hidden" name="discount_amount" id="discount_amount"
                                                 value="{{ old('discount_amount', 0) }}">
                                         </div>
                                     </div>
-                                    <div class="row g-2 mb-3">
+                                    <div class="mb-3 row g-2">
                                         <div class="col-6">
                                             {{-- VAT-এর হার শতাংশে নেওয়া হয়; হিসাব করা টাকার অঙ্ক hidden ইনপুটে পাঠানো হয়। --}}
                                             <label for="vat_percentage" class="form-label fw-semibold text-nowrap">VAT
@@ -233,7 +247,7 @@
                                                 <input type="number" name="vat_percentage" id="vat_percentage"
                                                     class="form-control" min="0" max="100" step="0.01"
                                                     value="{{ old('vat_percentage', 5) }}">
-                                                <span class="input-group-text px-2">%</span>
+                                                <span class="px-2 input-group-text">%</span>
                                             </div>
                                             <input type="hidden" name="vat_amount" id="vat_amount"
                                                 value="{{ old('vat_amount', 0) }}">
@@ -245,13 +259,13 @@
                                                 <input type="number" name="ait_percentage" id="ait_percentage"
                                                     class="form-control" min="0" max="100" step="0.01"
                                                     value="{{ old('ait_percentage', 0) }}">
-                                                <span class="input-group-text px-2">%</span>
+                                                <span class="px-2 input-group-text">%</span>
                                             </div>
                                             <input type="hidden" name="ait_amount" id="ait_amount"
                                                 value="{{ old('ait_amount', 0) }}">
                                         </div>
                                     </div>
-                                    <div class="row g-2 mb-3">
+                                    <div class="mb-3 row g-2">
                                         <div class="col-6">
                                             <label for="amount_paid"
                                                 class="form-label fw-semibold text-nowrap">Amount_Received</label>
@@ -259,7 +273,7 @@
                                                 <input type="number" name="amount_paid" id="amount_paid"
                                                     class="form-control" min="0" step="0.01"
                                                     value="{{ old('amount_paid', 0) }}">
-                                                <span class="input-group-text px-2">৳</span>
+                                                <span class="px-2 input-group-text">৳</span>
                                             </div>
                                         </div>
                                         <div class="col-6">
@@ -279,7 +293,8 @@
                                         <textarea name="notes" id="notes" rows="2" class="form-control">{{ old('notes') }}</textarea>
                                     </div>
                                     <div class="mb-3">
-                                        <label for="terms_conditions" class="form-label fw-semibold">Terms & Conditions</label>
+                                        <label for="terms_conditions" class="form-label fw-semibold">Terms &
+                                            Conditions</label>
                                         <textarea name="terms_conditions" id="terms_conditions" rows="5"
                                             class="form-control @error('terms_conditions') is-invalid @enderror"
                                             placeholder="Input terms and conditions to be displayed on this invoice...">{{ old('terms_conditions', $defaultTerms) }}</textarea>

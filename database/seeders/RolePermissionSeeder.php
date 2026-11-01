@@ -20,6 +20,7 @@ class RolePermissionSeeder extends Seeder
                 'customer.create',
                 'customer.index',
                 'customer.ledger',
+                'money-receipt',
             ],
             'manager' => [
                 'Dashboard',
@@ -48,9 +49,11 @@ class RolePermissionSeeder extends Seeder
                 'voucher.account.edit',
                 'voucher.account.update',
                 'voucher.account.delete',
+                'money-receipt',
                 'supplier.index',
                 'supplier.create',
                 'supplier.edit',
+                'supplier.inactive',
                 'supplier.ledger',
                 'Supplier.ledger.payment', // পুরোনো ledger.payment-এর বদলে নির্দিষ্ট permission।
                 'employee.create',

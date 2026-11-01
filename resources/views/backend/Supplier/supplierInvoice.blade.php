@@ -16,6 +16,7 @@
 
             <div class="border-0 shadow-sm card">
                 <div class="p-4 card-body p-md-5">
+                    @include('backend.partials.organizationHeader')
                     <div class="mb-4 row align-items-start">
                         <div class="col-7">
                             <h2 class="mb-1 text-primary fw-bold">Supplier Invoice</h2>

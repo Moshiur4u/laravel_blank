@@ -118,6 +118,13 @@
                     <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
                 </div>
             @endif
+            {{-- ভাউচার থাকলে delete guard-এর বার্তাটি এখানে দেখানো হয়। --}}
+            @if (session('error'))
+                <div class="alert alert-danger alert-dismissible fade show">
+                    {{ session('error') }}
+                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                </div>
+            @endif
 
             <div class="card">
                 <div class="card-header bg-transparent d-flex align-items-center justify-content-between">
@@ -185,6 +192,9 @@
                                                                 {{ $supplier->name }}
                                                             @endcan
                                                         </h6>
+                                                        <span class="badge {{ $supplier->is_active ? 'bg-success' : 'bg-secondary' }}">
+                                                            {{ $supplier->is_active ? 'Active' : 'Inactive' }}
+                                                        </span>
                                                         <small class="text-muted"><i class="bx bx-receipt"></i> {{ $ledgerCount }} Transactions</small>
                                                     </div>
                                                 </div>
@@ -217,6 +227,17 @@
                                                         class="btn btn-sm btn-info text-white" title="Supplier Details & Ledger">
                                                         <i class="bx bx-file"></i> Ledger
                                                     </a>
+                                                    @endcan
+                                                    @can('supplier.inactive')
+                                                    <form action="{{ route('supplier.status', $supplier->id) }}" method="POST">
+                                                        @csrf
+                                                        @method('PATCH')
+                                                        <button type="submit"
+                                                            class="btn btn-sm {{ $supplier->is_active ? 'btn-outline-secondary' : 'btn-outline-success' }}"
+                                                            title="{{ $supplier->is_active ? 'Mark supplier inactive' : 'Activate supplier' }}">
+                                                            {{ $supplier->is_active ? 'Inactive' : 'Activate' }}
+                                                        </button>
+                                                    </form>
                                                     @endcan
                                                     @can('supplier.edit')
                                                     <a href="{{ route('supplier.edit', $supplier->id) }}"

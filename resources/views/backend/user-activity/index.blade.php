@@ -7,7 +7,7 @@
         @media print {
             @page {
                 size: landscape;
-                margin: 12mm;
+                margin: 34mm 12mm 15mm;
             }
 
             body {
@@ -78,6 +78,7 @@
             </div>
 
             <div class="mb-3">
+                @include('backend.partials.organizationHeader')
                 <h5 class="mb-1">
                     {{ $selectedUser ? 'Activity history: ' . $selectedUser->name : 'Activity history: All users' }}</h5>
                 @if ($selectedUser?->email)

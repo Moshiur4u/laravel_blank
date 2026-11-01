@@ -9,6 +9,7 @@ use App\Models\Supplier;
 use App\Models\Supplierledger;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Validation\Rule;
 
 class ProductController extends Controller
 {
@@ -37,8 +38,8 @@ class ProductController extends Controller
             ->distinct()
             ->orderBy('productName')
             ->pluck('productName');
-        // ফর্মের supplier dropdown-এ দেখানোর জন্য বিদ্যমান supplier-গুলো আনা হয়।
-        $suppliers = Supplier::orderBy('name')->get();
+        // নতুন product-এ শুধু active supplier নির্বাচনযোগ্য রাখা হয়।
+        $suppliers = Supplier::where('is_active', true)->orderBy('name')->get();
 
         return view('backend.Product.product.createProduct', compact(
             'brands',
@@ -59,7 +60,7 @@ class ProductController extends Controller
             'brand_id' => 'nullable',
             'price' => 'nullable',
             // দুটো field-ই একসঙ্গে ঐচ্ছিক; supplier দিলে purchase price-ও দিতে হবে।
-            'supplier_id' => 'nullable',
+            'supplier_id' => ['nullable', Rule::exists('suppliers', 'id')->where('is_active', true)],
             'purchase_price' => 'nullable',
             // ledger-এর quantity গণনায় সঠিক numeric পরিমাণ নিশ্চিত করা হয়।
             'unit' => 'nullable',
@@ -142,7 +143,10 @@ class ProductController extends Controller
         $product = Product::findOrFail($id);
         $ProductCategories = ProductCategory::latest()->get();
         $brands = Brand::all();
-        $suppliers = Supplier::orderBy('name')->get();
+        $suppliers = Supplier::where('is_active', true)
+            ->when($product->supplier_id, fn ($query) => $query->orWhereKey($product->supplier_id))
+            ->orderBy('name')
+            ->get();
 
         return view('backend.Product.product.editProduct', compact('product', 'ProductCategories', 'brands', 'suppliers'));
     }
@@ -171,6 +175,13 @@ class ProductController extends Controller
 
         // ২. প্রডাক্ট খুঁজে বের করা
         $product = Product::findOrFail($id);
+        if ($request->filled('supplier_id')
+            && (int) $request->supplier_id !== (int) $product->supplier_id
+            && ! Supplier::whereKey($request->supplier_id)->where('is_active', true)->exists()) {
+            throw \Illuminate\Validation\ValidationException::withMessages([
+                'supplier_id' => 'Please select an active supplier.',
+            ]);
+        }
 
         // ডিফল্টভাবে ডেটাবেজে থাকা বর্তমান ইমেজের নাম রাখা হচ্ছে
         $productImageName = $product->img_url;

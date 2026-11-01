@@ -544,6 +544,45 @@ class CustomerController extends Controller
     public function destroy($id)
     {
         $customer = Customer::findOrFail($id);
+        $hasVouchers = $customer->ledgers()
+            ->with('payments')
+            ->get()
+            ->contains(function (CustomerLedger $ledger) use ($customer) {
+                $paymentRows = $ledger->payments
+                    ->map(fn (CustomerLedgerPayment $payment) => [
+                        'date' => $payment->payment_date->toDateString(),
+                        'amount' => number_format((float) $payment->amount, 2, '.', ''),
+                    ])
+                    ->all();
+                $initialPayment = round(
+                    (float) $ledger->payment_amount - $ledger->payments->sum(fn (CustomerLedgerPayment $payment) => (float) $payment->amount),
+                    2
+                );
+
+                if ($initialPayment > 0) {
+                    $paymentRows[] = [
+                        'date' => $ledger->sale_date->toDateString(),
+                        'amount' => number_format($initialPayment, 2, '.', ''),
+                    ];
+                }
+
+                return VoucherEntry::existsForSource(
+                    $ledger,
+                    'credit',
+                    $customer->name,
+                    'Payment received from customer '.$customer->name,
+                    $ledger->invoice_no,
+                    $paymentRows
+                );
+            });
+
+        if ($hasVouchers) {
+            return redirect()->route('customer.index')->with(
+                'error',
+                'Delete this customer’s associated vouchers from the Combined Voucher Report before deleting the customer.'
+            );
+        }
+
         $customer->delete();
 
         return redirect()->route('customer.index')->with('success', 'Customer deleted successfully.');

@@ -1,4 +1,5 @@
 @php
+    $organization = $organization ?? null;
     $hasOrganizationDetails = $organization
         && ($organization->name || $organization->logo || $organization->phone || $organization->email || $organization->address);
 @endphp

@@ -11,7 +11,12 @@ class Supplier extends Model
         'email',
         'phone',
         'address',
-        'logo'
+        'logo',
+        'is_active',
+    ];
+
+    protected $casts = [
+        'is_active' => 'boolean',
     ];
 
     public function supplierledgers()

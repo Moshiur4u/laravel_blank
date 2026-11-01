@@ -69,6 +69,22 @@
             color: #665cac;
         }
 
+        table> :not(caption)>*>* {
+            padding: .25rem .4rem !important;
+            line-height: 1.2;
+        }
+
+        table thead th {
+            background-color: #14ADE0 !important;
+            border-color: #14ADE0 !important;
+            color: #fff !important;
+        }
+
+        table :where(tbody td, tbody th),
+        table :where(tbody td, tbody th) *:not(i):not(svg):not(path) {
+            font-size: .875rem !important;
+        }
+
         @media (max-width: 575.98px) {
             .help-line-banner {
                 gap: .4rem !important;
@@ -86,6 +102,43 @@
 
             .help-line-apps {
                 font-size: 1.15rem;
+            }
+        }
+
+        @media print {
+            @page {
+                margin: 34mm 12mm 15mm;
+            }
+
+            *,
+            *::before,
+            *::after {
+                -webkit-print-color-adjust: exact !important;
+                print-color-adjust: exact !important;
+            }
+
+            table thead {
+                display: table-header-group;
+            }
+
+            table tfoot {
+                display: table-footer-group;
+            }
+
+            table tr {
+                break-inside: avoid;
+                page-break-inside: avoid;
+            }
+
+            .invoice-organization,
+            .quotation-organization,
+            .organization-report-header {
+                /* position: fixed !important; */
+                top: 3mm;
+                left: 12mm;
+                right: 12mm;
+                z-index: 1000;
+                margin: 5px !important;
             }
         }
     </style>

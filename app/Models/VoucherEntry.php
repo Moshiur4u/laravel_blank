@@ -86,6 +86,48 @@ class VoucherEntry extends Model
         }
     }
 
+    /**
+     * উৎস ledger-এর linked voucher এবং পুরোনো morph-বিহীন voucher আছে কি না যাচাই করে।
+     */
+    public static function existsForSource(
+        Model $source,
+        string $voucherType,
+        string $voucherHead,
+        string $description,
+        ?string $reference,
+        array $payments
+    ): bool {
+        if (static::query()
+            ->where('voucherable_type', $source::class)
+            ->where('voucherable_id', $source->getKey())
+            ->exists()) {
+            return true;
+        }
+
+        foreach ($payments as $payment) {
+            $legacyQuery = static::query()
+                ->whereNull('voucherable_type')
+                ->whereNull('voucherable_id')
+                ->where('voucher_type', $voucherType)
+                ->where('expense_income_type', $voucherHead)
+                ->where('description', $description)
+                ->whereDate('voucher_date', $payment['date'])
+                ->where('amount', $payment['amount']);
+
+            if ($reference === null) {
+                $legacyQuery->whereNull('reference');
+            } else {
+                $legacyQuery->where('reference', $reference);
+            }
+
+            if ($legacyQuery->exists()) {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
     public function voucherable(): MorphTo
     {
         return $this->morphTo();

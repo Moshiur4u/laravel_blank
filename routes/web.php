@@ -5,6 +5,7 @@ use App\Http\Controllers\CombinedVoucherReportController;
 use App\Http\Controllers\CustomerController;
 use App\Http\Controllers\DashboardConrtoller;
 use App\Http\Controllers\EmployeePaymentVoucherController;
+use App\Http\Controllers\MoneyReceiptController;
 use App\Http\Controllers\OrganizationController;
 use App\Http\Controllers\ProductCategoryController;
 use App\Http\Controllers\ProductController;
@@ -178,6 +179,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::get('/supplier/{id}/edit', [SupplierController::class, 'edit'])->middleware('permission:supplier.edit')->name('supplier.edit');
     Route::put('/supplier/{id}/update', [SupplierController::class, 'update'])->middleware('permission:supplier.edit')->name('supplier.update');
     Route::get('/supplier/{id}/destroy', [SupplierController::class, 'destroy'])->middleware('permission:supplier.delete')->name('supplier.destroy');
+    Route::patch('/supplier/{id}/status', [SupplierController::class, 'toggleStatus'])->middleware('permission:supplier.inactive')->name('supplier.status');
 
     // সাপ্লায়ার লেজার রাউট
     Route::get('/supplier/{id}/ledger', [SupplierledgerController::class, 'index'])->middleware('permission:supplier.ledger')->name('supplier.ledger');
@@ -226,7 +228,13 @@ Route::middleware(['auth', 'verified'])->group(function () {
 // বিক্রির ইনভয়েস, ফোন দিয়ে গ্রাহক খোঁজা এবং প্রিন্ট
 Route::middleware(['auth', 'verified'])->group(function () {
     Route::get('/sales', [SaleController::class, 'index'])->middleware('permission:sales.create|sales.view')->name('sales.index');
-    Route::get('/sales/customer-lookup', [SaleController::class, 'customerByPhone'])->middleware('permission:sales.create')->name('sales.customer.lookup');
+    Route::get('/sales/blank-invoice', [SaleController::class, 'blankInvoice'])
+        ->middleware('permission:sales.create|sales.view')
+        ->name('sales.blank-invoice');
+    Route::get('/money-receipts/create', [MoneyReceiptController::class, 'create'])
+        ->middleware('permission:money-receipt')
+        ->name('money-receipts.create');
+    Route::get('/sales/customer-lookup', [SaleController::class, 'customerByPhone'])->middleware('permission:sales.create|blank-invoice')->name('sales.customer.lookup');
     Route::post('/sales', [SaleController::class, 'store'])->middleware('permission:sales.create')->name('sales.store');
     Route::get('/sales/invoice/{id}', [SaleController::class, 'invoice'])->middleware('permission:sales.report')->name('sales.invoice');
     Route::get('/sales/delivery-challan/{id}', [SaleController::class, 'deliveryChallan'])
