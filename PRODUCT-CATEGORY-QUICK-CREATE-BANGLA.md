@@ -27,6 +27,8 @@ return redirect()->route('category.create');
 
 **ব্যাখ্যা:** আগের validation ও save বজায় আছে। Modal-এর JSON request-এ নতুন category-র ID/name ফেরত যায়; সাধারণ form submission আগের মতো redirect করে।
 
+Category name-এর জন্য store ও update—দুই ক্ষেত্রেই `product_categories.category_name`-এর uniqueness যাচাই হয়। Duplicate হলে validation message হয় `The name has already been taken.`—Brand-এর মতোই। Update validation বর্তমান category-টিকে unique check থেকে বাদ দেয়, তাই নিজের নাম অপরিবর্তিত রেখে save করা যায়।
+
 ### Supplier
 
 ফাইল: `app/Http/Controllers/SupplierController.php`, `store()` method-এর save-এর পর:

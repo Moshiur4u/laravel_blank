@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\ProductCategory;
 use Illuminate\Http\Request;
+use Illuminate\Validation\Rule;
 use Symfony\Component\Console\Input\Input;
 
 class ProductCategoryController extends Controller
@@ -15,7 +16,7 @@ class ProductCategoryController extends Controller
     {
 
         $ProductCategories = ProductCategory::latest()->get();
-        return view('backend.Product.Category.ProductCategoryindex',compact('ProductCategories'));
+        return view('backend.Product.Category.ProductCategoryindex', compact('ProductCategories'));
     }
 
     /**
@@ -24,7 +25,7 @@ class ProductCategoryController extends Controller
     public function create()
     {
         $ProductCategories = ProductCategory::latest()->get();
-        return view('backend.Product.Category.ProductCategoryCreate',compact('ProductCategories'));
+        return view('backend.Product.Category.ProductCategoryCreate', compact('ProductCategories'));
     }
 
     /**
@@ -34,7 +35,9 @@ class ProductCategoryController extends Controller
     {
         // dd($request->all());
         $request->validate([
-            'category_name'=>'required'
+            'category_name' => 'required|unique:product_categories,category_name',
+        ], [
+            'category_name.unique' => 'The name has already been taken.',
         ]);
         $productCategory = ProductCategory::create([
             'category_name' => $request->input('category_name'),
@@ -65,20 +68,25 @@ class ProductCategoryController extends Controller
      */
     public function edit($id)
     {
-        $CategoryEdit=ProductCategory::find($id);
-        return view('backend.Product.Category.Categoryedit',compact('CategoryEdit'));
+        $CategoryEdit = ProductCategory::find($id);
+        return view('backend.Product.Category.Categoryedit', compact('CategoryEdit'));
     }
 
     /**
      * Update the specified resource in storage.
      */
-    public function update(Request $request,$id)
+    public function update(Request $request, $id)
     {
         $request->validate([
-            'category_name'=>'required'
+            'category_name' => [
+                'required',
+                Rule::unique('product_categories', 'category_name')->ignore($id),
+            ],
+        ], [
+            'category_name.unique' => 'The name has already been taken.',
         ]);
 
-        $ProductCategory =ProductCategory::find($id);
+        $ProductCategory = ProductCategory::find($id);
         $ProductCategory->update($request->all());
         // Method two
         // $ProductCategory->category_name =$request->input('category_name');
@@ -94,6 +102,6 @@ class ProductCategoryController extends Controller
     {
         ProductCategory::find($id)->delete();
         sweetalert()->success('Category Delete Successfully.');
-       return back();
+        return back();
     }
 }
