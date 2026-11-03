@@ -47,7 +47,7 @@
                         </div>
 
                         <div class="card-body p-4">
-                            <form action="{{ route('category.store') }}" method="POST">
+                            <form action="{{ route('category.store') }}" method="POST" id="product-category-create-form">
                                 @csrf
 
                                 <div class="mb-4">

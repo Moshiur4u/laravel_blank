@@ -47,7 +47,7 @@
                         </div>
 
                         <div class="card-body p-4">
-                            <form action="{{ route('brand.store') }}" method="POST">
+                            <form action="{{ route('brand.store') }}" method="POST" id="brand-create-form">
                                 @csrf
 
                                 <div class="mb-4">

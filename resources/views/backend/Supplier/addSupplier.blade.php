@@ -47,7 +47,8 @@
                             </a>
                         </div>
                         <div class="card-body p-4">
-                            <form action="{{ route('supplier.store') }}" method="POST" enctype="multipart/form-data">
+                            <form action="{{ route('supplier.store') }}" method="POST" enctype="multipart/form-data"
+                                id="supplier-create-form">
                                 @csrf
 
                                 {{-- Supplier Name --}}
@@ -121,10 +122,10 @@
 
                                 {{-- Supplier Logo --}}
                                 <div class="mb-4">
-                                    <label for="imageInput" class="form-label fw-semibold">
+                                    <label for="supplierLogoInput" class="form-label fw-semibold">
                                         Supplier Logo
                                     </label>
-                                    <input type="file" id="imageInput" name="logo"
+                                    <input type="file" id="supplierLogoInput" name="logo"
                                         class="form-control @error('logo') is-invalid @enderror"
                                         accept="image/*">
                                     <small class="text-muted d-block mt-1">Supported formats: JPEG, PNG, JPG, GIF (Max: 1MB)</small>
@@ -133,9 +134,9 @@
                                     @enderror
 
                                     {{-- Image Preview Container --}}
-                                    <div class="mt-3 text-center p-3 border rounded bg-light" id="previewContainer" style="display: none;">
+                                    <div class="mt-3 text-center p-3 border rounded bg-light" id="supplierLogoPreviewContainer" style="display: none;">
                                         <p class="small text-muted mb-2">Logo Preview</p>
-                                        <img id="preview" alt="Supplier Logo Preview"
+                                        <img id="supplierLogoPreview" alt="Supplier Logo Preview"
                                             style="max-width: 140px; max-height: 140px; border-radius: 12px; object-fit: cover; border: 2px solid #dee2e6; box-shadow: 0 4px 6px rgba(0,0,0,0.05);" />
                                     </div>
                                 </div>
@@ -159,10 +160,10 @@
     </div>
 
     <script>
-        document.getElementById('imageInput').onchange = function(evt) {
+        document.getElementById('supplierLogoInput').onchange = function(evt) {
             const [file] = this.files;
-            const preview = document.getElementById('preview');
-            const previewContainer = document.getElementById('previewContainer');
+            const preview = document.getElementById('supplierLogoPreview');
+            const previewContainer = document.getElementById('supplierLogoPreviewContainer');
             if (file) {
                 preview.src = URL.createObjectURL(file);
                 previewContainer.style.display = 'block';

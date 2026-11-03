@@ -57,6 +57,15 @@ class SupplierController extends Controller
 
         $supplier->save();
 
+        if ($request->expectsJson()) {
+            return response()->json([
+                'supplier' => [
+                    'id' => $supplier->id,
+                    'name' => $supplier->name,
+                ],
+            ], 201);
+        }
+
         return redirect()->route('supplier.index')->with('success', 'Supplier added successfully!');
     }
 

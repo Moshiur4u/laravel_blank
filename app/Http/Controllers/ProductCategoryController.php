@@ -36,7 +36,19 @@ class ProductCategoryController extends Controller
         $request->validate([
             'category_name'=>'required'
         ]);
-        ProductCategory::create(['category_name'=>$request->input('category_name')]);
+        $productCategory = ProductCategory::create([
+            'category_name' => $request->input('category_name'),
+        ]);
+
+        if ($request->expectsJson()) {
+            return response()->json([
+                'category' => [
+                    'id' => $productCategory->id,
+                    'category_name' => $productCategory->category_name,
+                ],
+            ], 201);
+        }
+
         return redirect()->route('category.create');
     }
 

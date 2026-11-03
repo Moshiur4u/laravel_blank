@@ -33,8 +33,17 @@ class BrandController extends Controller
         $request->validate([
             'name'=> 'required|unique:brands,name'
         ]);
-        $brandNames = Brand::create(['name'=>$request->input('name')] );
-        $brandNames->save();
+        $brand = Brand::create(['name' => $request->input('name')]);
+
+        if ($request->expectsJson()) {
+            return response()->json([
+                'brand' => [
+                    'id' => $brand->id,
+                    'name' => $brand->name,
+                ],
+            ], 201);
+        }
+
         return redirect()->route('brand.index');
     }
 
