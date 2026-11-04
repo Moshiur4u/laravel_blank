@@ -10,6 +10,7 @@ use App\Http\Controllers\OrganizationController;
 use App\Http\Controllers\ProductCategoryController;
 use App\Http\Controllers\ProductController;
 use App\Http\Controllers\ProductInventoryReportController;
+use App\Http\Controllers\ProductReturnController;
 use App\Http\Controllers\QuotationController;
 use App\Http\Controllers\RoleController;
 use App\Http\Controllers\SaleController;
@@ -227,6 +228,27 @@ Route::middleware(['auth', 'verified'])->group(function () {
 
 // বিক্রির ইনভয়েস, ফোন দিয়ে গ্রাহক খোঁজা এবং প্রিন্ট
 Route::middleware(['auth', 'verified'])->group(function () {
+    Route::get('/product-returns', [ProductReturnController::class, 'index'])
+        ->middleware('permission:product.return')
+        ->name('product-returns.index');
+    Route::get('/product-returns/search', [ProductReturnController::class, 'search'])
+        ->middleware('permission:product.return')
+        ->name('product-returns.search');
+    Route::get('/product-returns/customer-history', [ProductReturnController::class, 'customerHistory'])
+        ->middleware('permission:product.return')
+        ->name('product-returns.customer-history');
+    Route::get('/product-returns/invoices/{id}', [ProductReturnController::class, 'invoiceDetails'])
+        ->middleware('permission:product.return')
+        ->name('product-returns.invoice');
+    Route::post('/product-returns', [ProductReturnController::class, 'store'])
+        ->middleware('permission:product.return')
+        ->name('product-returns.store');
+    Route::get('/product-returns/report', [ProductReturnController::class, 'report'])
+        ->middleware('permission:product.return.report|reports.all_access')
+        ->name('product-returns.report');
+});
+
+Route::middleware(['auth', 'verified'])->group(function () {
     Route::get('/sales', [SaleController::class, 'index'])->middleware('permission:sales.create|sales.view')->name('sales.index');
     Route::get('/sales/blank-invoice', [SaleController::class, 'blankInvoice'])
         ->middleware('permission:sales.create|sales.view')
@@ -237,6 +259,9 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::get('/sales/customer-lookup', [SaleController::class, 'customerByPhone'])->middleware('permission:sales.create|blank-invoice')->name('sales.customer.lookup');
     Route::post('/sales', [SaleController::class, 'store'])->middleware('permission:sales.create')->name('sales.store');
     Route::get('/sales/invoice/{id}', [SaleController::class, 'invoice'])->middleware('permission:sales.report')->name('sales.invoice');
+    Route::delete('/sales/invoice/{id}', [SaleController::class, 'destroy'])
+        ->middleware('permission:sales.create')
+        ->name('sales.destroy');
     Route::get('/sales/delivery-challan/{id}', [SaleController::class, 'deliveryChallan'])
         ->middleware('permission:sales.view|sales.report')
         ->name('sales.delivery-challan');

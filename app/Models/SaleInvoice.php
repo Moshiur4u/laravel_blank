@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class SaleInvoice extends Model
 {
@@ -60,5 +61,10 @@ class SaleInvoice extends Model
     {
         // একটি ইনভয়েসের প্রতিটি পণ্য আলাদা sale_items সারিতে থাকে।
         return $this->hasMany(SaleItem::class);
+    }
+
+    public function productReturns(): HasMany
+    {
+        return $this->hasMany(ProductReturn::class);
     }
 }

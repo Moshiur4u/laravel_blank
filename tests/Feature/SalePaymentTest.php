@@ -1,6 +1,8 @@
 <?php
 
 use App\Models\Customer;
+use App\Models\CustomerLedger;
+use App\Models\CustomerLedgerPayment;
 use App\Models\Product;
 use App\Models\SaleInvoice;
 use App\Models\User;
@@ -130,4 +132,110 @@ test('sales use entered unit prices for invoices and profit and calculate AIT', 
         ->and((float) $item->unit_price)->toBe(125.0)
         ->and((float) $item->line_total)->toBe(250.0)
         ->and($item->profit)->toBe(110.0);
+});
+
+test('today invoice void restores stock and removes its ledger and linked vouchers', function () {
+    $employee = User::factory()->create();
+    $customer = Customer::create([
+        'name' => 'Void Invoice Customer',
+        'phone' => '01700000004',
+        'customer_type' => 'temporary',
+        'status' => 1,
+    ]);
+    $categoryId = DB::table('product_categories')->insertGetId(['category_name' => 'Void Test Category']);
+    $brandId = DB::table('brands')->insertGetId(['name' => 'Void Test Brand']);
+    $product = Product::create([
+        'productName' => 'Void Test Product',
+        'product_categorie_id' => $categoryId,
+        'brand_id' => $brandId,
+        'price' => 100,
+        'unit' => '10',
+        'stock_unit' => '10',
+    ]);
+
+    $this->actingAs($employee)
+        ->post(route('sales.store'), [
+            'customer_phone' => $customer->phone,
+            'save_customer' => 'no',
+            'discount_amount' => 0,
+            'vat_amount' => 0,
+            'amount_paid' => 30,
+            'payment_method' => 'cash',
+            'items' => [
+                ['product_id' => $product->id, 'quantity' => 2, 'unit_price' => 100],
+            ],
+        ])
+        ->assertRedirect();
+
+    $invoice = SaleInvoice::query()->latest('id')->firstOrFail();
+    $ledger = CustomerLedger::query()->where('sale_invoice_id', $invoice->id)->firstOrFail();
+    $receipt = CustomerLedgerPayment::create([
+        'customer_ledger_id' => $ledger->id,
+        'payment_date' => today(),
+        'amount' => 10,
+        'received_by' => $employee->id,
+    ]);
+    VoucherEntry::createWithCode([
+        'voucher_type' => 'credit',
+        'expense_income_type' => $customer->name,
+        'voucher_date' => today(),
+        'amount' => '10.00',
+        'reference' => $invoice->invoice_no,
+        'description' => 'Payment received from customer '.$customer->name,
+        'created_by' => $employee->id,
+        'created_by_name' => $employee->name,
+        'voucherable_type' => CustomerLedger::class,
+        'voucherable_id' => $ledger->id,
+    ]);
+
+    $this->actingAs($employee)
+        ->delete(route('sales.destroy', $invoice->id))
+        ->assertRedirect(route('sales.index'))
+        ->assertSessionHas('success');
+
+    $this->assertDatabaseMissing('sale_invoices', ['id' => $invoice->id]);
+    $this->assertDatabaseMissing('sale_items', ['sale_invoice_id' => $invoice->id]);
+    $this->assertDatabaseMissing('customer_ledgers', ['id' => $ledger->id]);
+    $this->assertDatabaseMissing('customer_ledger_payments', ['id' => $receipt->id]);
+    $this->assertDatabaseMissing('voucher_entries', ['reference' => $invoice->invoice_no]);
+    expect((float) $product->fresh()->unit)->toBe(10.0);
+});
+
+test('an invoice from an earlier date cannot be voided', function () {
+    $employee = User::factory()->create();
+    $categoryId = DB::table('product_categories')->insertGetId(['category_name' => 'Old Invoice Category']);
+    $brandId = DB::table('brands')->insertGetId(['name' => 'Old Invoice Brand']);
+    $product = Product::create([
+        'productName' => 'Old Invoice Product',
+        'product_categorie_id' => $categoryId,
+        'brand_id' => $brandId,
+        'price' => 100,
+        'unit' => '10',
+        'stock_unit' => '10',
+    ]);
+
+    $this->actingAs($employee)
+        ->post(route('sales.store'), [
+            'customer_phone' => '01700000005',
+            'save_customer' => 'no',
+            'customer_name' => 'Old Invoice Customer',
+            'discount_amount' => 0,
+            'vat_amount' => 0,
+            'amount_paid' => 0,
+            'payment_method' => 'cash',
+            'items' => [
+                ['product_id' => $product->id, 'quantity' => 2, 'unit_price' => 100],
+            ],
+        ])
+        ->assertRedirect();
+
+    $invoice = SaleInvoice::query()->latest('id')->firstOrFail();
+    $invoice->update(['invoice_date' => today()->subDay()]);
+
+    $this->actingAs($employee)
+        ->delete(route('sales.destroy', $invoice->id))
+        ->assertForbidden();
+
+    $this->assertDatabaseHas('sale_invoices', ['id' => $invoice->id]);
+    expect((float) $product->fresh()->unit)->toBe(8.0);
 });

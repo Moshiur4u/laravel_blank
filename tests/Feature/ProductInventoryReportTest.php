@@ -67,13 +67,24 @@ class ProductInventoryReportTest extends TestCase
             'quantity' => '5',
             'total' => '110.00',
         ]);
-        SaleItem::create([
+        $returnedSaleItem = SaleItem::create([
             'product_id' => $product->id,
             'product_name' => 'Rice',
             'quantity' => 3,
             'purchase_price' => '10.00',
             'unit_price' => '20.00',
             'line_total' => '60.00',
+        ]);
+        \Illuminate\Support\Facades\DB::table('product_returns')->insert([
+            'sale_invoice_id' => 1,
+            'sale_item_id' => $returnedSaleItem->id,
+            'product_id' => $product->id,
+            'quantity' => 1,
+            'return_date' => today()->toDateString(),
+            'return_amount' => '33.00',
+            'refund_amount' => '0.00',
+            'created_at' => now(),
+            'updated_at' => now(),
         ]);
         SaleItem::create([
             'product_id' => $product->id,
@@ -93,12 +104,12 @@ class ProductInventoryReportTest extends TestCase
         $this->assertEquals(15, $row['purchased_quantity']);
         $this->assertEquals(310, $row['purchase_amount']);
         $this->assertEquals(7, $row['stock']);
-        $this->assertEquals(12, $row['purchase_price']);
-        $this->assertEquals(22, $row['avg_selling_price']);
-        $this->assertEquals(5, $row['quantity_sold']);
-        $this->assertEquals(110, $row['revenue']);
-        $this->assertEquals(60, $row['total_cost']);
-        $this->assertEquals(50, $row['profit']);
+        $this->assertEquals(12.5, $row['purchase_price']);
+        $this->assertEquals(22.5, $row['avg_selling_price']);
+        $this->assertEquals(4, $row['quantity_sold']);
+        $this->assertEquals(90, $row['revenue']);
+        $this->assertEquals(50, $row['total_cost']);
+        $this->assertEquals(40, $row['profit']);
         $this->assertSame('expiring', $row['expiry_status']);
         $this->assertCount(2, $row['suppliers']);
         $this->assertSame('01700000001', $row['suppliers'][0]['phone']);
@@ -146,6 +157,18 @@ class ProductInventoryReportTest extends TestCase
             $table->decimal('purchase_price', 15, 2)->nullable();
             $table->decimal('unit_price', 15, 2);
             $table->decimal('line_total', 15, 2);
+            $table->timestamps();
+        });
+
+        Schema::create('product_returns', function (Blueprint $table): void {
+            $table->id();
+            $table->unsignedBigInteger('sale_invoice_id');
+            $table->unsignedBigInteger('sale_item_id');
+            $table->unsignedBigInteger('product_id')->nullable();
+            $table->unsignedInteger('quantity');
+            $table->date('return_date');
+            $table->decimal('return_amount', 15, 2)->default(0);
+            $table->decimal('refund_amount', 15, 2)->default(0);
             $table->timestamps();
         });
     }

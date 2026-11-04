@@ -113,17 +113,26 @@ class ProductInventoryReportController extends Controller
         $salesByProduct = collect();
 
         if ($products->isNotEmpty()) {
-            // বিক্রির সময়কার ক্রয়মূল্যকে অগ্রাধিকার দিয়ে Sales Report-এর মতো লাভ হিসাব করা হয়।
+            $returnTotalsByItem = \Illuminate\Support\Facades\DB::table('product_returns')
+                ->select('sale_item_id')
+                ->selectRaw('SUM(quantity) as returned_quantity')
+                ->groupBy('sale_item_id');
+            $netQuantity = 'CASE WHEN sale_items.quantity > COALESCE(report_item_returns.returned_quantity, 0) THEN sale_items.quantity - COALESCE(report_item_returns.returned_quantity, 0) ELSE 0 END';
+            $netRevenue = "CASE WHEN sale_items.quantity > 0 THEN sale_items.line_total * ({$netQuantity}) / sale_items.quantity ELSE 0 END";
+            $unitCost = 'COALESCE(sale_items.purchase_price, products.purchase_price, 0)';
+
+            // Return বাদ দিয়ে বিক্রির সময়কার ক্রয়মূল্যে net quantity ও profit হিসাব করা হয়।
             $salesByProduct = SaleItem::query()
                 ->leftJoin('products', 'sale_items.product_id', '=', 'products.id')
+                ->leftJoinSub($returnTotalsByItem, 'report_item_returns', 'report_item_returns.sale_item_id', '=', 'sale_items.id')
                 ->whereIn('sale_items.product_id', $products->pluck('id'))
                 ->select('sale_items.product_id')
-                ->selectRaw('CASE WHEN SUM(sale_items.quantity) > 0 THEN SUM(sale_items.quantity * COALESCE(sale_items.purchase_price, products.purchase_price, 0)) / SUM(sale_items.quantity) ELSE 0 END as purchase_price')
-                ->selectRaw('CASE WHEN SUM(sale_items.quantity) > 0 THEN SUM(sale_items.line_total) / SUM(sale_items.quantity) ELSE 0 END as avg_selling_price')
-                ->selectRaw('SUM(sale_items.quantity) as quantity_sold')
-                ->selectRaw('SUM(sale_items.line_total) as revenue')
-                ->selectRaw('SUM(sale_items.quantity * COALESCE(sale_items.purchase_price, products.purchase_price, 0)) as total_cost')
-                ->selectRaw('SUM(sale_items.line_total - (sale_items.quantity * COALESCE(sale_items.purchase_price, products.purchase_price, 0))) as profit')
+                ->selectRaw("CASE WHEN SUM({$netQuantity}) > 0 THEN SUM(({$netQuantity}) * {$unitCost}) / SUM({$netQuantity}) ELSE 0 END as purchase_price")
+                ->selectRaw("CASE WHEN SUM({$netQuantity}) > 0 THEN SUM({$netRevenue}) / SUM({$netQuantity}) ELSE 0 END as avg_selling_price")
+                ->selectRaw("SUM({$netQuantity}) as quantity_sold")
+                ->selectRaw("SUM({$netRevenue}) as revenue")
+                ->selectRaw("SUM(({$netQuantity}) * {$unitCost}) as total_cost")
+                ->selectRaw("SUM(({$netRevenue}) - (({$netQuantity}) * {$unitCost})) as profit")
                 ->groupBy('sale_items.product_id')
                 ->get()
                 ->keyBy('product_id');

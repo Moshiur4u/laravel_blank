@@ -31,6 +31,10 @@
                 @endcan
             </div>
 
+            @if (session('success'))
+                <div class="alert alert-success" role="status">{{ session('success') }}</div>
+            @endif
+
             @can('sales.create')
                 <form id="saleForm" action="{{ route('sales.store') }}" method="POST">
                     @csrf

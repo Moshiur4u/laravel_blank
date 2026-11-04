@@ -188,9 +188,14 @@
                                         $isEmployeeVoucher = $voucher->voucher_category === 'employee';
                                         $isLinkedVoucher = in_array(
                                             $voucher->voucherable_type,
-                                            [\App\Models\Supplierledger::class, \App\Models\CustomerLedger::class],
+                                            [
+                                                \App\Models\Supplierledger::class,
+                                                \App\Models\CustomerLedger::class,
+                                                \App\Models\ProductReturn::class,
+                                            ],
                                             true,
                                         );
+                                        $isReturnVoucher = $voucher->voucherable_type === \App\Models\ProductReturn::class;
                                     @endphp
                                     <tr>
                                         <td>{{ \Illuminate\Support\Carbon::parse($voucher->report_date)->format('d M Y') }}
@@ -229,7 +234,10 @@
                                         <td>{{ $voucher->reference ?: $voucher->description ?: '—' }}</td>
                                         @if ($canManageVouchers)
                                             <td class="no-print">
-                                                @canany(['voucher.edit', 'reports.all_access'])
+                                                @if ($isReturnVoucher)
+                                                    <span class="text-muted small">Managed by product return</span>
+                                                @else
+                                                    @canany(['voucher.edit', 'reports.all_access'])
                                                     <details>
                                                         <summary class="btn btn-sm btn-outline-primary">Edit</summary>
                                                         <form method="POST"
@@ -288,8 +296,8 @@
                                                                 Changes</button>
                                                         </form>
                                                     </details>
-                                                @endcanany
-                                                @canany(['voucher.delete', 'reports.all_access'])
+                                                    @endcanany
+                                                    @canany(['voucher.delete', 'reports.all_access'])
                                                     <form method="POST"
                                                         action="{{ route('voucher-report.combined.destroy', [$voucher->voucher_category, $voucher->voucher_id]) }}"
                                                         class="mt-2"
@@ -304,7 +312,8 @@
                                                         <button type="submit"
                                                             class="btn btn-sm btn-outline-danger">Delete</button>
                                                     </form>
-                                                @endcanany
+                                                    @endcanany
+                                                @endif
                                             </td>
                                         @endif
                                     </tr>

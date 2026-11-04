@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class SaleItem extends Model
 {
@@ -32,6 +33,11 @@ class SaleItem extends Model
     {
         // পণ্য পরে মুছে গেলেও product_name-এ ইনভয়েসের জন্য নামের কপি রাখা হয়।
         return $this->belongsTo(Product::class);
+    }
+
+    public function returns(): HasMany
+    {
+        return $this->hasMany(ProductReturn::class);
     }
 
     /**

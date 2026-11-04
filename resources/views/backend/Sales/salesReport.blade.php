@@ -252,9 +252,29 @@
                             <tbody>
                                 @forelse ($invoices as $invoice)
                                     @php
+                                        $invoiceReturnedGross = $invoice->items->sum(
+                                            fn($item) => $item->quantity > 0
+                                                ? $item->returns->sum(
+                                                    fn($return) => (float) $item->line_total * $return->quantity / $item->quantity,
+                                                )
+                                                : 0,
+                                        );
+                                        $invoiceReturnedCost = $invoice->items->sum(
+                                            fn($item) => $item->returns->sum(
+                                                fn($return) => $item->effective_purchase_price * $return->quantity,
+                                            ),
+                                        );
+                                        $invoiceReturnedDiscount =
+                                            (float) $invoice->subtotal > 0
+                                                ? $invoiceReturnedGross * (float) $invoice->discount_amount / (float) $invoice->subtotal
+                                                : 0;
+                                        $invoiceReturnedAmount = (float) $invoice->productReturns->sum('return_amount');
                                         $invoiceProfit =
                                             $invoice->items->sum(fn($item) => (float) $item->profit) -
-                                            (float) $invoice->discount_amount;
+                                            $invoiceReturnedGross +
+                                            $invoiceReturnedCost -
+                                            (float) $invoice->discount_amount +
+                                            $invoiceReturnedDiscount;
                                     @endphp
                                     <tr>
                                         <td>{{ $invoice->invoice_date?->format('d M Y, h:i A') }}</td>
@@ -269,7 +289,7 @@
                                         <td>{{ $invoice->employee?->name ?? 'N/A' }}</td>
                                         <td class="text-end">{{ number_format($invoice->items_count) }}</td>
                                         <td class="text-end">
-                                            ৳{{ number_format((float) $invoice->subtotal - (float) $invoice->discount_amount + (float) $invoice->vat_amount + (float) $invoice->ait_amount, 2) }}
+                                            ৳{{ number_format((float) $invoice->subtotal - (float) $invoice->discount_amount + (float) $invoice->vat_amount + (float) $invoice->ait_amount - $invoiceReturnedAmount, 2) }}
                                         </td>
                                         <td class="text-end">
                                             <span

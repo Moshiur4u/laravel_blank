@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\EmployeePaymentVoucher;
 use App\Models\CustomerLedger;
 use App\Models\CustomerLedgerPayment;
+use App\Models\ProductReturn;
 use App\Models\SupplierLedgerPayment;
 use App\Models\Supplierledger;
 use App\Models\User;
@@ -143,6 +144,11 @@ class CombinedVoucherReportController extends Controller
                     ->where('voucher_type', $category)
                     ->lockForUpdate()
                     ->findOrFail($voucherId);
+                if ($voucher->voucherable_type === ProductReturn::class) {
+                    throw ValidationException::withMessages([
+                        'voucher' => 'Product return refund vouchers can only be changed by processing a product return.',
+                    ]);
+                }
                 $amount = number_format($this->moneyToCents($validated['amount']) / 100, 2, '.', '');
 
                 if ($voucher->voucherable_type === Supplierledger::class) {
@@ -182,6 +188,11 @@ class CombinedVoucherReportController extends Controller
                 ->where('voucher_type', $category)
                 ->lockForUpdate()
                 ->findOrFail($voucherId);
+            if ($voucher->voucherable_type === ProductReturn::class) {
+                throw ValidationException::withMessages([
+                    'voucher' => 'Product return refund vouchers can only be removed by voiding the related invoice.',
+                ]);
+            }
 
             if ($voucher->voucherable_type === Supplierledger::class) {
                 $this->deleteSupplierPayment($voucher);

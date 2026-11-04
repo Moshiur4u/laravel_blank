@@ -184,7 +184,7 @@
 
                     </li>
                 @endcan
-                @canany(['sales.create', 'sales.view'])
+                @canany(['sales.create', 'sales.view', 'product.return'])
                     <li class="menu-label">Regural Operation</li>
                     <li>
                         <a href="javascript:;" class="has-arrow">
@@ -195,6 +195,11 @@
                             @can('sales.create')
                                 <li>
                                     <a href="{{ route('sales.index') }}"><i class='bx bx-plus-medical'></i>Create Sale</a>
+                                </li>
+                            @endcan
+                            @can('product.return')
+                                <li>
+                                    <a href="{{ route('product-returns.index') }}"><i class='bx bx-undo'></i>Product Return</a>
                                 </li>
                             @endcan
                         </ul>
@@ -443,7 +448,8 @@
                 @endcan
 
                 @canany(['voucher.report.view', 'voucher.report.employee', 'voucher.report.miscellaneous',
-                    'reports.all_access', 'product.report.inventory', 'sales.report', 'user.activity.logs'])
+                    'reports.all_access', 'product.report.inventory', 'sales.report', 'product.return.report',
+                    'user.activity.logs'])
                     {{-- Reports menu-তে নতুন report ও Activity Log permission key ব্যবহৃত। --}}
                     <li class="menu-label">Reports</li>
 
@@ -503,6 +509,14 @@
                                 </a>
                             </li>
                         </ul>
+                    </li>
+                @endcan
+                @canany(['product.return.report', 'reports.all_access'])
+                    <li>
+                        <a href="{{ route('product-returns.report') }}">
+                            <div class="parent-icon"><i class='bx bx-undo'></i></div>
+                            <div class="menu-title">Product Return Report</div>
+                        </a>
                     </li>
                 @endcan
                 @canany(['product.report.inventory', 'reports.all_access']) {{-- inventory report route-এর access অনুযায়ী link দেখায়। --}}

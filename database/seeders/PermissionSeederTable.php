@@ -51,6 +51,8 @@ class PermissionSeederTable extends Seeder
             'product.edit',
             'product.update',
             'product.delete',
+            'product.return',
+            'product.return.report',
             //Brand all parmissions,
             'brand.index',
             'brand.create',
