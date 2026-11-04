@@ -181,7 +181,7 @@
                                             <select
                                                 class="form-select border-start-0 @error('supplier_id') is-invalid @enderror"
                                                 name="supplier_id" id="supplier_id">
-                                                <option value="">Select Supplier (Optional)</option>
+                                                <option value="">Select Supplier</option>
                                                 @foreach ($suppliers as $supplier)
                                                     <option value="{{ $supplier->id }}"
                                                         {{ old('supplier_id') == $supplier->id ? 'selected' : '' }}>
@@ -412,7 +412,7 @@
                     <div class="modal-dialog modal-dialog-centered">
                         <div class="modal-content">
                             <div class="modal-header">
-                                <h5 class="modal-title" id="categoryCreateModalLabel">Create New Category</h5>
+                                <h5 class="modal-title" id="categoryCreateModalLabel">Create Category</h5>
                                 <button type="button" class="btn-close" data-bs-dismiss="modal"
                                     aria-label="Close"></button>
                             </div>
@@ -433,7 +433,7 @@
                     <div class="modal-dialog modal-dialog-centered modal-lg">
                         <div class="modal-content">
                             <div class="modal-header">
-                                <h5 class="modal-title" id="supplierCreateModalLabel">Create New Supplier</h5>
+                                <h5 class="modal-title" id="supplierCreateModalLabel">Create Supplier</h5>
                                 <button type="button" class="btn-close" data-bs-dismiss="modal"
                                     aria-label="Close"></button>
                             </div>
@@ -454,7 +454,7 @@
                     <div class="modal-dialog modal-dialog-centered">
                         <div class="modal-content">
                             <div class="modal-header">
-                                <h5 class="modal-title" id="brandCreateModalLabel">Create New Brand</h5>
+                                <h5 class="modal-title" id="brandCreateModalLabel">Create Brand</h5>
                                 <button type="button" class="btn-close" data-bs-dismiss="modal"
                                     aria-label="Close"></button>
                             </div>
@@ -578,7 +578,7 @@
                         modalBody.replaceChildren(form);
                         form.querySelector('input:not([type="hidden"])')?.focus();
                     } catch (error) {
-                        modalBody.innerHTML = '<div class="alert alert-danger mb-0" role="alert"></div>';
+                        modalBody.innerHTML = '<div class="mb-0 alert alert-danger" role="alert"></div>';
                         modalBody.querySelector('.alert').textContent = error.message;
                     }
                 });
