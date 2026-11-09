@@ -149,3 +149,67 @@ test('manager cannot edit or delete roles or delete suppliers', function () {
         ->get(route('supplier.ledger.edit', 1))
         ->assertForbidden();
 });
+
+test('role permission changes are selectable and persist when saved', function () {
+    $editor = User::factory()->create(['email_verified_at' => now()]);
+    $editor->givePermissionTo([
+        Permission::findOrCreate('role.edit', 'web'),
+        Permission::findOrCreate('product.index', 'web'),
+    ]);
+
+    $existingPermission = Permission::findOrCreate('supplier.index', 'web');
+    $role = Role::create(['name' => 'inventory-editor', 'guard_name' => 'web']);
+    $role->givePermissionTo($existingPermission);
+    $assignablePermission = Permission::findByName('product.index', 'web');
+
+    $this->actingAs($editor)
+        ->get(route('roles.edit', $role->id))
+        ->assertOk()
+        ->assertSee('product.index')
+        ->assertSee('supplier.index')
+        ->assertDontSee('voucher.delete');
+
+    $this->actingAs($editor)
+        ->put(route('roles.update', $role->id), [
+            'name' => $role->name,
+            'permission' => [$assignablePermission->id],
+        ])
+        ->assertRedirect(route('roles.index'));
+
+    expect($role->fresh()->hasPermissionTo($assignablePermission))->toBeTrue()
+        ->and($role->fresh()->hasPermissionTo($existingPermission))->toBeFalse();
+});
+
+test('an administrator can restore a permission removed from the admin role', function () {
+    $admin = User::factory()->create(['email_verified_at' => now()]);
+    $admin->assignRole('admin');
+    $adminRole = Role::findByName('admin');
+    $purchaseReturn = Permission::findByName('purchase.return');
+    $remainingPermissionIds = $adminRole->permissions
+        ->reject(fn (Permission $permission) => $permission->id === $purchaseReturn->id)
+        ->modelKeys();
+
+    $this->actingAs($admin)
+        ->put(route('roles.update', $adminRole->id), [
+            'name' => $adminRole->name,
+            'permission' => $remainingPermissionIds,
+        ])
+        ->assertRedirect(route('roles.index'));
+
+    expect($adminRole->fresh()->hasPermissionTo('purchase.return'))->toBeFalse();
+
+    $this->actingAs($admin->fresh())
+        ->get(route('roles.edit', $adminRole->id))
+        ->assertOk()
+        ->assertSee('purchase.return');
+
+    $restoredPermissionIds = array_merge($remainingPermissionIds, [$purchaseReturn->id]);
+    $this->actingAs($admin->fresh())
+        ->put(route('roles.update', $adminRole->id), [
+            'name' => $adminRole->name,
+            'permission' => $restoredPermissionIds,
+        ])
+        ->assertRedirect(route('roles.index'));
+
+    expect($adminRole->fresh()->hasPermissionTo('purchase.return'))->toBeTrue();
+});

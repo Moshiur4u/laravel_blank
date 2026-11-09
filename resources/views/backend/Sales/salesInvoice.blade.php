@@ -33,7 +33,7 @@
                         class="bx bx-printer me-1"></i>Print Invoice</button>
             </div>
 
-            <div id="print-document" class="border-0 shadow-sm card print-document"
+            <div id="print-document" class="border-0 shadow-sm card print-document invoice-print-area"
                 @if ($organization?->logo) style="--invoice-watermark: url('{{ asset('uploads/organizations/' . $organization->logo) }}');" @endif>
                 <div class="p-4 card-body p-md-5">
                     @if (
@@ -68,12 +68,12 @@
 
                     {{-- ইনভয়েসের পরিচিতি ও গ্রাহকের তথ্য আলাদা কলামে রাখলে প্রিন্টে দ্রুত পড়া যায়। --}}
                     <div class="mb-4 row align-items-start invoice-header">
-                        <div class="col-7">
+                        <div class="col-7 invoice-header-details">
                             <h2 class="mb-1 text-primary fw-bold">Sales Invoice</h2>
                             <div class="text-muted">Invoice: <strong>{{ $invoice->invoice_no }}</strong></div>
                             <div class="text-muted">Date: {{ $invoice->invoice_date->format('d M Y') }}</div>
                         </div>
-                        <div class="col-5 text-end">
+                        <div class="col-5 text-end invoice-customer-info">
                             <h5 class="mb-1 fw-bold">Customer</h5>
                             <div><i class="bx bx-user me-1" aria-hidden="true"></i>Name:
                                 {{ $invoice->customer_name ?? ($invoice->customer?->name ?? 'Walk-in Customer') }}</div>
@@ -109,7 +109,7 @@
                                 @foreach ($invoice->items as $key => $item)
                                     <tr>
                                         <td>{{ $key + 1 }}</td>
-                                        <td class="invoice-product-name">{{ $item->product_name }}</td>
+                                        <td class="invoice-product-name">{{ $item->display_product_name }}</td>
                                         {{-- sale তৈরির সময় Product-এর selling price sale item-এ snapshot হয়ে invoice-এ দেখায়। --}}
                                         <td class="text-end">৳{{ number_format($item->unit_price, 2) }}</td>
                                         <td class="text-center">{{ $item->quantity }}</td>
@@ -155,11 +155,13 @@
                                     <th colspan="4" class="text-end">Amount Paid</th>
                                     <td class="text-end">৳{{ number_format($invoice->amount_paid, 2) }}</td>
                                 </tr>
-                                {{-- Due-কে অন্য মোটের মতো স্বাভাবিক রঙে রেখে শুধু bold করা হয়েছে। --}}
-                                <tr class="fw-bold">
-                                    <th colspan="4" class="text-end">Due</th>
-                                    <td class="text-end">৳{{ number_format($invoice->due_amount, 2) }}</td>
-                                </tr>
+                                @if ((float) $invoice->due_amount > 0)
+                                    {{-- বকেয়া না থাকলে invoice-এ Due row দেখানোর প্রয়োজন নেই। --}}
+                                    <tr class="fw-bold">
+                                        <th colspan="4" class="text-end">Due</th>
+                                        <td class="text-end">৳{{ number_format($invoice->due_amount, 2) }}</td>
+                                    </tr>
+                                @endif
                                 <tr>
                                     <th colspan="4" class="text-end">Payment Method</th>
                                     <td class="text-end">

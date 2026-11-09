@@ -100,7 +100,7 @@
                                     <tr>
                                         <td class="text-center text-muted">{{ $index + 1 }}</td>
                                         <td class="quotation-product-name">
-                                            <div class="fw-semibold text-dark">{{ $item->product_name }}</div>
+                                            <div class="fw-semibold text-dark">{{ $item->display_product_name }}</div>
                                             {{-- পণ্যের নামের জন্য বেশি জায়গা রাখতে Item Code কোটেশনের প্রিন্টে দেখানো হয় না। --}}
                                             {{-- @if ($item->product_id)
                                                 <small class="text-muted">Item Code: PRD-{{ str_pad($item->product_id, 5, '0', STR_PAD_LEFT) }}</small>

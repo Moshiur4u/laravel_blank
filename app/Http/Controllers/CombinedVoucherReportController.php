@@ -6,6 +6,7 @@ use App\Models\EmployeePaymentVoucher;
 use App\Models\CustomerLedger;
 use App\Models\CustomerLedgerPayment;
 use App\Models\ProductReturn;
+use App\Models\PurchaseReturn;
 use App\Models\SupplierLedgerPayment;
 use App\Models\Supplierledger;
 use App\Models\User;
@@ -149,6 +150,11 @@ class CombinedVoucherReportController extends Controller
                         'voucher' => 'Product return refund vouchers can only be changed by processing a product return.',
                     ]);
                 }
+                if ($voucher->voucherable_type === PurchaseReturn::class) {
+                    throw ValidationException::withMessages([
+                        'voucher' => 'Purchase return refund vouchers can only be changed by processing a purchase return.',
+                    ]);
+                }
                 $amount = number_format($this->moneyToCents($validated['amount']) / 100, 2, '.', '');
 
                 if ($voucher->voucherable_type === Supplierledger::class) {
@@ -191,6 +197,11 @@ class CombinedVoucherReportController extends Controller
             if ($voucher->voucherable_type === ProductReturn::class) {
                 throw ValidationException::withMessages([
                     'voucher' => 'Product return refund vouchers can only be removed by voiding the related invoice.',
+                ]);
+            }
+            if ($voucher->voucherable_type === PurchaseReturn::class) {
+                throw ValidationException::withMessages([
+                    'voucher' => 'Purchase return refund vouchers can only be removed by voiding the related purchase return.',
                 ]);
             }
 
@@ -332,6 +343,11 @@ class CombinedVoucherReportController extends Controller
     private function updateSupplierPayment(VoucherEntry $voucher, string $date, string $amount): void
     {
         $ledger = Supplierledger::query()->lockForUpdate()->findOrFail($voucher->voucherable_id);
+        if ($ledger->purchaseReturns()->exists()) {
+            throw ValidationException::withMessages([
+                'voucher' => 'Supplier payment vouchers cannot be changed after a purchase return has been recorded.',
+            ]);
+        }
         $payment = SupplierLedgerPayment::query()
             ->where('supplierledger_id', $ledger->id)
             ->whereDate('payment_date', $voucher->voucher_date)
@@ -377,6 +393,11 @@ class CombinedVoucherReportController extends Controller
     private function deleteSupplierPayment(VoucherEntry $voucher): void
     {
         $ledger = Supplierledger::query()->lockForUpdate()->findOrFail($voucher->voucherable_id);
+        if ($ledger->purchaseReturns()->exists()) {
+            throw ValidationException::withMessages([
+                'voucher' => 'Supplier payment vouchers cannot be removed after a purchase return has been recorded.',
+            ]);
+        }
         $payment = SupplierLedgerPayment::query()
             ->where('supplierledger_id', $ledger->id)
             ->whereDate('payment_date', $voucher->voucher_date)

@@ -130,6 +130,21 @@
                 page-break-inside: avoid;
             }
 
+            .invoice-print-area,
+            .invoice-print-area * {
+                font-size: 10px !important;
+            }
+
+            .invoice-customer-info,
+            .invoice-customer-info * {
+                font-size: 1rem !important;
+            }
+
+            .invoice-header-details,
+            .invoice-header-details * {
+                font-size: 1rem !important;
+            }
+
             .invoice-organization,
             .quotation-organization,
             .organization-report-header {
@@ -199,7 +214,7 @@
                             @endcan
                             @can('product.return')
                                 <li>
-                                    <a href="{{ route('product-returns.index') }}"><i class='bx bx-undo'></i>Product Return</a>
+                                    <a href="{{ route('product-returns.index') }}"><i class='bx bx-undo'></i>Sales Return</a>
                                 </li>
                             @endcan
                         </ul>
@@ -223,10 +238,10 @@
                 @endcan
                 @canany(['product.index', 'product.create', 'product.edit', 'brand.index', 'brand.create', 'brand.edit',
                     'brand.update', 'brand.delete', 'supplier.index', 'supplier.create', 'category.index', 'customer.index',
-                    'customer.create']) {{-- sidebar group নতুন module permission দিয়ে দেখায়। --}}
+                    'customer.create', 'purchase.return']) {{-- sidebar group নতুন module permission দিয়ে দেখায়। --}}
                     <li class="menu-label">Managerial Operations</li>
                 @endcanany
-                @canany(['product.index', 'product.create', 'product.edit']) {{-- Product menu-তে নতুন permission key ব্যবহৃত। --}}
+                @canany(['product.index', 'product.create', 'product.edit', 'purchase.return']) {{-- Product menu-তে নতুন permission key ব্যবহৃত। --}}
                     <li>
                         <a href="javascript:;" class="has-arrow">
                             <div class="parent-icon"><i class=' bx bxl-product-hunt'></i>
@@ -245,6 +260,12 @@
                                 <li>
                                     <a href="{{ route('product.create') }}"><i class='bx bx-plus-medical'></i>Create
                                         Product</a>
+                                </li>
+                            @endcan
+                            @can(['purchase.return', 'product.index', 'product.create', 'product.edit'])
+                                <li>
+                                    <a href="{{ route('purchase-returns.index') }}"><i class='bx bx-undo'></i>Purchase
+                                        Return</a>
                                 </li>
                             @endcan
                         </ul>
@@ -323,7 +344,7 @@
                         </ul>
                     </li>
                 @endcan
-                @canany(['supplier.index', 'supplier.create'])
+                @canany(['supplier.index', 'supplier.create', 'purchase.return'])
                     <li>
                         <a href="javascript:;" class="has-arrow">
                             <div class="parent-icon"><i class="bx bxs-school"></i></div>
@@ -449,7 +470,7 @@
 
                 @canany(['voucher.report.view', 'voucher.report.employee', 'voucher.report.miscellaneous',
                     'reports.all_access', 'product.report.inventory', 'sales.report', 'product.return.report',
-                    'user.activity.logs'])
+                    'purchase.return.report', 'user.activity.logs'])
                     {{-- Reports menu-তে নতুন report ও Activity Log permission key ব্যবহৃত। --}}
                     <li class="menu-label">Reports</li>
 
@@ -511,14 +532,14 @@
                         </ul>
 
 
-                @canany(['product.return.report', 'reports.all_access'])
-                    <ul>
-                        <a href="{{ route('product-returns.report') }}">
-                            <div class="parent-icon"><i class='bx bx-undo'></i></div>
-                            <div class="menu-title">Sale Return Report</div>
-                        </a>
-                    </ul>
-                @endcan
+                        @canany(['product.return.report', 'reports.all_access'])
+                            <ul>
+                                <a href="{{ route('product-returns.report') }}">
+                                    <div class="parent-icon"><i class='bx bx-undo'></i></div>
+                                    <div class="menu-title">Sale Return Report</div>
+                                </a>
+                            </ul>
+                        @endcan
                     </li>
                 @endcan
                 @canany(['product.report.inventory', 'reports.all_access']) {{-- inventory report route-এর access অনুযায়ী link দেখায়। --}}
@@ -535,6 +556,15 @@
                                 </a>
                             </li>
                         </ul>
+
+                        @canany(['purchase.return.report', 'reports.all_access'])
+                            <ul>
+                                <a href="{{ route('purchase-returns.report') }}">
+                                    <div class="parent-icon"><i class='bx bx-undo'></i></div>
+                                    <div class="menu-title">Purchase Return Report</div>
+                                </a>
+                            </ul>
+                        @endcanany
                     </li>
                 @endcanany
 
@@ -617,7 +647,7 @@
                                                         @endif
                                                         <div class="flex-grow-1">
                                                             <h6 class="msg-name">
-                                                                {{ $alertProduct->productName }}
+                                                                {{ $alertProduct->display_name }}
                                                                 <span class="msg-time float-end">
                                                                     {{ $alertProduct->expiry_date->diffForHumans() }}
                                                                 </span>
@@ -686,16 +716,16 @@
                                                             <div class="cart-product rounded-circle bg-light">
                                                                 @if ($stockProduct->img_url && file_exists(public_path('uploads/products/' . $stockProduct->img_url)))
                                                                     <img src="{{ asset('uploads/products/' . $stockProduct->img_url) }}"
-                                                                        alt="{{ $stockProduct->productName }}">
+                                                                        alt="{{ $stockProduct->display_name }}">
                                                                 @else
                                                                     <img src="{{ asset('assets/images/products/11.png') }}"
-                                                                        alt="{{ $stockProduct->productName }}">
+                                                                        alt="{{ $stockProduct->display_name }}">
                                                                 @endif
                                                             </div>
                                                         </div>
                                                         <div class="flex-grow-1">
                                                             <h6 class="mb-0 cart-product-title">
-                                                                {{ $stockProduct->productName }}
+                                                                {{ $stockProduct->display_name }}
                                                             </h6>
                                                             <p class="mb-0 cart-product-price">
                                                                 @if ($stockProduct->isOutOfStock())

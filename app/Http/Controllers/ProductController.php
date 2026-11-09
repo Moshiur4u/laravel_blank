@@ -10,6 +10,7 @@ use App\Models\Supplierledger;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Validation\Rule;
+use Illuminate\Validation\ValidationException;
 
 class ProductController extends Controller
 {
@@ -62,6 +63,7 @@ class ProductController extends Controller
             // দুটো field-ই একসঙ্গে ঐচ্ছিক; supplier দিলে purchase price-ও দিতে হবে।
             'supplier_id' => ['nullable', Rule::exists('suppliers', 'id')->where('is_active', true)],
             'purchase_price' => 'nullable',
+            'quantity_size' => 'nullable|string|max:50',
             // ledger-এর quantity গণনায় সঠিক numeric পরিমাণ নিশ্চিত করা হয়।
             'unit' => 'nullable',
             'purchase_date' => 'nullable|date',
@@ -99,6 +101,7 @@ class ProductController extends Controller
                 'purchase_price' => $request->purchase_price,
                 'price' => $request->price,
                 'unit' => $request->unit,
+                'quantity_size' => $request->quantity_size,
                 'purchase_date' => $request->purchase_date,
                 'mfg_date' => $request->menufecher_date,
                 'expiry_date' => $request->expire_date,
@@ -166,6 +169,7 @@ class ProductController extends Controller
             'purchase_price' => 'nullable',
             'price' => 'nullable',
             'unit' => 'nullable',
+            'quantity_size' => 'nullable|string|max:50',
             'purchase_date' => 'nullable|date',
             'menufecher_date' => 'nullable|date',
             'expire_date' => 'nullable|date',
@@ -175,6 +179,25 @@ class ProductController extends Controller
 
         // ২. প্রডাক্ট খুঁজে বের করা
         $product = Product::findOrFail($id);
+        $hasPurchaseReturns = $product->purchaseLedgers()
+            ->whereHas('purchaseReturns')
+            ->exists();
+        $purchaseReturnSensitiveFieldsChanged = collect(['unit', 'supplier_id', 'purchase_price'])
+            ->contains(function (string $field) use ($request, $product): bool {
+                $incoming = $request->input($field);
+                $current = $product->getAttribute($field);
+                if (is_numeric($incoming) && is_numeric($current)) {
+                    return (float) $incoming !== (float) $current;
+                }
+
+                return (string) $incoming !== (string) $current;
+            });
+        if ($hasPurchaseReturns && $purchaseReturnSensitiveFieldsChanged) {
+            throw ValidationException::withMessages([
+                'unit' => 'Stock, supplier, and purchase price cannot be changed after this product has purchase return history.',
+            ]);
+        }
+
         if ($request->filled('supplier_id')
             && (int) $request->supplier_id !== (int) $product->supplier_id
             && ! Supplier::whereKey($request->supplier_id)->where('is_active', true)->exists()) {
@@ -218,6 +241,7 @@ class ProductController extends Controller
                 'purchase_price'       => $request->purchase_price,
                 'price'                => $request->price,
                 'unit'                 => $request->unit,
+                'quantity_size'        => $request->quantity_size,
                 'purchase_date'        => $request->purchase_date,
                 'mfg_date'             => $request->menufecher_date,
                 'expiry_date'          => $request->expire_date,

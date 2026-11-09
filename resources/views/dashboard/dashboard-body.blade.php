@@ -113,9 +113,9 @@
                                                 <td class="gap-2 d-flex align-items-center">
                                                     @if ($product->img_url)
                                                         <img src="{{ asset('uploads/products/' . $product->img_url) }}"
-                                                            alt="{{ $product->product_name }}" class="product-img-2">
+                                                            alt="{{ $product->product_name }}{{ $product->quantity_size ? ' - ' . $product->quantity_size : '' }}" class="product-img-2">
                                                     @endif
-                                                    <span>{{ $product->product_name }}</span>
+                                                    <span>{{ $product->product_name }}{{ $product->quantity_size ? ' - ' . $product->quantity_size : '' }}</span>
                                                 </td>
                                                 <td class="text-end">{{ number_format((int) $product->quantity_sold) }}
                                                 </td>

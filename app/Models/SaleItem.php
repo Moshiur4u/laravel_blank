@@ -40,6 +40,19 @@ class SaleItem extends Model
         return $this->hasMany(ProductReturn::class);
     }
 
+    public function getDisplayProductNameAttribute(): string
+    {
+        $name = trim((string) $this->product_name);
+        $quantitySize = trim((string) ($this->product?->quantity_size ?? ''));
+        $suffix = ' - '.$quantitySize;
+
+        if ($quantitySize === '' || str_ends_with(mb_strtolower($name), mb_strtolower($suffix))) {
+            return $name;
+        }
+
+        return $name.$suffix;
+    }
+
     /**
      * বিক্রির সময়কার snapshot ক্রয়মূল্য ফেরত দেয়, না থাকলে পণ্যের বর্তমান ক্রয়মূল্য নেয়।
      */

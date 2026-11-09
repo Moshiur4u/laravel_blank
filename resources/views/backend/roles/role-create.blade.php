@@ -132,7 +132,7 @@
                                         <div class="col-md-6 col-xl-4 permission-item" data-name="{{ strtolower($permission->name) }}">
                                             <div class="p-3 border rounded h-100 bg-light-subtle d-flex align-items-center hover-shadow transition-all"
                                                 style="cursor: pointer; transition: 0.2s;"
-                                                onclick="toggleCheckbox('perm_{{ $permission->id }}')">
+                                                onclick="toggleCheckbox(event, 'perm_{{ $permission->id }}')">
                                                 <div class="form-check m-0 d-flex align-items-center">
                                                     <input type="checkbox"
                                                         name="permission[]"
@@ -181,11 +181,14 @@
 
     <!-- JavaScript for Select All, Click Card Toggle, and Filter -->
     <script>
-        function toggleCheckbox(id) {
+        function toggleCheckbox(event, id) {
+            // A label click bubbles to this card while also triggering the browser's native checkbox toggle.
+            if (event.target.closest('input, label')) {
+                return;
+            }
             const cb = document.getElementById(id);
             if (cb) {
-                cb.checked = !cb.checked;
-                updateSelectedCount();
+                cb.click();
             }
         }
 

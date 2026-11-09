@@ -123,7 +123,7 @@ class SaleController extends Controller
                 $product = $products->get($productId);
                 if (! $product || (float) $product->unit < $quantity) {
                     throw ValidationException::withMessages([
-                        'items' => ($product?->productName ?? 'A selected product') . ' does not have enough stock.',
+                        'items' => ($product?->display_name ?? 'A selected product') . ' does not have enough stock.',
                     ]);
                 }
             }
@@ -202,8 +202,23 @@ class SaleController extends Controller
                 ]);
             }
 
+            $currentMonth = now()->format('Ym');
+            $latestInvoice = SaleInvoice::query()
+                ->where('invoice_no', 'like', "INV-{$currentMonth}-%")
+                ->lockForUpdate()
+                ->latest('id')
+                ->first();
+            $nextNumber = 1;
+            if ($latestInvoice) {
+                $parts = explode('-', $latestInvoice->invoice_no);
+                if (isset($parts[2]) && is_numeric($parts[2])) {
+                    $nextNumber = (int) $parts[2] + 1;
+                }
+            }
+            $invoiceNumber = "INV-{$currentMonth}-" . str_pad($nextNumber, 4, '0', STR_PAD_LEFT);
+
             $invoice = SaleInvoice::create([
-                'invoice_no' => 'INV-' . now()->format('YmdHis') . '-' . Str::upper(Str::random(5)),
+                'invoice_no' => $invoiceNumber,
                 'customer_id' => $customer?->id,
                 'customer_phone' => $customerPhone,
                 'customer_name' => $customer?->name ?? $validated['customer_name'] ?? null,
@@ -252,7 +267,7 @@ class SaleController extends Controller
             if ($customer) {
                 $totalQuantity = collect($lineItems)->sum('quantity');
                 $productsSummary = collect($lineItems)
-                    ->map(fn($lineItem) => $lineItem['product']->productName . ' × ' . $lineItem['quantity'])
+                    ->map(fn($lineItem) => $lineItem['product']->display_name . ' × ' . $lineItem['quantity'])
                     ->implode(', ');
 
                 $customerLedger = CustomerLedger::create([
@@ -299,7 +314,7 @@ class SaleController extends Controller
         $invoice->load(['items.product', 'customer', 'employee']);
         $lowStockProducts = $invoice->items
             ->filter(fn(SaleItem $item) => $item->product && (float) $item->product->unit <= 10)
-            ->map(fn(SaleItem $item) => $item->product_name)
+            ->map(fn(SaleItem $item) => $item->display_product_name)
             ->unique()
             ->values()
             ->all();
@@ -311,7 +326,7 @@ class SaleController extends Controller
 
     public function invoice($id)
     {
-        $invoice = SaleInvoice::with(['items', 'customer', 'employee'])->findOrFail($id);
+        $invoice = SaleInvoice::with(['items.product', 'customer', 'employee'])->findOrFail($id);
         $termsConditions = $invoice->terms_conditions ?: self::DEFAULT_TERMS;
         $amountInWords = $this->amountInWords((float) $invoice->amount_paid);
 
@@ -333,12 +348,12 @@ class SaleController extends Controller
                 ->get(['id', 'sale_item_id', 'product_id', 'quantity']);
             $returnedByItem = $returns
                 ->groupBy('sale_item_id')
-                ->map(fn ($productReturns) => $productReturns->sum('quantity'));
+                ->map(fn($productReturns) => $productReturns->sum('quantity'));
             $quantities = $items
                 ->whereNotNull('product_id')
                 ->groupBy('product_id')
-                ->map(fn ($productItems) => $productItems->sum(
-                    fn (SaleItem $item) => max((int) $item->quantity - (int) $returnedByItem->get($item->id, 0), 0)
+                ->map(fn($productItems) => $productItems->sum(
+                    fn(SaleItem $item) => max((int) $item->quantity - (int) $returnedByItem->get($item->id, 0), 0)
                 ));
             $products = Product::query()
                 ->whereIn('id', $quantities->keys())
@@ -389,12 +404,12 @@ class SaleController extends Controller
                             ->where('voucher_type', 'credit')
                             ->where('expense_income_type', $customerName)
                             ->where('reference', $invoice->invoice_no)
-                            ->where('description', 'Payment received from customer '.$customerName);
+                            ->where('description', 'Payment received from customer ' . $customerName);
                     });
                 })
                 ->lockForUpdate()
                 ->get()
-                ->each(fn (VoucherEntry $voucher) => $voucher->delete());
+                ->each(fn(VoucherEntry $voucher) => $voucher->delete());
 
             foreach ($ledgers as $ledger) {
                 $ledger->delete();

@@ -110,7 +110,7 @@ class ProductReturnController extends Controller
         }
 
         $invoices = $query
-            ->with(['items' => fn ($itemQuery) => $itemQuery->withSum('returns as returned_quantity', 'quantity')])
+            ->with(['items' => fn ($itemQuery) => $itemQuery->with('product')->withSum('returns as returned_quantity', 'quantity')])
             ->latest('invoice_date')
             ->limit(50)
             ->get();
@@ -123,7 +123,7 @@ class ProductReturnController extends Controller
     public function invoiceDetails($id)
     {
         $invoice = SaleInvoice::query()
-            ->with(['items' => fn ($query) => $query->withSum('returns as returned_quantity', 'quantity')])
+            ->with(['items' => fn ($query) => $query->with('product')->withSum('returns as returned_quantity', 'quantity')])
             ->findOrFail($id);
 
         return response()->json($this->invoicePayload($invoice));
@@ -268,7 +268,7 @@ class ProductReturnController extends Controller
                     'voucher_date' => $validated['return_date'],
                     'amount' => number_format($refundAmount, 2, '.', ''),
                     'reference' => $productReturn->return_no,
-                    'description' => "Refund for returned product {$saleItem->product_name} from invoice {$invoice->invoice_no}",
+                    'description' => "Refund for returned product {$saleItem->display_product_name} from invoice {$invoice->invoice_no}",
                     'created_by' => $creator->id,
                     'created_by_name' => $creator->name,
                     'voucherable_type' => ProductReturn::class,
@@ -310,7 +310,7 @@ class ProductReturnController extends Controller
         $totalRefundAmount = (float) (clone $returns)->sum('refund_amount');
         $returnCount = (clone $returns)->count();
         $rows = (clone $returns)
-            ->with(['returnedBy', 'invoice'])
+            ->with(['returnedBy', 'invoice', 'product'])
             ->latest('return_date')
             ->latest('id')
             ->paginate(30)
@@ -342,7 +342,7 @@ class ProductReturnController extends Controller
                 return [
                     'id' => $item->id,
                     'product_id' => $item->product_id,
-                    'product_name' => $item->product_name,
+                    'product_name' => $item->display_product_name,
                     'quantity' => (int) $item->quantity,
                     'returned_quantity' => $returnedQuantity,
                     'remaining_quantity' => $remainingQuantity,

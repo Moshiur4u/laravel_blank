@@ -1,6 +1,8 @@
 <?php
 
 namespace App\Http\Controllers;
+
+use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Validation\Rule;
 use Spatie\Permission\Models\Role;
@@ -60,11 +62,12 @@ class RoleController extends Controller
      */
     public function edit( $id )
     {
-        $permissions = Permission::get()->all();
-        $role =Role::with('Permissions')->find($id);
-        $rolewithpermission = $role->Permissions->pluck('id')->all();
+        $role = Role::with('permissions')->findOrFail($id);
+        $rolewithpermission = $role->permissions->modelKeys();
+        $permissionIds = $this->manageablePermissionIds(auth()->user(), $role);
+        $permissions = Permission::query()->whereIn('id', $permissionIds)->orderBy('name')->get();
 
-        return view('backend.roles.role-edit',compact('permissions','role','rolewithpermission'));
+        return view('backend.roles.role-edit', compact('permissions', 'role', 'rolewithpermission'));
     }
 
     /**
@@ -73,10 +76,7 @@ class RoleController extends Controller
     public function update(Request $request, $id)
     {
         $role = Role::with('permissions')->findOrFail($id);
-        $permissionIds = array_unique(array_merge(
-            $request->user()->getAllPermissions()->modelKeys(),
-            $role->permissions->modelKeys()
-        ));
+        $permissionIds = $this->manageablePermissionIds($request->user(), $role);
         $validated = $request->validate([
             'name' => 'required|unique:roles,name,'.$id,
             'permission' => ['required', 'array', 'min:1'],
@@ -90,6 +90,19 @@ class RoleController extends Controller
         return redirect()->route('roles.index');
 
 
+    }
+
+    private function manageablePermissionIds(User $user, Role $role): array
+    {
+        if ($user->hasRole('admin')) {
+            // Preserve a recovery path when an admin removes a permission from the admin role itself.
+            return Permission::query()->pluck('id')->all();
+        }
+
+        return array_unique(array_merge(
+            $user->getAllPermissions()->modelKeys(),
+            $role->permissions->modelKeys()
+        ));
     }
 
     /**

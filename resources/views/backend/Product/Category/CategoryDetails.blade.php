@@ -102,7 +102,7 @@
                                             <tbody>
                                                 @foreach ($cat->Products as $product)
                                                     <tr>
-                                                        <td class="fw-medium text-dark">{{ $product->productName }}</td>
+                                                        <td class="fw-medium text-dark">{{ $product->display_name }}</td>
                                                         <td>৳{{ number_format($product->price, 2) }}</td>
                                                         <td><span class="badge bg-light-success text-success">{{ $product->unit }} units</span></td>
                                                         <td class="text-end">

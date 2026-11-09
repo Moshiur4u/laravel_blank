@@ -19,7 +19,7 @@ class SupplierledgerController extends Controller
     public function index($supplier_id)
     {
         $supplier = Supplier::findOrFail($supplier_id);
-        $ledgers = Supplierledger::with(['product', 'payments'])
+        $ledgers = Supplierledger::with(['product', 'payments', 'purchaseReturns'])
             ->where('supplier_id', $supplier_id)
             ->latest()
             ->get();
@@ -150,6 +150,11 @@ class SupplierledgerController extends Controller
         // payment record-এর সঙ্গে মিল রাখতে ledger-এর financial update row lock-এর মধ্যে করা হয়।
         $ledger = DB::transaction(function () use ($validated, $id) {
             $ledger = Supplierledger::query()->lockForUpdate()->findOrFail($id);
+            if ($ledger->purchaseReturns()->exists()) {
+                throw ValidationException::withMessages([
+                    'total' => 'This purchase ledger entry cannot be edited after a purchase return has been recorded.',
+                ]);
+            }
             $paidInCents = (int) round((float) $ledger->payment * 100);
             $totalInCents = (int) round((float) ($validated['total'] ?? 0) * 100);
 
@@ -192,6 +197,11 @@ class SupplierledgerController extends Controller
         $creator = $request->user();
         $supplierId = DB::transaction(function () use ($validated, $id, $creator) {
             $ledger = Supplierledger::query()->lockForUpdate()->findOrFail($id);
+            if ($ledger->purchaseReturns()->exists()) {
+                throw ValidationException::withMessages([
+                    'amount' => 'Additional supplier payments cannot be recorded after a purchase return has been recorded.',
+                ]);
+            }
             $supplier = Supplier::findOrFail($ledger->supplier_id);
             $amountInCents = (int) round((float) $validated['amount'] * 100);
             $dueInCents = (int) round((float) $ledger->due * 100);
@@ -314,6 +324,11 @@ class SupplierledgerController extends Controller
     {
         $supplierId = DB::transaction(function () use ($id) {
             $ledger = Supplierledger::with('payments')->findOrFail($id);
+            if ($ledger->purchaseReturns()->exists()) {
+                throw ValidationException::withMessages([
+                    'supplierledger_id' => 'This purchase ledger entry cannot be deleted because purchase return records are linked to it.',
+                ]);
+            }
             $supplier = Supplier::findOrFail($ledger->supplier_id);
             $supplierId = $ledger->supplier_id;
             $paymentRows = $ledger->payments

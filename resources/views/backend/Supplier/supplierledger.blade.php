@@ -140,7 +140,7 @@
                                                 @foreach ($products as $product)
                                                     <option value="{{ $product->id }}"
                                                         {{ $ledger->product_id == $product->id ? 'selected' : '' }}>
-                                                        {{ $product->productName }}
+                                                        {{ $product->display_name }}
                                                     </option>
                                                 @endforeach
                                             </select>
@@ -271,7 +271,7 @@
                                                 </td>
                                                 <td>
                                                     @if ($entry->product)
-                                                        {{ $entry->product->productName }}
+                                                        {{ $entry->product->display_name }}
                                                     @else
                                                         <span class="text-muted">N/A</span>
                                                     @endif
@@ -281,6 +281,20 @@
                                                 <td><strong>৳{{ number_format($entry->total, 2) }}</strong></td>
                                                 <td class="text-success fw-bold">
                                                     ৳{{ number_format($entry->payment, 2) }}
+                                                    @if ($entry->purchaseReturns->isNotEmpty())
+                                                        <details class="mt-1 small fw-normal">
+                                                            <summary class="text-danger">
+                                                                Purchase returns ({{ $entry->purchaseReturns->count() }})
+                                                            </summary>
+                                                            @foreach ($entry->purchaseReturns as $purchaseReturn)
+                                                                <div class="text-nowrap">
+                                                                    {{ $purchaseReturn->return_date->format('d M Y') }}:
+                                                                    {{ number_format($purchaseReturn->quantity, 3) }} unit(s),
+                                                                    −৳{{ number_format($purchaseReturn->return_amount, 2) }}
+                                                                </div>
+                                                            @endforeach
+                                                        </details>
+                                                    @endif
                                                     @if ($entry->payments->isNotEmpty())
                                                         {{-- সংরক্ষিত payment date ও amount চাইলে details-এ খোলা যায়। --}}
                                                         <details class="mt-1 small fw-normal">
@@ -291,36 +305,40 @@
                                                                     ৳{{ number_format((float) $paymentRecord->amount, 2) }}
                                                                 </div>
                                                                 @can('Supplier.ledger.payment.edit')
-                                                                    <details class="mb-2">
-                                                                        <summary class="text-primary">Edit receipt</summary>
-                                                                        <form
-                                                                            action="{{ route('supplier.ledger.payments.update', $paymentRecord->id) }}"
-                                                                            method="POST" class="p-2 mt-1 border rounded bg-light">
-                                                                            @csrf
-                                                                            @method('PUT')
-                                                                            <label class="form-label small"
-                                                                                for="supplier_payment_date_{{ $paymentRecord->id }}">Payment
-                                                                                Date</label>
-                                                                            <input type="date" name="payment_date"
-                                                                                id="supplier_payment_date_{{ $paymentRecord->id }}"
-                                                                                class="mb-2 form-control form-control-sm"
-                                                                                value="{{ $paymentRecord->payment_date->toDateString() }}"
-                                                                                max="{{ now()->toDateString() }}" required>
-                                                                            <label class="form-label small"
-                                                                                for="supplier_payment_amount_{{ $paymentRecord->id }}">Amount
-                                                                                (৳)</label>
-                                                                            <input type="number" name="amount"
-                                                                                id="supplier_payment_amount_{{ $paymentRecord->id }}"
-                                                                                class="mb-2 form-control form-control-sm"
-                                                                                min="0.01"
-                                                                                max="{{ number_format((float) $entry->due + (float) $paymentRecord->amount, 2, '.', '') }}"
-                                                                                step="0.01"
-                                                                                value="{{ number_format((float) $paymentRecord->amount, 2, '.', '') }}"
-                                                                                required>
-                                                                            <button type="submit"
-                                                                                class="btn btn-sm btn-primary w-100">Update Receipt</button>
-                                                                        </form>
-                                                                    </details>
+                                                                    @if ($entry->purchaseReturns->isEmpty())
+                                                                        <details class="mb-2">
+                                                                            <summary class="text-primary">Edit receipt</summary>
+                                                                            <form
+                                                                                action="{{ route('supplier.ledger.payments.update', $paymentRecord->id) }}"
+                                                                                method="POST" class="p-2 mt-1 border rounded bg-light">
+                                                                                @csrf
+                                                                                @method('PUT')
+                                                                                <label class="form-label small"
+                                                                                    for="supplier_payment_date_{{ $paymentRecord->id }}">Payment
+                                                                                    Date</label>
+                                                                                <input type="date" name="payment_date"
+                                                                                    id="supplier_payment_date_{{ $paymentRecord->id }}"
+                                                                                    class="mb-2 form-control form-control-sm"
+                                                                                    value="{{ $paymentRecord->payment_date->toDateString() }}"
+                                                                                    max="{{ now()->toDateString() }}" required>
+                                                                                <label class="form-label small"
+                                                                                    for="supplier_payment_amount_{{ $paymentRecord->id }}">Amount
+                                                                                    (৳)</label>
+                                                                                <input type="number" name="amount"
+                                                                                    id="supplier_payment_amount_{{ $paymentRecord->id }}"
+                                                                                    class="mb-2 form-control form-control-sm"
+                                                                                    min="0.01"
+                                                                                    max="{{ number_format((float) $entry->due + (float) $paymentRecord->amount, 2, '.', '') }}"
+                                                                                    step="0.01"
+                                                                                    value="{{ number_format((float) $paymentRecord->amount, 2, '.', '') }}"
+                                                                                    required>
+                                                                                <button type="submit"
+                                                                                    class="btn btn-sm btn-primary w-100">Update Receipt</button>
+                                                                            </form>
+                                                                        </details>
+                                                                    @else
+                                                                        <div class="small text-muted">Payment edits disabled after return.</div>
+                                                                    @endif
                                                                 @endcan
                                                             @endforeach
                                                         </details>
@@ -329,7 +347,7 @@
                                                 <td class="text-danger fw-bold">৳{{ number_format($entry->due, 2) }}</td>
                                                 <td>
                                                     {{-- প্রতিটি entry-র জন্য date ও amount-সহ আলাদা payment যোগ করার form। --}}
-                                                    @if ((float) $entry->due > 0 && auth()->user()->can('Supplier.ledger.payment')) {{-- supplier payment-এর নতুন permission। --}}
+                                                    @if ((float) $entry->due > 0 && $entry->purchaseReturns->isEmpty() && auth()->user()->can('Supplier.ledger.payment')) {{-- supplier payment-এর নতুন permission। --}}
                                                         <details class="mb-1">
                                                             <summary class="text-white btn btn-sm btn-success">
                                                                 <i class="bx bx-money me-1"></i>Payment
@@ -357,6 +375,8 @@
                                                                 </button>
                                                             </form>
                                                         </details>
+                                                    @elseif ((float) $entry->due > 0 && $entry->purchaseReturns->isNotEmpty())
+                                                        <div class="small text-muted">Payment disabled after return.</div>
                                                     @endif
                                                     {{-- নির্দিষ্ট এন্ট্রির সংরক্ষিত তথ্য দিয়ে ইনভয়েস দেখানোর লিংক। --}}
                                                     <a href="{{ route('supplier.ledger.invoice', $entry->id) }}"

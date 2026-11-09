@@ -34,4 +34,17 @@ class QuotationItem extends Model
     {
         return $this->belongsTo(Product::class);
     }
+
+    public function getDisplayProductNameAttribute(): string
+    {
+        $name = trim((string) $this->product_name);
+        $quantitySize = trim((string) ($this->product?->quantity_size ?? ''));
+        $suffix = ' - '.$quantitySize;
+
+        if ($quantitySize === '' || str_ends_with(mb_strtolower($name), mb_strtolower($suffix))) {
+            return $name;
+        }
+
+        return $name.$suffix;
+    }
 }

@@ -35,6 +35,16 @@
                 @csrf
                 @method('PUT')
 
+                @if ($errors->any())
+                    <div class="alert alert-danger" role="alert">
+                        <ul class="mb-0">
+                            @foreach ($errors->all() as $message)
+                                <li>{{ $message }}</li>
+                            @endforeach
+                        </ul>
+                    </div>
+                @endif
+
                 <div class="row justify-content-center">
                     <div class="col-lg-10">
                         <!-- Role Info Card -->
@@ -111,13 +121,6 @@
                             </div>
 
                             <div class="card-body p-4">
-                                @error('permission')
-                                    <div class="alert alert-danger d-flex align-items-center mb-3 py-2">
-                                        <i class="bx bx-error-circle fs-5 me-2"></i>
-                                        <div>Please select at least one permission for this role.</div>
-                                    </div>
-                                @enderror
-
                                 <!-- Search Filter for Permissions -->
                                 <div class="mb-3">
                                     <div class="input-group input-group-sm">
@@ -131,16 +134,23 @@
                                     </div>
                                 </div>
 
+                                @php
+                                    $selectedPermissionIds = old('permission', $rolewithpermission);
+                                    if (! is_array($selectedPermissionIds)) {
+                                        $selectedPermissionIds = $rolewithpermission;
+                                    }
+                                @endphp
+
                                 <!-- Permission Items Grid -->
                                 <div class="row g-3" id="permissionGrid">
                                     @forelse ($permissions as $permission)
                                         @php
-                                            $isChecked = in_array($permission->id, $rolewithpermission);
+                                            $isChecked = in_array($permission->id, $selectedPermissionIds);
                                         @endphp
                                         <div class="col-md-6 col-xl-4 permission-item" data-name="{{ strtolower($permission->name) }}">
                                             <div class="p-3 border rounded h-100 {{ $isChecked ? 'bg-light-primary border-primary-subtle' : 'bg-light-subtle' }} d-flex align-items-center hover-shadow transition-all"
                                                 style="cursor: pointer; transition: 0.2s;"
-                                                onclick="toggleCheckbox('perm_{{ $permission->id }}')">
+                                                onclick="toggleCheckbox(event, 'perm_{{ $permission->id }}')">
                                                 <div class="form-check m-0 d-flex align-items-center">
                                                     <input type="checkbox"
                                                         name="permission[]"
@@ -190,11 +200,14 @@
 
     <!-- JavaScript for Select All, Click Card Toggle, and Filter -->
     <script>
-        function toggleCheckbox(id) {
+        function toggleCheckbox(event, id) {
+            // A label click bubbles to this card while also triggering the browser's native checkbox toggle.
+            if (event.target.closest('input, label')) {
+                return;
+            }
             const cb = document.getElementById(id);
             if (cb) {
-                cb.checked = !cb.checked;
-                updateSelectedCount();
+                cb.click();
             }
         }
 

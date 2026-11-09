@@ -106,6 +106,7 @@ test('sale invoice shows customer details, quotation default terms, and the colo
         ->assertSee('Terms & Conditions')
         ->assertSee('This quotation is valid for 15 days from the date of issue.')
         ->assertSee('Amount Paid in Words')
+        ->assertSee('<th colspan="4" class="text-end">Due</th>', false)
         ->assertSee('Taka seventy-five only.')
         ->assertSee('#14ADE0')
         ->assertSee('#ffff')
@@ -114,4 +115,24 @@ test('sale invoice shows customer details, quotation default terms, and the colo
         ->assertDontSee($invoice->invoice_date->format('d M Y, h:i A'));
 
     expect(substr_count($response->getContent(), '<table'))->toBe(1);
+});
+
+test('sale invoice hides the due row when the invoice has no outstanding balance', function () {
+    $user = User::factory()->create();
+    $user->givePermissionTo(Permission::findOrCreate('sales.report', 'web'));
+    $invoice = SaleInvoice::create([
+        'invoice_no' => 'INVOICE-PAID-001',
+        'customer_name' => 'Paid Invoice Customer',
+        'customer_phone' => '01800000001',
+        'user_id' => $user->id,
+        'invoice_date' => now(),
+        'total_amount' => 100,
+        'amount_paid' => 100,
+        'due_amount' => 0,
+    ]);
+
+    $this->actingAs($user)
+        ->get(route('sales.invoice', $invoice->id))
+        ->assertOk()
+        ->assertDontSee('<th colspan="4" class="text-end">Due</th>', false);
 });

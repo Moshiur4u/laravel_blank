@@ -46,7 +46,7 @@
                                 @foreach ($products as $product)
                                     <option value="{{ $product->id }}"
                                         {{ (string) ($filters['product_id'] ?? '') === (string) $product->id ? 'selected' : '' }}>
-                                        {{ $product->productName }}
+                                        {{ $product->display_name }}
                                     </option>
                                 @endforeach
                             </select>
@@ -183,7 +183,7 @@
                                 @forelse ($topProducts as $index => $topProduct)
                                     <tr>
                                         <td>{{ $index + 1 }}</td>
-                                        <td class="fw-semibold">{{ $topProduct->product_name }}</td>
+                                        <td class="fw-semibold">{{ $topProduct->product_name }}{{ $topProduct->quantity_size ? ' - ' . $topProduct->quantity_size : '' }}</td>
                                         <td class="text-end">
                                             ৳{{ number_format((float) ($topProduct->purchase_price ?? 0), 2) }}</td>
                                         <td class="text-end">

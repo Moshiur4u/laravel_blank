@@ -44,6 +44,7 @@ test('walk-in sales receive the full invoice amount and existing customers can p
 
     $walkInInvoice = SaleInvoice::query()->latest('id')->firstOrFail();
     expect($walkInInvoice->customer_id)->toBeNull()
+        ->and($walkInInvoice->invoice_no)->toBe('QT-' . now()->format('Ym') . '-0001')
         ->and($walkInInvoice->customer_name)->toBe('Walk-in Invoice Customer')
         ->and($walkInInvoice->customer_address)->toBe('5 Walk-in Road')
         ->and($walkInInvoice->terms_conditions)->toBe('Deliver within five business days.')
@@ -81,6 +82,7 @@ test('walk-in sales receive the full invoice amount and existing customers can p
 
     $customerInvoice = SaleInvoice::query()->latest('id')->firstOrFail();
     expect($customerInvoice->customer_id)->toBe($customer->id)
+        ->and($customerInvoice->invoice_no)->toBe('QT-' . now()->format('Ym') . '-0002')
         ->and((float) $customerInvoice->total_amount)->toBe(100.0)
         ->and((float) $customerInvoice->amount_paid)->toBe(40.0)
         ->and((float) $customerInvoice->due_amount)->toBe(60.0);

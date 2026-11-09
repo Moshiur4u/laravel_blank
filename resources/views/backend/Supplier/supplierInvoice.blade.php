@@ -14,7 +14,7 @@
                 </button>
             </div>
 
-            <div class="border-0 shadow-sm card">
+            <div class="border-0 shadow-sm card invoice-print-area">
                 <div class="p-4 card-body p-md-5">
                     @include('backend.partials.organizationHeader')
                     <div class="mb-4 row align-items-start">
@@ -59,7 +59,7 @@
                                 {{-- এই ইনভয়েসটি নির্বাচিত ledger row-র product ও amount-ই দেখায়। --}}
                                 <tr>
                                     <td>1</td>
-                                    <td>{{ $ledger->product->productName ?? 'N/A' }}</td>
+                                    <td>{{ $ledger->product->display_name ?? 'N/A' }}</td>
                                     <td class="text-end">৳{{ number_format($ledger->price ?? 0, 2) }}</td>
                                     <td class="text-center">{{ $ledger->quantity ?? 0 }}</td>
                                     <td class="text-end">৳{{ number_format($ledger->total ?? 0, 2) }}</td>

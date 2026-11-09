@@ -77,9 +77,9 @@
                                 @foreach ($invoice->items as $key => $item)
                                     <tr>
                                         <td>{{ $key + 1 }}</td>
-                                        <td>{{ $item->product_name }}</td>
+                                        <td>{{ $item->display_product_name }}</td>
                                         <td class="text-center">{{ $item->quantity }}</td>
-                                        <td class="text-center">{{ $item->product?->stock_unit ?: 'Unit' }}</td>
+                                        <td class="text-center">{{ $item->product?->quantity_size ?: ($item->product?->stock_unit ?: 'Unit') }}</td>
                                     </tr>
                                 @endforeach
                                 <tr class="table-light fw-bold">

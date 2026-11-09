@@ -120,7 +120,7 @@
                                     <td>{{ $return->return_no }}</td>
                                     <td>{{ $return->return_date->format('d M Y') }}</td>
                                     <td>{{ $return->invoice_no }}</td>
-                                    <td>{{ $return->product_name }}</td>
+                                    <td>{{ $return->product?->display_name ?? $return->product_name }}</td>
                                     <td>
                                         {{ $return->invoice?->customer_name ?: 'Walk-in Customer' }}
                                         <div class="small text-muted">{{ $return->invoice?->customer_phone }}</div>

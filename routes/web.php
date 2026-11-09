@@ -11,6 +11,7 @@ use App\Http\Controllers\ProductCategoryController;
 use App\Http\Controllers\ProductController;
 use App\Http\Controllers\ProductInventoryReportController;
 use App\Http\Controllers\ProductReturnController;
+use App\Http\Controllers\PurchaseReturnController;
 use App\Http\Controllers\QuotationController;
 use App\Http\Controllers\RoleController;
 use App\Http\Controllers\SaleController;
@@ -228,6 +229,26 @@ Route::middleware(['auth', 'verified'])->group(function () {
 
 // বিক্রির ইনভয়েস, ফোন দিয়ে গ্রাহক খোঁজা এবং প্রিন্ট
 Route::middleware(['auth', 'verified'])->group(function () {
+    Route::get('/purchase-returns', [PurchaseReturnController::class, 'index'])
+        ->middleware('permission:purchase.return|product.index|product.create|product.edit')
+        ->name('purchase-returns.index');
+    Route::get('/purchase-returns/search', [PurchaseReturnController::class, 'search'])
+        ->middleware('permission:purchase.return|product.index|product.create|product.edit')
+        ->name('purchase-returns.search');
+    Route::get('/purchase-returns/supplier-history', [PurchaseReturnController::class, 'supplierHistory'])
+        ->middleware('permission:purchase.return|product.index|product.create|product.edit')
+        ->name('purchase-returns.supplier-history');
+    Route::get('/purchase-returns/purchases/{id}', [PurchaseReturnController::class, 'purchaseDetails'])
+        ->whereNumber('id')
+        ->middleware('permission:purchase.return|product.index|product.create|product.edit')
+        ->name('purchase-returns.purchase');
+    Route::post('/purchase-returns', [PurchaseReturnController::class, 'store'])
+        ->middleware('permission:purchase.return|product.index|product.create|product.edit')
+        ->name('purchase-returns.store');
+    Route::get('/purchase-returns/report', [PurchaseReturnController::class, 'report'])
+        ->middleware('permission:purchase.return.report|reports.all_access')
+        ->name('purchase-returns.report');
+
     Route::get('/product-returns', [ProductReturnController::class, 'index'])
         ->middleware('permission:product.return')
         ->name('product-returns.index');

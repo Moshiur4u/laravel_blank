@@ -56,6 +56,8 @@ class RolePermissionSeeder extends Seeder
                 'supplier.inactive',
                 'supplier.ledger',
                 'Supplier.ledger.payment', // পুরোনো ledger.payment-এর বদলে নির্দিষ্ট permission।
+                'purchase.return',
+                'purchase.return.report',
                 'employee.create',
                 'employee.index',
                 'view-employee-details', // পুরোনো employee.view-এর বদলে নতুন permission।

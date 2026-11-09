@@ -138,6 +138,13 @@ class SupplierController extends Controller
     public function destroy($id)
     {
         $supplier = Supplier::findOrFail($id);
+        if ($supplier->purchaseReturns()->exists()) {
+            return redirect()->route('supplier.index')->with(
+                'error',
+                'This supplier cannot be deleted because purchase return records are linked to the supplier.'
+            );
+        }
+
         $hasVouchers = $supplier->supplierledgers()
             ->with('payments')
             ->get()

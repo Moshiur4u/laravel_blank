@@ -122,7 +122,7 @@
                         <i class="bx bx-error-circle fs-4 me-2"></i>
                         <div>
                             <strong>Expired products:</strong>
-                            {{ $expiredProducts->pluck('productName')->join(', ') }}
+                            {{ $expiredProducts->pluck('display_name')->join(', ') }}
                         </div>
                     </div>
                 @endif
@@ -131,7 +131,7 @@
                         <i class="bx bx-time-five fs-4 me-2"></i>
                         <div>
                             <strong>Expiring within one month:</strong>
-                            {{ $expiringSoonProducts->map(fn($p) => $p->productName . ' (' . $p->expiry_date->format('Y-m-d') . ')')->join(', ') }}
+                            {{ $expiringSoonProducts->map(fn($p) => $p->display_name . ' (' . $p->expiry_date->format('Y-m-d') . ')')->join(', ') }}
                         </div>
                     </div>
                 @endif
@@ -178,7 +178,7 @@
                                                 <div class="me-3 position-relative">
                                                     @if ($product->img_url && file_exists(public_path('uploads/products/' . $product->img_url)))
                                                         <img src="{{ asset('uploads/products/' . $product->img_url) }}"
-                                                            alt="{{ $product->productName }}"
+                                                            alt="{{ $product->display_name }}"
                                                             class="border rounded shadow-sm"
                                                             style="width: 48px; height: 48px; object-fit: cover;" />
                                                     @else
@@ -190,7 +190,7 @@
                                                 </div>
                                                 <div>
                                                     <h6 class="mb-0 fw-semibold text-dark">
-                                                        {{ $product->productName }}
+                                                        {{ $product->display_name }}
                                                         @if ($product->isExpired())
                                                             <span class="badge bg-danger ms-1">Expired</span>
                                                         @elseif ($product->isExpiringSoon())
@@ -265,7 +265,7 @@
                                                     {{-- product মুছতে নতুন permission। --}}
                                                     <a href="{{ route('product.destroy', $product->id) }}"
                                                         class="btn btn-sm btn-outline-danger" data-swal-delete
-                                                        data-delete-message="Product: {{ $product->productName }}"
+                                                        data-delete-message="Product: {{ $product->display_name }}"
                                                         title="Delete Product">
                                                         <i class="bx bx-trash"></i>
                                                     </a>
@@ -299,7 +299,7 @@
                                                                 <div class="text-center col-md-5">
                                                                     @if ($product->img_url && file_exists(public_path('uploads/products/' . $product->img_url)))
                                                                         <img src="{{ asset('uploads/products/' . $product->img_url) }}"
-                                                                            alt="{{ $product->productName }}"
+                                                                            alt="{{ $product->display_name }}"
                                                                             class="mb-2 border rounded shadow-sm img-fluid"
                                                                             style="max-height: 240px; width: 100%; object-fit: contain;" />
                                                                     @else
@@ -314,7 +314,7 @@
                                                                         </div>
                                                                     @endif
                                                                     <h5 class="mt-2 mb-1 fw-bold text-dark">
-                                                                        {{ $product->productName }}</h5>
+                                                                        {{ $product->display_name }}</h5>
                                                                     <div class="mb-0 h4 text-primary fw-bold">
                                                                         ৳{{ number_format($product->price, 2) }}</div>
                                                                 </div>

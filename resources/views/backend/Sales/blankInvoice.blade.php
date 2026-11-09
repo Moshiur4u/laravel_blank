@@ -21,7 +21,7 @@
                 </button>
             </div>
 
-            <div id="print-document" class="border-0 shadow-sm card print-document"
+            <div id="print-document" class="border-0 shadow-sm card print-document invoice-print-area"
                 @if ($organization?->logo) style="--invoice-watermark: url('{{ asset('uploads/organizations/' . $organization->logo) }}');" @endif>
                 <div class="p-4 card-body p-md-5">
                     @if ($organization?->logo || $organization?->name || $organization?->address || $organization?->phone || $organization?->email)

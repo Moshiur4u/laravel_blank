@@ -238,6 +238,29 @@
                                             </div>
                                         @enderror
                                     </div>
+
+                                    <div class="col-md-6">
+                                        <label for="quantity_size" class="form-label fw-semibold text-secondary">
+                                            Qty/Size
+                                        </label>
+                                        <div class="input-group">
+                                            <span class="input-group-text bg-light text-secondary border-end-0">
+                                                <i class="bx bx-ruler"></i>
+                                            </span>
+                                            <input type="text"
+                                                name="quantity_size"
+                                                id="quantity_size"
+                                                class="form-control border-start-0 @error('quantity_size') is-invalid @enderror"
+                                                maxlength="50"
+                                                placeholder="e.g. RIM, pcs"
+                                                value="{{ old('quantity_size', $product->quantity_size) }}">
+                                        </div>
+                                        @error('quantity_size')
+                                            <div class="text-danger small mt-1">
+                                                <i class="bx bx-error-circle me-1"></i>{{ $message }}
+                                            </div>
+                                        @enderror
+                                    </div>
                                 </div>
                             </div>
                         </div>
@@ -364,7 +387,7 @@
                                     @if ($product->img_url && file_exists(public_path('uploads/products/' . $product->img_url)))
                                         <img id="preview"
                                             src="{{ asset('uploads/products/' . $product->img_url) }}"
-                                            alt="{{ $product->productName }}"
+                                            alt="{{ $product->display_name }}"
                                             class="img-fluid rounded mb-2 shadow-sm"
                                             style="max-height: 180px; object-fit: contain;" />
                                         <div id="uploadPlaceholder" class="text-muted small mt-1">

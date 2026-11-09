@@ -18,6 +18,7 @@ class Product extends Model
             'purchase_price',
             'price',
             'unit',
+            'quantity_size',
             'stock_unit',
             'purchase_date',
             'mfg_date',
@@ -44,6 +45,19 @@ class Product extends Model
         return $this->belongsTo(Supplier::class);
     }
 
+    public function getDisplayNameAttribute(): string
+    {
+        $name = trim((string) $this->productName);
+        $quantitySize = trim((string) $this->quantity_size);
+        $suffix = ' - '.$quantitySize;
+
+        if ($quantitySize === '' || str_ends_with(mb_strtolower($name), mb_strtolower($suffix))) {
+            return $name;
+        }
+
+        return $name.$suffix;
+    }
+
     /**
      * supplier ledger-এ সংরক্ষিত এই পণ্যের সব ক্রয়-এন্ট্রি ফেরত দেয়।
      */
@@ -51,6 +65,11 @@ class Product extends Model
     {
         // supplierledgers.product_id string হলেও তা products.id-এর মান সংরক্ষণ করে।
         return $this->hasMany(Supplierledger::class, 'product_id');
+    }
+
+    public function purchaseReturns(): HasMany
+    {
+        return $this->hasMany(PurchaseReturn::class);
     }
 
     public function shelfDurationDays(): ?int

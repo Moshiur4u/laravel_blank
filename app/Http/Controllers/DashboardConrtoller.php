@@ -208,11 +208,11 @@ class DashboardConrtoller extends Controller
         // এছাড়া বিক্রির মোট আয়ের পাশাপাশি ক্রয়মূল্যের স্ন্যাপশট অনুযায়ী লাভ (profit) নির্ণয় করা হয়।
         $topProducts = DB::table('sale_items')
             ->leftJoin('products', 'products.id', '=', 'sale_items.product_id')
-            ->select('sale_items.product_id', 'sale_items.product_name', 'products.img_url')
+            ->select('sale_items.product_id', 'sale_items.product_name', 'products.quantity_size', 'products.img_url')
             ->selectRaw('SUM(sale_items.quantity) as quantity_sold')
             ->selectRaw('SUM(sale_items.line_total) as sales_amount')
             ->selectRaw('SUM(sale_items.line_total - (sale_items.quantity * COALESCE(sale_items.purchase_price, products.purchase_price, 0))) as profit')
-            ->groupBy('sale_items.product_id', 'sale_items.product_name', 'products.img_url')
+            ->groupBy('sale_items.product_id', 'sale_items.product_name', 'products.quantity_size', 'products.img_url')
             ->orderByDesc('quantity_sold')
             ->limit(5)
             ->get();

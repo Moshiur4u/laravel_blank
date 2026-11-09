@@ -27,6 +27,7 @@ class DatabaseSeeder extends Seeder
             // Standard role presets are synchronized only after their permissions exist.
             RolePermissionSeeder::class,
             ProductReturnPermissionSeeder::class,
+            PurchaseReturnPermissionSeeder::class,
             SalesDocumentWatermarkPermissionSeeder::class,
             VoucherAccountPermissionSeeder::class,
             // ইউজার সিডার কল করা হলো ডাটাবেজে ইউজার টেবিলের জন্য

@@ -26,6 +26,17 @@
             <form id="quotationForm" action="{{ route('quotation.store') }}" method="POST">
                 @csrf
 
+                @if ($errors->any())
+                    <div class="alert alert-danger" role="alert">
+                        <strong>Quotation was not saved. Please correct the following:</strong>
+                        <ul class="mb-0 mt-2">
+                            @foreach ($errors->all() as $error)
+                                <li>{{ $error }}</li>
+                            @endforeach
+                        </ul>
+                    </div>
+                @endif
+
                 <!-- Top Row: Customer Info on Left, Organization Info on Right (Invoice Layout Style) -->
                 <div class="row g-3 mb-4">
                     <!-- Customer Information Section -->
@@ -162,30 +173,38 @@
                                     </tr>
                                 </thead>
                                 <tbody id="itemsTableBody">
-                                    <tr class="item-row">
-                                        <td>
-                                            <input type="text" class="form-control product-name-input"
-                                                name="items[0][product_name]" list="quotationProductOptions"
-                                                placeholder="Type or select product..." autocomplete="off" required>
-                                            <input type="hidden" name="items[0][product_id]" class="product-id-hidden" value="">
-                                        </td>
-                                        <td>
-                                            <input type="number" step="0.01" min="0" class="form-control text-end item-unit-price"
-                                                name="items[0][unit_price]" placeholder="0.00" value="0.00" required>
-                                        </td>
-                                        <td>
-                                            <input type="number" min="1" class="form-control text-center item-quantity"
-                                                name="items[0][quantity]" value="1" required>
-                                        </td>
-                                        <td class="text-end fw-bold">
-                                            <span class="item-line-total text-dark">0.00</span>
-                                        </td>
-                                        <td class="text-center">
-                                            <button type="button" class="btn btn-sm btn-outline-danger remove-item-btn" title="Remove Item">
-                                                <i class="bx bx-trash"></i>
-                                            </button>
-                                        </td>
-                                    </tr>
+                                    @foreach (old('items', [['product_name' => '', 'product_id' => '', 'unit_price' => '0.00', 'quantity' => 0]]) as $index => $oldItem)
+                                        <tr class="item-row">
+                                            <td>
+                                                <input type="text" class="form-control product-name-input"
+                                                    name="items[{{ $index }}][product_name]" list="quotationProductOptions"
+                                                    placeholder="Type or select product..." autocomplete="off" required
+                                                    value="{{ $oldItem['product_name'] ?? '' }}">
+                                                <input type="hidden" name="items[{{ $index }}][product_id]"
+                                                    class="product-id-hidden" value="{{ $oldItem['product_id'] ?? '' }}">
+                                            </td>
+                                            <td>
+                                                <input type="number" step="0.01" min="0"
+                                                    class="form-control text-end item-unit-price"
+                                                    name="items[{{ $index }}][unit_price]" placeholder="0.00"
+                                                    value="{{ $oldItem['unit_price'] ?? '0.00' }}" required>
+                                            </td>
+                                            <td>
+                                                <input type="number" min="1" step="1"
+                                                    class="form-control text-center item-quantity"
+                                                    name="items[{{ $index }}][quantity]"
+                                                    value="{{ $oldItem['quantity'] ?? 0 }}" required>
+                                            </td>
+                                            <td class="text-end fw-bold">
+                                                <span class="item-line-total text-dark">0.00</span>
+                                            </td>
+                                            <td class="text-center">
+                                                <button type="button" class="btn btn-sm btn-outline-danger remove-item-btn" title="Remove Item">
+                                                    <i class="bx bx-trash"></i>
+                                                </button>
+                                            </td>
+                                        </tr>
+                                    @endforeach
                                 </tbody>
                             </table>
                         </div>
@@ -193,7 +212,7 @@
                         <!-- Datalist for fast searchable product auto-fill -->
                         <datalist id="quotationProductOptions">
                             @foreach ($products as $product)
-                                <option value="{{ $product->productName }}"
+                                <option value="{{ $product->display_name }}"
                                     data-id="{{ $product->id }}"
                                     data-price="{{ $product->price ?? 0 }}">
                                     PRD-{{ str_pad($product->id, 5, '0', STR_PAD_LEFT) }} | Price: ৳{{ number_format((float)$product->price, 2) }}
@@ -317,8 +336,11 @@
 @section('scripts')
 <script>
     document.addEventListener('DOMContentLoaded', function () {
-        let rowIndex = 1;
         const tableBody = document.getElementById('itemsTableBody');
+        let rowIndex = Array.from(tableBody.querySelectorAll('.product-name-input')).reduce((nextIndex, input) => {
+            const match = input.name.match(/^items\[(\d+)\]/);
+            return match ? Math.max(nextIndex, Number(match[1]) + 1) : nextIndex;
+        }, 0);
         const addItemBtn = document.getElementById('addItemBtn');
         const productDatalist = document.getElementById('quotationProductOptions');
 
@@ -481,8 +503,8 @@
                         name="items[${rowIndex}][unit_price]" placeholder="0.00" value="0.00" required>
                 </td>
                 <td>
-                    <input type="number" min="1" class="form-control text-center item-quantity"
-                        name="items[${rowIndex}][quantity]" value="1" required>
+                    <input type="number" min="1" step="1" class="form-control text-center item-quantity"
+                        name="items[${rowIndex}][quantity]" value="0" required>
                 </td>
                 <td class="text-end fw-bold">
                     <span class="item-line-total text-dark">0.00</span>

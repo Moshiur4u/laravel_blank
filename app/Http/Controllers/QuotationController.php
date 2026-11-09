@@ -131,16 +131,24 @@ class QuotationController extends Controller
             // Compute subtotal from valid rows
             $subtotal = 0;
             $itemsData = [];
+            $selectedProducts = Product::query()
+                ->whereIn('id', collect($validated['items'])
+                    ->pluck('product_id')
+                    ->filter()
+                    ->unique())
+                ->get()
+                ->keyBy('id');
 
             foreach ($validated['items'] as $item) {
                 $qty = (int)$item['quantity'];
                 $unitPrice = (float)$item['unit_price'];
                 $lineTotal = round($qty * $unitPrice, 2);
                 $subtotal += $lineTotal;
+                $product = $selectedProducts->get($item['product_id'] ?? null);
 
                 $itemsData[] = [
                     'product_id' => !empty($item['product_id']) ? $item['product_id'] : null,
-                    'product_name' => trim($item['product_name']),
+                    'product_name' => $product?->productName ?? trim($item['product_name']),
                     'unit_price' => $unitPrice,
                     'quantity' => $qty,
                     'line_total' => $lineTotal,
@@ -205,7 +213,7 @@ class QuotationController extends Controller
      */
     public function show($id)
     {
-        $quotation = Quotation::with('items', 'user')->findOrFail($id);
+        $quotation = Quotation::with('items.product', 'user')->findOrFail($id);
         $organization = Organization::query()->find(1);
 
         return view('backend.quotation.show', compact('quotation', 'organization'));

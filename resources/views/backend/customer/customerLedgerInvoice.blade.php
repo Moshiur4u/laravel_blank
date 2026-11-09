@@ -14,7 +14,7 @@
                 </button>
             </div>
 
-            <div class="border-0 shadow-sm card">
+            <div class="border-0 shadow-sm card invoice-print-area">
                 <div class="p-4 card-body p-md-5">
                     @if ($organization?->logo || $organization?->name)
                         <div class="d-flex align-items-center gap-3 mb-4 pb-3 border-bottom invoice-organization">

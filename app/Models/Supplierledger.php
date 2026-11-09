@@ -37,4 +37,9 @@ class Supplierledger extends Model
             ->orderByDesc('payment_date')
             ->orderByDesc('id');
     }
+
+    public function purchaseReturns(): HasMany
+    {
+        return $this->hasMany(PurchaseReturn::class, 'supplierledger_id');
+    }
 }

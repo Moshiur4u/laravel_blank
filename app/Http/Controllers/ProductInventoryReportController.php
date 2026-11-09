@@ -154,7 +154,7 @@ class ProductInventoryReportController extends Controller
 
             return [
                 'id' => $product->id,
-                'name' => $product->productName,
+                'name' => $product->display_name,
                 'purchased_quantity' => $purchaseLedgers->sum(
                     static fn (Supplierledger $ledger): float => (float) $ledger->quantity
                 ),
