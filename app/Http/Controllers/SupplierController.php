@@ -7,6 +7,7 @@ use App\Models\SupplierLedgerPayment;
 use App\Models\Supplierledger;
 use App\Models\VoucherEntry;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Validator;
 
 class SupplierController extends Controller
 {
@@ -33,13 +34,22 @@ class SupplierController extends Controller
      */
     public function store(Request $request)
     {
-        $request->validate([
-            'name' => 'required',
+        $validator = Validator::make($request->all(), [
+            'name' => 'required|unique:suppliers,name',
             'email' => 'required',
             'phone' => 'required',
             'address' => 'required',
             'logo' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:1048',
+        ], [
+            'name.unique' => 'This supplier already exists.',
         ]);
+        if ($validator->fails() && $request->expectsJson()) {
+            return response()->json([
+                'message' => $validator->errors()->first(),
+                'errors' => $validator->errors(),
+            ], 422);
+        }
+        $validator->validate();
 
         $supplier = new Supplier;
         $supplier->name = $request->name;

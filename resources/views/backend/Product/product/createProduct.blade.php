@@ -598,6 +598,7 @@
                     form.querySelectorAll('.is-invalid').forEach((input) => input.classList.remove('is-invalid'));
                     form.querySelectorAll('.quick-create-validation-error').forEach((error) => error.remove());
                     form.querySelector('.quick-create-submit-error')?.remove();
+                    form.querySelector('.quick-create-validation-summary')?.remove();
                     const submitButton = form.querySelector('[type="submit"]');
                     submitButton.disabled = true;
 
@@ -610,10 +611,30 @@
                                 'Accept': 'application/json'
                             }
                         });
-                        const result = await response.json();
+                        const responseText = await response.text();
+                        let result = {};
+                        try {
+                            result = responseText ? JSON.parse(responseText) : {};
+                        } catch {
+                            throw new Error(response.ok ?
+                                'The server returned an invalid response.' :
+                                `Unable to save ${config.label} (HTTP ${response.status}).`);
+                        }
 
                         if (response.status === 422 && result.errors) {
+                            if (config.showValidationSummary) {
+                                const summary = document.createElement('div');
+                                summary.className = 'alert alert-danger quick-create-validation-summary';
+                                summary.setAttribute('role', 'alert');
+                                summary.textContent = Object.values(result.errors).flat().join(' ');
+                                form.prepend(summary);
+                            }
+
                             Object.entries(result.errors).forEach(([field, messages]) => {
+                                if (config.summaryOnlyErrors?.includes(messages[0])) {
+                                    return;
+                                }
+
                                 const input = Array.from(form.elements).find((element) => element.name === field);
                                 if (!input) {
                                     return;
@@ -675,7 +696,9 @@
                     selectId: 'category_id',
                     responseKey: 'category',
                     nameKey: 'category_name',
-                    label: 'category'
+                    label: 'category',
+                    showValidationSummary: true,
+                    summaryOnlyErrors: ['This product category already exists.']
                 });
             @endcan
 
@@ -689,7 +712,9 @@
                     responseKey: 'supplier',
                     nameKey: 'name',
                     label: 'supplier',
-                    logoPreview: true
+                    logoPreview: true,
+                    showValidationSummary: true,
+                    summaryOnlyErrors: ['This supplier already exists.']
                 });
             @endcan
 
@@ -702,7 +727,9 @@
                     selectId: 'brand_id',
                     responseKey: 'brand',
                     nameKey: 'name',
-                    label: 'brand'
+                    label: 'brand',
+                    showValidationSummary: true,
+                    summaryOnlyErrors: ['This brand already exists.']
                 });
             @endcan
         });

@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\ProductCategory;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Validator;
 use Illuminate\Validation\Rule;
 use Symfony\Component\Console\Input\Input;
 
@@ -34,11 +35,19 @@ class ProductCategoryController extends Controller
     public function store(Request $request)
     {
         // dd($request->all());
-        $request->validate([
+        $validator = Validator::make($request->all(), [
             'category_name' => 'required|unique:product_categories,category_name',
         ], [
-            'category_name.unique' => 'The name has already been taken.',
+            'category_name.unique' => 'This product category already exists.',
         ]);
+        if ($validator->fails() && $request->expectsJson()) {
+            return response()->json([
+                'message' => $validator->errors()->first(),
+                'errors' => $validator->errors(),
+            ], 422);
+        }
+        $validator->validate();
+
         $productCategory = ProductCategory::create([
             'category_name' => $request->input('category_name'),
         ]);

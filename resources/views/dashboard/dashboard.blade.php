@@ -509,14 +509,16 @@
                                 </a>
                             </li>
                         </ul>
-                    </li>
-                @endcan
+
+
                 @canany(['product.return.report', 'reports.all_access'])
-                    <li>
+                    <ul>
                         <a href="{{ route('product-returns.report') }}">
                             <div class="parent-icon"><i class='bx bx-undo'></i></div>
-                            <div class="menu-title">Product Return Report</div>
+                            <div class="menu-title">Sale Return Report</div>
                         </a>
+                    </ul>
+                @endcan
                     </li>
                 @endcan
                 @canany(['product.report.inventory', 'reports.all_access']) {{-- inventory report route-এর access অনুযায়ী link দেখায়। --}}
