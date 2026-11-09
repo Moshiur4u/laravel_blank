@@ -16,6 +16,19 @@
 
 এতে `RIM`, `pcs` বা অনুরূপ একক/প্যাকের বর্ণনা রাখা যায়। এটি পণ্যের সংখ্যাগত মজুত `unit` থেকে আলাদা; তাই স্টক কমানো-বাড়ানো বা মূল্য গণনায় এই নতুন ফিল্ড ব্যবহার করা হয় না।
 
+`app/Http/Controllers/QuantitySizeController.php` reusable Qty/Size অপশনের তালিকা, create, update ও delete পরিচালনা করে। Create/update-এ unique নাম যাচাই হয়। Product form-এর icon থেকে তৈরি করলে JSON response-এ option ফেরত আসে এবং সেটি product form-এ বসে।
+
+```php
+$request->merge(['name' => trim((string) $request->input('name'))]);
+$validated = $request->validate([
+    'name' => ['required', 'string', 'max:50', 'unique:quantity_sizes,name'],
+]);
+
+$quantitySize = QuantitySize::create($validated);
+```
+
+Update validation বর্তমান option-কে unique check থেকে বাদ দেয়। Catalog option delete করলে `products.quantity_size` আলাদা text হিসেবে থাকায় আগের পণ্যের label অপরিবর্তিত থাকে।
+
 বিক্রয় ও quotation আইটেমে পণ্যের নামের snapshot আগের মতোই সংরক্ষিত হয়। প্রদর্শনের সময় সংশ্লিষ্ট পণ্যের Qty/Size যোগ হয়। ফলে পুরোনো invoice/quotation-ও বর্তমান পণ্যের আকারসহ নাম দেখাতে পারে।
 
 ## Migration (Code and Explanation)
@@ -40,20 +53,36 @@ public function down(): void
 
 ফিল্ডটি nullable, তাই আগের পণ্যগুলোর জন্য কোনো মান বাধ্যতামূলক নয়। `down()`-এ কলামটি বাদ দেওয়ার ব্যবস্থা থাকায় migration rollback করা যায়।
 
-## Route (Code and Explanation)
-
-Qty/Size-এর জন্য আলাদা route যোগ করা হয়নি। পণ্য তৈরি ও সম্পাদনার বিদ্যমান route-ই ব্যবহার হয়:
+Reusable catalog-এর migration: `database/migrations/2026_11_10_000002_create_quantity_sizes_table.php`
 
 ```php
-Route::Post('/product/store', [ProductController::class, 'store'])
-    ->middleware('permission:product.create')
-    ->name('product.store');
-Route::put('/product/update/{id}', [ProductController::class, 'update'])
-    ->middleware('permission:product.update')
-    ->name('product.update');
+Schema::create('quantity_sizes', function (Blueprint $table) {
+    $table->id();
+    $table->string('name', 50)->unique();
+    $table->timestamps();
+});
 ```
 
-অতএব route বা permission কাঠামোর পরিবর্তন ছাড়াই বিদ্যমান form submit থেকে নতুন মান সংরক্ষিত হয়।
+## Route (Code and Explanation)
+
+`routes/web.php`-এ Qty/Size CRUD route permission middleware দিয়ে সুরক্ষিত:
+
+```php
+Route::get('/product/quantity-size/index', [QuantitySizeController::class, 'index'])
+    ->middleware('permission:quantity-size.index')->name('quantity-size.index');
+Route::get('/product/quantity-size/create', [QuantitySizeController::class, 'create'])
+    ->middleware('permission:quantity-size.create')->name('quantity-size.create');
+Route::post('/product/quantity-size/store', [QuantitySizeController::class, 'store'])
+    ->middleware('permission:quantity-size.create')->name('quantity-size.store');
+Route::get('/product/quantity-size/{quantitySize}/edit', [QuantitySizeController::class, 'edit'])
+    ->middleware('permission:quantity-size.edit')->name('quantity-size.edit');
+Route::put('/product/quantity-size/{quantitySize}/update', [QuantitySizeController::class, 'update'])
+    ->middleware('permission:quantity-size.update')->name('quantity-size.update');
+Route::delete('/product/quantity-size/{quantitySize}/destroy', [QuantitySizeController::class, 'destroy'])
+    ->middleware('permission:quantity-size.delete')->name('quantity-size.destroy');
+```
+
+`PermissionSeederTable`-এ CRUD permission-গুলো যোগ করা হয়েছে এবং `RolePermissionSeeder`-এ manager role-এর জন্য দেওয়া হয়েছে।
 
 ## Model (Code and Explanation)
 
@@ -64,6 +93,15 @@ Route::put('/product/update/{id}', [ProductController::class, 'update'])
 ```php
 'quantity_size',
 ```
+
+```php
+class QuantitySize extends Model
+{
+    protected $fillable = ['name'];
+}
+```
+
+Catalog model এবং product label-এর মধ্যে foreign key নেই। ফলে option edit/delete করলেও আগে save করা product text বদলায় না।
 
 ```php
 public function getDisplayNameAttribute(): string
@@ -84,21 +122,27 @@ public function getDisplayNameAttribute(): string
 
 ## Blade Template (Code and Explanation)
 
-**পণ্য ফর্ম:** `resources/views/backend/Product/product/createProduct.blade.php` এবং `resources/views/backend/Product/product/editProduct.blade.php`-এ ঐচ্ছিক `Qty/Size` ইনপুট রয়েছে। সম্পাদনার ফর্মে বর্তমান মান এবং validation ব্যর্থ হলে আগের ইনপুট দেখানো হয়।
+**পণ্য ফর্ম:** `resources/views/backend/Product/product/createProduct.blade.php` এবং `resources/views/backend/Product/product/editProduct.blade.php`-এ ঐচ্ছিক `Qty/Size` ইনপুট রয়েছে। Catalog option datalist-এ দেখায়; ফর্মে custom text-ও লেখা যায়।
 
 ```blade
 <div class="input-group">
-    <span class="input-group-text bg-light text-secondary border-end-0">
+    <button type="button" class="input-group-text bg-light text-secondary border-end-0"
+        data-bs-toggle="modal" data-bs-target="#quantitySizeModal">
         <i class="bx bx-ruler"></i>
-    </span>
+    </button>
     <input type="text" name="quantity_size" id="quantity_size"
-        class="form-control border-start-0" maxlength="50"
+        class="form-control border-start-0" list="quantitySizeOptions" maxlength="50"
         placeholder="e.g. RIM, pcs"
         value="{{ old('quantity_size', $product->quantity_size ?? '') }}">
 </div>
+<datalist id="quantitySizeOptions">
+    @foreach ($quantitySizes as $quantitySize)
+        <option value="{{ $quantitySize }}"></option>
+    @endforeach
+</datalist>
 ```
 
-Qty/Size বোঝাতে ইনপুটের আগে `bx-ruler` আইকন ব্যবহার করা হয়েছে।
+Clickable `bx-ruler` আইকন থেকে modal-এ reusable option তৈরি করা যায়; তৈরি option বর্তমান product field-এ বসে এবং অন্য product-এও বাছাই করা যায়। `resources/views/backend/Product/QuantitySize/`-এ Brand-এর মতো list/create/edit/delete UI রয়েছে। Delete confirmation JavaScript form-based `DELETE` request সমর্থন করে।
 
 **প্রদর্শন:** পণ্যের তালিকা, category details, dashboard, sales picker/invoice/delivery challan, quotation, inventory ও sales report, supplier এবং return screens-এ `display_name` বা আইটেমের `display_product_name` ব্যবহৃত হয়েছে। উদাহরণ:
 

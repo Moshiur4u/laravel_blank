@@ -244,17 +244,32 @@
                                             Qty/Size
                                         </label>
                                         <div class="input-group">
-                                            <span class="input-group-text bg-light text-secondary border-end-0">
+                                            @can('quantity-size.create')
+                                            <button type="button"
+                                                class="input-group-text bg-light text-secondary border-end-0"
+                                                data-bs-toggle="modal" data-bs-target="#quantitySizeModal"
+                                                aria-label="Create Qty/Size option" title="Create Qty/Size option">
                                                 <i class="bx bx-ruler"></i>
-                                            </span>
+                                            </button>
+                                            @else
+                                                <span class="input-group-text bg-light text-secondary border-end-0" aria-hidden="true">
+                                                    <i class="bx bx-ruler"></i>
+                                                </span>
+                                            @endcan
                                             <input type="text"
                                                 name="quantity_size"
                                                 id="quantity_size"
                                                 class="form-control border-start-0 @error('quantity_size') is-invalid @enderror"
                                                 maxlength="50"
+                                                list="quantitySizeOptions"
                                                 placeholder="e.g. RIM, pcs"
                                                 value="{{ old('quantity_size', $product->quantity_size) }}">
                                         </div>
+                                        <datalist id="quantitySizeOptions">
+                                            @foreach ($quantitySizes as $quantitySize)
+                                                <option value="{{ $quantitySize }}"></option>
+                                            @endforeach
+                                        </datalist>
                                         @error('quantity_size')
                                             <div class="text-danger small mt-1">
                                                 <i class="bx bx-error-circle me-1"></i>{{ $message }}
@@ -443,6 +458,37 @@
                 </div>
             </form>
 
+            @can('quantity-size.create')
+                <div class="modal fade" id="quantitySizeModal" tabindex="-1"
+                    aria-labelledby="quantitySizeModalLabel" aria-hidden="true">
+                    <div class="modal-dialog modal-dialog-centered">
+                        <div class="modal-content">
+                            <form id="quantitySizeForm" action="{{ route('quantity-size.store') }}" method="POST">
+                                @csrf
+                                <div class="modal-header">
+                                    <h5 class="modal-title" id="quantitySizeModalLabel">Create Qty/Size Option</h5>
+                                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                                </div>
+                                <div class="modal-body">
+                                    <div class="alert alert-danger d-none" id="quantitySizeModalError" role="alert"></div>
+                                    <label for="quantitySizeModalInput" class="form-label">Qty/Size</label>
+                                    <input type="text" name="name" id="quantitySizeModalInput" class="form-control"
+                                        maxlength="50" placeholder="e.g. RIM, pcs" required>
+                                    <div class="form-text">This option will also be available on other product forms.</div>
+                                </div>
+                                <div class="modal-footer">
+                                    @can('quantity-size.index')
+                                        <a href="{{ route('quantity-size.index') }}" class="btn btn-outline-secondary">Manage options</a>
+                                    @endcan
+                                    <button type="button" class="btn btn-light" data-bs-dismiss="modal">Cancel</button>
+                                    <button type="submit" class="btn btn-primary">Create &amp; Use</button>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            @endcan
+
         </div>
     </div>
 
@@ -465,6 +511,47 @@
             const mfgInput = document.getElementById('menufecher_date');
             const expInput = document.getElementById('expire_date');
             const totalDurationInput = document.getElementById('total_duration');
+            const quantitySizeInput = document.getElementById('quantity_size');
+            const quantitySizeForm = document.getElementById('quantitySizeForm');
+            if (quantitySizeForm) {
+                quantitySizeForm.addEventListener('submit', async function(event) {
+                    event.preventDefault();
+                    const errorBox = document.getElementById('quantitySizeModalError');
+                    const submitButton = quantitySizeForm.querySelector('[type="submit"]');
+                    errorBox.classList.add('d-none');
+                    errorBox.textContent = '';
+                    submitButton.disabled = true;
+
+                    try {
+                        const response = await fetch(quantitySizeForm.action, {
+                            method: 'POST',
+                            body: new FormData(quantitySizeForm),
+                            headers: {
+                                'X-Requested-With': 'XMLHttpRequest',
+                                'Accept': 'application/json'
+                            }
+                        });
+                        const result = await response.json();
+                        if (!response.ok || !result.quantity_size) {
+                            throw new Error(result.message || Object.values(result.errors || {}).flat().join(' ')
+                                || `Unable to create Qty/Size (HTTP ${response.status}).`);
+                        }
+
+                        quantitySizeInput.value = result.quantity_size.name;
+                        const options = document.getElementById('quantitySizeOptions');
+                        if (![...options.options].some((option) => option.value === result.quantity_size.name)) {
+                            options.add(new Option(result.quantity_size.name, result.quantity_size.name));
+                        }
+                        quantitySizeInput.dispatchEvent(new Event('change', { bubbles: true }));
+                        bootstrap.Modal.getOrCreateInstance(document.getElementById('quantitySizeModal')).hide();
+                    } catch (error) {
+                        errorBox.textContent = error.message;
+                        errorBox.classList.remove('d-none');
+                    } finally {
+                        submitButton.disabled = false;
+                    }
+                });
+            }
 
             function calculateDuration() {
                 if (!mfgInput.value || !expInput.value) {

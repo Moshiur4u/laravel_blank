@@ -11,6 +11,7 @@ use App\Http\Controllers\ProductCategoryController;
 use App\Http\Controllers\ProductController;
 use App\Http\Controllers\ProductInventoryReportController;
 use App\Http\Controllers\ProductReturnController;
+use App\Http\Controllers\QuantitySizeController;
 use App\Http\Controllers\PurchaseReturnController;
 use App\Http\Controllers\QuotationController;
 use App\Http\Controllers\RoleController;
@@ -32,6 +33,21 @@ Route::middleware(['auth', 'verified'])->group(function () { // নির্দ�
 Route::get('/', function () {
     return view('frontend.loginpage.login');
 });
+Route::middleware(['auth', 'verified'])->group(function () {
+    Route::get('/product/quantity-size/index', [QuantitySizeController::class, 'index'])->middleware('permission:quantity-size.index')
+        ->name('quantity-size.index');
+    Route::get('/product/quantity-size/create', [QuantitySizeController::class, 'create'])->middleware('permission:quantity-size.create')
+        ->name('quantity-size.create');
+    Route::post('/product/quantity-size/store', [QuantitySizeController::class, 'store'])->middleware('permission:quantity-size.create')
+        ->name('quantity-size.store');
+    Route::get('/product/quantity-size/{quantitySize}/edit', [QuantitySizeController::class, 'edit'])->middleware('permission:quantity-size.edit')
+        ->name('quantity-size.edit');
+    Route::put('/product/quantity-size/{quantitySize}/update', [QuantitySizeController::class, 'update'])->middleware('permission:quantity-size.update')
+        ->name('quantity-size.update');
+    Route::delete('/product/quantity-size/{quantitySize}/destroy', [QuantitySizeController::class, 'destroy'])->middleware('permission:quantity-size.delete')
+        ->name('quantity-size.destroy');
+});
+
 Route::middleware(['auth', 'verified'])->group(function () {
     Route::get('/logout', [UserController::class, 'logout'])->name('logout');
 });

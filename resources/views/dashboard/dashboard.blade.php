@@ -238,7 +238,8 @@
                 @endcan
                 @canany(['product.index', 'product.create', 'product.edit', 'brand.index', 'brand.create', 'brand.edit',
                     'brand.update', 'brand.delete', 'supplier.index', 'supplier.create', 'category.index', 'customer.index',
-                    'customer.create', 'purchase.return']) {{-- sidebar group নতুন module permission দিয়ে দেখায়। --}}
+                    'customer.create', 'purchase.return', 'quantity-size.index', 'quantity-size.create'])
+                    {{-- sidebar group নতুন module permission দিয়ে দেখায়। --}}
                     <li class="menu-label">Managerial Operations</li>
                 @endcanany
                 @canany(['product.index', 'product.create', 'product.edit', 'purchase.return']) {{-- Product menu-তে নতুন permission key ব্যবহৃত। --}}
@@ -344,6 +345,26 @@
                         </ul>
                     </li>
                 @endcan
+                @canany(['quantity-size.index', 'quantity-size.create'])
+                    <li>
+                        <a href="javascript:;" class="has-arrow">
+                            <div class="parent-icon"><i class="bx bx-ruler"></i></div>
+                            <div class="menu-title">Qty/Size</div>
+                        </a>
+                        <ul>
+                            @can('quantity-size.index')
+                                <li>
+                                    <a href="{{ route('quantity-size.index') }}"><i class="bx bx-list-ul"></i>Qty/Size List</a>
+                                </li>
+                            @endcan
+                            @can('quantity-size.create')
+                                <li>
+                                    <a href="{{ route('quantity-size.create') }}"><i class="bx bx-plus-medical"></i>New Qty/Size</a>
+                                </li>
+                            @endcan
+                        </ul>
+                    </li>
+                @endcanany
                 @canany(['supplier.index', 'supplier.create', 'purchase.return'])
                     <li>
                         <a href="javascript:;" class="has-arrow">

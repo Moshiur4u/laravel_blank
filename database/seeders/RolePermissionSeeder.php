@@ -31,6 +31,11 @@ class RolePermissionSeeder extends Seeder
                 'brand.edit', // নতুন brand edit permission।
                 'brand.update', // নতুন brand update permission।
                 'brand.delete', // নতুন brand delete permission।
+                'quantity-size.index',
+                'quantity-size.create',
+                'quantity-size.edit',
+                'quantity-size.update',
+                'quantity-size.delete',
                 'category.index', // পুরোনো Categories-এর বদলে category list permission।
                 'product.category.create', // নতুন category create permission।
                 'product.category.edit', // নতুন category edit permission।

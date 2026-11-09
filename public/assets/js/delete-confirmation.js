@@ -4,8 +4,8 @@ document.addEventListener('click', function (event) {
         return;
     }
 
-    const deleteLink = event.target.closest('[data-swal-delete]');
-    if (!deleteLink) {
+    const deleteControl = event.target.closest('[data-swal-delete]');
+    if (!deleteControl) {
         return;
     }
 
@@ -19,7 +19,7 @@ document.addEventListener('click', function (event) {
 
     window.Swal.fire({
         title: 'Do you want to delete?',
-        text: deleteLink.dataset.deleteMessage || 'This action cannot be undone.',
+        text: deleteControl.dataset.deleteMessage || 'This action cannot be undone.',
         icon: 'warning',
         showCancelButton: true,
         confirmButtonText: 'Yes',
@@ -28,7 +28,12 @@ document.addEventListener('click', function (event) {
         focusCancel: true,
     }).then(function (result) {
         if (result.isConfirmed) {
-            window.location.assign(deleteLink.href);
+            if (deleteControl instanceof HTMLFormElement) {
+                deleteControl.requestSubmit();
+                return;
+            }
+
+            window.location.assign(deleteControl.href);
         }
     }).catch(function (error) {
         console.error('Unable to display the delete confirmation.', error);

@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\Brand;
 use App\Models\Product;
 use App\Models\ProductCategory;
+use App\Models\QuantitySize;
 use App\Models\Supplier;
 use App\Models\Supplierledger;
 use Illuminate\Http\Request;
@@ -33,6 +34,7 @@ class ProductController extends Controller
     {
         $ProductCategories = ProductCategory::all();
         $brands = Brand::all();
+        $quantitySizes = QuantitySize::query()->orderBy('name')->pluck('name');
         $existingProductNames = Product::query()
             ->whereNotNull('productName')
             ->where('productName', '<>', '')
@@ -45,6 +47,7 @@ class ProductController extends Controller
         return view('backend.Product.product.createProduct', compact(
             'brands',
             'ProductCategories',
+            'quantitySizes',
             'suppliers',
             'existingProductNames'
         ));
@@ -146,12 +149,19 @@ class ProductController extends Controller
         $product = Product::findOrFail($id);
         $ProductCategories = ProductCategory::latest()->get();
         $brands = Brand::all();
+        $quantitySizes = QuantitySize::query()->orderBy('name')->pluck('name');
         $suppliers = Supplier::where('is_active', true)
             ->when($product->supplier_id, fn ($query) => $query->orWhereKey($product->supplier_id))
             ->orderBy('name')
             ->get();
 
-        return view('backend.Product.product.editProduct', compact('product', 'ProductCategories', 'brands', 'suppliers'));
+        return view('backend.Product.product.editProduct', compact(
+            'product',
+            'ProductCategories',
+            'brands',
+            'quantitySizes',
+            'suppliers'
+        ));
     }
 
     /**

@@ -61,6 +61,12 @@ class PermissionSeederTable extends Seeder
             'brand.edit',
             'brand.update',
             'brand.delete',
+            // Qty/Size catalog management permissions.
+            'quantity-size.index',
+            'quantity-size.create',
+            'quantity-size.edit',
+            'quantity-size.update',
+            'quantity-size.delete',
             //Category all parmissions,
             'category.index',
             'product.category.create',
