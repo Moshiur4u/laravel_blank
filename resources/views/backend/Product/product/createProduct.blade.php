@@ -454,7 +454,12 @@
                     <div class="modal-dialog modal-dialog-centered">
                         <div class="modal-content">
                             <div class="modal-header">
-                                <h5 class="modal-title" id="brandCreateModalLabel">Create Brand</h5>
+                                <h5 class="modal-title" id="brandCreateModalLabel" name="brand">Create Brand</h5>
+                                @error('brand')
+                                    <div class="mt-1 text-danger small">
+                                        <i class="bx bx-error-circle me-1"></i>{{ $message }}
+                                    </div>
+                                @enderror
                                 <button type="button" class="btn-close" data-bs-dismiss="modal"
                                     aria-label="Close"></button>
                             </div>
