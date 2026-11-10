@@ -57,4 +57,9 @@ class CustomerLedger extends Model
     {
         return $this->hasMany(CustomerLedgerPayment::class)->orderByDesc('payment_date')->orderByDesc('id'); // সাম্প্রতিক কিস্তি আগে ফেরায়।
     }
+
+    public function saleItems(): HasMany
+    {
+        return $this->hasMany(SaleItem::class, 'sale_invoice_id', 'sale_invoice_id');
+    }
 }

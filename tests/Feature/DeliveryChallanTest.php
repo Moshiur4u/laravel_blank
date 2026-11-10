@@ -2,6 +2,7 @@
 
 use App\Models\Organization;
 use App\Models\Product;
+use App\Models\ProductReturn;
 use App\Models\SaleInvoice;
 use App\Models\SaleItem;
 use App\Models\User;
@@ -72,6 +73,68 @@ test('sales viewers can print a delivery challan with product quantities and uni
         ->assertDontSee($invoice->invoice_date->format('d M Y, h:i A'))
         ->assertDontSee('Unit Selling Price')
         ->assertDontSee('Subtotal');
+});
+
+test('invoice and delivery challan show quantities and amounts remaining after product returns', function () {
+    $user = User::factory()->create();
+    $user->givePermissionTo([
+        Permission::findOrCreate('sales.view', 'web'),
+        Permission::findOrCreate('sales.report', 'web'),
+    ]);
+    $categoryId = DB::table('product_categories')->insertGetId(['category_name' => 'Returned Category']);
+    $brandId = DB::table('brands')->insertGetId(['name' => 'Returned Brand']);
+    $product = Product::create([
+        'productName' => 'Returned Product',
+        'product_categorie_id' => $categoryId,
+        'brand_id' => $brandId,
+        'price' => 100,
+        'unit' => '8',
+        'stock_unit' => 'Boxes',
+    ]);
+    $invoice = SaleInvoice::create([
+        'invoice_no' => 'CHALLAN-RETURN-001',
+        'customer_name' => 'Return Customer',
+        'user_id' => $user->id,
+        'invoice_date' => now(),
+        'subtotal' => 300,
+        'total_amount' => 200,
+        'amount_paid' => 200,
+        'due_amount' => 0,
+    ]);
+    $saleItem = SaleItem::create([
+        'sale_invoice_id' => $invoice->id,
+        'product_id' => $product->id,
+        'product_name' => $product->productName,
+        'quantity' => 3,
+        'unit_price' => 100,
+        'line_total' => 300,
+    ]);
+    ProductReturn::create([
+        'return_no' => 'RET-CHALLAN-001',
+        'sale_invoice_id' => $invoice->id,
+        'sale_item_id' => $saleItem->id,
+        'product_id' => $product->id,
+        'returned_by' => $user->id,
+        'invoice_no' => $invoice->invoice_no,
+        'product_name' => $product->productName,
+        'quantity' => 1,
+        'return_date' => today(),
+        'return_amount' => 100,
+        'refund_amount' => 100,
+    ]);
+
+    $this->actingAs($user)
+        ->get(route('sales.invoice', $invoice->id))
+        ->assertOk()
+        ->assertSee('class="text-center">2</td>', false)
+        ->assertSee('class="text-end">৳200.00</td>', false);
+
+    $this->actingAs($user)
+        ->get(route('sales.delivery-challan', $invoice->id))
+        ->assertOk()
+        ->assertSee('class="text-center">2</td>', false)
+        ->assertSee('Total Quantity')
+        ->assertSee('class="text-center">2</td>', false);
 });
 
 test('sale invoice shows customer details, quotation default terms, and the colored header', function () {

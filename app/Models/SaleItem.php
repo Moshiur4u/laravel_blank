@@ -40,6 +40,16 @@ class SaleItem extends Model
         return $this->hasMany(ProductReturn::class);
     }
 
+    public function getRemainingQuantityAttribute(): int
+    {
+        return max((int) $this->quantity - (int) ($this->returned_quantity ?? 0), 0);
+    }
+
+    public function getRemainingLineTotalAttribute(): float
+    {
+        return round((float) $this->unit_price * $this->remaining_quantity, 2);
+    }
+
     public function getDisplayProductNameAttribute(): string
     {
         $name = trim((string) $this->product_name);

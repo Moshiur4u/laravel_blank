@@ -204,14 +204,21 @@ class DashboardConrtoller extends Controller
             ];
         }
 
-        // product-এর নাম snapshot থেকে রাখা হয়; ranking quantity sold অনুযায়ী সব সময়ের জন্য।
-        // এছাড়া বিক্রির মোট আয়ের পাশাপাশি ক্রয়মূল্যের স্ন্যাপশট অনুযায়ী লাভ (profit) নির্ণয় করা হয়।
+        // ফেরত quantity বাদ দিয়ে net বিক্রি, আয় ও snapshot ক্রয়মূল্যের ভিত্তিতে profit নির্ণয় করা হয়।
+        $returnedQuantities = DB::table('product_returns')
+            ->select('sale_item_id')
+            ->selectRaw('SUM(quantity) as returned_quantity')
+            ->groupBy('sale_item_id');
+        $netQuantity = 'CASE WHEN sale_items.quantity > COALESCE(dashboard_item_returns.returned_quantity, 0) THEN sale_items.quantity - COALESCE(dashboard_item_returns.returned_quantity, 0) ELSE 0 END';
+        $netSalesAmount = "CASE WHEN sale_items.quantity > 0 THEN sale_items.line_total * ({$netQuantity}) / sale_items.quantity ELSE 0 END";
+        $unitCost = 'COALESCE(sale_items.purchase_price, products.purchase_price, 0)';
         $topProducts = DB::table('sale_items')
             ->leftJoin('products', 'products.id', '=', 'sale_items.product_id')
+            ->leftJoinSub($returnedQuantities, 'dashboard_item_returns', 'dashboard_item_returns.sale_item_id', '=', 'sale_items.id')
             ->select('sale_items.product_id', 'sale_items.product_name', 'products.quantity_size', 'products.img_url')
-            ->selectRaw('SUM(sale_items.quantity) as quantity_sold')
-            ->selectRaw('SUM(sale_items.line_total) as sales_amount')
-            ->selectRaw('SUM(sale_items.line_total - (sale_items.quantity * COALESCE(sale_items.purchase_price, products.purchase_price, 0))) as profit')
+            ->selectRaw("SUM({$netQuantity}) as quantity_sold")
+            ->selectRaw("SUM({$netSalesAmount}) as sales_amount")
+            ->selectRaw("SUM(({$netSalesAmount}) - (({$netQuantity}) * {$unitCost})) as profit")
             ->groupBy('sale_items.product_id', 'sale_items.product_name', 'products.quantity_size', 'products.img_url')
             ->orderByDesc('quantity_sold')
             ->limit(5)

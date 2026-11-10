@@ -27,19 +27,20 @@ test('sales report filters invoices and ranks products by revenue', function () 
     ]);
 
     $categoryId = DB::table('product_categories')->insertGetId(['category_name' => 'Report Category']);
+    $otherCategoryId = DB::table('product_categories')->insertGetId(['category_name' => 'Other Report Category']);
     $brandId = DB::table('brands')->insertGetId(['name' => 'Report Brand']);
-    $createProduct = function (string $name) use ($categoryId, $brandId): Product {
+    $createProduct = function (string $name, int $productCategoryId) use ($brandId): Product {
         return Product::create([
             'productName' => $name,
-            'product_categorie_id' => $categoryId,
+            'product_categorie_id' => $productCategoryId,
             'brand_id' => $brandId,
             'price' => 100,
             'unit' => '50',
             'stock_unit' => '50',
         ]);
     };
-    $topProduct = $createProduct('Top Report Product');
-    $otherProduct = $createProduct('Other Report Product');
+    $topProduct = $createProduct('Top Report Product', $categoryId);
+    $otherProduct = $createProduct('Other Report Product', $otherCategoryId);
 
     $createInvoice = function (array $attributes, array $items): SaleInvoice {
         $invoice = SaleInvoice::create($attributes);
@@ -89,7 +90,7 @@ test('sales report filters invoices and ranks products by revenue', function () 
     $response = $this->actingAs($employee)->get(route('sales.report', [
         'start_date' => today()->toDateString(),
         'end_date' => today()->toDateString(),
-        'product_id' => $topProduct->id,
+        'category_id' => $categoryId,
         'employee_id' => $employee->id,
         'customer_id' => $customer->id,
     ]));
@@ -105,7 +106,10 @@ test('sales report filters invoices and ranks products by revenue', function () 
             && $invoices->first()->is($matchingInvoice))
         ->assertViewHas('topProducts', fn ($products) => $products->count() === 1
             && $products->first()->product_name === 'Top Report Product'
-            && (float) $products->first()->revenue === 100.0);
+            && $products->first()->category_name === 'Report Category'
+            && (float) $products->first()->revenue === 100.0)
+        ->assertSee('Product Category')
+        ->assertSee('Report Category');
 
     $this->actingAs($employee)->get(route('sales.report', [
         'start_date' => today()->toDateString(),
@@ -134,8 +138,8 @@ test('sales report defaults to today and validates date and filter values', func
         'end_date' => today()->subDay()->toDateString(),
     ]))->assertSessionHasErrors('end_date');
 
-    $this->get(route('sales.report', ['product_id' => 999999]))
-        ->assertSessionHasErrors('product_id');
+    $this->get(route('sales.report', ['category_id' => 999999]))
+        ->assertSessionHasErrors('category_id');
 });
 
 test('sales report allocates invoice VAT to products by their share of invoice sales', function () {

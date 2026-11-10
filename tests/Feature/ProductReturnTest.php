@@ -25,6 +25,7 @@ test('product returns restore stock and proportionally adjust due and refund vou
         Permission::findOrCreate('product.return.report', 'web'),
         Permission::findOrCreate('sales.create', 'web'),
         Permission::findOrCreate('sales.report', 'web'),
+        Permission::findOrCreate('customer.ledger', 'web'),
         Permission::findOrCreate('voucher.edit', 'web'),
         Permission::findOrCreate('voucher.delete', 'web'),
     ]);
@@ -148,6 +149,17 @@ test('product returns restore stock and proportionally adjust due and refund vou
         ->and((float) $product->fresh()->unit)->toBe(9.0)
         ->and((float) $ledger->fresh()->due_amount)->toBe(49.0);
     $this->actingAs($user)
+        ->get(route('customer.ledger', $customer->id))
+        ->assertOk()
+        ->assertSee('Return Test Product × 2')
+        ->assertSee('Remark-1 Return');
+    $this->actingAs($user)
+        ->get(route('sales.customer.lookup', ['phone' => $customer->phone]))
+        ->assertOk()
+        ->assertJsonPath('customer.ledger.0.items.0.name', 'Return Test Product')
+        ->assertJsonPath('customer.ledger.0.items.0.quantity', 2)
+        ->assertJsonPath('customer.ledger.0.items.0.returned_quantity', 1);
+    $this->actingAs($user)
         ->get(route('sales.report', [
             'start_date' => today()->toDateString(),
             'end_date' => today()->toDateString(),
@@ -174,6 +186,16 @@ test('product returns restore stock and proportionally adjust due and refund vou
         ->and((float) $ledger->fresh()->total_amount)->toBe(0.0)
         ->and((float) $ledger->fresh()->payment_amount)->toBe(0.0)
         ->and((float) $ledger->fresh()->due_amount)->toBe(0.0);
+    $this->actingAs($user)
+        ->get(route('customer.ledger', $customer->id))
+        ->assertOk()
+        ->assertSee('Return Test Product × 2')
+        ->assertSee('Remark-2 Return');
+    $this->actingAs($user)
+        ->get(route('sales.customer.lookup', ['phone' => $customer->phone]))
+        ->assertOk()
+        ->assertJsonPath('customer.ledger.0.items.0.quantity', 2)
+        ->assertJsonPath('customer.ledger.0.items.0.returned_quantity', 2);
     $this->actingAs($user)
         ->get(route('sales.report', [
             'start_date' => today()->toDateString(),
@@ -221,6 +243,61 @@ test('product returns restore stock and proportionally adjust due and refund vou
     expect((float) $product->fresh()->unit)->toBe(10.0);
     $this->assertDatabaseMissing('product_returns', ['sale_invoice_id' => $invoice->id]);
     $this->assertDatabaseMissing('voucher_entries', ['reference' => $lastReturn->return_no]);
+});
+
+test('sales invoice customer ledger lookup shows only invoices with outstanding due', function () {
+    $user = User::factory()->create(['email_verified_at' => now()]);
+    $user->givePermissionTo(Permission::findOrCreate('sales.create', 'web'));
+    $customer = Customer::create([
+        'name' => 'Ledger History Customer',
+        'phone' => '01700000011',
+        'customer_type' => 'temporary',
+        'status' => 1,
+    ]);
+
+    $createLedgerEntry = function (string $invoiceNo, string $date, string $item, float $paid, float $due) use ($customer, $user): CustomerLedger {
+        $invoice = SaleInvoice::create([
+            'invoice_no' => $invoiceNo,
+            'customer_id' => $customer->id,
+            'customer_name' => $customer->name,
+            'customer_phone' => $customer->phone,
+            'user_id' => $user->id,
+            'invoice_date' => $date,
+            'total_amount' => $paid + $due,
+            'amount_paid' => $paid,
+            'due_amount' => $due,
+        ]);
+
+        return CustomerLedger::create([
+            'customer_id' => $customer->id,
+            'sale_invoice_id' => $invoice->id,
+            'employee_id' => $user->id,
+            'entry_type' => 'sale',
+            'sale_date' => $date,
+            'invoice_no' => $invoiceNo,
+            'product_name' => $item,
+            'quantity' => 1,
+            'unit_price' => $paid + $due,
+            'total_amount' => $paid + $due,
+            'payment_type' => $due > 0 ? 'due' : 'full_payment',
+            'payment_amount' => $paid,
+            'due_amount' => $due,
+        ]);
+    };
+
+    $createLedgerEntry('OLD-DUE-INVOICE', today()->subMonths(3)->toDateString(), 'Old unpaid item', 40, 60);
+    $createLedgerEntry('OLD-PAID-INVOICE', today()->subMonths(2)->toDateString(), 'Old paid item', 100, 0);
+    $createLedgerEntry('RECENT-DUE-INVOICE', today()->subDays(2)->toDateString(), 'Recent unpaid item', 25, 35);
+    $createLedgerEntry('RECENT-PAID-INVOICE', today()->subDays(10)->toDateString(), 'Recent paid item', 100, 0);
+
+    $this->actingAs($user)
+        ->get(route('sales.customer.lookup', ['phone' => $customer->phone]))
+        ->assertOk()
+        ->assertJsonPath('customer.ledger.0.item', 'Recent unpaid item')
+        ->assertJsonPath('customer.ledger.1.item', 'Old unpaid item')
+        ->assertJsonCount(2, 'customer.ledger')
+        ->assertJsonPath('customer.ledger.0.due', 35)
+        ->assertJsonPath('customer.ledger.1.due', 60);
 });
 
 test('a user without product return permission cannot open the return menu or submit a return', function () {

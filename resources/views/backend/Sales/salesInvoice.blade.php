@@ -114,9 +114,9 @@
                                         <td class="invoice-product-name">{{ $item->product_name }}</td>
                                         {{-- sale তৈরির সময় Product-এর selling price sale item-এ snapshot হয়ে invoice-এ দেখায়। --}}
                                         <td class="text-end">৳{{ number_format($item->unit_price, 2) }}</td>
-                                        <td class="text-center">{{ $item->quantity }}</td>
+                                        <td class="text-center">{{ $item->remaining_quantity }}</td>
                                         <td class="text-center">{{ $item->product?->quantity_size ?: ($item->product?->stock_unit ?: 'Unit') }}</td>
-                                        <td class="text-end">৳{{ number_format($item->line_total, 2) }}</td>
+                                        <td class="text-end">৳{{ number_format($item->remaining_line_total, 2) }}</td>
                                     </tr>
                                 @endforeach
                                 <tr>

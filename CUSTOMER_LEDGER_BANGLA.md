@@ -2,6 +2,157 @@
 
 এই নথিতে customer ledger-এর route, controller logic, model relationship, database migration এবং Blade view-এর কাজ ব্যাখ্যা করা হয়েছে। Supplier ledger-এর মতো sale edit, due collection, payment history, invoice/receipt print এবং permission-ভিত্তিক delete যোগ হয়েছে; customer-এর বিদ্যমান sale ও standalone payment entry-র ধরন অক্ষুণ্ণ আছে।
 
+## Sale Return-এর পর Product column-এ item breakdown
+
+### Controller (Code and Explanation)
+
+ফাইল: [`app/Http/Controllers/CustomerController.php`](./app/Http/Controllers/CustomerController.php), `ledger($id)` method।
+
+```php
+$query->with([
+    'receiver',
+    'employee',
+    'payments.receiver',
+    'saleItems.product',
+    'saleItems.returns',
+])->latest();
+```
+
+Ledger page খোলার সময় sale invoice-এর পৃথক item, product display name এবং প্রতিটি item-এর return records একসঙ্গে eager-load হয়। এতে প্রতিটি ledger row-এর জন্য আলাদা database query না করে পণ্যের নাম ও ফেরত quantity দেখানো যায়।
+
+### Migration (Code and Explanation)
+
+কোনো migration যোগ বা পরিবর্তন করা হয়নি। বিদ্যমান `sale_items` ও `product_returns` টেবিলের invoice/item সম্পর্ক ব্যবহার করা হয়েছে।
+
+### Route (Code and Explanation)
+
+কোনো route যোগ বা পরিবর্তন করা হয়নি। আগের `customer.ledger` route-ই ledger page দেখায়।
+
+### Model (Code and Explanation)
+
+ফাইল: [`app/Models/CustomerLedger.php`](./app/Models/CustomerLedger.php)।
+
+```php
+public function saleItems(): HasMany
+{
+    return $this->hasMany(SaleItem::class, 'sale_invoice_id', 'sale_invoice_id');
+}
+```
+
+এই relation customer ledger-এর invoice ID দিয়ে সেই invoice-এর আলাদা sale item-গুলো আনে। প্রতিটি `SaleItem`-এর `product()` ও `returns()` relation আগে থেকেই আছে; তাই পণ্যের বর্তমান display name এবং ওই item-এর মোট ফেরত quantity পাওয়া যায়।
+
+### Blade Template (Code and Explanation)
+
+ফাইল: [`resources/views/backend/customer/customerLedger.blade.php`](./resources/views/backend/customer/customerLedger.blade.php), ledger table-এর Entry / Product cell।
+
+```blade
+<th>Entry / Product</th>
+<td class="customer-ledger-product">
+    @if ($ledger->saleItems->isNotEmpty())
+        <div class="d-flex flex-column gap-1 text-break">
+            @foreach ($ledger->saleItems as $item)
+                @php($returnedQuantity = (int) $item->returns->sum('quantity'))
+                <div>
+                    {{ $item->product?->display_name ?? $item->product_name }}
+                    × {{ $item->quantity }}
+                    @if ($returnedQuantity > 0)
+                        <span class="text-danger">(Remark-{{ $returnedQuantity }} Return)</span>
+                    @endif
+                </div>
+            @endforeach
+        </div>
+    @else
+        <div class="text-break">{{ $ledger->product_name }}</div>
+    @endif
+</td>
+```
+
+```css
+.customer-ledger-product {
+    width: 240px !important;
+    max-width: 240px !important;
+    white-space: normal !important;
+    overflow-wrap: anywhere;
+    word-break: break-word;
+}
+```
+
+আগে invoice-এর সব পণ্যের নাম একসঙ্গে একটি cell-এ দেখানো হতো। এখন প্রতিটি sale item আলাদা লাইনে মূল বিক্রিত quantity-সহ দেখা যায়। কোনো item ফেরত হলে তার পাশে `(Remark-N Return)` যোগ হয়; যেমন `A4 Paper 70 GSM (Ream) - Rim × 5 (Remark-2 Return)`। Product কলামের সর্বোচ্চ প্রস্থ ২৪০ পিক্সেল এবং `overflow-wrap`/`word-break` থাকায় লম্বা product name-ও cell-এর মধ্যে ভেঙে যায়; ফলে একটি দীর্ঘ নাম পুরো টেবিল চওড়া করে না। পুরোনো/manual ledger entry-তে linked sale item না থাকলে আগের সংরক্ষিত product description-ই দেখায়।
+
+## Sale Invoice-এ Customer Ledger lookup-এর return breakdown
+
+### Controller (Code and Explanation)
+
+ফাইল: [`app/Http/Controllers/SaleController.php`](./app/Http/Controllers/SaleController.php), `customerByPhone()` method।
+
+```php
+$customer = Customer::with(['ledgers' => function ($query) {
+    $query->where('entry_type', 'sale')
+        ->where('due_amount', '>', 0)
+        ->with(['saleItems.product', 'saleItems.returns'])
+        ->latest('sale_date')
+        ->orderByDesc('id');
+}])->where('phone', trim($validated['phone']))->first();
+```
+
+Sale Invoice-এর Customer Ledger preview-তে এখন শুধু বকেয়া থাকা sale invoice দেখানো হয়—invoice-এর তারিখ পুরোনো বা সাম্প্রতিক যাই হোক। সম্পূর্ণ পরিশোধিত sale এবং payment entry দেখানো হয় না। কোনো বকেয়া invoice না থাকলে preview-তে “No outstanding due invoices.” দেখায়। প্রতিটি নির্বাচিত invoice-এর sale item, product এবং return eager-load হয়। JSON response-এ প্রতিটি item-এর display name, বিক্রির মূল quantity ও ফেরত quantity পাঠানো হয়:
+
+```php
+'items' => $ledger->saleItems->map(fn (SaleItem $item) => [
+    'name' => $item->display_product_name,
+    'quantity' => (int) $item->quantity,
+    'returned_quantity' => (int) $item->returns->sum('quantity'),
+])->values(),
+```
+
+এতে Sale Invoice form-এ Customer বাছার পর Customer Ledger preview-তে কেবল outstanding due invoice-এর তথ্য ও return-এর পরিমাণ দেখা যায়। পুরোনো/manual ledger entry-তে linked sale item না থাকলে response-এ আগের `product_name` থাকে।
+
+### Migration (Code and Explanation)
+
+কোনো migration প্রয়োজন হয়নি। বিদ্যমান `sale_items` ও `product_returns` থেকে item এবং return quantity পড়া হয়।
+
+### Route (Code and Explanation)
+
+কোনো route যোগ বা পরিবর্তন হয়নি। Sale form বিদ্যমান `sales.customer.lookup` route-এ phone পাঠায়:
+
+```php
+Route::get('/sales/customer-lookup', [SaleController::class, 'customerByPhone'])
+    ->middleware('permission:sales.create|blank-invoice')
+    ->name('sales.customer.lookup');
+```
+
+### Model (Code and Explanation)
+
+নতুন model relation যোগের প্রয়োজন হয়নি। বিদ্যমান `CustomerLedger::saleItems()`, `SaleItem::product()` ও `SaleItem::returns()` relation-গুলো ব্যবহার করা হয়। `SaleItem::display_product_name` product-এর নাম ও size-সহ display label দেয়।
+
+### Blade Template (Code and Explanation)
+
+ফাইল: [`resources/views/backend/Sales/salesIndex.blade.php`](./resources/views/backend/Sales/salesIndex.blade.php), customer lookup-এর ledger table তৈরির JavaScript।
+
+```javascript
+if (entry.type === 'sale' && entry.items && entry.items.length > 0) {
+    const itemList = document.createElement('div');
+    itemList.className = 'd-flex flex-column gap-1 text-break';
+    entry.items.forEach((item) => {
+        const itemLine = document.createElement('div');
+        itemLine.append(document.createTextNode(`${item.name} × ${item.quantity}`));
+        if (item.returned_quantity > 0) {
+            const returnNote = document.createElement('span');
+            returnNote.className = 'text-danger';
+            returnNote.textContent = ` (Remark-${item.returned_quantity} Return)`;
+            itemLine.appendChild(returnNote);
+        }
+        itemList.appendChild(itemLine);
+    });
+    itemCell.appendChild(itemList);
+} else {
+    itemCell.textContent = entry.type === 'payment' ?
+        'Payment received' : (entry.item || 'Sale');
+}
+```
+
+প্রতিটি বকেয়া invoice-এর পণ্য আলাদা লাইনে দেখায়। Return থাকলে মূল বিক্রির quantity-এর পরে `(Remark-N Return)` যোগ হয়—যেমন `A4 Paper 70 GSM (Ream) - Rim × 5 (Remark-2 Return)`। DOM node ও `textContent` ব্যবহার করায় product/customer text নিরাপদে প্রদর্শিত হয়; পুরোনো item data না থাকলে আগের description দেখানো হয়।
+
 ## ১. কাস্টমার তালিকা থেকে Ledger খোলা
 
 ফাইল: [`resources/views/backend/customer/customerIndex.blade.php`](./resources/views/backend/customer/customerIndex.blade.php)

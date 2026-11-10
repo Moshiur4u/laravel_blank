@@ -86,7 +86,7 @@
         }
 
         /* DataTable-এর page size, Search ও Showing তথ্য scroll করলেও উপরে স্থির থাকে। */
-        #myTable_wrapper > .dt-layout-row:first-child {
+        #myTable_wrapper>.dt-layout-row:first-child {
             position: sticky;
             top: 60px;
             left: 0;
@@ -371,12 +371,14 @@
                         <ul>
                             @can('quantity-size.index')
                                 <li>
-                                    <a href="{{ route('quantity-size.index') }}"><i class="bx bx-list-ul"></i>Qty/Size List</a>
+                                    <a href="{{ route('quantity-size.index') }}"><i class="bx bx-list-ul"></i>Qty/Size
+                                        List</a>
                                 </li>
                             @endcan
                             @can('quantity-size.create')
                                 <li>
-                                    <a href="{{ route('quantity-size.create') }}"><i class="bx bx-plus-medical"></i>New Qty/Size</a>
+                                    <a href="{{ route('quantity-size.create') }}"><i class="bx bx-plus-medical"></i>New
+                                        Qty/Size</a>
                                 </li>
                             @endcan
                         </ul>
@@ -918,14 +920,16 @@
     <script>
         if (document.getElementById('myTable')) {
             new DataTable('#myTable', {
+                info: true,
                 pageLength: 10,
                 lengthMenu: [
                     [10, 25, 50, 100, -1],
                     [10, 25, 50, 100, 'All']
                 ],
                 layout: {
-                    topStart: ['pageLength', 'info'],
+                    topStart: 'pageLength',
                     topEnd: 'search',
+                    bottomStart: 'info',
                     bottomEnd: 'paging'
                 }
             });

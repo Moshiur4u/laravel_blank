@@ -3,7 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\Customer;
-use App\Models\Product;
+use App\Models\ProductCategory;
 use App\Models\SaleInvoice;
 use App\Models\SaleItem;
 use App\Models\User;
@@ -21,7 +21,7 @@ class SalesReportController extends Controller
         $filters = $request->validate([
             'start_date' => ['nullable', 'date'],
             'end_date' => ['nullable', 'date'],
-            'product_id' => ['nullable', 'integer', 'exists:products,id'],
+            'category_id' => ['nullable', 'integer', 'exists:product_categories,id'],
             'employee_id' => ['nullable', 'integer', 'exists:users,id'],
             'customer_id' => ['nullable', 'integer', 'exists:customers,id'],
         ]);
@@ -44,9 +44,9 @@ class SalesReportController extends Controller
             ->when($endDate, fn ($query) => $query->whereDate('invoice_date', '<=', $endDate))
             ->when($filters['employee_id'] ?? null, fn ($query, $employeeId) => $query->where('user_id', $employeeId))
             ->when($filters['customer_id'] ?? null, fn ($query, $customerId) => $query->where('customer_id', $customerId))
-            ->when($filters['product_id'] ?? null, fn ($query, $productId) => $query->whereHas(
-                'items',
-                fn ($itemQuery) => $itemQuery->where('product_id', $productId)
+            ->when($filters['category_id'] ?? null, fn ($query, $categoryId) => $query->whereHas(
+                'items.product.productCategory',
+                fn ($categoryQuery) => $categoryQuery->where('product_categories.id', $categoryId)
             ));
 
         $returnTotalsByInvoice = \Illuminate\Support\Facades\DB::table('product_returns')
@@ -69,12 +69,13 @@ class SalesReportController extends Controller
         $topProductsQuery = SaleItem::query()
             ->join('sale_invoices', 'sale_items.sale_invoice_id', '=', 'sale_invoices.id')
             ->leftJoin('products', 'sale_items.product_id', '=', 'products.id')
+            ->leftJoin('product_categories', 'products.product_categorie_id', '=', 'product_categories.id')
             ->leftJoinSub($returnTotalsByItem, 'report_item_returns', 'report_item_returns.sale_item_id', '=', 'sale_items.id')
             ->when($startDate, fn ($query) => $query->whereDate('sale_invoices.invoice_date', '>=', $startDate))
             ->when($endDate, fn ($query) => $query->whereDate('sale_invoices.invoice_date', '<=', $endDate))
             ->when($filters['employee_id'] ?? null, fn ($query, $employeeId) => $query->where('sale_invoices.user_id', $employeeId))
             ->when($filters['customer_id'] ?? null, fn ($query, $customerId) => $query->where('sale_invoices.customer_id', $customerId))
-            ->when($filters['product_id'] ?? null, fn ($query, $productId) => $query->where('sale_items.product_id', $productId));
+            ->when($filters['category_id'] ?? null, fn ($query, $categoryId) => $query->where('products.product_categorie_id', $categoryId));
 
         $netQuantity = 'CASE WHEN sale_items.quantity > COALESCE(report_item_returns.returned_quantity, 0) THEN sale_items.quantity - COALESCE(report_item_returns.returned_quantity, 0) ELSE 0 END';
         $netRevenue = "CASE WHEN sale_items.quantity > 0 THEN sale_items.line_total * ({$netQuantity}) / sale_items.quantity ELSE 0 END";
@@ -86,6 +87,7 @@ class SalesReportController extends Controller
             ->select([
                 'sale_items.product_id',
                 'sale_items.product_name',
+                'product_categories.category_name',
                 'products.quantity_size',
                 'products.stock_unit',
             ])
@@ -97,7 +99,7 @@ class SalesReportController extends Controller
             ->selectRaw("SUM(({$netRevenue}) - (({$netQuantity}) * {$unitCost})) as profit")
             ->selectRaw("SUM(CASE WHEN sale_invoices.subtotal > 0 THEN sale_invoices.vat_amount * ({$netRevenue}) / sale_invoices.subtotal ELSE 0 END) as vat_amount")
             ->selectRaw("SUM(CASE WHEN sale_invoices.subtotal > 0 THEN sale_invoices.ait_amount * ({$netRevenue}) / sale_invoices.subtotal ELSE 0 END) as ait_amount")
-            ->groupBy('sale_items.product_id', 'sale_items.product_name', 'products.quantity_size', 'products.stock_unit')
+            ->groupBy('sale_items.product_id', 'sale_items.product_name', 'product_categories.category_name', 'products.quantity_size', 'products.stock_unit')
             ->orderByDesc('revenue')
             ->orderBy('sale_items.product_name')
             ->get();
@@ -122,7 +124,7 @@ class SalesReportController extends Controller
             'startDate' => $startDate,
             'endDate' => $endDate,
             'filters' => $filters,
-            'products' => Product::query()->orderBy('productName')->get(['id', 'productName', 'quantity_size']),
+            'categories' => ProductCategory::query()->orderBy('category_name')->get(['id', 'category_name']),
             'employees' => User::query()->orderBy('name')->get(['id', 'name']),
             'customers' => Customer::query()->orderBy('name')->get(['id', 'name', 'phone']),
             'invoices' => $invoices,
@@ -144,7 +146,7 @@ class SalesReportController extends Controller
         $filters = $request->validate([
             'start_date' => ['nullable', 'date'],
             'end_date' => ['nullable', 'date'],
-            'product_id' => ['nullable', 'integer', 'exists:products,id'],
+            'category_id' => ['nullable', 'integer', 'exists:product_categories,id'],
             'employee_id' => ['nullable', 'integer', 'exists:users,id'],
             'customer_id' => ['nullable', 'integer', 'exists:customers,id'],
         ]);
@@ -166,9 +168,9 @@ class SalesReportController extends Controller
             ->when($endDate, fn ($query) => $query->whereDate('invoice_date', '<=', $endDate))
             ->when($filters['employee_id'] ?? null, fn ($query, $employeeId) => $query->where('user_id', $employeeId))
             ->when($filters['customer_id'] ?? null, fn ($query, $customerId) => $query->where('customer_id', $customerId))
-            ->when($filters['product_id'] ?? null, fn ($query, $productId) => $query->whereHas(
-                'items',
-                fn ($itemQuery) => $itemQuery->where('product_id', $productId)
+            ->when($filters['category_id'] ?? null, fn ($query, $categoryId) => $query->whereHas(
+                'items.product.productCategory',
+                fn ($categoryQuery) => $categoryQuery->where('product_categories.id', $categoryId)
             ));
 
         $returnTotalsByInvoice = \Illuminate\Support\Facades\DB::table('product_returns')
@@ -189,12 +191,13 @@ class SalesReportController extends Controller
         $topProductsQuery = SaleItem::query()
             ->join('sale_invoices', 'sale_items.sale_invoice_id', '=', 'sale_invoices.id')
             ->leftJoin('products', 'sale_items.product_id', '=', 'products.id')
+            ->leftJoin('product_categories', 'products.product_categorie_id', '=', 'product_categories.id')
             ->leftJoinSub($returnTotalsByItem, 'report_item_returns', 'report_item_returns.sale_item_id', '=', 'sale_items.id')
             ->when($startDate, fn ($query) => $query->whereDate('sale_invoices.invoice_date', '>=', $startDate))
             ->when($endDate, fn ($query) => $query->whereDate('sale_invoices.invoice_date', '<=', $endDate))
             ->when($filters['employee_id'] ?? null, fn ($query, $employeeId) => $query->where('sale_invoices.user_id', $employeeId))
             ->when($filters['customer_id'] ?? null, fn ($query, $customerId) => $query->where('sale_invoices.customer_id', $customerId))
-            ->when($filters['product_id'] ?? null, fn ($query, $productId) => $query->where('sale_items.product_id', $productId));
+            ->when($filters['category_id'] ?? null, fn ($query, $categoryId) => $query->where('products.product_categorie_id', $categoryId));
 
         $netQuantity = 'CASE WHEN sale_items.quantity > COALESCE(report_item_returns.returned_quantity, 0) THEN sale_items.quantity - COALESCE(report_item_returns.returned_quantity, 0) ELSE 0 END';
         $netRevenue = "CASE WHEN sale_items.quantity > 0 THEN sale_items.line_total * ({$netQuantity}) / sale_items.quantity ELSE 0 END";
@@ -202,7 +205,7 @@ class SalesReportController extends Controller
 
         // Quantity / Unit একই CSV cell-এ দেখাতে Product-এর unit তথ্য load হয়।
         $topProducts = (clone $topProductsQuery)
-            ->select(['sale_items.product_id', 'sale_items.product_name', 'products.quantity_size', 'products.stock_unit'])
+            ->select(['sale_items.product_id', 'sale_items.product_name', 'product_categories.category_name', 'products.quantity_size', 'products.stock_unit'])
             ->selectRaw("CASE WHEN SUM({$netQuantity}) > 0 THEN SUM(({$netQuantity}) * {$unitCost}) / SUM({$netQuantity}) ELSE 0 END as purchase_price")
             ->selectRaw("CASE WHEN SUM({$netQuantity}) > 0 THEN SUM({$netRevenue}) / SUM({$netQuantity}) ELSE 0 END as avg_selling_price")
             ->selectRaw("SUM({$netQuantity}) as quantity_sold")
@@ -211,7 +214,7 @@ class SalesReportController extends Controller
             ->selectRaw("SUM(({$netRevenue}) - (({$netQuantity}) * {$unitCost})) as profit")
             ->selectRaw("SUM(CASE WHEN sale_invoices.subtotal > 0 THEN sale_invoices.vat_amount * ({$netRevenue}) / sale_invoices.subtotal ELSE 0 END) as vat_amount")
             ->selectRaw("SUM(CASE WHEN sale_invoices.subtotal > 0 THEN sale_invoices.ait_amount * ({$netRevenue}) / sale_invoices.subtotal ELSE 0 END) as ait_amount")
-            ->groupBy('sale_items.product_id', 'sale_items.product_name', 'products.quantity_size', 'products.stock_unit')
+            ->groupBy('sale_items.product_id', 'sale_items.product_name', 'product_categories.category_name', 'products.quantity_size', 'products.stock_unit')
             ->orderByDesc('revenue')
             ->orderBy('sale_items.product_name')
             ->get();
@@ -248,10 +251,11 @@ class SalesReportController extends Controller
             $writeRow(['Total Sales (Invoices)', $totalSalesCount]);
             $writeRow([]);
             $writeRow(['Product-wise Sales & Profit']);
-            $writeRow(['Product', 'Purchase Price', 'Avg Selling Price', 'Quantity Sold / Unit', 'Total Sales (Revenue)', 'Total Purchase Cost', 'Profit', 'VAT', 'AIT']);
+            $writeRow(['Product', 'Product Category', 'Purchase Price', 'Avg Selling Price', 'Quantity Sold / Unit', 'Total Sales (Revenue)', 'Total Purchase Cost', 'Profit', 'VAT', 'AIT']);
             foreach ($topProducts as $product) {
                 $writeRow([
                     $product->product_name,
+                    $product->category_name ?: 'Uncategorized',
                     number_format((float) $product->purchase_price, 2, '.', ''),
                     number_format((float) $product->avg_selling_price, 2, '.', ''),
                     $product->quantity_sold.' '.($product->quantity_size ?: ($product->stock_unit ?: 'Unit')),

@@ -3,7 +3,10 @@
 use App\Models\EmployeePaymentVoucher;
 use App\Models\Customer;
 use App\Models\CustomerLedger;
+use App\Models\Product;
+use App\Models\ProductReturn;
 use App\Models\SaleInvoice;
+use App\Models\SaleItem;
 use App\Models\Supplier;
 use App\Models\Supplierledger;
 use App\Models\User;
@@ -170,5 +173,72 @@ test('dashboard calculates profit from sales purchases and voucher totals', func
                 && count($chart['weekly']['labels']) === 7
                 && count($chart['monthly']['labels']) === today()->daysInMonth
                 && count($chart['yearly']['labels']) === 12;
+        });
+});
+
+test('dashboard top products excludes returned quantity and recalculates net sales and profit', function () {
+    $user = User::factory()->create([
+        'email_verified_at' => now(),
+    ]);
+    $user->givePermissionTo(Permission::findOrCreate('Dashboard', 'web'));
+
+    $categoryId = DB::table('product_categories')->insertGetId(['category_name' => 'Dashboard Return Category']);
+    $brandId = DB::table('brands')->insertGetId(['name' => 'Dashboard Return Brand']);
+    $product = Product::create([
+        'productName' => 'Dashboard Returned Product',
+        'product_categorie_id' => $categoryId,
+        'brand_id' => $brandId,
+        'purchase_price' => 30,
+        'price' => 100,
+        'unit' => '8',
+        'stock_unit' => 'Unit',
+    ]);
+    $invoice = SaleInvoice::create([
+        'invoice_no' => 'DASHBOARD-RETURN-001',
+        'user_id' => $user->id,
+        'invoice_date' => now(),
+        'subtotal' => 200,
+        'discount_amount' => 0,
+        'vat_amount' => 0,
+        'ait_amount' => 0,
+        'previous_due' => 0,
+        'total_amount' => 200,
+        'amount_paid' => 200,
+        'due_amount' => 0,
+    ]);
+    $saleItem = SaleItem::create([
+        'sale_invoice_id' => $invoice->id,
+        'product_id' => $product->id,
+        'product_name' => $product->productName,
+        'quantity' => 2,
+        'purchase_price' => 30,
+        'unit_price' => 100,
+        'line_total' => 200,
+    ]);
+    ProductReturn::create([
+        'return_no' => 'RET-DASHBOARD-RETURN-001',
+        'sale_invoice_id' => $invoice->id,
+        'sale_item_id' => $saleItem->id,
+        'product_id' => $product->id,
+        'returned_by' => $user->id,
+        'invoice_no' => $invoice->invoice_no,
+        'product_name' => $product->productName,
+        'quantity' => 1,
+        'return_date' => today(),
+        'return_amount' => 100,
+        'refund_amount' => 0,
+    ]);
+
+    $this->actingAs($user)
+        ->get(route('dashboardbody'))
+        ->assertOk()
+        ->assertViewHas('topProducts', function ($topProducts) {
+            $product = $topProducts->first();
+
+            return $topProducts->count() === 1
+                && $product->product_name === 'Dashboard Returned Product'
+                && (int) $product->quantity_sold === 1
+                && (float) $product->sales_amount === 100.0
+                && (float) $product->profit === 70.0;
         });
 });

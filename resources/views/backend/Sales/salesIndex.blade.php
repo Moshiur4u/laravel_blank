@@ -50,16 +50,19 @@
                                 <div class="card-body">
                                     <div class="row g-3">
                                         <div class="col-md-6">
-                                            <label for="customer_phone" class="form-label fw-semibold">Phone Number <span
+                                            <label for="customer_phone" class="form-label fw-semibold">Customer Name or Phone <span
                                                     class="text-danger">*</span></label>
                                             <div class="input-group">
-                                                <input type="tel" name="customer_phone" id="customer_phone"
-                                                    class="form-control" value="{{ old('customer_phone') }}" required>
+                                                <input type="text" name="customer_phone" id="customer_phone"
+                                                    class="form-control" value="{{ old('customer_phone') }}"
+                                                    list="customerSuggestions" placeholder="Type customer name or phone"
+                                                    autocomplete="off" required>
                                                 <button type="button" id="lookupCustomer"
                                                     class="btn btn-outline-primary">Find</button>
                                             </div>
-                                            <div id="customerLookupMessage" class="form-text">Enter a phone number to look up
-                                                an existing customer.</div>
+                                            <datalist id="customerSuggestions"></datalist>
+                                            <div id="customerLookupMessage" class="form-text">Type a customer name or phone
+                                                number to see matches.</div>
                                         </div>
                                         <div class="col-md-6">
                                             <label for="customerDisplayName" class="form-label fw-semibold">Customer
@@ -82,6 +85,7 @@
                                                         <th>Type / Item</th>
                                                         <th>Sale</th>
                                                         <th>Paid</th>
+                                                        <th>Due</th>
                                                     </tr>
                                                 </thead>
                                                 <tbody id="customerLedgerRows"></tbody>
@@ -403,7 +407,8 @@
             const saveCustomer = document.getElementById('save_customer');
             let customerFound = false;
             let calculatedInvoiceTotal = 0;
-            let lookupTimer;
+            let suggestionTimer;
+            let customerSearchSequence = 0;
             let lastLookedUpPhone = '';
             let rowIndex = Array.from(itemsBody.querySelectorAll('.product-select')).reduce((nextIndex, select) => {
                 const match = select.name.match(/^items\[(\d+)\]/);
@@ -570,7 +575,7 @@
             async function lookupCustomer() {
                 const phone = customerPhone.value.trim();
                 if (!phone) {
-                    lookupMessage.textContent = 'Enter a phone number first.';
+                    lookupMessage.textContent = 'Enter a customer name or phone number first.';
                     return false;
                 }
                 lookupMessage.textContent = 'Searching customer...';
@@ -586,6 +591,9 @@
                         throw new Error('Customer lookup failed. Please try again.');
                     }
                     const result = await response.json();
+                    if (customerPhone.value.trim() !== phone) {
+                        return false;
+                    }
                     lastLookedUpPhone = phone;
                     customerFound = result.found;
                     ledgerPanel.classList.toggle('d-none', !customerFound);
@@ -601,14 +609,37 @@
                         dueLabel.textContent = money(result.customer.due);
                         result.customer.ledger.forEach((entry) => {
                             const row = document.createElement('tr');
-                            const values = [
-                                entry.date || '',
-                                entry.type === 'payment' ? 'Payment received' : (entry.item ||
-                                    'Sale'),
-                                money(entry.amount),
-                                money(entry.payment),
-                            ];
-                            values.forEach((value) => {
+                            const dateCell = document.createElement('td');
+                            dateCell.textContent = entry.date || '';
+                            row.appendChild(dateCell);
+
+                            const itemCell = document.createElement('td');
+                            if (entry.type === 'sale' && entry.items && entry.items.length > 0) {
+                                const itemList = document.createElement('div');
+                                itemList.className = 'd-flex flex-column gap-1 text-break';
+                                entry.items.forEach((item) => {
+                                    const itemLine = document.createElement('div');
+                                    itemLine.append(document.createTextNode(
+                                        `${item.name} × ${item.quantity}`
+                                    ));
+                                    if (item.returned_quantity > 0) {
+                                        const returnNote = document.createElement('span');
+                                        returnNote.className = 'text-danger';
+                                        returnNote.textContent =
+                                            ` (Remark-${item.returned_quantity} Return)`;
+                                        itemLine.appendChild(returnNote);
+                                    }
+                                    itemList.appendChild(itemLine);
+                                });
+                                itemCell.appendChild(itemList);
+                            } else {
+                                itemCell.textContent = entry.type === 'payment' ?
+                                    `Payment received${entry.paid_by ? ' from ' + entry.paid_by : ''}` :
+                                    (entry.item || 'Sale');
+                            }
+                            row.appendChild(itemCell);
+
+                            [money(entry.amount), money(entry.payment), money(entry.due)].forEach((value) => {
                                 const cell = document.createElement('td');
                                 cell.textContent = value;
                                 row.appendChild(cell);
@@ -618,8 +649,8 @@
                         if (result.customer.ledger.length === 0) {
                             const row = document.createElement('tr');
                             const cell = document.createElement('td');
-                            cell.colSpan = 4;
-                            cell.textContent = 'No previous ledger entries.';
+                            cell.colSpan = 5;
+                            cell.textContent = 'No outstanding due invoices.';
                             row.appendChild(cell);
                             rows.appendChild(row);
                         }
@@ -636,19 +667,93 @@
                 }
             }
 
-            document.getElementById('lookupCustomer').addEventListener('click', lookupCustomer);
-            customerPhone.addEventListener('change', lookupCustomer);
+            async function suggestCustomers(resolveExactMatch = false) {
+                const search = customerPhone.value.trim();
+                if (!search) return false;
+
+                const requestSequence = ++customerSearchSequence;
+                try {
+                    const url = new URL(@json(route('sales.customer.lookup')), window.location.origin);
+                    url.searchParams.set('search', search);
+                    const response = await fetch(url, {
+                        headers: {
+                            'Accept': 'application/json'
+                        }
+                    });
+                    if (!response.ok) {
+                        throw new Error('Customer suggestions could not be loaded. Please try again.');
+                    }
+
+                    const result = await response.json();
+                    if (requestSequence !== customerSearchSequence || customerPhone.value.trim() !== search) {
+                        return false;
+                    }
+
+                    const suggestions = document.getElementById('customerSuggestions');
+                    suggestions.replaceChildren();
+                    result.suggestions.forEach((customer) => {
+                        const option = document.createElement('option');
+                        option.value = customer.phone;
+                        option.label = `${customer.name} — ${customer.phone}`;
+                        suggestions.appendChild(option);
+                    });
+
+                    const exactPhone = result.suggestions.find((customer) => customer.phone === search);
+                    const exactNameMatches = result.suggestions.filter((customer) =>
+                        customer.name.trim().toLocaleLowerCase() === search.toLocaleLowerCase()
+                    );
+                    const exactMatch = exactPhone || (exactNameMatches.length === 1 ? exactNameMatches[0] : null);
+
+                    if (exactMatch && (resolveExactMatch || exactPhone)) {
+                        customerPhone.value = exactMatch.phone;
+                        return lookupCustomer();
+                    }
+
+                    lookupMessage.textContent = result.suggestions.length ?
+                        'Select a customer suggestion to load their name and ledger.' :
+                        'No matching saved customer. Enter a phone number to continue.';
+                    return false;
+                } catch (error) {
+                    if (requestSequence === customerSearchSequence) {
+                        lookupMessage.textContent = error.message;
+                    }
+                    return false;
+                }
+            }
+
+            document.getElementById('lookupCustomer').addEventListener('click', function() {
+                window.clearTimeout(suggestionTimer);
+                if (!/^[+\d\s().-]+$/.test(customerPhone.value.trim())) {
+                    suggestCustomers(true);
+                } else {
+                    lookupCustomer();
+                }
+            });
+            customerPhone.addEventListener('change', function() {
+                window.clearTimeout(suggestionTimer);
+                if (!/^[+\d\s().-]+$/.test(customerPhone.value.trim())) {
+                    suggestCustomers(true);
+                } else {
+                    lookupCustomer();
+                }
+            });
             customerPhone.addEventListener('input', function() {
                 customerFound = false;
                 ledgerPanel.classList.add('d-none');
                 newCustomerDetails.classList.add('d-none');
-                window.clearTimeout(lookupTimer);
-                lookupTimer = window.setTimeout(lookupCustomer, 350);
+                customerName.value = '';
+                window.clearTimeout(suggestionTimer);
+                suggestionTimer = window.setTimeout(suggestCustomers, 250);
             });
             customerPhone.addEventListener('keydown', (event) => {
                 if (event.key === 'Enter') {
                     event.preventDefault();
-                    lookupCustomer();
+                    window.clearTimeout(suggestionTimer);
+                    if (!/^[+\d\s().-]+$/.test(customerPhone.value.trim())) {
+                        suggestCustomers(true);
+                    } else {
+                        lookupCustomer();
+                    }
                 }
             });
             document.getElementById('addItem').addEventListener('click', addRow);
@@ -708,7 +813,18 @@
                     invalidQuantity.reportValidity();
                     return;
                 }
-                window.clearTimeout(lookupTimer);
+                if (!/^[+\d\s().-]+$/.test(customerPhone.value.trim())) {
+                    await suggestCustomers(true);
+                    if (!/^[+\d\s().-]+$/.test(customerPhone.value.trim())) {
+                        await window.Swal.fire({
+                            title: 'Select a customer',
+                            text: 'Choose a customer from the suggestions, or enter a phone number.',
+                            icon: 'warning',
+                        });
+                        customerPhone.focus();
+                        return;
+                    }
+                }
                 if (lastLookedUpPhone !== customerPhone.value.trim()) {
                     const lookupSucceeded = await lookupCustomer();
                     if (!lookupSucceeded) return;
@@ -775,7 +891,13 @@
             @endif
 
             updateTotals();
-            if (customerPhone.value) lookupCustomer();
+            if (customerPhone.value) {
+                if (/^[+\d\s().-]+$/.test(customerPhone.value.trim())) {
+                    lookupCustomer();
+                } else {
+                    suggestCustomers();
+                }
+            }
         });
     </script>
 @endsection

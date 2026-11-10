@@ -93,7 +93,7 @@ class CustomerController extends Controller
         $customer = Customer::with([
             'employee',
             'ledgers' => function ($query) {
-                $query->with(['receiver', 'employee', 'payments.receiver'])->latest(); // ledger, দায়িত্বপ্রাপ্ত কর্মী ও payment history একবারে আনা হয়।
+                $query->with(['receiver', 'employee', 'payments.receiver', 'saleItems.product', 'saleItems.returns'])->latest(); // ledger, payment history ও return-সহ invoice item একবারে আনা হয়।
             },
         ])->findOrFail($id);
 

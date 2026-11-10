@@ -21,6 +21,51 @@ $profit = round(
 
 প্রতিটি হিসাব দৈনিক, সাপ্তাহিক, মাসিক ও বার্ষিক তারিখসীমায় আলাদাভাবে চলে। Revenue-তে বিক্রয় ইনভয়েস, invoice-এর সঙ্গে যুক্ত নয় এমন customer-ledger sale এবং customer ledger receipt নয় এমন credit voucher যোগ হয়; invoice-linked customer-ledger sale দ্বিতীয়বার যোগ হয় না। Total Due-তে customer ledger-এ থাকা বিক্রয়ের বর্তমান due যোগ হয়, আর customer ledger row দিয়ে ইতিমধ্যে মেলানো invoice-এর পুরোনো due দ্বিতীয়বার ধরা হয় না। Expense-এ employee payment voucher আগের মতো এবং সব debit voucher অন্তর্ভুক্ত। Net Profit: Total Revenue − (Total Purchase + Supplier Payment category/ supplier ledger-এ পোস্ট debit বাদে অন্যান্য debit voucher)। যেমন Employee category-র Mobile Bill এবং Printer Servicing profit-এর ক্রয়/ব্যয় অংশে যোগ হয়; supplier payment দুবার গণনা ঠেকাতে বাদ থাকে। Card ও chart-এ একই সূত্র ব্যবহৃত হয়েছে।
 
+### Sale Return-এর পর Top Selling Products-এর হিসাব
+
+ফাইল: `app/Http/Controllers/DashboardConrtoller.php`
+
+```php
+$returnedQuantities = DB::table('product_returns')
+    ->select('sale_item_id')
+    ->selectRaw('SUM(quantity) as returned_quantity')
+    ->groupBy('sale_item_id');
+
+$netQuantity = 'CASE
+    WHEN sale_items.quantity > COALESCE(dashboard_item_returns.returned_quantity, 0)
+    THEN sale_items.quantity - COALESCE(dashboard_item_returns.returned_quantity, 0)
+    ELSE 0
+END';
+$netSalesAmount = "CASE WHEN sale_items.quantity > 0
+    THEN sale_items.line_total * ({$netQuantity}) / sale_items.quantity
+    ELSE 0
+END";
+$unitCost = 'COALESCE(sale_items.purchase_price, products.purchase_price, 0)';
+
+$topProducts = DB::table('sale_items')
+    ->leftJoin('products', 'products.id', '=', 'sale_items.product_id')
+    ->leftJoinSub(
+        $returnedQuantities,
+        'dashboard_item_returns',
+        'dashboard_item_returns.sale_item_id',
+        '=',
+        'sale_items.id'
+    )
+    ->selectRaw("SUM({$netQuantity}) as quantity_sold")
+    ->selectRaw("SUM({$netSalesAmount}) as sales_amount")
+    ->selectRaw("SUM(({$netSalesAmount}) - (({$netQuantity}) * {$unitCost})) as profit")
+    ->groupBy('sale_items.product_id', 'sale_items.product_name', 'products.quantity_size', 'products.img_url')
+    ->orderByDesc('quantity_sold')
+    ->limit(5)
+    ->get();
+```
+
+আগে dashboard-এর এই তালিকায় sale item-এর মূল quantity ও line total সরাসরি যোগ হতো। তাই sale return-এর পরে ফেরত দেওয়া পণ্যও বিক্রিত পরিমাণ ও লাভে থেকে যেত। এখন `product_returns` থেকে প্রতিটি sale item-এর ফেরত quantity আগে যোগ করা হয়। Top Selling Products-এর `quantity_sold` থেকে সেটি বাদ যায়; ফেরতের পরিমাণ যত, সেই অনুপাতে net sales amount কমে এবং অবশিষ্ট বিক্রির ক্রয়মূল্য বাদ দিয়ে profit পুনরায় হিসাব হয়। Purchase cost-এর জন্য বিক্রির সময়কার `sale_items.purchase_price` নেওয়া হয়; পুরোনো row-তে সেটি না থাকলে পণ্যের বর্তমান purchase price fallback হিসেবে ব্যবহৃত হয়। একাধিক/আংশিক return-ও একত্রে গণনা হয়, এবং ফেরত quantity বিক্রিত quantity ছাড়িয়ে গেলে net quantity শূন্যে সীমাবদ্ধ থাকে। Ranking-ও সংশোধিত net quantity অনুযায়ী হয়।
+
+`resources/views/dashboard/dashboard-body.blade.php`-এর Top Selling Products টেবিলের markup বদলানো হয়নি; controller থেকে আসা `quantity_sold`, `sales_amount` ও `profit` field-গুলো এখন return বাদ দেওয়া হিসাব দেখায়।
+
+এই আচরণ যাচাইয়ের জন্য `tests/Feature/DashboardMetricsTest.php`-এ একটি feature test যোগ হয়েছে। দুইটি বিক্রিত ইউনিটের একটি ফেরত দেওয়ার পর test-টি net quantity `1`, sales amount `100.00` এবং profit `70.00` প্রত্যাশা করে।
+
 ### লেজার পেমেন্ট সম্পাদনা
 
 ফাইলসমূহ: `app/Http/Controllers/SupplierledgerController.php`, `app/Http/Controllers/CustomerController.php`

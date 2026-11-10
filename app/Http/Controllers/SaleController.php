@@ -39,12 +39,40 @@ class SaleController extends Controller
 
     public function customerByPhone(Request $request)
     {
+        if ($request->filled('search')) {
+            $validated = $request->validate([
+                'search' => 'required|string|max:100',
+            ]);
+            $search = trim($validated['search']);
+
+            if ($search === '') {
+                return response()->json(['suggestions' => []]);
+            }
+
+            $customers = Customer::query()
+                ->where(function ($query) use ($search) {
+                    $query->where('name', 'like', '%' . $search . '%')
+                        ->orWhere('phone', 'like', '%' . $search . '%');
+                })
+                ->orderBy('name')
+                ->limit(10)
+                ->get(['id', 'name', 'phone']);
+
+            return response()->json([
+                'suggestions' => $customers,
+            ]);
+        }
+
         $validated = $request->validate([
             'phone' => 'required|string|max:30',
         ]);
 
         $customer = Customer::with(['ledgers' => function ($query) {
-            $query->latest('sale_date')->limit(10);
+            $query->where('entry_type', 'sale')
+                ->where('due_amount', '>', 0)
+                ->with(['saleItems.product', 'saleItems.returns'])
+                ->latest('sale_date')
+                ->orderByDesc('id');
         }])->where('phone', trim($validated['phone']))->first();
 
         if (! $customer) {
@@ -69,6 +97,11 @@ class SaleController extends Controller
                     'date' => $ledger->sale_date?->format('Y-m-d'),
                     'type' => $ledger->entry_type,
                     'item' => $ledger->product_name,
+                    'items' => $ledger->saleItems->map(fn (SaleItem $item) => [
+                        'name' => $item->display_product_name,
+                        'quantity' => (int) $item->quantity,
+                        'returned_quantity' => (int) $item->returns->sum('quantity'),
+                    ])->values(),
                     'amount' => (float) $ledger->total_amount,
                     'payment' => (float) $ledger->payment_amount,
                     'due' => (float) $ledger->due_amount,
@@ -326,7 +359,11 @@ class SaleController extends Controller
 
     public function invoice($id)
     {
-        $invoice = SaleInvoice::with(['items.product', 'customer', 'employee'])->findOrFail($id);
+        $invoice = SaleInvoice::with([
+            'items' => fn($query) => $query->with('product')->withSum('returns as returned_quantity', 'quantity'),
+            'customer',
+            'employee',
+        ])->findOrFail($id);
         $termsConditions = $invoice->terms_conditions ?: self::DEFAULT_TERMS;
         $amountInWords = $this->amountInWords((float) $invoice->amount_paid);
 
@@ -427,7 +464,11 @@ class SaleController extends Controller
 
     public function deliveryChallan($id)
     {
-        $invoice = SaleInvoice::with(['items.product', 'customer', 'employee'])->findOrFail($id);
+        $invoice = SaleInvoice::with([
+            'items' => fn($query) => $query->with('product')->withSum('returns as returned_quantity', 'quantity'),
+            'customer',
+            'employee',
+        ])->findOrFail($id);
 
         return view('backend.Sales.deliveryChallan', compact('invoice'));
     }

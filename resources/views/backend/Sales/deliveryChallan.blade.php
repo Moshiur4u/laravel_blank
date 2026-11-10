@@ -78,13 +78,13 @@
                                     <tr>
                                         <td>{{ $key + 1 }}</td>
                                         <td>{{ $item->display_product_name }}</td>
-                                        <td class="text-center">{{ $item->quantity }}</td>
+                                        <td class="text-center">{{ $item->remaining_quantity }}</td>
                                         <td class="text-center">{{ $item->product?->quantity_size ?: ($item->product?->stock_unit ?: 'Unit') }}</td>
                                     </tr>
                                 @endforeach
                                 <tr class="table-light fw-bold">
                                     <td colspan="2" class="text-end">Total Quantity</td>
-                                    <td class="text-center">{{ $invoice->items->sum('quantity') }}</td>
+                                    <td class="text-center">{{ $invoice->items->sum('remaining_quantity') }}</td>
                                     <td></td>
                                 </tr>
                             </tbody>

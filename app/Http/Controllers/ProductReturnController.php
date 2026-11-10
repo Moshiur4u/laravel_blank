@@ -338,7 +338,7 @@ class ProductReturnController extends Controller
             'customer_phone' => $invoice->customer_phone,
             'items' => $invoice->items->map(function (SaleItem $item) {
                 $returnedQuantity = (int) ($item->returned_quantity ?? 0);
-                $remainingQuantity = max((int) $item->quantity - $returnedQuantity, 0);
+                $remainingQuantity = $item->remaining_quantity;
 
                 return [
                     'id' => $item->id,

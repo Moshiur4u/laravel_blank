@@ -40,13 +40,13 @@
                                 value="{{ $endDate }}">
                         </div>
                         <div class="col-md-6 col-xl-2">
-                            <label for="product_id" class="form-label">Product</label>
-                            <select name="product_id" id="product_id" class="form-select">
-                                <option value="">All products</option>
-                                @foreach ($products as $product)
-                                    <option value="{{ $product->id }}"
-                                        {{ (string) ($filters['product_id'] ?? '') === (string) $product->id ? 'selected' : '' }}>
-                                        {{ $product->display_name }}
+                            <label for="category_id" class="form-label">Product Category</label>
+                            <select name="category_id" id="category_id" class="form-select">
+                                <option value="">All categories</option>
+                                @foreach ($categories as $category)
+                                    <option value="{{ $category->id }}"
+                                        {{ (string) ($filters['category_id'] ?? '') === (string) $category->id ? 'selected' : '' }}>
+                                        {{ $category->category_name }}
                                     </option>
                                 @endforeach
                             </select>
@@ -169,6 +169,7 @@
                                 <tr>
                                     <th style="width: 50px;">#</th>
                                     <th>Product</th>
+                                    <th>Product Category</th>
                                     <th class="text-end">Purchase Price</th>
                                     <th class="text-end">Selling Price</th>
                                     {{-- পরিমাণ ও একক একই cell-এ থাকায় report table সংকীর্ণ থাকে। --}}
@@ -185,6 +186,7 @@
                                     <tr>
                                         <td>{{ $index + 1 }}</td>
                                         <td class="fw-semibold">{{ $topProduct->product_name }}</td>
+                                        <td>{{ $topProduct->category_name ?: 'Uncategorized' }}</td>
                                         <td class="text-end">
                                             ৳{{ number_format((float) ($topProduct->purchase_price ?? 0), 2) }}</td>
                                         <td class="text-end">
@@ -211,7 +213,7 @@
                                     </tr>
                                 @empty
                                     <tr>
-                                        <td colspan="10" class="py-4 text-center text-muted">No product sales found for
+                                        <td colspan="11" class="py-4 text-center text-muted">No product sales found for
                                             the selected filters.</td>
                                     </tr>
                                 @endforelse
@@ -219,7 +221,7 @@
                             @if ($topProducts->isNotEmpty())
                                 <tfoot class="table-light fw-bold">
                                     <tr>
-                                        <td colspan="4" class="text-end">Total:</td>
+                                        <td colspan="5" class="text-end">Total:</td>
                                         <td class="text-end">{{ number_format($topProducts->sum('quantity_sold')) }}</td>
                                         <td class="text-end">৳{{ number_format($topProducts->sum('revenue'), 2) }}</td>
                                         <td class="text-end">৳{{ number_format($topProducts->sum('total_cost'), 2) }}</td>
