@@ -168,18 +168,24 @@
                                         <th style="min-width: 280px;">Product Name <span class="text-danger">*</span></th>
                                         <th style="width: 140px;" class="text-end">Unit Price (৳) <span class="text-danger">*</span></th>
                                         <th style="width: 120px;" class="text-center">Quantity <span class="text-danger">*</span></th>
+                                        <th style="width: 100px;" class="text-center">Unit</th>
                                         <th style="width: 150px;" class="text-end">Line Total (৳)</th>
                                         <th style="width: 60px;" class="text-center">Action</th>
                                     </tr>
                                 </thead>
                                 <tbody id="itemsTableBody">
                                     @foreach (old('items', [['product_name' => '', 'product_id' => '', 'unit_price' => '0.00', 'quantity' => 0]]) as $index => $oldItem)
+                                        @php
+                                            $oldProduct = $products->firstWhere('id', $oldItem['product_id'] ?? null);
+                                        @endphp
                                         <tr class="item-row">
                                             <td>
+                                                {{-- পুরোনো value-তে Unit-সহ display_name আসত; Unit আলাদা কলামে দেখানোর জন্য এখন Product name ও code দেখানো হয়। --}}
+                                                {{-- value="{{ $oldProduct ? $oldProduct->display_name : ($oldItem['product_name'] ?? '') }}" --}}
                                                 <input type="text" class="form-control product-name-input"
                                                     name="items[{{ $index }}][product_name]" list="quotationProductOptions"
                                                     placeholder="Type or select product..." autocomplete="off" required
-                                                    value="{{ $oldItem['product_name'] ?? '' }}">
+                                                    value="{{ $oldProduct ? $oldProduct->productName . ' — PRD-' . str_pad($oldProduct->id, 5, '0', STR_PAD_LEFT) : ($oldItem['product_name'] ?? '') }}">
                                                 <input type="hidden" name="items[{{ $index }}][product_id]"
                                                     class="product-id-hidden" value="{{ $oldItem['product_id'] ?? '' }}">
                                             </td>
@@ -195,6 +201,7 @@
                                                     name="items[{{ $index }}][quantity]"
                                                     value="{{ $oldItem['quantity'] ?? 0 }}" required>
                                             </td>
+                                            <td class="item-unit text-center">{{ $oldProduct ? ($oldProduct->quantity_size ?: ($oldProduct->stock_unit ?: 'Unit')) : '—' }}</td>
                                             <td class="text-end fw-bold">
                                                 <span class="item-line-total text-dark">0.00</span>
                                             </td>
@@ -212,10 +219,14 @@
                         <!-- Datalist for fast searchable product auto-fill -->
                         <datalist id="quotationProductOptions">
                             @foreach ($products as $product)
-                                <option value="{{ $product->display_name }}"
-                                    data-id="{{ $product->id }}"
-                                    data-price="{{ $product->price ?? 0 }}">
-                                    PRD-{{ str_pad($product->id, 5, '0', STR_PAD_LEFT) }} | Price: ৳{{ number_format((float)$product->price, 2) }}
+                                {{-- পুরোনো option-এ display_name ব্যবহার হতো, ফলে Unit পণ্যের নামের পাশে দেখা যেত। --}}
+                                {{-- <option value="{{ $product->display_name }}" data-id="{{ $product->id }}" data-price="{{ $product->price ?? 0 }}"> --}}
+                                {{-- এখন নামের সঙ্গে Product code রাখা হয়েছে; Unit আলাদা টেবিল কলামে দেখানো হয়। --}}
+                                <option value="{{ $product->productName }} — PRD-{{ str_pad($product->id, 5, '0', STR_PAD_LEFT) }}"
+                                    {{-- data-id="{{ $product->id }}" --}}
+                                    {{-- data-id="{{ $product->productName }}" --}}
+                                    {{-- data-price="{{ $product->price ?? 0 }}" --}}
+                                    {{-- data-unit="{{ $product->quantity_size ?: ($product->stock_unit ?: 'Unit') }}"> --}}
                                 </option>
                             @endforeach
                         </datalist>
@@ -447,7 +458,8 @@
             Array.from(productDatalist.options).forEach(opt => {
                 productMap[opt.value.trim().toLowerCase()] = {
                     id: opt.getAttribute('data-id'),
-                    price: parseFloat(opt.getAttribute('data-price')) || 0
+                    price: parseFloat(opt.getAttribute('data-price')) || 0,
+                    unit: opt.getAttribute('data-unit') || 'Unit'
                 };
             });
         }
@@ -464,11 +476,13 @@
                 const val = this.value.trim().toLowerCase();
                 if (productMap[val]) {
                     hiddenId.value = productMap[val].id;
+                    row.querySelector('.item-unit').textContent = productMap[val].unit;
                     if (!parseFloat(unitPriceInput.value) || parseFloat(unitPriceInput.value) === 0) {
                         unitPriceInput.value = productMap[val].price.toFixed(2);
                     }
                 } else {
                     hiddenId.value = '';
+                    row.querySelector('.item-unit').textContent = '—';
                 }
                 updateTotals();
             });
@@ -506,6 +520,7 @@
                     <input type="number" min="1" step="1" class="form-control text-center item-quantity"
                         name="items[${rowIndex}][quantity]" value="0" required>
                 </td>
+                <td class="item-unit text-center">—</td>
                 <td class="text-end fw-bold">
                     <span class="item-line-total text-dark">0.00</span>
                 </td>

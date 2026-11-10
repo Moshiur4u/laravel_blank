@@ -200,7 +200,7 @@
                                     {{-- ক্রয়মূল্য বিক্রয়মূল্য থেকে আলাদা field-এ রাখা হয়। --}}
                                     <div class="col-md-6">
                                         <label for="purchase_price" class="form-label fw-semibold text-secondary">
-                                            Purchase Order Price (৳)
+                                            Order Price (৳)
                                         </label>
                                         <div class="input-group">
                                             <span class="input-group-text bg-light text-secondary border-end-0">৳</span>
@@ -219,7 +219,7 @@
                                     {{-- বিদ্যমান price field-টিই বিক্রয়মূল্য হিসেবে রাখা হয়েছে, তাই পুরোনো ব্যবহার বদলায় না। --}}
                                     <div class="col-md-6">
                                         <label for="price" class="form-label fw-semibold text-secondary">
-                                            Product Selling Price (৳) <span class="text-danger">*</span>
+                                            Selling Price (৳) <span class="text-danger">*</span>
                                         </label>
                                         <div class="input-group">
                                             <span class="input-group-text bg-light text-secondary border-end-0">৳</span>
@@ -271,16 +271,18 @@
                                                     <i class="bx bx-ruler"></i>
                                                 </span>
                                             @endcan
-                                            <input type="text" name="quantity_size" id="quantity_size"
-                                                class="form-control border-start-0 @error('quantity_size') is-invalid @enderror"
-                                                list="quantitySizeOptions" maxlength="50" placeholder="e.g. RIM, pcs"
-                                                value="{{ old('quantity_size') }}">
+                                            {{-- Brand-এর মতো catalog-এর Qty/Size option dropdown-এ দেখানো হয়। --}}
+                                            <select name="quantity_size" id="quantity_size"
+                                                class="form-select border-start-0 @error('quantity_size') is-invalid @enderror">
+                                                <option value="">Select Qty/Size</option>
+                                                @foreach ($quantitySizes as $quantitySize)
+                                                    <option value="{{ $quantitySize }}"
+                                                        {{ old('quantity_size') === $quantitySize ? 'selected' : '' }}>
+                                                        {{ $quantitySize }}
+                                                    </option>
+                                                @endforeach
+                                            </select>
                                         </div>
-                                        <datalist id="quantitySizeOptions">
-                                            @foreach ($quantitySizes as $quantitySize)
-                                                <option value="{{ $quantitySize }}"></option>
-                                            @endforeach
-                                        </datalist>
                                         @error('quantity_size')
                                             <div class="mt-1 text-danger small">
                                                 <i class="bx bx-error-circle me-1"></i>{{ $message }}
@@ -568,6 +570,18 @@
                     const submitButton = quantitySizeForm.querySelector('[type="submit"]');
                     errorBox.classList.add('d-none');
                     errorBox.textContent = '';
+                    const enteredName = document.getElementById('quantitySizeModalInput').value.trim();
+                    const existingOption = [...quantitySizeInput.options].some((option) =>
+                        option.value.trim().toLocaleLowerCase() === enteredName.toLocaleLowerCase()
+                    );
+
+                    // আগে থেকেই থাকা মান server-এ পাঠানোর আগেই নির্দিষ্ট বার্তা দেখানো হয়।
+                    if (existingOption) {
+                        errorBox.textContent = 'This Qty/Size is existing';
+                        errorBox.classList.remove('d-none');
+                        return;
+                    }
+
                     submitButton.disabled = true;
 
                     try {
@@ -579,17 +593,39 @@
                                 'Accept': 'application/json'
                             }
                         });
-                        const result = await response.json();
-                        if (!response.ok || !result.quantity_size) {
-                            throw new Error(result.message || Object.values(result.errors || {}).flat().join(' ')
-                                || `Unable to create Qty/Size (HTTP ${response.status}).`);
+                        const responseText = await response.text();
+                        let result = {};
+                        try {
+                            result = responseText ? JSON.parse(responseText) : {};
+                        } catch {
+                            throw new Error(response.ok ?
+                                'The server returned an invalid response.' :
+                                `Unable to create Qty/Size (HTTP ${response.status}).`);
                         }
 
-                        quantitySizeInput.value = result.quantity_size.name;
-                        const options = document.getElementById('quantitySizeOptions');
-                        if (![...options.options].some((option) => option.value === result.quantity_size.name)) {
-                            options.add(new Option(result.quantity_size.name, result.quantity_size.name));
+                        if (response.status === 422 && result.errors) {
+                            const validationMessages = Object.values(result.errors).flat();
+                            const duplicateMessage = validationMessages.find((message) =>
+                                message.toLowerCase().includes('qty/size') &&
+                                message.toLowerCase().includes('exist')
+                            );
+                            // Server-এ আগে থেকে থাকা option-এর জন্যও একই নির্দিষ্ট বার্তা দেখানো হয়।
+                            throw new Error(duplicateMessage
+                                ? 'This Qty/Size is existing'
+                                : validationMessages.join(' ')
+                                || result.message
+                                || 'Please check the Qty/Size value and try again.');
                         }
+                        if (!response.ok || !result.quantity_size) {
+                            throw new Error(result.message || `Unable to create Qty/Size (HTTP ${response.status}).`);
+                        }
+
+                        // Modal-এ তৈরি option dropdown-এ যোগ করে নতুন product-এ নির্বাচন করা হয়।
+                        if (![...quantitySizeInput.options].some((option) => option.value === result.quantity_size.name)) {
+                            quantitySizeInput.add(new Option(result.quantity_size.name, result.quantity_size.name));
+                        }
+                        // option যোগ করার পর value বসালে form submit-এ Qty/Size পাঠানো নিশ্চিত হয়।
+                        quantitySizeInput.value = result.quantity_size.name;
                         quantitySizeInput.dispatchEvent(new Event('change', { bubbles: true }));
                         bootstrap.Modal.getOrCreateInstance(document.getElementById('quantitySizeModal')).hide();
                     } catch (error) {

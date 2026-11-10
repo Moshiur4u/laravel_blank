@@ -85,6 +85,23 @@
             font-size: .875rem !important;
         }
 
+        /* DataTable-এর page size, Search ও Showing তথ্য scroll করলেও উপরে স্থির থাকে। */
+        #myTable_wrapper > .dt-layout-row:first-child {
+            position: sticky;
+            top: 60px;
+            left: 0;
+            z-index: 9;
+            padding: .5rem 0;
+            background: var(--bs-body-bg, #fff);
+        }
+
+        /* অনুভূমিক scrollbar-এ table সরালেও header-কে দৃশ্যমান রাখে। */
+        #myTable thead {
+            position: sticky;
+            left: 0;
+            z-index: 8;
+        }
+
         @media (max-width: 575.98px) {
             .help-line-banner {
                 gap: .4rem !important;
@@ -900,12 +917,17 @@
     </script>
     <script>
         if (document.getElementById('myTable')) {
-            let table = new DataTable('#myTable', {
-                "pageLength": 5,
-                "lengthMenu": [
-                    [5, 10, 25, 50, -1],
-                    [5, 10, 25, 50, "All"]
-                ]
+            new DataTable('#myTable', {
+                pageLength: 10,
+                lengthMenu: [
+                    [10, 25, 50, 100, -1],
+                    [10, 25, 50, 100, 'All']
+                ],
+                layout: {
+                    topStart: ['pageLength', 'info'],
+                    topEnd: 'search',
+                    bottomEnd: 'paging'
+                }
             });
         }
     </script>

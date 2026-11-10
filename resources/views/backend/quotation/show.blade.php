@@ -80,9 +80,10 @@
                             {{-- স্থির কলাম প্রস্থ পণ্যের বর্ণনাকে মূল্য ও পরিমাণের কলাম থেকে আলাদা রাখে। --}}
                             <colgroup>
                                 <col style="width: 6%;">
-                                <col style="width: 39%;">
-                                <col style="width: 20%;">
-                                <col style="width: 15%;">
+                                <col style="width: 32%;">
+                                <col style="width: 18%;">
+                                <col style="width: 12%;">
+                                <col style="width: 12%;">
                                 <col style="width: 20%;">
                             </colgroup>
                             {{-- চালানের প্রিন্ট ডিজাইনের সঙ্গে মিল রাখতে টেবিলের শিরোনামে একই নীল রঙ ব্যবহার করা হয়। --}}
@@ -92,6 +93,7 @@
                                     <th class="text-white" style="background-color: #14ADE0;">Product Description</th>
                                     <th class="text-white text-end" style="background-color: #14ADE0;">Unit Price</th>
                                     <th class="text-center text-white" style="background-color: #14ADE0;">Quantity</th>
+                                    <th class="text-center text-white" style="background-color: #14ADE0;">Unit</th>
                                     <th class="text-white text-end" style="background-color: #14ADE0;">Total Amount</th>
                                 </tr>
                             </thead>
@@ -100,7 +102,7 @@
                                     <tr>
                                         <td class="text-center text-muted">{{ $index + 1 }}</td>
                                         <td class="quotation-product-name">
-                                            <div class="fw-semibold text-dark">{{ $item->display_product_name }}</div>
+                                            <div class="fw-semibold text-dark">{{ $item->product_name }}</div>
                                             {{-- পণ্যের নামের জন্য বেশি জায়গা রাখতে Item Code কোটেশনের প্রিন্টে দেখানো হয় না। --}}
                                             {{-- @if ($item->product_id)
                                                 <small class="text-muted">Item Code: PRD-{{ str_pad($item->product_id, 5, '0', STR_PAD_LEFT) }}</small>
@@ -108,6 +110,7 @@
                                         </td>
                                         <td class="text-end">৳{{ number_format((float) $item->unit_price, 2) }}</td>
                                         <td class="text-center">{{ $item->quantity }}</td>
+                                        <td class="text-center">{{ $item->product?->quantity_size ?: ($item->product?->stock_unit ?: 'Unit') }}</td>
                                         <td class="text-end fw-bold">৳{{ number_format((float) $item->line_total, 2) }}
                                         </td>
                                     </tr>

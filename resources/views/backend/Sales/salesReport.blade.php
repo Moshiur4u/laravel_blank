@@ -171,7 +171,8 @@
                                     <th>Product</th>
                                     <th class="text-end">Purchase Price</th>
                                     <th class="text-end">Selling Price</th>
-                                    <th class="text-end">Quantity Sold</th>
+                                    {{-- পরিমাণ ও একক একই cell-এ থাকায় report table সংকীর্ণ থাকে। --}}
+                                    <th class="text-end">Quantity Sold / Unit</th>
                                     <th class="text-end">Total Sales</th>
                                     <th class="text-end">Purchase Cost </th>
                                     <th class="text-end">Profit</th>
@@ -183,12 +184,12 @@
                                 @forelse ($topProducts as $index => $topProduct)
                                     <tr>
                                         <td>{{ $index + 1 }}</td>
-                                        <td class="fw-semibold">{{ $topProduct->product_name }}{{ $topProduct->quantity_size ? ' - ' . $topProduct->quantity_size : '' }}</td>
+                                        <td class="fw-semibold">{{ $topProduct->product_name }}</td>
                                         <td class="text-end">
                                             ৳{{ number_format((float) ($topProduct->purchase_price ?? 0), 2) }}</td>
                                         <td class="text-end">
                                             ৳{{ number_format((float) ($topProduct->avg_selling_price ?? 0), 2) }}</td>
-                                        <td class="text-end">{{ number_format((int) $topProduct->quantity_sold) }}</td>
+                                        <td class="text-end">{{ number_format((int) $topProduct->quantity_sold) }} {{ $topProduct->quantity_size ?: ($topProduct->stock_unit ?: 'Unit') }}</td>
                                         <td class="text-end">৳{{ number_format((float) $topProduct->revenue, 2) }}</td>
                                         <td class="text-end">
                                             ৳{{ number_format((float) ($topProduct->total_cost ?? 0), 2) }}</td>

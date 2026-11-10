@@ -134,6 +134,7 @@
                                                     <th style="min-width: 230px;">Product</th>
                                                     <th style="width: 110px;">Stock Left</th>
                                                     <th style="width: 110px;">Quantity</th>
+                                                    <th style="width: 100px;">Unit</th>
                                                     <th style="width: 150px;">Unit Price</th>
                                                     <th style="width: 140px;">Line Total</th>
                                                     <th></th>
@@ -153,7 +154,7 @@
                                                                 list="saleProductOptions"
                                                                 placeholder="Search product name or code"
                                                                 aria-label="Search product by name or code" autocomplete="off"
-                                                                value="{{ $oldProduct ? $oldProduct->display_name . ' — PRD-' . str_pad($oldProduct->id, 5, '0', STR_PAD_LEFT) : '' }}"
+                                                                value="{{ $oldProduct ? $oldProduct->productName . ' — PRD-' . str_pad($oldProduct->id, 5, '0', STR_PAD_LEFT) : '' }}"
                                                                 required>
                                                             <select name="items[{{ $index }}][product_id]"
                                                                 class="product-select d-none" tabindex="-1"
@@ -164,11 +165,12 @@
                                                                     <option value="{{ $product->id }}"
                                                                         data-price="{{ $product->price }}"
                                                                         data-stock="{{ $product->unit }}"
+                                                                        data-unit="{{ $product->quantity_size ?: ($product->stock_unit ?: 'Unit') }}"
                                                                         data-name="{{ strtolower($product->productName) }}"
                                                                         data-code="{{ strtolower($productSku) }}"
-                                                                        data-label="{{ strtolower($product->display_name . ' — ' . $productSku) }}"
+                                                                        data-label="{{ strtolower($product->productName . ' — ' . $productSku) }}"
                                                                         {{ (string) ($oldItem['product_id'] ?? '') === (string) $product->id ? 'selected' : '' }}>
-                                                                        {{ $product->display_name }}
+                                                                        {{ $product->productName }}
                                                                     </option>
                                                                 @endforeach
                                                             </select>
@@ -177,6 +179,7 @@
                                                         <td><input type="number" name="items[{{ $index }}][quantity]"
                                                                 class="form-control quantity-input" min="1" step="1"
                                                                 value="{{ $oldItem['quantity'] ?? 0 }}" required></td>
+                                                        <td class="unit-cell text-center">{{ $oldProduct ? ($oldProduct->quantity_size ?: ($oldProduct->stock_unit ?: 'Unit')) : '—' }}</td>
                                                         <td>
                                                             <input type="number"
                                                                 name="items[{{ $index }}][unit_price]"
@@ -197,7 +200,7 @@
                                     <datalist id="saleProductOptions">
                                         @foreach ($products as $product)
                                             <option
-                                                value="{{ $product->display_name }} — PRD-{{ str_pad($product->id, 5, '0', STR_PAD_LEFT) }}">
+                                                value="{{ $product->productName }} — PRD-{{ str_pad($product->id, 5, '0', STR_PAD_LEFT) }}">
                                             </option>
                                         @endforeach
                                     </datalist>
@@ -534,9 +537,13 @@
                 select.value = option ? option.value : '';
                 if (option && option.value !== previousProductId) {
                     row.querySelector('.unit-price-input').value = Number(option.dataset.price || 0).toFixed(2);
+                    row.querySelector('.quantity-input').value = '1';
                 } else if (!option) {
                     row.querySelector('.unit-price-input').value = '';
                 }
+                row.querySelector('.unit-cell').textContent = option ?
+                    (option.dataset.unit || 'Unit') :
+                    '—';
                 searchInput.setCustomValidity(option || !search ? '' :
                     'Choose a product from the suggested name and code.');
             }
@@ -548,6 +555,7 @@
                 row.querySelector('.product-select').name = `items[${rowIndex}][product_id]`;
                 row.querySelector('.product-select').value = '';
                 row.querySelector('.stock-cell').textContent = '—';
+                row.querySelector('.unit-cell').textContent = '—';
                 row.querySelector('.line-total-cell').textContent = money(0);
                 row.querySelector('.unit-price-input').name = `items[${rowIndex}][unit_price]`;
                 row.querySelector('.unit-price-input').value = '0.00';

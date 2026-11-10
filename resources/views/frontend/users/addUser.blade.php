@@ -77,7 +77,9 @@
                                             <select class="form-select @error('roles') is-invalid @enderror" name="roles" id="roles" required>
                                                 <option value="" selected disabled>-- Select Role --</option>
                                                 @foreach ($Roles as $role)
-                                                    <option value="{{ $role->name }}" {{ old('roles') == $role->name ? 'selected' : '' }}>
+                                                    <option value="{{ $role->name }}"
+                                                        {{ old('roles') == $role->name ? 'selected' : '' }}
+                                                        {{ in_array($role->name, $assignableRoleNames, true) ? '' : 'disabled' }}>
                                                         {{ ucfirst($role->name) }}
                                                     </option>
                                                 @endforeach

@@ -107,7 +107,8 @@
                                 <th>Invoice</th>
                                 <th>Product</th>
                                 <th>Customer</th>
-                                <th class="text-center">Quantity</th>
+                                {{-- ফেরত পরিমাণ ও একক একই cell-এ দেখানো হয়। --}}
+                                <th class="text-center">Quantity / Unit</th>
                                 <th class="text-end">Return Value</th>
                                 <th class="text-end">Refund</th>
                                 <th>Processed By</th>
@@ -120,12 +121,12 @@
                                     <td>{{ $return->return_no }}</td>
                                     <td>{{ $return->return_date->format('d M Y') }}</td>
                                     <td>{{ $return->invoice_no }}</td>
-                                    <td>{{ $return->product?->display_name ?? $return->product_name }}</td>
+                                    <td>{{ $return->product?->productName ?? $return->product_name }}</td>
                                     <td>
                                         {{ $return->invoice?->customer_name ?: 'Walk-in Customer' }}
                                         <div class="small text-muted">{{ $return->invoice?->customer_phone }}</div>
                                     </td>
-                                    <td class="text-center">{{ $return->quantity }}</td>
+                                    <td class="text-center">{{ $return->quantity }} {{ $return->product?->quantity_size ?: ($return->product?->stock_unit ?: 'Unit') }}</td>
                                     <td class="text-end">৳{{ number_format($return->return_amount, 2) }}</td>
                                     <td class="text-end">৳{{ number_format($return->refund_amount, 2) }}</td>
                                     <td>{{ $return->returnedBy?->name ?? 'N/A' }}</td>

@@ -23,10 +23,23 @@ class QuantitySizeController extends Controller
     public function store(Request $request)
     {
         $request->merge(['name' => trim((string) $request->input('name'))]);
+        $name = mb_strtolower((string) $request->input('name'));
+
+        // Modal request-এ duplicate-এর জন্য redirect/HTML নয়, সরাসরি JSON validation response ফেরত যায়।
+        if ($request->expectsJson() && QuantitySize::query()
+            ->whereRaw('LOWER(name) = ?', [$name])
+            ->exists()) {
+            return response()->json([
+                'errors' => [
+                    'name' => ['This Qty/Size is existing'],
+                ],
+            ], 422);
+        }
+
         $validated = $request->validate([
             'name' => ['required', 'string', 'max:50', 'unique:quantity_sizes,name'],
         ], [
-            'name.unique' => 'This Qty/Size option already exists.',
+            'name.unique' => 'This Qty/Size is existing',
         ]);
 
         $quantitySize = QuantitySize::create($validated);
@@ -60,7 +73,7 @@ class QuantitySizeController extends Controller
                 Rule::unique('quantity_sizes', 'name')->ignore($quantitySize->id),
             ],
         ], [
-            'name.unique' => 'This Qty/Size option already exists.',
+            'name.unique' => 'This Qty/Size is existing',
         ]);
 
         $quantitySize->update($validated);

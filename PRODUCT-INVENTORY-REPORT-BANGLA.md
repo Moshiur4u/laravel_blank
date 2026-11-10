@@ -19,6 +19,10 @@ public function index(): View
         'rows' => $rows,
         'total_products' => $rows->count(),
         'total_purchased_quantity' => $rows->sum('purchased_quantity'),
+        // ক্রয়কৃত quantity থাকা প্রতিটি স্বতন্ত্র পণ্য একবার করে গণনা করা হয়।
+        'unique_products_purchased' => $rows
+            ->filter(static fn (array $row): bool => $row['purchased_quantity'] > 0)
+            ->count(),
         'total_purchase_amount' => $rows->sum('purchase_amount'),
         'total_stock' => $rows->sum('stock'),
         'total_expired_products' => $rows
@@ -29,6 +33,9 @@ public function index(): View
 ```
 
 `index()` একই `reportRows()` থেকে পণ্যের row তৈরি করে এবং page-এর summary value পাঠায়। `total_expired_products`-এ শুধু `expired` status-সহ product গণনা করা হয়।
+`unique_products_purchased`-এ positive মোট purchased quantity থাকা প্রতিটি স্বতন্ত্র
+Product row একবার করে গণনা করা হয়; purchase না থাকা product এই সংখ্যায় পড়ে না।
+বাংলা comment-এ এই গণনার কারণ code-এর পাশেই উল্লেখ করা হয়েছে।
 
 ### বিক্রির পরিমাণ, আয় ও লাভ
 

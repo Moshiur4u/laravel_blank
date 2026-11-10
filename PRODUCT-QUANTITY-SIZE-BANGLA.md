@@ -122,7 +122,7 @@ public function getDisplayNameAttribute(): string
 
 ## Blade Template (Code and Explanation)
 
-**পণ্য ফর্ম:** `resources/views/backend/Product/product/createProduct.blade.php` এবং `resources/views/backend/Product/product/editProduct.blade.php`-এ ঐচ্ছিক `Qty/Size` ইনপুট রয়েছে। Catalog option datalist-এ দেখায়; ফর্মে custom text-ও লেখা যায়।
+**পণ্য ফর্ম:** `resources/views/backend/Product/product/createProduct.blade.php` এবং `resources/views/backend/Product/product/editProduct.blade.php`-এ `Qty/Size` নির্বাচন করা যায়। Create form-এ catalog options dropdown-এ দেখায়; Edit form-এ custom text-ও লেখা যায়।
 
 ```blade
 <div class="input-group">
@@ -143,6 +143,54 @@ public function getDisplayNameAttribute(): string
 ```
 
 Clickable `bx-ruler` আইকন থেকে modal-এ reusable option তৈরি করা যায়; তৈরি option বর্তমান product field-এ বসে এবং অন্য product-এও বাছাই করা যায়। `resources/views/backend/Product/QuantitySize/`-এ Brand-এর মতো list/create/edit/delete UI রয়েছে। Delete confirmation JavaScript form-based `DELETE` request সমর্থন করে।
+
+### Create Product-এ Qty/Size dropdown
+
+`resources/views/backend/Product/product/createProduct.blade.php`-এ Qty/Size text
+input ও datalist-কে Brand field-এর মতো `<select>` dropdown করা হয়েছে। এতে আগে তৈরি
+Qty/Size-গুলো দৃশ্যমান option হিসেবে থাকে এবং submit validation error-এর পর আগের
+নির্বাচন `old('quantity_size')` দিয়ে বজায় থাকে। নতুন Qty/Size modal থেকে তৈরি করলে
+JavaScript সেটিকে dropdown-এ যোগ করে স্বয়ংক্রিয়ভাবে select করে। বাংলা Blade comment-এ
+এই পরিবর্তনের কারণ উল্লেখ করা হয়েছে।
+
+```blade
+<select name="quantity_size" id="quantity_size" class="form-select border-start-0">
+    <option value="">Select Qty/Size</option>
+    @foreach ($quantitySizes as $quantitySize)
+        <option value="{{ $quantitySize }}"
+            {{ old('quantity_size') === $quantitySize ? 'selected' : '' }}>
+            {{ $quantitySize }}
+        </option>
+    @endforeach
+</select>
+```
+
+### নতুন Qty/Size option product-এ সংরক্ষণ
+
+Qty/Size modal থেকে নতুন option ফেরত এলে আগে সেটিকে dropdown-এ যোগ করা হয়, এরপর
+`select.value`-তে মান বসানো হয়। আগে option যোগের আগেই value বসানো হতো; `<select>`-এ
+না-থাকা value browser নির্বাচন করতে পারে না, ফলে product submit-এ `quantity_size`
+ফাঁকা যেত। এখন যোগ করার পরে মান select করায় form-এ value পাঠানো হয়।
+
+```javascript
+if (![...quantitySizeInput.options].some((option) => option.value === result.quantity_size.name)) {
+    quantitySizeInput.add(new Option(result.quantity_size.name, result.quantity_size.name));
+}
+quantitySizeInput.value = result.quantity_size.name;
+```
+
+এই ক্রম ঠিক রাখার কারণ inline বাংলা code comment-এও উল্লেখ করা হয়েছে।
+
+### Duplicate Qty/Size message modal-এ দেখানো
+
+Qty/Size modal-এর AJAX response-এ validation status `422` হলে controller-এর
+`errors`-এর message আগে দেখানো হয়, generic response `message` নয়। Controller
+duplicate নাম modal-এ `This Qty/Size is existing` বার্তায় দেখানো হয়। Modal submit-এর
+আগে dropdown-এর option-গুলোর সঙ্গে case-insensitive তুলনা হয়। Server-এ আগে থেকে
+থাকা option ধরা পড়লেও controller modal request-এর জন্য `422` JSON validation error
+ফেরত দেয়, HTML redirect নয়; তাই client-এর invalid response fallback দেখানোর বদলে
+সঠিক duplicate বার্তাটি আসে। বাংলা JavaScript/PHP comment-এ এই আচরণের কারণ উল্লেখ
+করা হয়েছে।
 
 **প্রদর্শন:** পণ্যের তালিকা, category details, dashboard, sales picker/invoice/delivery challan, quotation, inventory ও sales report, supplier এবং return screens-এ `display_name` বা আইটেমের `display_product_name` ব্যবহৃত হয়েছে। উদাহরণ:
 

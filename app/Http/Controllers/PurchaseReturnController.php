@@ -266,8 +266,9 @@ class PurchaseReturnController extends Controller
         $totalReturnAmount = (float) (clone $returns)->sum('return_amount');
         $totalRefundAmount = (float) (clone $returns)->sum('refund_amount');
         $returnCount = (clone $returns)->count();
+        // Return report-এর Unit কলামের জন্য Product-এর দুই ধরনের unit তথ্য eager-load করা হয়।
         $rows = (clone $returns)
-            ->with(['returnedBy', 'product:id,productName,quantity_size'])
+            ->with(['returnedBy', 'product:id,productName,quantity_size,stock_unit'])
             ->latest('return_date')
             ->latest('id')
             ->paginate(30)

@@ -50,6 +50,37 @@
 - `resources/views/backend/Product/product/createProduct.blade.php`-এর Product Name
   ইনপুটে বিদ্যমান সব পণ্যের নামের autocomplete suggestion দেখানো হয়।
 
+## Product Index-এ Stock সংখ্যা ও Unit প্রদর্শন
+
+**ফাইল:** `resources/views/backend/Product/product/indexProduct.blade.php`
+
+Product তালিকার Stock / Unit badge এবং Product details modal-এ আগে stock সংখ্যার
+পরে সব পণ্যের জন্য সাধারণ `Units` লেখা হতো। এখন প্রকৃত Unit দেখাতে প্রথমে
+`quantity_size`, সেটি ফাঁকা হলে `stock_unit`, এবং দুটোই না থাকলে `Units` fallback
+ব্যবহার করা হয়। এতে `12 RIM` বা `5 pcs`-এর মতো stock-এর সংখ্যা ও একক একসঙ্গে বোঝা যায়।
+কম stock এবং শূন্য stock-এর badge-এও stock সংখ্যা ও একই Unit দৃশ্যমান থাকে।
+
+```blade
+@php
+    $stockUnitLabel = $product->quantity_size ?: ($product->stock_unit ?: 'Units');
+@endphp
+{{ $product->unit }} {{ $stockUnitLabel }}
+```
+
+Low Stock হলে stock সংখ্যা ও Unit-এর নিচে status-টি আলাদা লাইনে 8px font-এ দেখানো হয়:
+
+```blade
+{{ $product->unit }} {{ $stockUnitLabel }}
+<span class="d-block" style="font-size: 8px;">Low Stock</span>
+```
+
+এভাবে breakdown-এ পরিমাণ/একক এবং সতর্কবার্তা আলাদা করে সহজে পড়া যায়।
+
+বাংলা Blade comment-এ এই পরিবর্তনের কারণ রাখা হয়েছে: এককসহ stock দেখালে মজুতের
+পরিমাণ বোঝা সহজ হয় এবং details modal-ও তালিকার সঙ্গে একই তথ্য দেখায়। কোনো
+Controller, Model বা Migration পরিবর্তন করা হয়নি; Product-এর বিদ্যমান field-ই
+ব্যবহার করা হয়েছে।
+
 ## যাচাই
 
 - `tests/Feature/ProductAvailableStockTest.php` পণ্যের তালিকা ও বিক্রয় ফর্মে

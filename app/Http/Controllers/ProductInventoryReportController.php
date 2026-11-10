@@ -23,6 +23,10 @@ class ProductInventoryReportController extends Controller
             'rows' => $rows,
             'total_products' => $rows->count(),
             'total_purchased_quantity' => $rows->sum('purchased_quantity'),
+            // যেসব product-এর মোট ক্রয়কৃত quantity শূন্যের বেশি, সেগুলো একবার করে গণনা করা হয়।
+            'unique_products_purchased' => $rows
+                ->filter(static fn (array $row): bool => $row['purchased_quantity'] > 0)
+                ->count(),
             'total_purchase_amount' => $rows->sum('purchase_amount'),
             'total_stock' => $rows->sum('stock'),
             'total_expired_products' => $rows->where('expiry_status', 'expired')->count(),
@@ -61,13 +65,13 @@ class ProductInventoryReportController extends Controller
                 'Product',
                 'Purchase Price',
                 'Avg Selling Price',
-                'Quantity Sold',
+                'Quantity Sold / Unit',
                 'Total Sales',
                 'Total Cost',
                 'Profit',
-                'Purchased Quantity',
+                'Purchased Quantity / Unit',
                 'Purchase Amount',
-                'Current Stock',
+                'Current Stock / Unit',
                 'Expiry Date',
                 'Expiry Status',
                 'Supplier',
@@ -78,15 +82,16 @@ class ProductInventoryReportController extends Controller
                 $writeRow([
                     'SKU: #PRD-'.str_pad((string) $row['id'], 5, '0', STR_PAD_LEFT),
                     $row['name'],
+                    $row['unit_label'],
                     number_format((float) $row['purchase_price'], 2, '.', ''),
                     number_format((float) $row['avg_selling_price'], 2, '.', ''),
-                    number_format((float) $row['quantity_sold'], 2, '.', ''),
+                    number_format((float) $row['quantity_sold'], 2, '.', '').' '.$row['unit_label'],
                     number_format((float) $row['revenue'], 2, '.', ''),
                     number_format((float) $row['total_cost'], 2, '.', ''),
                     number_format((float) $row['profit'], 2, '.', ''),
-                    number_format((float) $row['purchased_quantity'], 2, '.', ''),
+                    number_format((float) $row['purchased_quantity'], 2, '.', '').' '.$row['unit_label'],
                     number_format((float) $row['purchase_amount'], 2, '.', ''),
-                    number_format((float) $row['stock'], 2, '.', ''),
+                    number_format((float) $row['stock'], 2, '.', '').' '.$row['unit_label'],
                     $row['expiry_date']?->format('Y-m-d'),
                     match ($row['expiry_status']) {
                         'expired' => 'Expired',
@@ -154,7 +159,9 @@ class ProductInventoryReportController extends Controller
 
             return [
                 'id' => $product->id,
-                'name' => $product->display_name,
+                // Unit-কে আলাদা কলামে দেখানো হয়, তাই Product নামের সঙ্গে জোড়া হয় না।
+                'name' => $product->productName,
+                'unit_label' => $product->quantity_size ?: ($product->stock_unit ?: 'Unit'),
                 'purchased_quantity' => $purchaseLedgers->sum(
                     static fn (Supplierledger $ledger): float => (float) $ledger->quantity
                 ),

@@ -90,10 +90,11 @@
                         <table class="table align-middle table-bordered invoice-table">
                             {{-- নির্দিষ্ট প্রস্থ পণ্যের নামকে পাশের মূল্য কলামে ঢুকে পড়া থেকে আটকায়। --}}
                             <colgroup>
-                                <col style="width: 6%;">
-                                <col style="width: 39%;">
-                                <col style="width: 20%;">
-                                <col style="width: 15%;">
+                                <col style="width: 5%;">
+                                <col style="width: 32%;">
+                                <col style="width: 18%;">
+                                <col style="width: 12%;">
+                                <col style="width: 13%;">
                                 <col style="width: 20%;">
                             </colgroup>
                             <thead>
@@ -102,6 +103,7 @@
                                     <th>Product</th>
                                     <th class="text-end">Unit Selling Price</th>
                                     <th class="text-center">Quantity</th>
+                                    <th class="text-center">Unit</th>
                                     <th class="text-end">Amount</th>
                                 </tr>
                             </thead>
@@ -109,21 +111,22 @@
                                 @foreach ($invoice->items as $key => $item)
                                     <tr>
                                         <td>{{ $key + 1 }}</td>
-                                        <td class="invoice-product-name">{{ $item->display_product_name }}</td>
+                                        <td class="invoice-product-name">{{ $item->product_name }}</td>
                                         {{-- sale তৈরির সময় Product-এর selling price sale item-এ snapshot হয়ে invoice-এ দেখায়। --}}
                                         <td class="text-end">৳{{ number_format($item->unit_price, 2) }}</td>
                                         <td class="text-center">{{ $item->quantity }}</td>
+                                        <td class="text-center">{{ $item->product?->quantity_size ?: ($item->product?->stock_unit ?: 'Unit') }}</td>
                                         <td class="text-end">৳{{ number_format($item->line_total, 2) }}</td>
                                     </tr>
                                 @endforeach
                                 <tr>
-                                    <th colspan="4" class="text-end">Subtotal</th>
+                                    <th colspan="5" class="text-end">Subtotal</th>
                                     <td class="text-end">৳{{ number_format($invoice->subtotal, 2) }}</td>
                                 </tr>
                                 {{-- ছাড় ও করের পরিমাণ শূন্য হলে অপ্রয়োজনীয় সারি প্রিন্টে দেখানো হয় না। --}}
                                 @if ((float) $invoice->discount_amount > 0)
                                     <tr>
-                                        <th colspan="4" class="text-end">
+                                        <th colspan="5" class="text-end">
                                             Discount{{ $invoice->discount_type === 'percentage' && (float) $invoice->discount_value > 0 ? ' (' . rtrim(rtrim(number_format((float) $invoice->discount_value, 2), '0'), '.') . '%)' : '' }}
                                         </th>
                                         <td class="text-end">- ৳{{ number_format($invoice->discount_amount, 2) }}</td>
@@ -131,45 +134,45 @@
                                 @endif
                                 @if ((float) $invoice->vat_amount > 0)
                                     <tr>
-                                        <th colspan="4" class="text-end">VAT</th>
+                                        <th colspan="5" class="text-end">VAT</th>
                                         <td class="text-end">৳{{ number_format($invoice->vat_amount, 2) }}</td>
                                     </tr>
                                 @endif
                                 @if ((float) $invoice->ait_amount > 0)
                                     <tr>
-                                        <th colspan="4" class="text-end">AIT</th>
+                                        <th colspan="5" class="text-end">AIT</th>
                                         <td class="text-end">৳{{ number_format($invoice->ait_amount, 2) }}</td>
                                     </tr>
                                 @endif
                                 @if ($invoice->include_previous_due)
                                     <tr>
-                                        <th colspan="4" class="text-end">Previous Due</th>
+                                        <th colspan="5" class="text-end">Previous Due</th>
                                         <td class="text-end">৳{{ number_format($invoice->previous_due, 2) }}</td>
                                     </tr>
                                 @endif
                                 <tr class=" fs-5">
-                                    <th colspan="4" class="text-end">Total</th>
+                                    <th colspan="5" class="text-end">Total</th>
                                     <td class="text-end">৳{{ number_format($invoice->total_amount, 2) }}</td>
                                 </tr>
                                 <tr>
-                                    <th colspan="4" class="text-end">Amount Paid</th>
+                                    <th colspan="5" class="text-end">Amount Paid</th>
                                     <td class="text-end">৳{{ number_format($invoice->amount_paid, 2) }}</td>
                                 </tr>
                                 @if ((float) $invoice->due_amount > 0)
                                     {{-- বকেয়া না থাকলে invoice-এ Due row দেখানোর প্রয়োজন নেই। --}}
                                     <tr class="fw-bold">
-                                        <th colspan="4" class="text-end">Due</th>
+                                        <th colspan="5" class="text-end">Due</th>
                                         <td class="text-end">৳{{ number_format($invoice->due_amount, 2) }}</td>
                                     </tr>
                                 @endif
                                 <tr>
-                                    <th colspan="4" class="text-end">Payment Method</th>
+                                    <th colspan="5" class="text-end">Payment Method</th>
                                     <td class="text-end">
                                         {{ $invoice->payment_method ? ucfirst($invoice->payment_method) : 'Unpaid' }}</td>
                                 </tr>
                                 <tr>
                                     <th colspan="2">Amount Paid in Words</th>
-                                    <td colspan="3">{{ $amountInWords }}</td>
+                                    <td colspan="4">{{ $amountInWords }}</td>
                                 </tr>
                             </tbody>
                         </table>

@@ -65,11 +65,16 @@ test('an administrator can change an employee role from the user edit form', fun
     $employee = User::factory()->create(['email_verified_at' => now()]);
     $employee->assignRole('manager');
 
-    $this->actingAs($admin)
+    $editResponse = $this->actingAs($admin)
         ->get(route('user.edit', $employee->id))
         ->assertOk()
         ->assertSee('name="roles"', false)
+        ->assertSee('value="admin"', false)
         ->assertSee('value="manager" selected', false);
+    expect(preg_match(
+        '/<option\b(?=[^>]*\bvalue="manager")(?=[^>]*\bdisabled)[^>]*>/s',
+        $editResponse->getContent()
+    ))->toBe(0);
 
     $this->actingAs($admin)
         ->put(route('user.update', $employee->id), [
@@ -83,13 +88,126 @@ test('an administrator can change an employee role from the user edit form', fun
         ->and($employee->fresh()->hasRole('manager'))->toBeFalse();
 });
 
-test('an employee editor without role assignment permission cannot silently submit a role change', function () {
+test('an administrator can assign the admin role and all other roles', function () {
+    $admin = User::factory()->create(['email_verified_at' => now()]);
+    $admin->assignRole('admin');
+    $employee = User::factory()->create(['email_verified_at' => now()]);
+    $employee->assignRole('sales');
+
+    $this->actingAs($admin)
+        ->get(route('user.create'))
+        ->assertOk()
+        ->assertSee('value="admin"', false)
+        ->assertSee('value="manager"', false);
+
+    $this->actingAs($admin)
+        ->put(route('user.update', $employee->id), [
+            'name' => $employee->name,
+            'email' => $employee->email,
+            'roles' => 'admin',
+        ])
+        ->assertRedirect(route('user.index'));
+
+    expect($employee->fresh()->hasRole('admin'))->toBeTrue();
+});
+
+test('all employee editors see every non-admin role in add and edit forms', function () {
+    $employee = User::factory()->create(['email_verified_at' => now()]);
+    $employee->assignRole('sales');
+
+    $extraPermission = Permission::create(['name' => 'custom.role.permission', 'guard_name' => 'web']);
+    $customRole = Role::create(['name' => 'custom-role', 'guard_name' => 'web']);
+    $customRole->givePermissionTo($extraPermission);
+
+    $editorRole = Role::create(['name' => 'employee-editor', 'guard_name' => 'web']);
+    $editorRole->givePermissionTo(['employee.create', 'employee.edit']);
+    $editor = User::factory()->create(['email_verified_at' => now()]);
+    $editor->assignRole($editorRole);
+
+    $createResponse = $this->actingAs($editor)
+        ->get(route('user.create'))
+        ->assertOk()
+        ->assertSee('value="sales"', false)
+        ->assertSee('value="custom-role"', false)
+        ->assertSee('value="manager"', false)
+        ->assertDontSee('value="admin"', false);
+    $this->assertMatchesRegularExpression(
+        '/<option\b(?=[^>]*\bvalue="manager")(?=[^>]*\bdisabled)[^>]*>/s',
+        $createResponse->getContent()
+    );
+
+    $editResponse = $this->actingAs($editor)
+        ->get(route('user.edit', $employee->id))
+        ->assertOk()
+        ->assertSee('value="sales"', false)
+        ->assertSee('value="custom-role"', false)
+        ->assertSee('value="manager"', false)
+        ->assertDontSee('value="admin"', false);
+    $this->assertMatchesRegularExpression(
+        '/<option\b(?=[^>]*\bvalue="manager")(?=[^>]*\bdisabled)[^>]*>/s',
+        $editResponse->getContent()
+    );
+});
+
+test('an employee editor cannot assign roles that grant employee role assignment permission', function () {
     $editorRole = Role::create(['name' => 'employee-editor', 'guard_name' => 'web']);
     $editorRole->givePermissionTo('employee.edit');
     $editor = User::factory()->create(['email_verified_at' => now()]);
     $editor->assignRole($editorRole);
     $employee = User::factory()->create(['email_verified_at' => now()]);
     $employee->assignRole('sales');
+    $ordinaryRole = Role::create(['name' => 'ordinary-role', 'guard_name' => 'web']);
+
+    $editResponse = $this->actingAs($editor)
+        ->get(route('user.edit', $employee->id))
+        ->assertOk()
+        ->assertSee('name="roles"', false)
+        ->assertSee('value="manager"', false)
+        ->assertDontSee('value="admin"', false);
+    $this->assertMatchesRegularExpression(
+        '/<option\b(?=[^>]*\bvalue="manager")(?=[^>]*\bdisabled)[^>]*>/s',
+        $editResponse->getContent()
+    );
+
+    $this->actingAs($editor)
+        ->put(route('user.update', $employee->id), [
+            'name' => $employee->name,
+            'email' => $employee->email,
+            'roles' => 'admin',
+        ])
+        ->assertSessionHasErrors('roles');
+
+    expect($employee->fresh()->hasRole('sales'))->toBeTrue();
+
+    $this->actingAs($editor)
+        ->put(route('user.update', $employee->id), [
+            'name' => $employee->name,
+            'email' => $employee->email,
+            'roles' => $ordinaryRole->name,
+        ])
+        ->assertRedirect(route('user.index'));
+
+    expect($employee->fresh()->hasRole($ordinaryRole->name))->toBeTrue()
+        ->and($employee->fresh()->hasRole('sales'))->toBeFalse();
+});
+
+test('a user with employee role assignment permission can assign protected roles', function () {
+    $editorRole = Role::create(['name' => 'role-assignment-editor', 'guard_name' => 'web']);
+    $editorRole->givePermissionTo(['employee.edit', 'employee.role.assign']);
+    $editor = User::factory()->create(['email_verified_at' => now()]);
+    $editor->assignRole($editorRole);
+    $employee = User::factory()->create(['email_verified_at' => now()]);
+    $employee->assignRole('sales');
+
+    $editResponse = $this->actingAs($editor)
+        ->get(route('user.edit', $employee->id))
+        ->assertOk()
+        ->assertSee('value="manager"', false)
+        ->assertDontSee('value="admin"', false);
+    expect(preg_match(
+        '/<option\b(?=[^>]*\bvalue="manager")(?=[^>]*\bdisabled)[^>]*>/s',
+        $editResponse->getContent()
+    ))->toBe(0);
 
     $this->actingAs($editor)
         ->put(route('user.update', $employee->id), [
@@ -97,10 +215,9 @@ test('an employee editor without role assignment permission cannot silently subm
             'email' => $employee->email,
             'roles' => 'manager',
         ])
-        ->assertForbidden();
+        ->assertRedirect(route('user.index'));
 
-    expect($employee->fresh()->hasRole('sales'))->toBeTrue()
-        ->and($employee->fresh()->hasRole('manager'))->toBeFalse();
+    expect($employee->fresh()->hasRole('manager'))->toBeTrue();
 });
 
 test('the dedicated activity log permission grants access without full report access', function () {

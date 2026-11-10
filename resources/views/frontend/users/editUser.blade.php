@@ -68,7 +68,6 @@
                                         @enderror
                                     </div>
 
-                                    @can('employee.role.assign') {{-- নতুন employee role assignment permission। --}}
                                     <div class="col-md-6">
                                         <label for="roles" class="form-label fw-semibold">
                                             Role <span class="text-danger">*</span>
@@ -79,7 +78,8 @@
                                                 <option value="" disabled>-- Select Role --</option>
                                                 @foreach ($Roles as $role)
                                                     <option value="{{ $role->name }}"
-                                                        {{ old('roles', $userRole[0] ?? '') === $role->name ? 'selected' : '' }}> {{-- একক role selector-এ কেবল একটি current/old role selected থাকে। --}}
+                                                        {{ old('roles', $userRole[0] ?? '') === $role->name ? 'selected' : '' }}
+                                                        {{ in_array($role->name, $assignableRoleNames, true) ? '' : 'disabled' }}> {{-- permission-সুরক্ষিত role কেবল অনুমতিপ্রাপ্ত user-কে বেছে নিতে দেওয়া হয়। --}}
                                                         {{ ucfirst($role->name) }}
                                                     </option>
                                                 @endforeach
@@ -89,12 +89,6 @@
                                             <span class="text-danger small d-block mt-1">{{ $message }}</span>
                                         @enderror
                                     </div>
-                                    @else
-                                    <div class="col-md-6">
-                                        <label class="form-label fw-semibold">Role</label>
-                                        <div class="form-control-plaintext">{{ implode(', ', $userRole) }}</div>
-                                    </div>
-                                    @endcan {{-- নতুন role assignment permission-এর Blade scope বন্ধ। --}}
                                 </div>
 
                                 {{-- Email, Password, Confirm Password --}}

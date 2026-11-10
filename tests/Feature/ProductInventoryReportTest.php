@@ -115,6 +115,7 @@ class ProductInventoryReportTest extends TestCase
         $this->assertSame('01700000001', $row['suppliers'][0]['phone']);
         $this->assertEquals(2, $data['total_products']);
         $this->assertEquals(15, $data['total_purchased_quantity']);
+        $this->assertSame(1, $data['unique_products_purchased']);
         $this->assertEquals(310, $data['total_purchase_amount']);
         $this->assertEquals(7, $data['total_stock']);
         $this->assertSame(1, $data['total_expired_products']);

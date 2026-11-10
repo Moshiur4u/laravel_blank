@@ -81,11 +81,13 @@ class SalesReportController extends Controller
         $unitCost = 'COALESCE(sale_items.purchase_price, products.purchase_price, 0)';
 
         // পণ্যের return বাদ দিয়ে net quantity/revenue/cost, VAT ও AIT নির্ণয় করা হয়।
+        // পণ্যের মাপ আলাদা Unit কলামে দেখাতে দুটো সম্ভাব্য unit field-ই নেওয়া হয়।
         $topProducts = (clone $topProductsQuery)
             ->select([
                 'sale_items.product_id',
                 'sale_items.product_name',
                 'products.quantity_size',
+                'products.stock_unit',
             ])
             ->selectRaw("CASE WHEN SUM({$netQuantity}) > 0 THEN SUM(({$netQuantity}) * {$unitCost}) / SUM({$netQuantity}) ELSE 0 END as purchase_price")
             ->selectRaw("CASE WHEN SUM({$netQuantity}) > 0 THEN SUM({$netRevenue}) / SUM({$netQuantity}) ELSE 0 END as avg_selling_price")
@@ -95,7 +97,7 @@ class SalesReportController extends Controller
             ->selectRaw("SUM(({$netRevenue}) - (({$netQuantity}) * {$unitCost})) as profit")
             ->selectRaw("SUM(CASE WHEN sale_invoices.subtotal > 0 THEN sale_invoices.vat_amount * ({$netRevenue}) / sale_invoices.subtotal ELSE 0 END) as vat_amount")
             ->selectRaw("SUM(CASE WHEN sale_invoices.subtotal > 0 THEN sale_invoices.ait_amount * ({$netRevenue}) / sale_invoices.subtotal ELSE 0 END) as ait_amount")
-            ->groupBy('sale_items.product_id', 'sale_items.product_name', 'products.quantity_size')
+            ->groupBy('sale_items.product_id', 'sale_items.product_name', 'products.quantity_size', 'products.stock_unit')
             ->orderByDesc('revenue')
             ->orderBy('sale_items.product_name')
             ->get();
@@ -198,8 +200,9 @@ class SalesReportController extends Controller
         $netRevenue = "CASE WHEN sale_items.quantity > 0 THEN sale_items.line_total * ({$netQuantity}) / sale_items.quantity ELSE 0 END";
         $unitCost = 'COALESCE(sale_items.purchase_price, products.purchase_price, 0)';
 
+        // Quantity / Unit একই CSV cell-এ দেখাতে Product-এর unit তথ্য load হয়।
         $topProducts = (clone $topProductsQuery)
-            ->select(['sale_items.product_id', 'sale_items.product_name', 'products.quantity_size'])
+            ->select(['sale_items.product_id', 'sale_items.product_name', 'products.quantity_size', 'products.stock_unit'])
             ->selectRaw("CASE WHEN SUM({$netQuantity}) > 0 THEN SUM(({$netQuantity}) * {$unitCost}) / SUM({$netQuantity}) ELSE 0 END as purchase_price")
             ->selectRaw("CASE WHEN SUM({$netQuantity}) > 0 THEN SUM({$netRevenue}) / SUM({$netQuantity}) ELSE 0 END as avg_selling_price")
             ->selectRaw("SUM({$netQuantity}) as quantity_sold")
@@ -208,7 +211,7 @@ class SalesReportController extends Controller
             ->selectRaw("SUM(({$netRevenue}) - (({$netQuantity}) * {$unitCost})) as profit")
             ->selectRaw("SUM(CASE WHEN sale_invoices.subtotal > 0 THEN sale_invoices.vat_amount * ({$netRevenue}) / sale_invoices.subtotal ELSE 0 END) as vat_amount")
             ->selectRaw("SUM(CASE WHEN sale_invoices.subtotal > 0 THEN sale_invoices.ait_amount * ({$netRevenue}) / sale_invoices.subtotal ELSE 0 END) as ait_amount")
-            ->groupBy('sale_items.product_id', 'sale_items.product_name', 'products.quantity_size')
+            ->groupBy('sale_items.product_id', 'sale_items.product_name', 'products.quantity_size', 'products.stock_unit')
             ->orderByDesc('revenue')
             ->orderBy('sale_items.product_name')
             ->get();
@@ -245,13 +248,13 @@ class SalesReportController extends Controller
             $writeRow(['Total Sales (Invoices)', $totalSalesCount]);
             $writeRow([]);
             $writeRow(['Product-wise Sales & Profit']);
-            $writeRow(['Product', 'Purchase Price', 'Avg Selling Price', 'Quantity Sold', 'Total Sales (Revenue)', 'Total Purchase Cost', 'Profit', 'VAT', 'AIT']);
+            $writeRow(['Product', 'Purchase Price', 'Avg Selling Price', 'Quantity Sold / Unit', 'Total Sales (Revenue)', 'Total Purchase Cost', 'Profit', 'VAT', 'AIT']);
             foreach ($topProducts as $product) {
                 $writeRow([
-                    $product->product_name.($product->quantity_size ? ' - '.$product->quantity_size : ''),
+                    $product->product_name,
                     number_format((float) $product->purchase_price, 2, '.', ''),
                     number_format((float) $product->avg_selling_price, 2, '.', ''),
-                    $product->quantity_sold,
+                    $product->quantity_sold.' '.($product->quantity_size ?: ($product->stock_unit ?: 'Unit')),
                     number_format((float) $product->revenue, 2, '.', ''),
                     number_format((float) $product->total_cost, 2, '.', ''),
                     number_format((float) $product->profit, 2, '.', ''),

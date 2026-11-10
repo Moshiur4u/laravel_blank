@@ -34,11 +34,15 @@ class UserController extends Controller
      */
     public function create()
     {
-        // Only roles whose permissions are a subset of the current user's access can be assigned.
-        $Roles = Role::whereIn('name', $this->assignableRoleNames())->latest()->get();
+        $roleQuery = Role::with('permissions');
+        if (! auth()->user()->hasRole('admin')) {
+            $roleQuery->where('name', '!=', 'admin');
+        }
+        $Roles = $roleQuery->latest()->get();
+        $assignableRoleNames = $this->assignableRoleNames();
 
         // রোলে ভিউ করা হলো
-        return view('frontend.users.addUser', compact('Roles'));
+        return view('frontend.users.addUser', compact('Roles', 'assignableRoleNames'));
     }
 
     /**
@@ -120,15 +124,18 @@ class UserController extends Controller
     public function edit(string $id)
     {
         // ইউজারকে খুঁজে বের করা হলো
-        $Users = User::find($id);
-        $Roles = auth()->user()->can('employee.role.assign') // পুরোনো role assignment permission-এর বদলে নতুন permission।
-            ? Role::whereIn('name', $this->assignableRoleNames())->latest()->get()
-            : collect();
+        $Users = User::findOrFail($id);
+        $roleQuery = Role::with('permissions');
+        if (! auth()->user()->hasRole('admin')) {
+            $roleQuery->where('name', '!=', 'admin');
+        }
+        $Roles = $roleQuery->latest()->get();
         // ইউজারকে রোল এসাইন করা হলো
         $userRole = $Users->Roles->pluck('name')->all();
+        $assignableRoleNames = $this->assignableRoleNames($userRole);
 
         // ইডিটে ভিউ করা হলো
-        return view('frontend.users.editUser', compact('Users', 'Roles', 'userRole'));
+        return view('frontend.users.editUser', compact('Users', 'Roles', 'userRole', 'assignableRoleNames'));
     }
 
     /**
@@ -136,12 +143,13 @@ class UserController extends Controller
      */
     public function update(Request $request, string $id)
     {
+        $user = User::findOrFail($id);
+
         // ১. ভ্যালিডেশন ঠিক করা হলো (email ignore এবং nullable)
-        $canAssignRole = $request->user()->can('employee.role.assign'); // পুরোনো role assignment permission-এর বদলে নতুন permission।
-        abort_if($request->exists('roles') && ! $canAssignRole, 403); // অনুমতি ছাড়া পাঠানো role পরিবর্তন নীরবে উপেক্ষা না করে নিষিদ্ধ করে।
         $rules = [
             'name' => 'required|string|max:255',
             'email' => 'required|email|unique:users,email,'.$id, // বর্তমান ইউজারকে ইগনোর করবে
+            'roles' => ['required', 'string', Rule::in($this->assignableRoleNames($user->roles->pluck('name')->all()))],
             'password' => 'nullable|same:confirmPassword|min:6', // nullable করা হলো
             'image' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048', // nullable করা হলো
             'status' => 'nullable',
@@ -150,14 +158,10 @@ class UserController extends Controller
             'nid_number' => ['nullable', 'regex:/^(?:[0-9]{10}|[0-9]{17})$/'],
             'phone' => 'nullable|string|max:30',
         ];
-        if ($canAssignRole) {
-            $rules['roles'] = ['required', 'string', Rule::in($this->assignableRoleNames())];
-        }
         $request->validate($rules, [
             'nid_number.regex' => 'The NID / Smart Card number must contain exactly 10 or 17 digits.',
         ]);
         // ডেটা আপডেট করার জন্য ইউজারকে খুজে বের করা হলো
-        $user = User::findOrFail($id);
         // ডেটা আপডেট করার জন্য ভেরিয়েবল তৈরি হলো
         $updateData = [
             'name' => $request->input('name'),
@@ -210,10 +214,7 @@ class UserController extends Controller
         // ৪. একবারেই ডেটা আপডেট করা (Efficient)
         $user->update($updateData);
 
-        // Only users with the dedicated permission may change an existing employee's role.
-        if ($canAssignRole) {
-            $user->syncRoles($request->roles);
-        }
+        $user->syncRoles($request->roles);
 
         sweetalert()->success('User updated successfully!');
         return redirect()->route('user.index');
@@ -273,18 +274,22 @@ class UserController extends Controller
     }
 
     /**
-     * Prevent role assignment from granting permissions the acting user does not possess.
+     * List roles available to employee forms, excluding the protected admin role.
      */
-    private function assignableRoleNames(): array
+    private function assignableRoleNames(array $existingRoleNames = []): array
     {
-        $permissions = auth()->user()->getAllPermissions()->pluck('name')->all();
+        // Admin সব role, admin role-সহ, বরাদ্দ করতে পারে।
+        if (auth()->user()->hasRole('admin')) {
+            return Role::query()->pluck('name')->all();
+        }
 
-        return Role::with('permissions')
-            ->get()
-            ->filter(fn (Role $role) => $role->permissions->every(
-                fn ($permission) => in_array($permission->name, $permissions, true)
-            ))
-            ->pluck('name')
-            ->all();
+        $roles = Role::query()->where('name', '!=', 'admin');
+
+        if (! auth()->user()->can('employee.role.assign')) {
+            $roles->whereDoesntHave('permissions', fn ($query) => $query->where('name', 'employee.role.assign'));
+        }
+
+        // বর্তমান সুরক্ষিত role অপরিবর্তিত রাখা যায়, তবে অন্য user তা নতুন করে বরাদ্দ করতে পারে না।
+        return array_values(array_unique(array_merge($roles->pluck('name')->all(), array_diff($existingRoleNames, ['admin']))));
     }
 }

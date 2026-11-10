@@ -178,7 +178,7 @@
                                                 <div class="me-3 position-relative">
                                                     @if ($product->img_url && file_exists(public_path('uploads/products/' . $product->img_url)))
                                                         <img src="{{ asset('uploads/products/' . $product->img_url) }}"
-                                                            alt="{{ $product->display_name }}"
+                                                            alt="{{ $product->productName }}"
                                                             class="border rounded shadow-sm"
                                                             style="width: 48px; height: 48px; object-fit: cover;" />
                                                     @else
@@ -190,7 +190,7 @@
                                                 </div>
                                                 <div>
                                                     <h6 class="mb-0 fw-semibold text-dark">
-                                                        {{ $product->display_name }}
+                                                        {{ $product->productName }}
                                                         @if ($product->isExpired())
                                                             <span class="badge bg-danger ms-1">Expired</span>
                                                         @elseif ($product->isExpiringSoon())
@@ -227,17 +227,23 @@
                                                 class="fw-bold text-dark font-15">৳{{ number_format($product->price, 2) }}</span>
                                         </td>
                                         <td class="text-center">
+                                            {{-- স্টকের সংখ্যার পাশে পণ্যের প্রকৃত একক দেখালে মজুতের পরিমাণ বোঝা সহজ হয়। --}}
+                                            @php
+                                                $stockUnitLabel = $product->quantity_size ?: ($product->stock_unit ?: 'Units');
+                                            @endphp
                                             @if ((int) $product->unit > 10)
                                                 <span class="px-3 py-1 badge bg-light-success text-success rounded-pill">
-                                                    {{ $product->unit }} Units
+                                                    {{ $product->unit }} {{ $stockUnitLabel }}
                                                 </span>
                                             @elseif ((int) $product->unit > 0)
                                                 <span class="px-3 py-1 badge bg-light-warning text-warning rounded-pill">
-                                                    {{ $product->unit }} Low Stock
+                                                    {{ $product->unit }} {{ $stockUnitLabel }}
+                                                    {{-- Low Stock বার্তাকে আলাদা লাইনে রাখলে stock breakdown পরিষ্কার থাকে। --}}
+                                                    <span class="d-block" style="font-size: 8px;">Low Stock</span>
                                                 </span>
                                             @else
                                                 <span class="px-3 py-1 badge bg-light-danger text-danger rounded-pill">
-                                                    Out of Stock
+                                                    0 {{ $stockUnitLabel }} · Out of Stock
                                                 </span>
                                             @endif
                                         </td>
@@ -350,7 +356,8 @@
                                                                                         / Units:
                                                                                     </td>
                                                                                     <td class="py-2 fw-semibold text-dark">
-                                                                                        {{ $product->unit }} Units
+                                                                                        {{-- বিস্তারিতেও একই Unit দেখালে তালিকা ও modal-এর তথ্য সামঞ্জস্যপূর্ণ থাকে। --}}
+                                                                                        {{ $product->unit }} {{ $product->quantity_size ?: ($product->stock_unit ?: 'Units') }}
                                                                                     </td>
                                                                                 </tr>
                                                                                 <tr>
