@@ -393,7 +393,7 @@
                                                     <a href="{{ route('supplier.ledger.destroy', $entry->id) }}"
                                                         class="btn btn-sm btn-danger"
                                                         data-swal-delete
-                                                        data-delete-message="Supplier ledger entry: {{ $entry->invoice_id }}">
+                                                        data-delete-message="Supplier ledger entry: {{ $entry->invoice_id }}. Deleting it will remove {{ $entry->quantity }} from product inventory.">
                                                         <i class="bx bx-trash"></i>
                                                     </a>
                                                     @endcan

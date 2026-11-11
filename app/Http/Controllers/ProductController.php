@@ -150,10 +150,18 @@ class ProductController extends Controller
         $ProductCategories = ProductCategory::latest()->get();
         $brands = Brand::all();
         $quantitySizes = QuantitySize::query()->orderBy('name')->pluck('name');
-        $suppliers = Supplier::where('is_active', true)
-            ->when($product->supplier_id, fn ($query) => $query->orWhereKey($product->supplier_id))
-            ->orderBy('name')
-            ->get();
+        // $suppliers = Supplier::where('is_active', true)
+        //     ->when($product->supplier_id, fn ($query) => $query->orWhereKey($product->supplier_id))
+        //     ->orderBy('name')
+        //     ->get();
+        $suppliers = Supplier::query()
+    ->where('is_active', true);
+
+if ($product->supplier_id) {
+    $suppliers->orWhere('id', $product->supplier_id);
+}
+
+$suppliers = $suppliers->orderBy('name')->get();
 
         return view('backend.Product.product.editProduct', compact(
             'product',

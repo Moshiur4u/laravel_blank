@@ -7,9 +7,12 @@ use App\Models\CustomerLedgerPayment;
 use App\Models\Supplier;
 use App\Models\SupplierLedgerPayment;
 use App\Models\Supplierledger;
+use App\Models\SaleInvoice;
 use App\Models\User;
+use App\Models\Product;
 use App\Models\VoucherEntry;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Support\Facades\DB;
 use Spatie\Permission\Models\Permission;
 
 uses(RefreshDatabase::class);
@@ -287,4 +290,50 @@ test('combined report updates and deletes customer-linked vouchers and ledger ba
         ->and((float) $ledger->fresh()->due_amount)->toBe(100.0)
         ->and(CustomerLedgerPayment::query()->where('customer_ledger_id', $ledger->id)->exists())->toBeFalse()
         ->and(VoucherEntry::query()->whereKey($voucher->id)->exists())->toBeFalse();
+});
+
+test('deleting a sale invoice voucher from the combined report voids the invoice and restores stock', function () {
+    $creator = User::factory()->create(['email_verified_at' => now()]);
+    $creator->givePermissionTo(Permission::findOrCreate('voucher.report.view', 'web'));
+    $creator->givePermissionTo(Permission::findOrCreate('voucher.delete', 'web'));
+    $categoryId = DB::table('product_categories')->insertGetId(['category_name' => 'Combined Void Category']);
+    $brandId = DB::table('brands')->insertGetId(['name' => 'Combined Void Brand']);
+    $product = Product::create([
+        'productName' => 'Combined Void Product',
+        'product_categorie_id' => $categoryId,
+        'brand_id' => $brandId,
+        'price' => 100,
+        'unit' => '10',
+        'stock_unit' => '10',
+    ]);
+
+    $this->actingAs($creator)
+        ->post(route('sales.store'), [
+            'customer_phone' => '01700000005',
+            'save_customer' => 'no',
+            'customer_name' => 'Combined Void Customer',
+            'discount_amount' => 0,
+            'vat_amount' => 0,
+            'amount_paid' => 30,
+            'payment_method' => 'cash',
+            'items' => [
+                ['product_id' => $product->id, 'quantity' => 2, 'unit_price' => 100],
+            ],
+        ])
+        ->assertRedirect();
+
+    $invoice = SaleInvoice::query()->latest('id')->firstOrFail();
+    $voucher = VoucherEntry::query()
+        ->where('voucherable_type', SaleInvoice::class)
+        ->where('voucherable_id', $invoice->id)
+        ->firstOrFail();
+
+    $this->delete(route('voucher-report.combined.destroy', ['category' => 'credit', 'voucherId' => $voucher->id]))
+        ->assertRedirect(route('voucher-report.combined'))
+        ->assertSessionHas('success', "Invoice {$invoice->invoice_no} was voided; its stock and payment entries were reversed.");
+
+    $this->assertDatabaseMissing('sale_invoices', ['id' => $invoice->id]);
+    $this->assertDatabaseMissing('sale_items', ['sale_invoice_id' => $invoice->id]);
+    $this->assertDatabaseMissing('voucher_entries', ['id' => $voucher->id]);
+    expect((float) $product->fresh()->unit)->toBe(10.0);
 });

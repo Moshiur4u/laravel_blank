@@ -301,7 +301,7 @@
                                                     <form method="POST"
                                                         action="{{ route('voucher-report.combined.destroy', [$voucher->voucher_category, $voucher->voucher_id]) }}"
                                                         class="mt-2"
-                                                        onsubmit="return confirm('Delete this voucher? This change will update related ledger balances.');">
+                                                        onsubmit="return confirm('Delete this voucher? If it is linked to a sale invoice, the invoice will be voided and its stock, ledger, and payment entries will be reversed.');">
                                                         @csrf
                                                         @method('DELETE')
                                                         <input type="hidden" name="period" value="{{ $period }}">

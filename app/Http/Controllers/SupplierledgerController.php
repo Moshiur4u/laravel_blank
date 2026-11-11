@@ -323,11 +323,27 @@ class SupplierledgerController extends Controller
     public function destroy($id)
     {
         $supplierId = DB::transaction(function () use ($id) {
-            $ledger = Supplierledger::with('payments')->findOrFail($id);
+            $ledger = Supplierledger::query()->with('payments')->lockForUpdate()->findOrFail($id);
             if ($ledger->purchaseReturns()->exists()) {
                 throw ValidationException::withMessages([
                     'supplierledger_id' => 'This purchase ledger entry cannot be deleted because purchase return records are linked to it.',
                 ]);
+            }
+            $purchaseQuantity = (float) $ledger->quantity;
+            if ($ledger->product_id && $purchaseQuantity > 0) {
+                $product = Product::query()->whereKey($ledger->product_id)->lockForUpdate()->first();
+                if ($product) {
+                    $currentStock = (float) $product->unit;
+                    if ($currentStock + 0.000001 < $purchaseQuantity) {
+                        throw ValidationException::withMessages([
+                            'supplierledger_id' => 'This purchase cannot be deleted because some of its stock has already been sold or consumed.',
+                        ]);
+                    }
+
+                    $remainingStock = $currentStock - $purchaseQuantity;
+                    $product->unit = abs($remainingStock) < 0.000001 ? '0' : (string) $remainingStock;
+                    $product->save();
+                }
             }
             $supplier = Supplier::findOrFail($ledger->supplier_id);
             $supplierId = $ledger->supplier_id;

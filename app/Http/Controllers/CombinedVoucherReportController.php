@@ -9,9 +9,11 @@ use App\Models\ProductReturn;
 use App\Models\PurchaseReturn;
 use App\Models\SupplierLedgerPayment;
 use App\Models\Supplierledger;
+use App\Models\SaleInvoice;
 use App\Models\User;
 use App\Models\VoucherEntry;
 use App\Support\ExcelCsvExport;
+use App\Support\SaleInvoiceVoidService;
 use Carbon\Carbon;
 use Illuminate\Database\Query\Builder;
 use Illuminate\Http\RedirectResponse;
@@ -183,36 +185,54 @@ class CombinedVoucherReportController extends Controller
      */
     public function destroy(Request $request, string $category, int $voucherId): RedirectResponse
     {
-        DB::transaction(function () use ($category, $voucherId) {
-            if ($category === 'employee') {
+        if ($category === 'employee') {
+            DB::transaction(function () use ($voucherId) {
                 EmployeePaymentVoucher::query()->lockForUpdate()->findOrFail($voucherId)->delete();
-
-                return;
-            }
-
-            $voucher = VoucherEntry::query()
+            });
+        } else {
+            $voucherSource = VoucherEntry::query()
                 ->where('voucher_type', $category)
-                ->lockForUpdate()
                 ->findOrFail($voucherId);
-            if ($voucher->voucherable_type === ProductReturn::class) {
-                throw ValidationException::withMessages([
-                    'voucher' => 'Product return refund vouchers can only be removed by voiding the related invoice.',
-                ]);
-            }
-            if ($voucher->voucherable_type === PurchaseReturn::class) {
-                throw ValidationException::withMessages([
-                    'voucher' => 'Purchase return refund vouchers can only be removed by voiding the related purchase return.',
-                ]);
+            $saleInvoiceId = match ($voucherSource->voucherable_type) {
+                SaleInvoice::class => $voucherSource->voucherable_id,
+                CustomerLedger::class => CustomerLedger::query()
+                    ->whereKey($voucherSource->voucherable_id)
+                    ->value('sale_invoice_id'),
+                default => null,
+            };
+
+            if ($saleInvoiceId) {
+                $invoiceNo = app(SaleInvoiceVoidService::class)->void((int) $saleInvoiceId);
+
+                return redirect()->route('voucher-report.combined', $request->only(['period', 'date', 'month']))
+                    ->with('success', "Invoice {$invoiceNo} was voided; its stock and payment entries were reversed.");
             }
 
-            if ($voucher->voucherable_type === Supplierledger::class) {
-                $this->deleteSupplierPayment($voucher);
-            } elseif ($voucher->voucherable_type === CustomerLedger::class) {
-                $this->deleteCustomerPayment($voucher);
-            }
+            DB::transaction(function () use ($category, $voucherId) {
+                $voucher = VoucherEntry::query()
+                    ->where('voucher_type', $category)
+                    ->lockForUpdate()
+                    ->findOrFail($voucherId);
+                if ($voucher->voucherable_type === ProductReturn::class) {
+                    throw ValidationException::withMessages([
+                        'voucher' => 'Product return refund vouchers can only be removed by voiding the related invoice.',
+                    ]);
+                }
+                if ($voucher->voucherable_type === PurchaseReturn::class) {
+                    throw ValidationException::withMessages([
+                        'voucher' => 'Purchase return refund vouchers can only be removed by voiding the related purchase return.',
+                    ]);
+                }
 
-            $voucher->delete();
-        });
+                if ($voucher->voucherable_type === Supplierledger::class) {
+                    $this->deleteSupplierPayment($voucher);
+                } elseif ($voucher->voucherable_type === CustomerLedger::class) {
+                    $this->deleteCustomerPayment($voucher);
+                }
+
+                $voucher->delete();
+            });
+        }
 
         return redirect()->route('voucher-report.combined', $request->only(['period', 'date', 'month']))
             ->with('success', 'Voucher deleted successfully.');
