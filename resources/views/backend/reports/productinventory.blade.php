@@ -50,20 +50,35 @@
                             </div>
                         </div>
                         <div class="col-12 col-sm-6 col-xl">
-                            <div class="border-0 card bg-light h-100">
-                                <div class="card-body">
-                                    <div class="text-muted">Total Purchased Quantity</div>
-                                    <div class="flex-wrap gap-3 d-flex align-items-baseline">
-                                        <div class="fs-4 fw-bold">{{ number_format($total_purchased_quantity, 2) }}</div>
-                                        {{-- মোট quantity-র পাশেই কয়টি স্বতন্ত্র product কেনা হয়েছে তা দেখানো হয়। --}}
-                                        <div class="small text-muted">
-                                            Unique Products InStore:
-                                            <span class="fw-bold text-body">{{ number_format($unique_products_purchased) }}</span>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
+    <div class="border-0 card bg-light h-100">
+        <div class="card-body">
+            <div class="mb-2 text-muted">Purchase Summary</div>
+
+            <div class="d-flex align-items-center justify-content-between">
+
+                <!-- Left Column -->
+                <div class="text-center flex-fill">
+                    <div class="text-muted small">Total Purchased Qty</div>
+                    <div class="fs-4 fw-bold">
+                        {{ number_format($total_purchased_quantity, 2) }}
+                    </div>
+                </div>
+
+                <!-- Red Divider -->
+                <div style="width:2px;height:60px;background:red;"></div>
+
+                <!-- Right Column -->
+                <div class="text-center flex-fill">
+                    <div class="text-muted small">Unique Products</div>
+                    <div class="fs-4 fw-bold">
+                        {{ number_format($unique_products_purchased) }}
+                    </div>
+                </div>
+
+            </div>
+        </div>
+    </div>
+</div>
                         <div class="col-12 col-sm-6 col-xl">
                             <div class="border-0 card bg-light h-100">
                                 <div class="card-body">
