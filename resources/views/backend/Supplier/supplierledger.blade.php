@@ -252,7 +252,7 @@
                                             <th>Date</th>
                                             <th>Invoice No.</th>
                                             <th>Product</th>
-                                            <th>Quantity</th>
+                                            <th>QTY</th>
                                             <th>Unit Price</th>
                                             <th>Total</th>
                                             <th>Payment</th>

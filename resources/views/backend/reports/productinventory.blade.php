@@ -53,7 +53,7 @@
                             <div class="border-0 card bg-light h-100">
                                 <div class="card-body">
                                     <div class="text-muted">Total Purchased Quantity</div>
-                                    <div class="d-flex flex-wrap align-items-baseline gap-3">
+                                    <div class="flex-wrap gap-3 d-flex align-items-baseline">
                                         <div class="fs-4 fw-bold">{{ number_format($total_purchased_quantity, 2) }}</div>
                                         {{-- মোট quantity-র পাশেই কয়টি স্বতন্ত্র product কেনা হয়েছে তা দেখানো হয়। --}}
                                         <div class="small text-muted">
@@ -77,7 +77,7 @@
                             <div class="border-0 card bg-light h-100">
                                 <div class="card-body">
                                     <div class="text-muted">Current Stock</div>
-                                    <div class="fs-4 fw-bold">{{ number_format($total_stock, 2) }}</div>
+                                    <div class="fs-4 fw-bold">{{ number_format($total_stock,) }}</div>
                                 </div>
                             </div>
                         </div>
@@ -107,12 +107,12 @@
                                     <th scope="col">Product ID</th>
                                     <th scope="col">Product</th>
                                     {{-- প্রতিটি quantity-র সঙ্গে তার Unit একই cell-এ রাখলে অতিরিক্ত কলাম লাগে না। --}}
-                                    <th scope="col" class="text-end">Purchased Qty / Unit</th>
-                                    <th scope="col" class="text-end">Purchase Amount</th>
-                                    <th scope="col" class="text-end">Total Qty Sold / Unit</th>
+                                    <th scope="col" class="text-end">Purchased Qty&Unit</th>
+                                    <th scope="col" class="text-end">Purchase Rate</th>
+                                    <th scope="col" class="text-end">Total Sold Qty&Unit</th>
                                     <th scope="col" class="text-end">Total Sales</th>
                                     <th scope="col" class="text-end">Profit</th>
-                                    <th scope="col" class="text-end">Current Stock / Unit</th>
+                                    <th scope="col" class="text-end">Stock Qty&Unit</th>
                                     <th scope="col">Expiry</th>
                                     <th scope="col">Supplier</th>
                                     <th scope="col">Phone Number</th>
@@ -123,10 +123,10 @@
                                     <tr>
                                         <td>{{ $index + 1 }}</td>
                                         <td class="text-nowrap">SKU: #PRD-{{ str_pad((string) $row['id'], 5, '0', STR_PAD_LEFT) }}</td>
-                                        <td class="fw-semibold">{{ $row['name'] }}</td>
-                                        <td class="text-end">{{ number_format($row['purchased_quantity'], 2) }} {{ $row['unit_label'] }}</td>
+                                        <td class="text">{{ $row['name'] }}</td>
+                                        <td class="text-end">{{ number_format($row['purchased_quantity'] ) }} {{ $row['unit_label'] }}</td>
                                         <td class="text-end">৳{{ number_format($row['purchase_amount'], 2) }}</td>
-                                        <td class="text-end">{{ number_format($row['quantity_sold'], 2) }} {{ $row['unit_label'] }}</td>
+                                        <td class="text-end">{{ number_format($row['quantity_sold'],) }} {{ $row['unit_label'] }}</td>
                                         <td class="text-end">৳{{ number_format($row['revenue'], 2) }}</td>
                                         <td class="text-end">
                                             <span
@@ -134,7 +134,7 @@
                                                 ৳{{ number_format($row['profit'], 2) }}
                                             </span>
                                         </td>
-                                        <td class="text-end">{{ number_format($row['stock'], 2) }} {{ $row['unit_label'] }}</td>
+                                        <td class="text-end">{{ number_format($row['stock']) }} {{ $row['unit_label'] }}</td>
                                         <td>
                                             @if ($row['expiry_date'])
                                                 <div class="text-nowrap">{{ $row['expiry_date']->format('d M Y') }}</div>

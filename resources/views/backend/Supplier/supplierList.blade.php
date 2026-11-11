@@ -43,9 +43,9 @@
                     $allDue += $s->supplierledgers->sum('due');
                 }
             @endphp
-            <div class="row row-cols-1 row-cols-md-2 row-cols-xl-4 g-3 mb-3">
+            <div class="mb-3 row row-cols-1 row-cols-md-2 row-cols-xl-4 g-3">
                 <div class="col">
-                    <div class="card radius-10 border-start border-0 border-3 border-info mb-0">
+                    <div class="mb-0 border-0 card radius-10 border-start border-3 border-info">
                         <div class="card-body">
                             <div class="d-flex align-items-center">
                                 <div>
@@ -60,7 +60,7 @@
                     </div>
                 </div>
                 <div class="col">
-                    <div class="card radius-10 border-start border-0 border-3 border-primary mb-0">
+                    <div class="mb-0 border-0 card radius-10 border-start border-3 border-primary">
                         <div class="card-body">
                             <div class="d-flex align-items-center">
                                 <div>
@@ -75,7 +75,7 @@
                     </div>
                 </div>
                 <div class="col">
-                    <div class="card radius-10 border-start border-0 border-3 border-success mb-0">
+                    <div class="mb-0 border-0 card radius-10 border-start border-3 border-success">
                         <div class="card-body">
                             <div class="d-flex align-items-center">
                                 <div>
@@ -90,7 +90,7 @@
                     </div>
                 </div>
                 <div class="col">
-                    <div class="card radius-10 border-start border-0 border-3 border-danger mb-0">
+                    <div class="mb-0 border-0 card radius-10 border-start border-3 border-danger">
                         <div class="card-body">
                             <div class="d-flex align-items-center">
                                 <div>
@@ -108,9 +108,9 @@
 
             {{-- সাকসেস মেসেজ দেখানো হবে --}}
             @if (session('success'))
-                <div class="alert alert-success border-0 bg-success alert-dismissible fade show py-2">
+                <div class="py-2 border-0 alert alert-success bg-success alert-dismissible fade show">
                     <div class="d-flex align-items-center">
-                        <div class="font-35 text-white"><i class="bx bxs-check-circle"></i></div>
+                        <div class="text-white font-35"><i class="bx bxs-check-circle"></i></div>
                         <div class="ms-3">
                             <h6 class="mb-0 text-white">{{ session('success') }}</h6>
                         </div>
@@ -127,14 +127,14 @@
             @endif
 
             <div class="card">
-                <div class="card-header bg-transparent d-flex align-items-center justify-content-between">
+                <div class="bg-transparent card-header d-flex align-items-center justify-content-between">
                     <h6 class="mb-0 text-uppercase fw-bold"><i class="bx bx-list-ul me-1"></i> Supplier Details & Ledger Summary</h6>
                     <span class="badge bg-primary">{{ $suppliers->count() }} Suppliers</span>
                 </div>
                 <div class="card-body">
                     <div class="table-responsive">
                         <div id="example_wrapper" class="dataTables_wrapper dt-bootstrap5">
-                            <table id="myTable" class="table display table-striped align-middle table-hover">
+                            <table id="myTable" class="table align-middle display table-striped table-hover">
                                 <thead class="table-light">
                                     <tr>
                                         <th>No</th>
@@ -158,7 +158,7 @@
                                         <tr>
                                             <td>{{ $key + 1 }}</td>
                                             <td>
-                                                <div class="d-flex align-items-center gap-2">
+                                                <div class="gap-2 d-flex align-items-center">
                                                     @if ($supplier->logo)
                                                         <img src="{{ asset('uploads/suppliers/' . $supplier->logo) }}"
                                                             alt="{{ $supplier->name }}" class="product-img-2"
@@ -204,7 +204,7 @@
                                                 <div><i class="bx bx-phone text-success me-1"></i>{{ $supplier->phone }}</div>
                                             </td>
                                             <td>
-                                                <span class="text-muted"><i class="bx bx-map me-1"></i>{{ $supplier->address }}</span>
+                                                <span class="text-wrap"><i class="bx bx-map me-1"></i>{{ $supplier->address }}</span>
                                             </td>
                                             <td>
                                                 <strong class="text-primary">৳{{ number_format($total, 2) }}</strong>
@@ -220,11 +220,11 @@
                                                 @endif
                                             </td>
                                             <td class="text-center">
-                                                <div class="d-flex gap-1 justify-content-center">
+                                                <div class="gap-1 d-flex justify-content-center">
                                                     {{-- লিঙ্ক টু সাপ্লায়ার লেজার অ্যান্ড ডিটেইলস --}}
                                                     @can('supplier.ledger')
                                                     <a href="{{ route('supplier.ledger', $supplier->id) }}"
-                                                        class="btn btn-sm btn-info text-white" title="Supplier Details & Ledger">
+                                                        class="text-white btn btn-sm btn-info" title="Supplier Details & Ledger">
                                                         <i class="bx bx-file"></i> Ledger
                                                     </a>
                                                     @endcan

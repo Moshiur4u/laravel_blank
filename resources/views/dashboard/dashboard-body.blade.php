@@ -101,8 +101,8 @@
                                         <tr>
                                             <th>#</th>
                                             <th>Product</th>
-                                            <th class="text-end">Qty Sold</th>
-                                            <th class="text-end">Sales Amount</th>
+                                            <th class="text-end">QTY Sold</th>
+                                            <th class="text-end">Amount</th>
                                             <th class="text-end">Profit</th>
                                         </tr>
                                     </thead>
@@ -150,8 +150,8 @@
                                         <tr>
                                             <th>#</th>
                                             <th>Employee</th>
-                                            <th class="text-end">Invoices</th>
-                                            <th class="text-end">Sales Amount</th>
+                                            <th class="text-end">QTY Sold</th>
+                                            <th class="text-end">Amount</th>
                                         </tr>
                                     </thead>
                                     <tbody>

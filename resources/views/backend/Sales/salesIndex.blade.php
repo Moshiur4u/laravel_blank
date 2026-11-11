@@ -139,8 +139,8 @@
                                                     <th style="width: 110px;">Stock Left</th>
                                                     <th style="width: 110px;">Quantity</th>
                                                     <th style="width: 100px;">Unit</th>
-                                                    <th style="width: 150px;">Unit Price</th>
-                                                    <th style="width: 140px;">Line Total</th>
+                                                    <th style="width: 150px;">UnitPrice</th>
+                                                    <th style="width: 140px;">LineTotal</th>
                                                     <th></th>
                                                 </tr>
                                             </thead>
@@ -183,7 +183,7 @@
                                                         <td><input type="number" name="items[{{ $index }}][quantity]"
                                                                 class="form-control quantity-input" min="1" step="1"
                                                                 value="{{ $oldItem['quantity'] ?? 0 }}" required></td>
-                                                        <td class="unit-cell text-center">{{ $oldProduct ? ($oldProduct->quantity_size ?: ($oldProduct->stock_unit ?: 'Unit')) : '—' }}</td>
+                                                        <td class="text-center unit-cell">{{ $oldProduct ? ($oldProduct->quantity_size ?: ($oldProduct->stock_unit ?: 'Unit')) : '—' }}</td>
                                                         <td>
                                                             <input type="number"
                                                                 name="items[{{ $index }}][unit_price]"
@@ -364,7 +364,7 @@
                                 @forelse ($invoices as $invoice)
                                     <tr>
                                         <td>{{ $invoice->invoice_no }}</td>
-                                        <td>{{ $invoice->invoice_date->format('d M Y, h:i A') }}</td>
+                                        <td>{{ $invoice->invoice_date->format('d M Y') }}</td>
                                         <td>{{ $invoice->customer_phone }}</td>
                                         <td>{{ $invoice->employee->name ?? 'N/A' }}</td>
                                         <td>৳{{ number_format($invoice->total_amount, 2) }}</td>

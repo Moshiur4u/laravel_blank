@@ -102,7 +102,7 @@
                                     <th class="text-center">#</th>
                                     <th>Product</th>
                                     <th class="text-end">Unit Selling Price</th>
-                                    <th class="text-center">Quantity</th>
+                                    <th class="text-center">QTY</th>
                                     <th class="text-center">Unit</th>
                                     <th class="text-end">Amount</th>
                                 </tr>
