@@ -9,6 +9,7 @@ use App\Models\User;
 use App\Models\VoucherEntry;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\DB;
+use Spatie\Permission\Models\Permission;
 
 uses(RefreshDatabase::class);
 
@@ -138,6 +139,7 @@ test('sales use entered unit prices for invoices and profit and calculate AIT', 
 
 test('today invoice void restores stock and removes its ledger and linked vouchers', function () {
     $employee = User::factory()->create();
+    $employee->givePermissionTo(Permission::findOrCreate('Voide_today_Invoice', 'web'));
     $customer = Customer::create([
         'name' => 'Void Invoice Customer',
         'phone' => '01700000004',
@@ -203,8 +205,14 @@ test('today invoice void restores stock and removes its ledger and linked vouche
     expect((float) $product->fresh()->unit)->toBe(10.0);
 });
 
-test('an invoice from an earlier date cannot be voided', function () {
+test('today-only permission cannot void an earlier invoice but any-day permission can', function () {
     $employee = User::factory()->create();
+    $customer = Customer::create([
+        'name' => 'Old Invoice Customer',
+        'phone' => '01700000005',
+        'customer_type' => 'temporary',
+        'status' => 1,
+    ]);
     $categoryId = DB::table('product_categories')->insertGetId(['category_name' => 'Old Invoice Category']);
     $brandId = DB::table('brands')->insertGetId(['name' => 'Old Invoice Brand']);
     $product = Product::create([
@@ -218,12 +226,11 @@ test('an invoice from an earlier date cannot be voided', function () {
 
     $this->actingAs($employee)
         ->post(route('sales.store'), [
-            'customer_phone' => '01700000005',
+            'customer_phone' => $customer->phone,
             'save_customer' => 'no',
-            'customer_name' => 'Old Invoice Customer',
             'discount_amount' => 0,
             'vat_amount' => 0,
-            'amount_paid' => 0,
+            'amount_paid' => 30,
             'payment_method' => 'cash',
             'items' => [
                 ['product_id' => $product->id, 'quantity' => 2, 'unit_price' => 100],
@@ -232,12 +239,61 @@ test('an invoice from an earlier date cannot be voided', function () {
         ->assertRedirect();
 
     $invoice = SaleInvoice::query()->latest('id')->firstOrFail();
+    $ledger = CustomerLedger::query()->where('sale_invoice_id', $invoice->id)->firstOrFail();
+    $receipt = CustomerLedgerPayment::create([
+        'customer_ledger_id' => $ledger->id,
+        'payment_date' => today()->subDay(),
+        'amount' => 10,
+        'received_by' => $employee->id,
+    ]);
+    $ledger->update([
+        'payment_amount' => 40,
+        'due_amount' => 160,
+    ]);
+    VoucherEntry::createWithCode([
+        'voucher_type' => 'credit',
+        'expense_income_type' => $customer->name,
+        'voucher_date' => today()->subDay(),
+        'amount' => '10.00',
+        'reference' => $invoice->invoice_no,
+        'description' => 'Payment received from customer '.$customer->name,
+        'created_by' => $employee->id,
+        'created_by_name' => $employee->name,
+        'voucherable_type' => CustomerLedger::class,
+        'voucherable_id' => $ledger->id,
+    ]);
     $invoice->update(['invoice_date' => today()->subDay()]);
+
+    expect((float) $ledger->fresh()->due_amount)->toBe(160.0)
+        ->and((float) VoucherEntry::query()
+            ->where('voucherable_type', CustomerLedger::class)
+            ->where('voucherable_id', $ledger->id)
+            ->sum('amount'))->toBe(40.0);
+
+    $this->actingAs($employee)
+        ->delete(route('sales.destroy', $invoice->id))
+        ->assertForbidden();
+
+    $employee->givePermissionTo(Permission::findOrCreate('Voide_today_Invoice', 'web'));
 
     $this->actingAs($employee)
         ->delete(route('sales.destroy', $invoice->id))
         ->assertForbidden();
 
     $this->assertDatabaseHas('sale_invoices', ['id' => $invoice->id]);
-    expect((float) $product->fresh()->unit)->toBe(8.0);
+
+    $employee->givePermissionTo(Permission::findOrCreate('Voide_anyday_Invoice', 'web'));
+
+    $this->actingAs($employee)
+        ->delete(route('sales.destroy', $invoice->id))
+        ->assertRedirect(route('sales.index'))
+        ->assertSessionHas('success');
+
+    $this->assertDatabaseMissing('sale_invoices', ['id' => $invoice->id]);
+    $this->assertDatabaseMissing('sale_items', ['sale_invoice_id' => $invoice->id]);
+    $this->assertDatabaseMissing('customer_ledgers', ['id' => $ledger->id]);
+    $this->assertDatabaseMissing('customer_ledger_payments', ['id' => $receipt->id]);
+    $this->assertDatabaseMissing('voucher_entries', ['reference' => $invoice->invoice_no]);
+    expect((float) $product->fresh()->unit)->toBe(10.0)
+        ->and((float) $customer->ledgers()->sum('due_amount'))->toBe(0.0);
 });

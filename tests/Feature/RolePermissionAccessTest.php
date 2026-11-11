@@ -24,6 +24,10 @@ test('standard roles receive only their intended module permissions', function (
 
     expect($sales->hasPermissionTo('Dashboard'))->toBeTrue()
         ->and($sales->hasPermissionTo('sales.create'))->toBeTrue()
+        ->and(Permission::where('name', 'Voide_today_Invoice')->exists())->toBeTrue()
+        ->and(Permission::where('name', 'Voide_anyday_Invoice')->exists())->toBeTrue()
+        ->and($sales->hasPermissionTo('Voide_today_Invoice'))->toBeFalse()
+        ->and($sales->hasPermissionTo('Voide_anyday_Invoice'))->toBeFalse()
         ->and($sales->hasPermissionTo('money-receipt'))->toBeTrue()
         ->and($sales->hasPermissionTo('supplier.inactive'))->toBeFalse()
         ->and($sales->hasPermissionTo('customer.ledger'))->toBeTrue()

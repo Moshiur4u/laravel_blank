@@ -216,7 +216,7 @@
 
                     </li>
                 @endcan
-                @canany(['sales.create', 'sales.view', 'product.return'])
+                @canany(['sales.create', 'product.return'])
                     <li class="menu-label">Regural Operation</li>
                     <li>
                         <a href="javascript:;" class="has-arrow">
@@ -572,7 +572,7 @@
                         </ul>
 
 
-                        @canany(['product.return.report', 'reports.all_access'])
+                        @can(['product.return.report', 'reports.all_access'])
                             <ul>
                                 <a href="{{ route('product-returns.report') }}">
                                     <div class="parent-icon"><i class='bx bx-undo'></i></div>
@@ -597,14 +597,14 @@
                             </li>
                         </ul>
 
-                        @canany(['purchase.return.report', 'reports.all_access'])
+                        @can(['purchase.return.report', 'reports.all_access'])
                             <ul>
                                 <a href="{{ route('purchase-returns.report') }}">
                                     <div class="parent-icon"><i class='bx bx-undo'></i></div>
                                     <div class="menu-title">Purchase Return Report</div>
                                 </a>
                             </ul>
-                        @endcanany
+                        @endcan
                     </li>
                 @endcanany
 

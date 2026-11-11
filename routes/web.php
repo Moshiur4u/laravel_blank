@@ -286,7 +286,9 @@ Route::middleware(['auth', 'verified'])->group(function () {
 });
 
 Route::middleware(['auth', 'verified'])->group(function () {
-    Route::get('/sales', [SaleController::class, 'index'])->middleware('permission:sales.create|sales.view')->name('sales.index');
+    Route::get('/sales', [SaleController::class, 'index'])
+        ->middleware('permission:sales.create|sales.view|Voide_today_Invoice|Voide_anyday_Invoice')
+        ->name('sales.index');
     Route::get('/sales/blank-invoice', [SaleController::class, 'blankInvoice'])
         ->middleware('permission:sales.create|sales.view')
         ->name('sales.blank-invoice');
@@ -295,9 +297,11 @@ Route::middleware(['auth', 'verified'])->group(function () {
         ->name('money-receipts.create');
     Route::get('/sales/customer-lookup', [SaleController::class, 'customerByPhone'])->middleware('permission:sales.create|blank-invoice')->name('sales.customer.lookup');
     Route::post('/sales', [SaleController::class, 'store'])->middleware('permission:sales.create')->name('sales.store');
-    Route::get('/sales/invoice/{id}', [SaleController::class, 'invoice'])->middleware('permission:sales.report')->name('sales.invoice');
+    Route::get('/sales/invoice/{id}', [SaleController::class, 'invoice'])
+        ->middleware('permission:sales.report|Voide_today_Invoice|Voide_anyday_Invoice')
+        ->name('sales.invoice');
     Route::delete('/sales/invoice/{id}', [SaleController::class, 'destroy'])
-        ->middleware('permission:sales.create')
+        ->middleware('permission:Voide_today_Invoice|Voide_anyday_Invoice')
         ->name('sales.destroy');
     Route::get('/sales/delivery-challan/{id}', [SaleController::class, 'deliveryChallan'])
         ->middleware('permission:sales.view|sales.report')

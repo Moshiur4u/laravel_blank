@@ -24,6 +24,7 @@ test('product returns restore stock and proportionally adjust due and refund vou
         Permission::findOrCreate('product.return', 'web'),
         Permission::findOrCreate('product.return.report', 'web'),
         Permission::findOrCreate('sales.create', 'web'),
+        Permission::findOrCreate('Voide_today_Invoice', 'web'),
         Permission::findOrCreate('sales.report', 'web'),
         Permission::findOrCreate('customer.ledger', 'web'),
         Permission::findOrCreate('voucher.edit', 'web'),

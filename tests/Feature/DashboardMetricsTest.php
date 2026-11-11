@@ -16,6 +16,17 @@ use Spatie\Permission\Models\Permission;
 
 uses(RefreshDatabase::class);
 
+test('dashboard navigation does not show recent invoices', function () {
+    $user = User::factory()->create(['email_verified_at' => now()]);
+    $user->givePermissionTo(Permission::findOrCreate('Dashboard', 'web'));
+    $user->givePermissionTo(Permission::findOrCreate('sales.view', 'web'));
+
+    $this->actingAs($user)
+        ->get(route('dashboard'))
+        ->assertOk()
+        ->assertDontSee('Recent Invoices');
+});
+
 test('dashboard calculates profit from sales purchases and voucher totals', function () {
     $user = User::factory()->create([
         'email_verified_at' => now(),

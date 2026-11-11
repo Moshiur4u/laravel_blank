@@ -92,11 +92,18 @@ $saleInvoiceId = match ($voucherSource->voucherable_type) {
 };
 
 if ($saleInvoiceId) {
-    $invoiceNo = app(SaleInvoiceVoidService::class)->void((int) $saleInvoiceId);
+    $voidService = app(SaleInvoiceVoidService::class);
+    $invoice = SaleInvoice::query()->findOrFail((int) $saleInvoiceId);
+    if (! $voidService->canVoid($invoice)) {
+        return redirect()->route('voucher-report.combined', $request->only(['period', 'date', 'month']))
+            ->with('warning', 'You do not have permission to void this sale invoice, so the voucher was not deleted.');
+    }
+
+    $invoiceNo = $voidService->void((int) $saleInvoiceId);
 }
 ```
 
-যে credit voucher সরাসরি sale invoice অথবা সেই sale-এর customer ledger-এর সঙ্গে যুক্ত, সেটি delete করলে বিদ্যমান invoice-void transaction চালু হয়। ফলে stock, invoice, sale items, সংশ্লিষ্ট ledger, payment ও voucher একই transaction-এ উল্টে যায়। সাধারণ voucher-এর বর্তমান delete ও ledger adjustment অপরিবর্তিত। পুরোনো তারিখের invoice-এ আগের void restriction-ও বজায় থাকে। `SaleController::destroy()`-ও একই service ব্যবহার করে, তাই দুই জায়গার rollback logic আলাদা হয়ে যায়নি।
+যে credit voucher সরাসরি sale invoice অথবা সেই sale-এর customer ledger-এর সঙ্গে যুক্ত, সেটি delete করলে বিদ্যমান invoice-void transaction চালু হয়। ফলে stock, invoice, sale items, সংশ্লিষ্ট ledger, payment ও voucher একই transaction-এ উল্টে যায়। সাধারণ voucher-এর বর্তমান delete ও ledger adjustment অপরিবর্তিত। পুরোনো তারিখের invoice void permission না থাকলে 403 পেজ না দেখিয়ে একই report-এ ফিরে warning দেখায়; invoice ও voucher অক্ষত থাকে। `SaleController::destroy()`-ও একই service ব্যবহার করে, তাই দুই জায়গার rollback logic আলাদা হয়ে যায়নি।
 
 **ফাইল:** `app/Http/Controllers/SaleController.php`
 
@@ -142,7 +149,8 @@ expect((float) $product->fresh()->unit)->toBe(10.0);
 **ফাইল:** `resources/views/backend/Accounts Entries/combinedVoucherReport.blade.php`
 
 ```blade
-onsubmit="return confirm('Delete this voucher? If it is linked to a sale invoice, the invoice will be voided and its stock, ledger, and payment entries will be reversed.');"
+data-swal-delete
+data-delete-message="Delete this voucher? If it is linked to a sale invoice, the invoice will be voided and its stock, ledger, and payment entries will be reversed."
 ```
 
-Delete confirmation-এ এখন স্পষ্ট করে বলা হয় যে sale invoice-এর voucher হলে সম্পূর্ণ invoice void হবে এবং সংশ্লিষ্ট stock, ledger ও payment entry ফেরত যাবে।
+অনুমতিপ্রাপ্ত ও অনুমতিহীন উভয় ব্যবহারকারীর Delete confirmation SweetAlert2-এ একই rollback বার্তা দেখায়। Yes চাপলে অনুমতিপ্রাপ্ত ব্যবহারকারীর voucher delete হয়; অনুমতি না থাকা ব্যবহারকারীর ক্ষেত্রে delete request না পাঠিয়ে একই report page reload হয়। server-side permission বহাল থাকে।

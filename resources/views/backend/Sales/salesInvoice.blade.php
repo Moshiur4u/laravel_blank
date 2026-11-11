@@ -9,18 +9,17 @@
                     <a href="{{ route('sales.index') }}" class="btn btn-outline-secondary"><i class="bx bx-arrow-back me-1"></i>New
                         Sale</a>
                 @endcanany
-                @can('sales.create')
-                    @if ($invoice->invoice_date?->isToday())
-                        <form action="{{ route('sales.destroy', $invoice->id) }}" method="POST"
-                            onsubmit="return confirm('Void this invoice? Its stock and related payment entries will be reversed.')">
-                            @csrf
-                            @method('DELETE')
-                            <button type="submit" class="btn btn-outline-danger">
-                                <i class="bx bx-trash me-1"></i>Void Invoice
-                            </button>
-                        </form>
-                    @endif
-                @endcan
+                @if (auth()->user()->can('Voide_anyday_Invoice') ||
+                        (auth()->user()->can('Voide_today_Invoice') && $invoice->invoice_date?->isToday()))
+                    <form action="{{ route('sales.destroy', $invoice->id) }}" method="POST"
+                        onsubmit="return confirm('Delete this invoice? If it is linked to a sale voucher, the invoice will be voided and its stock, ledger, payment voucher amounts, and due balance will be reversed.')">
+                        @csrf
+                        @method('DELETE')
+                        <button type="submit" class="btn btn-outline-danger">
+                            <i class="bx bx-trash me-1"></i>Void Invoice
+                        </button>
+                    </form>
+                @endif
                 @can('sales.document.watermark')
                     @if ($organization?->logo)
                         <label class="mb-0 btn btn-outline-secondary">

@@ -90,6 +90,85 @@ test('combined voucher report can show a selected month', function () {
         ->assertViewHas('debitTotal', 12.0);
 });
 
+test('voucher viewers without delete permission see the confirmation and cannot delete vouchers', function () {
+    $viewer = User::factory()->create(['email_verified_at' => now()]);
+    $viewer->givePermissionTo(Permission::findOrCreate('voucher.report.view', 'web'));
+    $voucher = VoucherEntry::create([
+        'voucher_code' => 'DBV-COMBINED-NO-DELETE-001',
+        'voucher_type' => 'debit',
+        'expense_income_type' => 'Office expense',
+        'voucher_date' => today()->toDateString(),
+        'amount' => '12.00',
+        'created_by' => $viewer->id,
+        'created_by_name' => $viewer->name,
+    ]);
+
+    $this->actingAs($viewer)
+        ->get(route('voucher-report.combined', ['period' => 'daily', 'date' => today()->toDateString()]))
+        ->assertOk()
+        ->assertSee('data-voucher-delete-denied', false)
+        ->assertSee('data-delete-message="Delete this voucher? If it is linked to a sale invoice', false)
+        ->assertSee('window.location.assign(window.location.href)', false)
+        ->assertSee('DBV-COMBINED-NO-DELETE-001');
+
+    $this->delete(route('voucher-report.combined.destroy', [
+        'category' => 'debit',
+        'voucherId' => $voucher->id,
+    ]))->assertForbidden();
+
+    $this->assertDatabaseHas('voucher_entries', ['id' => $voucher->id]);
+});
+
+test('deleting an old invoice voucher without void permission returns to the report instead of 403', function () {
+    $viewer = User::factory()->create(['email_verified_at' => now()]);
+    $viewer->givePermissionTo(Permission::findOrCreate('voucher.report.view', 'web'));
+    $viewer->givePermissionTo(Permission::findOrCreate('voucher.delete', 'web'));
+    $invoice = SaleInvoice::create([
+        'invoice_no' => 'COMBINED-OLD-VOID-DENIED-001',
+        'user_id' => $viewer->id,
+        'invoice_date' => today()->subDay(),
+        'subtotal' => '100.00',
+        'discount_amount' => '0.00',
+        'vat_amount' => '0.00',
+        'previous_due' => '0.00',
+        'total_amount' => '100.00',
+        'amount_paid' => '0.00',
+        'due_amount' => '100.00',
+    ]);
+    $voucher = VoucherEntry::create([
+        'voucher_code' => 'CRV-OLD-VOID-DENIED-001',
+        'voucher_type' => 'credit',
+        'expense_income_type' => 'Old invoice payment',
+        'voucher_date' => today()->subDay(),
+        'amount' => '100.00',
+        'created_by' => $viewer->id,
+        'created_by_name' => $viewer->name,
+        'voucherable_type' => SaleInvoice::class,
+        'voucherable_id' => $invoice->id,
+    ]);
+    $reportUrl = route('voucher-report.combined', [
+        'period' => 'daily',
+        'date' => today()->toDateString(),
+    ]);
+
+    $this->actingAs($viewer)
+        ->delete(route('voucher-report.combined.destroy', [
+            'category' => 'credit',
+            'voucherId' => $voucher->id,
+        ]), [
+            'period' => 'daily',
+            'date' => today()->toDateString(),
+        ])
+        ->assertRedirect($reportUrl)
+        ->assertSessionHas(
+            'warning',
+            'You do not have permission to void this sale invoice, so the voucher was not deleted.'
+        );
+
+    $this->assertDatabaseHas('sale_invoices', ['id' => $invoice->id]);
+    $this->assertDatabaseHas('voucher_entries', ['id' => $voucher->id]);
+});
+
 test('combined voucher report edits and deletes employee and standalone voucher entries', function () {
     $creator = User::factory()->create(['email_verified_at' => now()]);
     $creator->givePermissionTo(Permission::findOrCreate('voucher.report.view', 'web'));
@@ -296,6 +375,7 @@ test('deleting a sale invoice voucher from the combined report voids the invoice
     $creator = User::factory()->create(['email_verified_at' => now()]);
     $creator->givePermissionTo(Permission::findOrCreate('voucher.report.view', 'web'));
     $creator->givePermissionTo(Permission::findOrCreate('voucher.delete', 'web'));
+    $creator->givePermissionTo(Permission::findOrCreate('Voide_anyday_Invoice', 'web'));
     $categoryId = DB::table('product_categories')->insertGetId(['category_name' => 'Combined Void Category']);
     $brandId = DB::table('brands')->insertGetId(['name' => 'Combined Void Brand']);
     $product = Product::create([

@@ -159,11 +159,6 @@
                         </div>
                     </div>
 
-                    @php
-                        $canManageVouchers = auth()
-                            ->user()
-                            ->canAny(['voucher.edit', 'voucher.delete']);
-                    @endphp
                     <div class="table-responsive">
                         <table class="table align-middle table-bordered table-striped">
                             <thead class="table-light">
@@ -177,9 +172,7 @@
                                     <th>Employee</th>
                                     <th>Created By</th>
                                     <th>Reference / Description</th>
-                                    @if ($canManageVouchers)
-                                        <th class="no-print">Actions</th>
-                                    @endif
+                                    <th class="no-print">Actions</th>
                                 </tr>
                             </thead>
                             <tbody>
@@ -195,7 +188,8 @@
                                             ],
                                             true,
                                         );
-                                        $isReturnVoucher = $voucher->voucherable_type === \App\Models\ProductReturn::class;
+                                        $isReturnVoucher =
+                                            $voucher->voucherable_type === \App\Models\ProductReturn::class;
                                     @endphp
                                     <tr>
                                         <td>{{ \Illuminate\Support\Carbon::parse($voucher->report_date)->format('d M Y') }}
@@ -232,12 +226,11 @@
                                         <td>{{ $voucher->employee_name ?: '—' }}</td>
                                         <td>{{ $voucher->created_by_name }}</td>
                                         <td>{{ $voucher->reference ?: $voucher->description ?: '—' }}</td>
-                                        @if ($canManageVouchers)
-                                            <td class="no-print">
-                                                @if ($isReturnVoucher)
-                                                    <span class="text-muted small">Managed by product return</span>
-                                                @else
-                                                    @canany(['voucher.edit', 'reports.all_access'])
+                                        <td class="no-print">
+                                            @if ($isReturnVoucher)
+                                                <span class="text-muted small">Managed by product return</span>
+                                            @else
+                                                @canany(['voucher.edit', 'reports.all_access'])
                                                     <details>
                                                         <summary class="btn btn-sm btn-outline-primary">Edit</summary>
                                                         <form method="POST"
@@ -270,7 +263,8 @@
                                                                     class="mb-2 form-select form-select-sm" required>
                                                                     @foreach ($expenseTypes as $type => $label)
                                                                         <option value="{{ $type }}"
-                                                                            @selected($voucher->voucher_head === $type)>{{ $label }}
+                                                                            @selected($voucher->voucher_head === $type)>
+                                                                            {{ $label }}
                                                                         </option>
                                                                     @endforeach
                                                                 </select>
@@ -283,7 +277,8 @@
                                                             @elseif (!$isLinkedVoucher)
                                                                 <label class="mb-1 form-label small">Voucher Head</label>
                                                                 <input type="text" name="expense_income_type"
-                                                                    maxlength="100" class="mb-2 form-control form-control-sm"
+                                                                    maxlength="100"
+                                                                    class="mb-2 form-control form-control-sm"
                                                                     value="{{ $voucher->voucher_head }}">
                                                                 <label class="mb-1 form-label small">Reference</label>
                                                                 <input type="text" name="reference" maxlength="100"
@@ -296,12 +291,12 @@
                                                                 Changes</button>
                                                         </form>
                                                     </details>
-                                                    @endcanany
-                                                    @canany(['voucher.delete', 'reports.all_access'])
+                                                @endcanany
+                                                @canany(['voucher.delete', 'reports.all_access'])
                                                     <form method="POST"
                                                         action="{{ route('voucher-report.combined.destroy', [$voucher->voucher_category, $voucher->voucher_id]) }}"
-                                                        class="mt-2"
-                                                        onsubmit="return confirm('Delete this voucher? If it is linked to a sale invoice, the invoice will be voided and its stock, ledger, and payment entries will be reversed.');">
+                                                        class="mt-2" data-swal-delete
+                                                        data-delete-message="Delete this voucher? If it is linked to a sale invoice, the invoice will be voided and its stock, ledger, and payment entries will be reversed.">
                                                         @csrf
                                                         @method('DELETE')
                                                         <input type="hidden" name="period" value="{{ $period }}">
@@ -312,14 +307,19 @@
                                                         <button type="submit"
                                                             class="btn btn-sm btn-outline-danger">Delete</button>
                                                     </form>
-                                                    @endcanany
-                                                @endif
-                                            </td>
-                                        @endif
+                                                @else
+                                                    <button type="button" class="mt-2 btn btn-sm btn-outline-danger"
+                                                        data-voucher-delete-denied
+                                                        data-delete-message="Delete this voucher? If it is linked to a sale invoice, the invoice will be voided and its stock, ledger, and payment entries will be reversed.">
+                                                        Delete
+                                                    </button>
+                                                @endcanany
+                                            @endif
+                                        </td>
                                     </tr>
                                 @empty
                                     <tr>
-                                        <td colspan="{{ $canManageVouchers ? 10 : 9 }}"
+                                        <td colspan="10"
                                             class="py-4 text-center text-muted">No vouchers found for this period.</td>
                                     </tr>
                                 @endforelse
@@ -437,5 +437,53 @@
             document.getElementById('daily-date-field').style.display = isMonthly ? 'none' : 'block';
             document.getElementById('monthly-date-field').style.display = isMonthly ? 'block' : 'none';
         });
+    </script>
+@endsection
+
+@section('scripts')
+    <script>
+        document.addEventListener('click', function(event) {
+            if (!(event.target instanceof Element)) {
+                return;
+            }
+
+            const deleteControl = event.target.closest('[data-voucher-delete-denied]');
+            if (!deleteControl) {
+                return;
+            }
+
+            if (typeof window.Swal?.fire !== 'function') {
+                console.error('SweetAlert2 is unavailable; voucher deletion remains blocked.');
+                window.alert('You do not have permission to delete this voucher.');
+                return;
+            }
+
+            window.Swal.fire({
+                title: 'Do you want to delete?',
+                text: deleteControl.dataset.deleteMessage,
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonText: 'Yes',
+                cancelButtonText: 'No',
+                reverseButtons: true,
+                focusCancel: true,
+            }).catch(function(error) {
+                console.error('Unable to display the delete confirmation.', error);
+                window.alert('Delete confirmation failed. Please reload the page and try again.');
+            });
+        });
+
+        @if (session('warning'))
+            if (typeof window.Swal?.fire === 'function') {
+                window.Swal.fire({
+                    title: 'Voucher not deleted',
+                    text: @json(session('warning')),
+                    icon: 'warning',
+                });
+            } else {
+                console.error('SweetAlert2 is unavailable; voucher deletion was blocked.');
+                window.alert(@json(session('warning')));
+            }
+        @endif
     </script>
 @endsection

@@ -202,7 +202,14 @@ class CombinedVoucherReportController extends Controller
             };
 
             if ($saleInvoiceId) {
-                $invoiceNo = app(SaleInvoiceVoidService::class)->void((int) $saleInvoiceId);
+                $voidService = app(SaleInvoiceVoidService::class);
+                $invoice = SaleInvoice::query()->findOrFail((int) $saleInvoiceId);
+                if (! $voidService->canVoid($invoice)) {
+                    return redirect()->route('voucher-report.combined', $request->only(['period', 'date', 'month']))
+                        ->with('warning', 'You do not have permission to void this sale invoice, so the voucher was not deleted.');
+                }
+
+                $invoiceNo = $voidService->void((int) $saleInvoiceId);
 
                 return redirect()->route('voucher-report.combined', $request->only(['period', 'date', 'month']))
                     ->with('success', "Invoice {$invoiceNo} was voided; its stock and payment entries were reversed.");

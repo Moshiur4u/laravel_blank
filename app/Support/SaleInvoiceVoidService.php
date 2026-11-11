@@ -12,14 +12,20 @@ use Illuminate\Support\Facades\DB;
 
 class SaleInvoiceVoidService
 {
+    public function canVoid(SaleInvoice $invoice): bool
+    {
+        $user = auth()->user();
+        $canVoidAnyDay = $user?->can('Voide_anyday_Invoice') ?? false;
+        $canVoidToday = $user?->can('Voide_today_Invoice') ?? false;
+
+        return $canVoidAnyDay || ($canVoidToday && $invoice->invoice_date?->isToday());
+    }
+
     public function void(int $id): string
     {
         return DB::transaction(function () use ($id): string {
             $invoice = SaleInvoice::query()->lockForUpdate()->findOrFail($id);
-
-            if (! $invoice->invoice_date?->isToday()) {
-                abort(403, 'Only today’s sale invoices can be voided.');
-            }
+            abort_unless($this->canVoid($invoice), 403);
 
             $items = $invoice->items()->lockForUpdate()->get();
             $returns = ProductReturn::query()
