@@ -30,22 +30,38 @@
                 </div>
                 <div class="card-body">
                     <form action="{{ route('voucher-report.combined') }}" method="GET" class="row g-3 align-items-end">
-                        <div class="col-md-4">
+                        <div class="col-md-3">
                             <label for="period" class="form-label">Report period</label>
                             <select name="period" id="period" class="form-select">
                                 <option value="daily" {{ $period === 'daily' ? 'selected' : '' }}>Daily</option>
                                 <option value="monthly" {{ $period === 'monthly' ? 'selected' : '' }}>Monthly</option>
                             </select>
                         </div>
-                        <div class="col-md-4" id="daily-date-field">
+                        <div class="col-md-3" id="daily-date-field">
                             <label for="date" class="form-label">Voucher date</label>
                             <input type="date" name="date" id="date" class="form-control"
                                 value="{{ $period === 'daily' ? $startDate : today()->toDateString() }}">
                         </div>
-                        <div class="col-md-4" id="monthly-date-field">
+                        <div class="col-md-3" id="monthly-date-field">
                             <label for="month" class="form-label">Voucher month</label>
                             <input type="month" name="month" id="month" class="form-control"
                                 value="{{ $selectedMonth }}">
+                        </div>
+                        <div class="col-md-3">
+                            <label for="voucher" class="form-label">Voucher No.</label>
+                            <input type="text" name="voucher" id="voucher" class="form-control" maxlength="100"
+                                value="{{ $voucherSearch }}" placeholder="Search voucher number">
+                        </div>
+                        <div class="col-md-3">
+                            <label for="created_by" class="form-label">Created by</label>
+                            <select name="created_by" id="created_by" class="form-select">
+                                <option value="">All users</option>
+                                @foreach ($creators as $creator)
+                                    <option value="{{ $creator->id }}" @selected((string) $selectedCreator === (string) $creator->id)>
+                                        {{ $creator->name }}
+                                    </option>
+                                @endforeach
+                            </select>
                         </div>
                         <div class="gap-2 col-12 d-flex">
                             <button type="submit" class="btn btn-primary">
@@ -98,62 +114,93 @@
                     </div>
 
                     <div class="mb-4 row g-3 print-summary">
-                        <div class="col-md-3 summary-card">
-                            <div class="border-0 card bg-light h-100 voucher-count-card">
+                        <div class="col-12 col-sm-6 col-xl">
+                            <div class="border-0 card bg-light h-100">
                                 <div class="card-body">
-                                    <div class="mb-2 text-muted">Cash in Hand</div>
-                                    <div
-                                        class="mb-2 fs-5 fw-bold {{ $cashInHandTotal >= 0 ? 'text-success' : 'text-danger' }}">
-                                        ৳{{ number_format($cashInHandTotal, 2) }}
+                                    <div class="mb-2 text-muted">Cash Summary</div>
+
+                                    <div class="d-flex align-items-center justify-content-between">
+                                        <div class="text-center flex-fill">
+                                            <div class="mb-2 text-muted">inHand</div>
+                                            <div
+                                                class="mb-2 fs-5 fw-bold {{ $cashInHandTotal >= 0 ? 'text-success' : 'text-danger' }}">
+                                                ৳{{ number_format($cashInHandTotal, 2) }}
+                                            </div>
+                                        </div>
                                     </div>
                                 </div>
                             </div>
                         </div>
-                        <div class="col-md-3 summary-card">
+                        <div class="col-12 col-sm-6 col-xl">
                             <div class="border-0 card bg-light h-100">
                                 <div class="card-body">
+                                    <div class="mb-2 text-muted">Employee Voucher Summary</div>
 
-                                    <div class="gap-3 d-flex justify-content-between">
-                                        <div>
-                                            <div class="small text-muted">Employee vouchers</div>
+                                    <div class="d-flex align-items-center justify-content-between">
+                                        <!-- Right Column -->
+                                        <div class="text-center flex-fill">
+                                            <div class="small text-muted">Vouchers</div>
                                             <div class="fs-5 fw-bold">{{ number_format($employeeVoucherCount) }}
                                             </div>
                                         </div>
+                                        <!-- Red Divider -->
+                                        <div style="width:4px;height:60px;background:red;"></div>
+                                        <!-- Left Column -->
+                                        <div class="text-center flex-fill">
+                                            <div class="text-muted">Payment</div>
+                                            <div class="fs-5 fw-bold">৳{{ number_format($employeeTotal, 2) }}</div>
+                                        </div>
                                     </div>
-                                    <div class="text-muted">Employee Payment</div>
-                                    <div class="fs-5 fw-bold">৳{{ number_format($employeeTotal, 2) }}</div>
                                 </div>
                             </div>
                         </div>
-                        <div class="col-md-3 summary-card">
+
+                        <div class="col-12 col-sm-6 col-xl">
                             <div class="border-0 card bg-light h-100">
                                 <div class="card-body">
+                                    <div class="mb-2 text-muted">Debit Voucher Summary</div>
 
-                                    <div class="gap-3 d-flex justify-content-between">
-                                        <div>
-                                            <div class="small text-muted">Debit vouchers</div>
+                                    <div class="d-flex align-items-center justify-content-between">
+                                        <!-- Right Column -->
+                                        <div class="text-center flex-fill">
+                                            <div class="small text-muted">Vouchers</div>
                                             <div class="fs-5 fw-bold text-danger">{{ number_format($debitVoucherCount) }}
                                             </div>
                                         </div>
-                                    </div>
-                                    <div class="text-muted">Other Payment</div>
-                                    <div class="fs-5 fw-bold text-danger">৳{{ number_format($debitTotal, 2) }}</div>
-                                </div>
-                            </div>
-                        </div>
-                        <div class="col-md-3 summary-card">
-                            <div class="border-0 card bg-light h-100">
-                                <div class="card-body">
-
-                                    <div class="gap-3 d-flex justify-content-between">
-                                        <div class="text-end">
-                                            <div class="small text-muted">Credit vouchers</div>
-                                            <div class="fs-5 fw-bold text-success">{{ number_format($creditVoucherCount) }}
+                                        <!-- Red Divider -->
+                                        <div style="width:4px;height:60px;background:red;"></div>
+                                        <!-- Left Column -->
+                                        <div class="text-center flex-fill">
+                                            <div class="text-muted">Amount</div>
+                                            <div class="fs-5 fw-bold text-danger">৳{{ number_format($debitTotal, 2) }}
                                             </div>
                                         </div>
                                     </div>
-                                    <div class="text-muted">Total Credit</div>
-                                    <div class="fs-5 fw-bold text-success">৳{{ number_format($creditTotal, 2) }}</div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-12 col-sm-6 col-xl">
+                            <div class="border-0 card bg-light h-100">
+                                <div class="card-body">
+                                    <div class="mb-2 text-muted">Credit Voucher Summary</div>
+
+                                    <div class="d-flex align-items-center justify-content-between">
+                                        <!-- Right Column -->
+                                        <div class="text-center flex-fill">
+                                            <div class="small text-muted">Vouchers</div>
+                                            <div class="fs-5 fw-bold text-success">
+                                                {{ number_format($creditVoucherCount) }}
+                                            </div>
+                                        </div>
+                                        <!-- Green Divider -->
+                                        <div style="width:4px;height:60px;background:green;"></div>
+                                        <!-- Left Column -->
+                                        <div class="text-center flex-fill">
+                                            <div class="text-muted">Amount</div>
+                                            <div class="fs-5 fw-bold text-success">৳{{ number_format($creditTotal, 2) }}
+                                            </div>
+                                        </div>
+                                    </div>
                                 </div>
                             </div>
                         </div>
@@ -244,6 +291,8 @@
                                                                 value="{{ $period === 'daily' ? $startDate : '' }}">
                                                             <input type="hidden" name="month"
                                                                 value="{{ $period === 'monthly' ? $selectedMonth : '' }}">
+                                                            <input type="hidden" name="voucher" value="{{ $voucherSearch }}">
+                                                            <input type="hidden" name="created_by" value="{{ $selectedCreator }}">
                                                             <label class="mb-1 form-label small">Date</label>
                                                             <input type="date"
                                                                 name="{{ $isEmployeeVoucher ? 'payment_date' : 'voucher_date' }}"
@@ -277,8 +326,7 @@
                                                             @elseif (!$isLinkedVoucher)
                                                                 <label class="mb-1 form-label small">Voucher Head</label>
                                                                 <input type="text" name="expense_income_type"
-                                                                    maxlength="100"
-                                                                    class="mb-2 form-control form-control-sm"
+                                                                    maxlength="100" class="mb-2 form-control form-control-sm"
                                                                     value="{{ $voucher->voucher_head }}">
                                                                 <label class="mb-1 form-label small">Reference</label>
                                                                 <input type="text" name="reference" maxlength="100"
@@ -304,6 +352,8 @@
                                                             value="{{ $period === 'daily' ? $startDate : '' }}">
                                                         <input type="hidden" name="month"
                                                             value="{{ $period === 'monthly' ? $selectedMonth : '' }}">
+                                                        <input type="hidden" name="voucher" value="{{ $voucherSearch }}">
+                                                        <input type="hidden" name="created_by" value="{{ $selectedCreator }}">
                                                         <button type="submit"
                                                             class="btn btn-sm btn-outline-danger">Delete</button>
                                                     </form>
@@ -319,8 +369,8 @@
                                     </tr>
                                 @empty
                                     <tr>
-                                        <td colspan="10"
-                                            class="py-4 text-center text-muted">No vouchers found for this period.</td>
+                                        <td colspan="10" class="py-4 text-center text-muted">No vouchers found for this
+                                            period.</td>
                                     </tr>
                                 @endforelse
                             </tbody>

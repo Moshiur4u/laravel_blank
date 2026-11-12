@@ -14,6 +14,7 @@ use App\Models\VoucherEntry;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\DB;
 use Spatie\Permission\Models\Permission;
+use Spatie\Permission\Models\Role;
 
 uses(RefreshDatabase::class);
 
@@ -88,6 +89,79 @@ test('combined voucher report can show a selected month', function () {
         ->assertViewHas('startDate', '2026-10-01')
         ->assertViewHas('endDate', '2026-10-31')
         ->assertViewHas('debitTotal', 12.0);
+});
+
+test('combined voucher report filters vouchers by voucher number and creator', function () {
+    $creator = User::factory()->create(['name' => 'Voucher Creator']);
+    $otherCreator = User::factory()->create(['name' => 'Other Creator']);
+
+    VoucherEntry::create([
+        'voucher_code' => 'DBV-FILTER-MATCH-001',
+        'voucher_type' => 'debit',
+        'expense_income_type' => 'Office expense',
+        'voucher_date' => '2026-10-13',
+        'amount' => '30.00',
+        'created_by' => $creator->id,
+        'created_by_name' => $creator->name,
+    ]);
+    VoucherEntry::create([
+        'voucher_code' => 'DBV-FILTER-MATCH-002',
+        'voucher_type' => 'debit',
+        'expense_income_type' => 'Office expense',
+        'voucher_date' => '2026-10-13',
+        'amount' => '20.00',
+        'created_by' => $otherCreator->id,
+        'created_by_name' => $otherCreator->name,
+    ]);
+    VoucherEntry::create([
+        'voucher_code' => 'CRV-FILTER-OTHER-001',
+        'voucher_type' => 'credit',
+        'expense_income_type' => 'Other income',
+        'voucher_date' => '2026-10-13',
+        'amount' => '10.00',
+        'created_by' => $creator->id,
+        'created_by_name' => $creator->name,
+    ]);
+
+    $this->actingAs($creator)
+        ->get(route('voucher-report.combined', [
+            'period' => 'daily',
+            'date' => '2026-10-13',
+            'voucher' => 'FILTER-MATCH',
+            'created_by' => $creator->id,
+        ]))
+        ->assertOk()
+        ->assertSee('DBV-FILTER-MATCH-001')
+        ->assertDontSee('DBV-FILTER-MATCH-002')
+        ->assertDontSee('CRV-FILTER-OTHER-001')
+        ->assertViewHas('debitVoucherCount', 1)
+        ->assertViewHas('debitTotal', 30.0)
+        ->assertViewHas('creditVoucherCount', 0)
+        ->assertViewHas('voucherSearch', 'FILTER-MATCH')
+        ->assertViewHas('selectedCreator', $creator->id);
+});
+
+test('combined voucher creator options hide admins from non-admin users', function () {
+    $admin = User::factory()->create(['email_verified_at' => now()]);
+    $admin->assignRole(Role::findOrCreate('admin', 'web'));
+    $viewer = User::factory()->create(['email_verified_at' => now()]);
+    $reportPermission = Permission::findOrCreate('voucher.report.view', 'web');
+    $admin->givePermissionTo($reportPermission);
+    $viewer->givePermissionTo($reportPermission);
+
+    $viewerResponse = $this->actingAs($viewer)
+        ->get(route('voucher-report.combined'))
+        ->assertOk();
+
+    expect($viewerResponse->viewData('creators')->contains('id', $admin->id))->toBeFalse()
+        ->and($viewerResponse->viewData('creators')->contains('id', $viewer->id))->toBeTrue();
+
+    $adminResponse = $this->actingAs($admin)
+        ->get(route('voucher-report.combined'))
+        ->assertOk();
+
+    expect($adminResponse->viewData('creators')->contains('id', $admin->id))->toBeTrue()
+        ->and($adminResponse->viewData('creators')->contains('id', $viewer->id))->toBeTrue();
 });
 
 test('voucher viewers without delete permission see the confirmation and cannot delete vouchers', function () {

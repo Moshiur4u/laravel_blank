@@ -35,6 +35,8 @@ class CombinedVoucherReportController extends Controller
             'period' => ['nullable', 'in:daily,monthly'],
             'date' => ['nullable', 'required_if:period,daily', 'date'],
             'month' => ['nullable', 'required_if:period,monthly', 'date_format:Y-m'],
+            'voucher' => ['nullable', 'string', 'max:100'],
+            'created_by' => ['nullable', 'integer', 'exists:users,id'],
         ]);
 
         if ($validator->fails()) {
@@ -56,7 +58,9 @@ class CombinedVoucherReportController extends Controller
             $selectedMonth = today()->format('Y-m');
         }
 
-        $reportQuery = fn () => $this->combinedVoucherQuery($startDate, $endDate);
+        $voucherSearch = $filters['voucher'] ?? null;
+        $createdBy = isset($filters['created_by']) ? (int) $filters['created_by'] : null;
+        $reportQuery = fn () => $this->combinedVoucherQuery($startDate, $endDate, $voucherSearch, $createdBy);
 
         $totals = $reportQuery()
             ->selectRaw("SUM(CASE WHEN voucher_category = 'employee' THEN 1 ELSE 0 END) as employee_voucher_count")
@@ -77,11 +81,19 @@ class CombinedVoucherReportController extends Controller
             ->paginate(30)
             ->withQueryString();
 
+        $creatorsQuery = User::query();
+        if (! auth()->user()->hasRole('admin')) {
+            $creatorsQuery->whereDoesntHave('roles', fn ($query) => $query->where('name', 'admin'));
+        }
+
         return view('backend.Accounts Entries.combinedVoucherReport', [
             'period' => $period,
             'startDate' => $startDate,
             'endDate' => $endDate,
             'selectedMonth' => $selectedMonth,
+            'voucherSearch' => $voucherSearch,
+            'selectedCreator' => $createdBy,
+            'creators' => $creatorsQuery->orderBy('name')->get(['id', 'name']),
             'vouchers' => $vouchers,
             'employeeVoucherCount' => (int) $totals->employee_voucher_count,
             'debitVoucherCount' => (int) $totals->debit_voucher_count,
@@ -176,7 +188,7 @@ class CombinedVoucherReportController extends Controller
             });
         }
 
-        return redirect()->route('voucher-report.combined', $request->only(['period', 'date', 'month']))
+        return redirect()->route('voucher-report.combined', $request->only(['period', 'date', 'month', 'voucher', 'created_by']))
             ->with('success', 'Voucher updated successfully.');
     }
 
@@ -205,13 +217,13 @@ class CombinedVoucherReportController extends Controller
                 $voidService = app(SaleInvoiceVoidService::class);
                 $invoice = SaleInvoice::query()->findOrFail((int) $saleInvoiceId);
                 if (! $voidService->canVoid($invoice)) {
-                    return redirect()->route('voucher-report.combined', $request->only(['period', 'date', 'month']))
+                    return redirect()->route('voucher-report.combined', $request->only(['period', 'date', 'month', 'voucher', 'created_by']))
                         ->with('warning', 'You do not have permission to void this sale invoice, so the voucher was not deleted.');
                 }
 
                 $invoiceNo = $voidService->void((int) $saleInvoiceId);
 
-                return redirect()->route('voucher-report.combined', $request->only(['period', 'date', 'month']))
+                return redirect()->route('voucher-report.combined', $request->only(['period', 'date', 'month', 'voucher', 'created_by']))
                     ->with('success', "Invoice {$invoiceNo} was voided; its stock and payment entries were reversed.");
             }
 
@@ -241,7 +253,7 @@ class CombinedVoucherReportController extends Controller
             });
         }
 
-        return redirect()->route('voucher-report.combined', $request->only(['period', 'date', 'month']))
+        return redirect()->route('voucher-report.combined', $request->only(['period', 'date', 'month', 'voucher', 'created_by']))
             ->with('success', 'Voucher deleted successfully.');
     }
 
@@ -254,6 +266,8 @@ class CombinedVoucherReportController extends Controller
             'period' => ['nullable', 'in:daily,monthly'],
             'date' => ['nullable', 'required_if:period,daily', 'date'],
             'month' => ['nullable', 'required_if:period,monthly', 'date_format:Y-m'],
+            'voucher' => ['nullable', 'string', 'max:100'],
+            'created_by' => ['nullable', 'integer', 'exists:users,id'],
         ]);
 
         if ($validator->fails()) {
@@ -275,7 +289,9 @@ class CombinedVoucherReportController extends Controller
             $periodLabel = Carbon::parse($startDate)->format('d M Y');
         }
 
-        $totals = $this->combinedVoucherQuery($startDate, $endDate)
+        $voucherSearch = $filters['voucher'] ?? null;
+        $createdBy = isset($filters['created_by']) ? (int) $filters['created_by'] : null;
+        $totals = $this->combinedVoucherQuery($startDate, $endDate, $voucherSearch, $createdBy)
             ->selectRaw("SUM(CASE WHEN voucher_category = 'employee' THEN 1 ELSE 0 END) as employee_voucher_count")
             ->selectRaw("SUM(CASE WHEN voucher_category = 'debit' THEN 1 ELSE 0 END) as debit_voucher_count")
             ->selectRaw("SUM(CASE WHEN voucher_category = 'credit' THEN 1 ELSE 0 END) as credit_voucher_count")
@@ -283,7 +299,7 @@ class CombinedVoucherReportController extends Controller
             ->selectRaw("SUM(CASE WHEN voucher_category = 'debit' THEN amount ELSE 0 END) as debit_total")
             ->selectRaw("SUM(CASE WHEN voucher_category = 'credit' THEN amount ELSE 0 END) as credit_total")
             ->first();
-        $vouchers = $this->combinedVoucherQuery($startDate, $endDate)
+        $vouchers = $this->combinedVoucherQuery($startDate, $endDate, $voucherSearch, $createdBy)
             ->orderByDesc('report_date')
             ->orderByDesc('voucher_code')
             ->cursor();
@@ -331,7 +347,12 @@ class CombinedVoucherReportController extends Controller
     /**
      * Builds the shared union query for combined report rows.
      */
-    private function combinedVoucherQuery(string $startDate, string $endDate): Builder
+    private function combinedVoucherQuery(
+        string $startDate,
+        string $endDate,
+        ?string $voucherSearch = null,
+        ?int $createdBy = null
+    ): Builder
     {
         $employeeVouchers = DB::table('employee_payment_vouchers')
             ->leftJoin('users as creators', 'creators.id', '=', 'employee_payment_vouchers.created_by')
@@ -342,6 +363,7 @@ class CombinedVoucherReportController extends Controller
             ->selectRaw("'employee' as voucher_category")
             ->addSelect('employee_payment_vouchers.expense_type as voucher_head')
             ->addSelect('employee_payment_vouchers.employee_name')
+            ->addSelect('employee_payment_vouchers.created_by as created_by_id')
             ->selectRaw("COALESCE(creators.name, 'Unknown / legacy voucher') as created_by_name")
             ->addSelect('employee_payment_vouchers.amount')
             ->addSelect('employee_payment_vouchers.reference')
@@ -357,6 +379,7 @@ class CombinedVoucherReportController extends Controller
             ->addSelect('voucher_type as voucher_category')
             ->addSelect('expense_income_type as voucher_head')
             ->selectRaw('NULL as employee_name')
+            ->addSelect('created_by as created_by_id')
             ->addSelect('created_by_name')
             ->addSelect('amount')
             ->addSelect('reference')
@@ -364,7 +387,17 @@ class CombinedVoucherReportController extends Controller
             ->addSelect('voucherable_type')
             ->addSelect('voucherable_id');
 
-        return DB::query()->fromSub($employeeVouchers->unionAll($generalVouchers), 'combined_vouchers');
+        $query = DB::query()->fromSub($employeeVouchers->unionAll($generalVouchers), 'combined_vouchers');
+
+        if ($voucherSearch !== null && $voucherSearch !== '') {
+            $query->where('voucher_code', 'like', '%'.$voucherSearch.'%');
+        }
+
+        if ($createdBy !== null) {
+            $query->where('created_by_id', $createdBy);
+        }
+
+        return $query;
     }
 
     private function updateSupplierPayment(VoucherEntry $voucher, string $date, string $amount): void
