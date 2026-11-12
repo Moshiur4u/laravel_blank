@@ -98,7 +98,7 @@ class SaleController extends Controller
                     'date' => $ledger->sale_date?->format('Y-m-d'),
                     'type' => $ledger->entry_type,
                     'item' => $ledger->product_name,
-                    'items' => $ledger->saleItems->map(fn (SaleItem $item) => [
+                    'items' => $ledger->saleItems->map(fn(SaleItem $item) => [
                         'name' => $item->display_product_name,
                         'quantity' => (int) $item->quantity,
                         'returned_quantity' => (int) $item->returns->sum('quantity'),
@@ -366,7 +366,11 @@ class SaleController extends Controller
             'employee',
         ])->findOrFail($id);
         $termsConditions = $invoice->terms_conditions ?: self::DEFAULT_TERMS;
-        $amountInWords = $this->amountInWords((float) $invoice->amount_paid);
+        $amountInWords = $this->amountInWords(
+            (float) $invoice->due_amount === 0.0
+                ? (float) $invoice->amount_paid
+                : (float) $invoice->due_amount
+        );
 
         return view('backend.Sales.salesInvoice', compact('invoice', 'termsConditions', 'amountInWords'));
     }
@@ -420,6 +424,7 @@ class SaleController extends Controller
             'vat_percentage' => 'required|numeric|min:0|max:100',
             'ait_percentage' => 'required|numeric|min:0|max:100',
             'amount_paid' => 'required|numeric|min:0',
+            'payment_method' => 'nullable|in:' . implode(',', self::PAYMENT_METHODS),
             'notes' => 'nullable|string|max:2000',
             'terms_conditions' => 'nullable|string|max:5000',
             'items' => 'required|array|min:1',

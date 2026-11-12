@@ -122,7 +122,9 @@
                                         {{-- sale তৈরির সময় Product-এর selling price sale item-এ snapshot হয়ে invoice-এ দেখায়। --}}
                                         <td class="text-end">৳{{ number_format($item->unit_price, 2) }}</td>
                                         <td class="text-center">{{ $item->remaining_quantity }}</td>
-                                        <td class="text-center">{{ $item->product?->quantity_size ?: ($item->product?->stock_unit ?: 'Unit') }}</td>
+                                        <td class="text-center">
+                                            {{ $item->product?->quantity_size ?: ($item->product?->stock_unit ?: 'Unit') }}
+                                        </td>
                                         <td class="text-end">৳{{ number_format($item->remaining_line_total, 2) }}</td>
                                     </tr>
                                 @endforeach
@@ -168,7 +170,7 @@
                                 @if ((float) $invoice->due_amount > 0)
                                     {{-- বকেয়া না থাকলে invoice-এ Due row দেখানোর প্রয়োজন নেই। --}}
                                     <tr class="fw-bold">
-                                        <th colspan="5" class="text-end">Due</th>
+                                        <th colspan="5" class="text-end">Outstanding</th>
                                         <td class="text-end">৳{{ number_format($invoice->due_amount, 2) }}</td>
                                     </tr>
                                 @endif
@@ -178,7 +180,7 @@
                                         {{ $invoice->payment_method ? ucfirst($invoice->payment_method) : 'Unpaid' }}</td>
                                 </tr>
                                 <tr>
-                                    <th colspan="2">Amount Paid in Words</th>
+                                    <th colspan="2">Amount in Words</th>
                                     <td colspan="4">{{ $amountInWords }}</td>
                                 </tr>
                             </tbody>

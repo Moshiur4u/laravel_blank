@@ -332,8 +332,7 @@
                                         </div>
                                         <div class="col-6">
                                             <label for="payment_method" class="form-label fw-semibold">Payment Method</label>
-                                            <select name="payment_method" id="payment_method" class="form-select"
-                                                @if ($editingInvoice) disabled @endif>
+                                            <select name="payment_method" id="payment_method" class="form-select">
                                                 <option value="">Select method</option>
                                                 @foreach (['cash' => 'Cash', 'bank' => 'Bank', 'nagad' => 'Nagad', 'bkash' => 'bKash', 'rocket' => 'Rocket', 'upay' => 'Upay'] as $value => $label)
                                                     <option value="{{ $value }}"
@@ -341,9 +340,6 @@
                                                         {{ $label }}</option>
                                                 @endforeach
                                             </select>
-                                            @if ($editingInvoice)
-                                                    <input type="hidden" name="payment_method" value="{{ $editingInvoice->payment_method }}">
-                                            @endif
                                         </div>
                                     </div>
                                     <div class="mb-3">

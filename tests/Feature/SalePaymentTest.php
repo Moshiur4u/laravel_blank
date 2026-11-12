@@ -52,6 +52,10 @@ test('walk-in sales receive the full invoice amount and existing customers can p
         ->and((float) $walkInInvoice->total_amount)->toBe(200.0)
         ->and((float) $walkInInvoice->amount_paid)->toBe(200.0)
         ->and((float) $walkInInvoice->due_amount)->toBe(0.0);
+    $this->actingAs($employee)
+        ->get(route('sales.invoice', $walkInInvoice->id))
+        ->assertOk()
+        ->assertSee('Taka two hundred only.');
     $this->assertDatabaseHas('voucher_entries', [
         'voucher_type' => 'credit',
         'expense_income_type' => 'Walk-in Customer',
@@ -176,7 +180,9 @@ test('today invoice updates synchronize stock, walk-in voucher, and dashboard to
         ->get(route('sales.invoice.edit', $invoice->id))
         ->assertOk()
         ->assertViewIs('backend.Sales.salesIndex')
-        ->assertSee('Update Invoice');
+        ->assertSee('Update Invoice')
+        ->assertSee('name="payment_method" id="payment_method" class="form-select"', false)
+        ->assertDontSee('name="payment_method" id="payment_method" class="form-select" disabled', false);
 
     $this->actingAs($employee)
         ->put(route('sales.invoice.update', $invoice->id), [
@@ -185,6 +191,7 @@ test('today invoice updates synchronize stock, walk-in voucher, and dashboard to
             'vat_percentage' => 0,
             'ait_percentage' => 0,
             'amount_paid' => 300,
+            'payment_method' => 'bank',
             'items' => [
                 ['product_id' => $product->id, 'quantity' => 3, 'unit_price' => 150],
             ],
@@ -195,6 +202,7 @@ test('today invoice updates synchronize stock, walk-in voucher, and dashboard to
     expect((float) $invoice->fresh()->subtotal)->toBe(450.0)
         ->and((float) $invoice->fresh()->total_amount)->toBe(450.0)
         ->and((float) $invoice->fresh()->amount_paid)->toBe(300.0)
+        ->and($invoice->fresh()->payment_method)->toBe('bank')
         ->and((float) $invoice->fresh()->due_amount)->toBe(150.0)
         ->and((int) $invoice->items()->sum('quantity'))->toBe(3)
         ->and((float) $product->fresh()->unit)->toBe(7.0)
@@ -259,6 +267,7 @@ test('today invoice updates synchronize stock, walk-in voucher, and dashboard to
             'vat_percentage' => 0,
             'ait_percentage' => 0,
             'amount_paid' => 50,
+            'payment_method' => 'nagad',
             'items' => [
                 ['product_id' => $product->id, 'quantity' => 1, 'unit_price' => 150],
             ],
@@ -269,6 +278,7 @@ test('today invoice updates synchronize stock, walk-in voucher, and dashboard to
     expect((float) $customerInvoice->fresh()->amount_paid)->toBe(50.0)
         ->and((float) $customerInvoice->fresh()->due_amount)->toBe(90.0)
         ->and((float) $customerLedger->fresh()->payment_amount)->toBe(60.0)
+        ->and($customerLedger->fresh()->payment_method)->toBe('nagad')
         ->and((float) $customerLedger->fresh()->due_amount)->toBe(90.0)
         ->and((float) $initialVoucher->fresh()->amount)->toBe(50.0)
         ->and((float) $additionalVoucher->fresh()->amount)->toBe(10.0);

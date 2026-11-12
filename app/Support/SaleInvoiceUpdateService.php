@@ -164,6 +164,9 @@ class SaleInvoiceUpdateService
                 'ait_amount' => $ait,
                 'total_amount' => $invoiceTotal,
                 'amount_paid' => $paymentAmount,
+                'payment_method' => $paymentAmount > 0
+                    ? ($attributes['payment_method'] ?? $invoice->payment_method)
+                    : null,
                 'due_amount' => round($invoiceTotal - $totalPayments, 2),
                 'notes' => array_key_exists('notes', $attributes) ? $attributes['notes'] : $invoice->notes,
                 'terms_conditions' => array_key_exists('terms_conditions', $attributes)
@@ -196,6 +199,9 @@ class SaleInvoiceUpdateService
                     'unit_price' => $totalQuantity > 0 ? round($subtotal / $totalQuantity, 2) : 0,
                     'total_amount' => $saleAmount,
                     'payment_amount' => $totalPayments,
+                    'payment_method' => $paymentAmount > 0
+                        ? ($attributes['payment_method'] ?? $ledger->payment_method)
+                        : null,
                     'payment_type' => $invoiceTotal > $totalPayments ? 'due' : 'full_payment',
                     'due_amount' => round($invoiceTotal - $totalPayments, 2),
                 ]);
