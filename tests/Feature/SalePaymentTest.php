@@ -209,6 +209,12 @@ test('today invoice updates synchronize stock, walk-in voucher, and dashboard to
         ->and((float) $voucher->fresh()->amount)->toBe(300.0);
 
     $this->actingAs($employee)
+        ->get(route('sales.invoice.edit', $invoice->id))
+        ->assertOk()
+        ->assertSee('name="items[0][unit_price]"', false)
+        ->assertSee('value="150.00"', false);
+
+    $this->actingAs($employee)
         ->get(route('dashboardbody'))
         ->assertOk()
         ->assertViewHas('metrics', fn(array $metrics) => $metrics['daily']['revenue'] === 450.0);

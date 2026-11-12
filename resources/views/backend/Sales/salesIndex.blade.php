@@ -232,7 +232,7 @@
                                                                 name="items[{{ $index }}][unit_price]"
                                                                 class="form-control unit-price-input" min="0"
                                                                 max="9999999999999.99" step="0.01"
-                                                                value="{{ old("items.$index.unit_price", $oldProduct?->price ?? 0) }}"
+                                                                value="{{ old("items.$index.unit_price", $oldItem['unit_price'] ?? $oldProduct?->price ?? 0) }}"
                                                                 required>
                                                         </td>
                                                         <td class="line-total-cell fw-semibold">৳0.00</td>
