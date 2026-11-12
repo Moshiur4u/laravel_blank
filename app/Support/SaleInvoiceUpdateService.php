@@ -23,8 +23,10 @@ class SaleInvoiceUpdateService
     {
         return DB::transaction(function () use ($id, $items, $attributes): SaleInvoice {
             $invoice = SaleInvoice::query()->lockForUpdate()->findOrFail($id);
+            $user = auth()->user();
             abort_unless(
-                auth()->user()?->can('Update_today_Invoice') && $invoice->invoice_date?->isToday(),
+                $user?->hasRole('admin')
+                    || ($user?->can('Update_today_Invoice') && $invoice->invoice_date?->isToday()),
                 403
             );
 

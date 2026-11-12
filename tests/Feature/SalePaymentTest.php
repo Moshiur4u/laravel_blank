@@ -10,6 +10,7 @@ use App\Models\VoucherEntry;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\DB;
 use Spatie\Permission\Models\Permission;
+use Spatie\Permission\Models\Role;
 
 uses(RefreshDatabase::class);
 
@@ -305,6 +306,28 @@ test('today invoice updates synchronize stock, walk-in voucher, and dashboard to
             ],
         ])
         ->assertForbidden();
+
+    $admin = User::factory()->create(['email_verified_at' => now()]);
+    $admin->assignRole(Role::findOrCreate('admin', 'web'));
+
+    $this->actingAs($admin)
+        ->get(route('sales.invoice.edit', $invoice->id))
+        ->assertOk();
+
+    $this->actingAs($admin)
+        ->put(route('sales.invoice.update', $invoice->id), [
+            'discount_type' => 'amount',
+            'discount_value' => 0,
+            'vat_percentage' => 0,
+            'ait_percentage' => 0,
+            'amount_paid' => 300,
+            'payment_method' => 'bank',
+            'items' => [
+                ['product_id' => $product->id, 'quantity' => 3, 'unit_price' => 150],
+            ],
+        ])
+        ->assertRedirect(route('sales.invoice', $invoice->id))
+        ->assertSessionHas('success');
 });
 
 test('today invoice void restores stock and removes its ledger and linked vouchers', function () {

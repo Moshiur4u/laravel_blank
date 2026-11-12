@@ -298,13 +298,13 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::get('/sales/customer-lookup', [SaleController::class, 'customerByPhone'])->middleware('permission:sales.create|blank-invoice')->name('sales.customer.lookup');
     Route::post('/sales', [SaleController::class, 'store'])->middleware('permission:sales.create')->name('sales.store');
     Route::get('/sales/invoice/{id}', [SaleController::class, 'invoice'])
-        ->middleware('permission:sales.report|Voide_today_Invoice|Voide_anyday_Invoice|Update_today_Invoice')
+        ->middleware('role_or_permission:admin|sales.report|Voide_today_Invoice|Voide_anyday_Invoice|Update_today_Invoice')
         ->name('sales.invoice');
     Route::get('/sales/invoice/{id}/edit', [SaleController::class, 'editInvoice'])
-        ->middleware('permission:Update_today_Invoice')
+        ->middleware('role_or_permission:admin|Update_today_Invoice')
         ->name('sales.invoice.edit');
     Route::put('/sales/invoice/{id}', [SaleController::class, 'updateInvoice'])
-        ->middleware('permission:Update_today_Invoice')
+        ->middleware('role_or_permission:admin|Update_today_Invoice')
         ->name('sales.invoice.update');
     Route::delete('/sales/invoice/{id}', [SaleController::class, 'destroy'])
         ->middleware('permission:Voide_today_Invoice|Voide_anyday_Invoice')

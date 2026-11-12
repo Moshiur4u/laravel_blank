@@ -9,13 +9,12 @@
                     <a href="{{ route('sales.index') }}" class="btn btn-outline-secondary"><i class="bx bx-arrow-back me-1"></i>New
                         Sale</a>
                 @endcanany
-                @can('Update_today_Invoice')
-                    @if ($invoice->invoice_date?->isToday())
-                        <a href="{{ route('sales.invoice.edit', $invoice->id) }}" class="btn btn-outline-primary">
-                            <i class="bx bx-edit me-1"></i>Update Invoice
-                        </a>
-                    @endif
-                @endcan
+                @if (auth()->user()->hasRole('admin') ||
+                        (auth()->user()->can('Update_today_Invoice') && $invoice->invoice_date?->isToday()))
+                    <a href="{{ route('sales.invoice.edit', $invoice->id) }}" class="btn btn-outline-primary">
+                        <i class="bx bx-edit me-1"></i>Update Invoice
+                    </a>
+                @endif
                 @if (auth()->user()->can('Voide_anyday_Invoice') ||
                         (auth()->user()->can('Voide_today_Invoice') && $invoice->invoice_date?->isToday()))
                     <form action="{{ route('sales.destroy', $invoice->id) }}" method="POST"

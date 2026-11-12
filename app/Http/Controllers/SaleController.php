@@ -378,8 +378,10 @@ class SaleController extends Controller
     public function editInvoice($id)
     {
         $invoice = SaleInvoice::with(['items.product', 'customer'])->findOrFail($id);
+        $user = auth()->user();
         abort_unless(
-            auth()->user()?->can('Update_today_Invoice') && $invoice->invoice_date?->isToday(),
+            $user?->hasRole('admin')
+                || ($user?->can('Update_today_Invoice') && $invoice->invoice_date?->isToday()),
             403
         );
 
