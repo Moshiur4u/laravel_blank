@@ -386,7 +386,7 @@
                 </form>
             @endif
 
-            @canany(['sales.view', 'Voide_today_Invoice', 'Voide_anyday_Invoice', 'Update_today_Invoice'])
+            @canany(['sales.view', 'Voide_today_Invoice', 'Voide_anyday_Invoice', 'Update_today_Invoice', 'Update_anyday_Invoice'])
                 <div class="mt-4 border-0 shadow-sm card radius-10">
                     <div class="py-3 bg-transparent card-header border-bottom">
                         <h5 class="mb-0 fw-bold text-dark"><i class="bx bx-history text-primary me-2"></i>Recent Invoices</h5>

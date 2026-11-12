@@ -24,6 +24,7 @@ class PermissionSeederTable extends Seeder
             'Voide_today_Invoice',
             'Voide_anyday_Invoice',
             'Update_today_Invoice',
+            'Update_anyday_Invoice',
             //customer all parmissions,
             'customer.index',
             'customer.create',

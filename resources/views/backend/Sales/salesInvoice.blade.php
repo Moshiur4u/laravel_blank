@@ -10,6 +10,7 @@
                         Sale</a>
                 @endcanany
                 @if (auth()->user()->hasRole('admin') ||
+                        auth()->user()->can('Update_anyday_Invoice') ||
                         (auth()->user()->can('Update_today_Invoice') && $invoice->invoice_date?->isToday()))
                     <a href="{{ route('sales.invoice.edit', $invoice->id) }}" class="btn btn-outline-primary">
                         <i class="bx bx-edit me-1"></i>Update Invoice

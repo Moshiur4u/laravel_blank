@@ -321,6 +321,37 @@ test('today invoice updates synchronize stock, walk-in voucher, and dashboard to
             'vat_percentage' => 0,
             'ait_percentage' => 0,
             'amount_paid' => 300,
+            'items' => [
+                ['product_id' => $product->id, 'quantity' => 3, 'unit_price' => 150],
+            ],
+        ])
+        ->assertRedirect(route('sales.invoice', $invoice->id))
+        ->assertSessionHas('success');
+
+    $anydayUser = User::factory()->create(['email_verified_at' => now()]);
+    $anydayUser->givePermissionTo(Permission::findOrCreate('Update_anyday_Invoice', 'web'));
+
+    $this->actingAs($anydayUser)
+        ->get(route('sales.index'))
+        ->assertOk();
+
+    $this->actingAs($anydayUser)
+        ->get(route('sales.invoice', $invoice->id))
+        ->assertOk()
+        ->assertSee(route('sales.invoice.edit', $invoice->id));
+
+    $this->actingAs($anydayUser)
+        ->get(route('sales.invoice.edit', $invoice->id))
+        ->assertOk()
+        ->assertViewIs('backend.Sales.salesIndex');
+
+    $this->actingAs($anydayUser)
+        ->put(route('sales.invoice.update', $invoice->id), [
+            'discount_type' => 'amount',
+            'discount_value' => 0,
+            'vat_percentage' => 0,
+            'ait_percentage' => 0,
+            'amount_paid' => 300,
             'payment_method' => 'bank',
             'items' => [
                 ['product_id' => $product->id, 'quantity' => 3, 'unit_price' => 150],
@@ -328,6 +359,10 @@ test('today invoice updates synchronize stock, walk-in voucher, and dashboard to
         ])
         ->assertRedirect(route('sales.invoice', $invoice->id))
         ->assertSessionHas('success');
+
+    expect($invoice->fresh()->invoice_date->isYesterday())->toBeTrue()
+        ->and((float) $invoice->fresh()->total_amount)->toBe(450.0)
+        ->and((float) $invoice->fresh()->amount_paid)->toBe(300.0);
 });
 
 test('today invoice void restores stock and removes its ledger and linked vouchers', function () {

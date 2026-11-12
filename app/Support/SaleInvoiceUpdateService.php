@@ -26,6 +26,7 @@ class SaleInvoiceUpdateService
             $user = auth()->user();
             abort_unless(
                 $user?->hasRole('admin')
+                    || $user?->can('Update_anyday_Invoice')
                     || ($user?->can('Update_today_Invoice') && $invoice->invoice_date?->isToday()),
                 403
             );
