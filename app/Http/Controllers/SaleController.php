@@ -8,6 +8,7 @@ use App\Models\Product;
 use App\Models\SaleInvoice;
 use App\Models\SaleItem;
 use App\Models\VoucherEntry;
+use App\Support\SaleInvoiceUpdateService;
 use App\Support\SaleInvoiceVoidService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -368,6 +369,73 @@ class SaleController extends Controller
         $amountInWords = $this->amountInWords((float) $invoice->amount_paid);
 
         return view('backend.Sales.salesInvoice', compact('invoice', 'termsConditions', 'amountInWords'));
+    }
+
+    public function editInvoice($id)
+    {
+        $invoice = SaleInvoice::with(['items.product', 'customer'])->findOrFail($id);
+        abort_unless(
+            auth()->user()?->can('Update_today_Invoice') && $invoice->invoice_date?->isToday(),
+            403
+        );
+
+        $restockByProduct = $invoice->items
+            ->whereNotNull('product_id')
+            ->groupBy('product_id')
+            ->map(fn($items) => $items->sum('quantity'));
+        $products = Product::query()
+            ->where(function ($query) use ($restockByProduct) {
+                $query->whereRaw('CAST(unit AS DOUBLE) > 0')
+                    ->orWhereIn('id', $restockByProduct->keys());
+            })
+            ->orderBy('productName')
+            ->get();
+        $ledger = CustomerLedger::query()->where('sale_invoice_id', $invoice->id)->first();
+        $invoices = SaleInvoice::with('employee')->latest('invoice_date')->limit(10)->get();
+        $defaultTerms = self::DEFAULT_TERMS;
+        $vatPercentage = (float) $invoice->subtotal > (float) $invoice->discount_amount
+            ? round((float) $invoice->vat_amount / ((float) $invoice->subtotal - (float) $invoice->discount_amount) * 100, 2)
+            : 0;
+        $aitPercentage = (float) $invoice->subtotal > (float) $invoice->discount_amount
+            ? round((float) $invoice->ait_amount / ((float) $invoice->subtotal - (float) $invoice->discount_amount) * 100, 2)
+            : 0;
+
+        return view('backend.Sales.salesIndex', compact(
+            'invoice',
+            'products',
+            'restockByProduct',
+            'ledger',
+            'invoices',
+            'defaultTerms',
+            'vatPercentage',
+            'aitPercentage'
+        ));
+    }
+
+    public function updateInvoice(Request $request, $id)
+    {
+        $validated = $request->validate([
+            'discount_type' => 'required|in:amount,percentage',
+            'discount_value' => 'required|numeric|min:0',
+            'vat_percentage' => 'required|numeric|min:0|max:100',
+            'ait_percentage' => 'required|numeric|min:0|max:100',
+            'amount_paid' => 'required|numeric|min:0',
+            'notes' => 'nullable|string|max:2000',
+            'terms_conditions' => 'nullable|string|max:5000',
+            'items' => 'required|array|min:1',
+            'items.*.product_id' => 'required|integer|exists:products,id',
+            'items.*.quantity' => 'required|integer|min:1',
+            'items.*.unit_price' => 'required|numeric|min:0|max:9999999999999.99',
+        ]);
+
+        $invoice = app(SaleInvoiceUpdateService::class)->update(
+            (int) $id,
+            $validated['items'],
+            $validated
+        );
+
+        return redirect()->route('sales.invoice', $invoice->id)
+            ->with('success', "Invoice {$invoice->invoice_no} was updated; stock, ledger, vouchers, and dashboard totals were synchronized.");
     }
 
     public function destroy($id)

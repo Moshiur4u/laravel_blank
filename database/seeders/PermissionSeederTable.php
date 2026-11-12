@@ -23,6 +23,7 @@ class PermissionSeederTable extends Seeder
             'sales.document.watermark',
             'Voide_today_Invoice',
             'Voide_anyday_Invoice',
+            'Update_today_Invoice',
             //customer all parmissions,
             'customer.index',
             'customer.create',

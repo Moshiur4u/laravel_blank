@@ -137,6 +137,160 @@ test('sales use entered unit prices for invoices and profit and calculate AIT', 
         ->and($item->profit)->toBe(110.0);
 });
 
+test('today invoice updates synchronize stock, walk-in voucher, and dashboard totals', function () {
+    $employee = User::factory()->create(['email_verified_at' => now()]);
+    $employee->givePermissionTo(Permission::findOrCreate('Update_today_Invoice', 'web'));
+    $employee->givePermissionTo(Permission::findOrCreate('sales.create', 'web'));
+    $employee->givePermissionTo(Permission::findOrCreate('Dashboard', 'web'));
+    $categoryId = DB::table('product_categories')->insertGetId(['category_name' => 'Invoice Update Category']);
+    $brandId = DB::table('brands')->insertGetId(['name' => 'Invoice Update Brand']);
+    $product = Product::create([
+        'productName' => 'Invoice Update Product',
+        'product_categorie_id' => $categoryId,
+        'brand_id' => $brandId,
+        'purchase_price' => 60,
+        'price' => 100,
+        'unit' => '10',
+        'stock_unit' => '10',
+    ]);
+
+    $this->actingAs($employee)
+        ->post(route('sales.store'), [
+            'customer_phone' => '01700000006',
+            'save_customer' => 'no',
+            'customer_name' => 'Update Walk-in Customer',
+            'discount_amount' => 0,
+            'vat_amount' => 0,
+            'ait_amount' => 0,
+            'payment_method' => 'cash',
+            'items' => [
+                ['product_id' => $product->id, 'quantity' => 2, 'unit_price' => 100],
+            ],
+        ])
+        ->assertRedirect();
+
+    $invoice = SaleInvoice::query()->latest('id')->firstOrFail();
+    $voucher = VoucherEntry::query()->where('reference', $invoice->invoice_no)->firstOrFail();
+
+    $this->actingAs($employee)
+        ->get(route('sales.invoice.edit', $invoice->id))
+        ->assertOk()
+        ->assertViewIs('backend.Sales.salesIndex')
+        ->assertSee('Update Invoice');
+
+    $this->actingAs($employee)
+        ->put(route('sales.invoice.update', $invoice->id), [
+            'discount_type' => 'amount',
+            'discount_value' => 0,
+            'vat_percentage' => 0,
+            'ait_percentage' => 0,
+            'amount_paid' => 300,
+            'items' => [
+                ['product_id' => $product->id, 'quantity' => 3, 'unit_price' => 150],
+            ],
+        ])
+        ->assertRedirect(route('sales.invoice', $invoice->id))
+        ->assertSessionHas('success');
+
+    expect((float) $invoice->fresh()->subtotal)->toBe(450.0)
+        ->and((float) $invoice->fresh()->total_amount)->toBe(450.0)
+        ->and((float) $invoice->fresh()->amount_paid)->toBe(300.0)
+        ->and((float) $invoice->fresh()->due_amount)->toBe(150.0)
+        ->and((int) $invoice->items()->sum('quantity'))->toBe(3)
+        ->and((float) $product->fresh()->unit)->toBe(7.0)
+        ->and((float) $voucher->fresh()->amount)->toBe(300.0);
+
+    $this->actingAs($employee)
+        ->get(route('dashboardbody'))
+        ->assertOk()
+        ->assertViewHas('metrics', fn(array $metrics) => $metrics['daily']['revenue'] === 450.0);
+
+    $customer = Customer::create([
+        'name' => 'Update Payment Customer',
+        'phone' => '01700000007',
+        'customer_type' => 'temporary',
+        'status' => 1,
+    ]);
+    $this->actingAs($employee)
+        ->post(route('sales.store'), [
+            'customer_phone' => $customer->phone,
+            'save_customer' => 'no',
+            'discount_amount' => 0,
+            'vat_amount' => 0,
+            'ait_amount' => 0,
+            'amount_paid' => 40,
+            'payment_method' => 'cash',
+            'items' => [
+                ['product_id' => $product->id, 'quantity' => 1, 'unit_price' => 100],
+            ],
+        ])
+        ->assertRedirect();
+
+    $customerInvoice = SaleInvoice::query()->latest('id')->firstOrFail();
+    $customerLedger = CustomerLedger::query()->where('sale_invoice_id', $customerInvoice->id)->firstOrFail();
+    $initialVoucher = VoucherEntry::query()
+        ->where('voucherable_type', CustomerLedger::class)
+        ->where('voucherable_id', $customerLedger->id)
+        ->firstOrFail();
+    CustomerLedgerPayment::create([
+        'customer_ledger_id' => $customerLedger->id,
+        'payment_date' => today(),
+        'amount' => 10,
+        'received_by' => $employee->id,
+    ]);
+    $additionalVoucher = VoucherEntry::createWithCode([
+        'voucher_type' => 'credit',
+        'expense_income_type' => $customer->name,
+        'voucher_date' => today(),
+        'amount' => '10.00',
+        'reference' => $customerInvoice->invoice_no,
+        'description' => 'Payment received from customer '.$customer->name,
+        'created_by' => $employee->id,
+        'created_by_name' => $employee->name,
+        'voucherable_type' => CustomerLedger::class,
+        'voucherable_id' => $customerLedger->id,
+    ]);
+    $customerLedger->update(['payment_amount' => 50, 'due_amount' => 50]);
+
+    $this->actingAs($employee)
+        ->put(route('sales.invoice.update', $customerInvoice->id), [
+            'discount_type' => 'amount',
+            'discount_value' => 0,
+            'vat_percentage' => 0,
+            'ait_percentage' => 0,
+            'amount_paid' => 50,
+            'items' => [
+                ['product_id' => $product->id, 'quantity' => 1, 'unit_price' => 150],
+            ],
+        ])
+        ->assertRedirect(route('sales.invoice', $customerInvoice->id))
+        ->assertSessionHas('success');
+
+    expect((float) $customerInvoice->fresh()->amount_paid)->toBe(50.0)
+        ->and((float) $customerInvoice->fresh()->due_amount)->toBe(90.0)
+        ->and((float) $customerLedger->fresh()->payment_amount)->toBe(60.0)
+        ->and((float) $customerLedger->fresh()->due_amount)->toBe(90.0)
+        ->and((float) $initialVoucher->fresh()->amount)->toBe(50.0)
+        ->and((float) $additionalVoucher->fresh()->amount)->toBe(10.0);
+
+    $invoice->update(['invoice_date' => today()->subDay()]);
+    $this->actingAs($employee)
+        ->get(route('sales.invoice.edit', $invoice->id))
+        ->assertForbidden();
+    $this->actingAs($employee)
+        ->put(route('sales.invoice.update', $invoice->id), [
+            'discount_type' => 'amount',
+            'discount_value' => 0,
+            'vat_percentage' => 0,
+            'ait_percentage' => 0,
+            'amount_paid' => 300,
+            'items' => [
+                ['product_id' => $product->id, 'quantity' => 1, 'unit_price' => 100],
+            ],
+        ])
+        ->assertForbidden();
+});
+
 test('today invoice void restores stock and removes its ledger and linked vouchers', function () {
     $employee = User::factory()->create();
     $employee->givePermissionTo(Permission::findOrCreate('Voide_today_Invoice', 'web'));

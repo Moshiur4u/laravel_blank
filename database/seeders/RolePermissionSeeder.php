@@ -17,6 +17,7 @@ class RolePermissionSeeder extends Seeder
             'sales' => [
                 'Dashboard',
                 'sales.create',
+                'Update_today_Invoice',
                 'customer.create',
                 'customer.index',
                 'customer.ledger',
@@ -25,6 +26,7 @@ class RolePermissionSeeder extends Seeder
             'manager' => [
                 'Dashboard',
                 'sales.create',
+                'Update_today_Invoice',
                 'sales.document.watermark',
                 'brand.index', // পুরোনো Brands-এর বদলে নতুন brand list permission।
                 'brand.create', // নতুন brand create permission।

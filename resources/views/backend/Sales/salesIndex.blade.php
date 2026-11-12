@@ -1,7 +1,33 @@
 @extends('dashboard.dashboard')
-@section('title', 'Create Sale')
+@section('title', isset($invoice) ? 'Update Sale ' . $invoice->invoice_no : 'Create Sale')
 
 @section('content')
+    @php
+        $editingInvoice = isset($invoice) ? $invoice : null;
+        $saleItems = old(
+            'items',
+            $editingInvoice
+                ? $editingInvoice->items
+                    ->map(fn($item) => [
+                        'product_id' => $item->product_id,
+                        'quantity' => $item->quantity,
+                        'unit_price' => $item->unit_price,
+                    ])
+                    ->all()
+                : [['product_id' => '', 'quantity' => 0]],
+        );
+        $discountInput = old(
+            'discount_value',
+            $editingInvoice
+                ? ($editingInvoice->discount_type === 'percentage'
+                    ? $editingInvoice->discount_value
+                    : $editingInvoice->discount_amount)
+                : old('discount_amount', 0),
+        );
+        $receivedAmount = $editingInvoice
+            ? $editingInvoice->amount_paid
+            : old('amount_paid', 0);
+    @endphp
     <div class="page-wrapper">
         <div class="page-content">
             <div class="mb-3 page-breadcrumb d-none d-sm-flex align-items-center">
@@ -11,7 +37,9 @@
                         <ol class="p-0 mb-0 breadcrumb">
                             <li class="breadcrumb-item"><a href="{{ route('dashboardbody') }}"><i
                                         class="bx bx-home-alt"></i></a></li>
-                            <li class="breadcrumb-item active" aria-current="page">Create Sale</li>
+                            <li class="breadcrumb-item active" aria-current="page">
+                                {{ $editingInvoice ? 'Update Invoice ' . $editingInvoice->invoice_no : 'Create Sale' }}
+                            </li>
                         </ol>
                     </nav>
                 </div>
@@ -35,10 +63,15 @@
                 <div class="alert alert-success" role="status">{{ session('success') }}</div>
             @endif
 
-            @can('sales.create')
-                <form id="saleForm" action="{{ route('sales.store') }}" method="POST">
+            @if ($editingInvoice || auth()->user()->can('sales.create'))
+                <form id="saleForm"
+                    action="{{ $editingInvoice ? route('sales.invoice.update', $editingInvoice->id) : route('sales.store') }}"
+                    method="POST">
                     @csrf
-                    <input type="hidden" name="save_customer" id="save_customer" value="{{ old('save_customer', 'no') }}">
+                    @if ($editingInvoice)
+                        @method('PUT')
+                    @endif
+                    <input type="hidden" name="save_customer" id="save_customer" value="no">
                     <div class="row g-3">
                         <div class="col-12 col-lg-7 col-xl-8">
 
@@ -54,53 +87,63 @@
                                                     class="text-danger">*</span></label>
                                             <div class="input-group">
                                                 <input type="text" name="customer_phone" id="customer_phone"
-                                                    class="form-control" value="{{ old('customer_phone') }}"
+                                                    class="form-control" value="{{ old('customer_phone', $editingInvoice?->customer_phone) }}"
                                                     list="customerSuggestions" placeholder="Type customer name or phone"
-                                                    autocomplete="off" required>
-                                                <button type="button" id="lookupCustomer"
-                                                    class="btn btn-outline-primary">Find</button>
+                                                    autocomplete="off" required @if ($editingInvoice) readonly @endif>
+                                                @unless ($editingInvoice)
+                                                    <button type="button" id="lookupCustomer"
+                                                        class="btn btn-outline-primary">Find</button>
+                                                @endunless
                                             </div>
                                             <datalist id="customerSuggestions"></datalist>
-                                            <div id="customerLookupMessage" class="form-text">Type a customer name or phone
-                                                number to see matches.</div>
+                                            <div id="customerLookupMessage" class="form-text">
+                                                {{ $editingInvoice ? 'Customer details are kept unchanged while updating this invoice.' : 'Type a customer name or phone number to see matches.' }}
+                                            </div>
                                         </div>
                                         <div class="col-md-6">
                                             <label for="customerDisplayName" class="form-label fw-semibold">Customer
                                                 Name</label>
-                                            <input type="text" id="customerDisplayName" class="form-control" readonly>
+                                            <input type="text" id="customerDisplayName" class="form-control" readonly
+                                                value="{{ $editingInvoice?->customer_name ?? $editingInvoice?->customer?->name }}">
                                         </div>
                                     </div>
 
-                                    <div id="customerLedgerPanel" class="mt-3 d-none">
+                                    <div id="customerLedgerPanel"
+                                        class="mt-3 {{ $editingInvoice?->customer_id ? '' : 'd-none' }}">
                                         <div class="mb-2 d-flex align-items-center justify-content-between">
                                             <h6 class="mb-0 fw-bold">Customer Ledger</h6>
                                             <span class="badge bg-light-danger text-danger">Outstanding: <span
-                                                    id="customerDue">৳0.00</span></span>
+                                                    id="customerDue"
+                                                    data-value="{{ $editingInvoice ? $editingInvoice->previous_due : 0 }}">৳{{ number_format((float) ($editingInvoice?->previous_due ?? 0), 2) }}</span></span>
                                         </div>
-                                        <div class="table-responsive">
-                                            <table class="table mb-2 table-sm table-hover">
-                                                <thead class="table-light">
-                                                    <tr>
-                                                        <th>Date</th>
-                                                        <th>Type / Item</th>
-                                                        <th>Sale</th>
-                                                        <th>Paid</th>
-                                                        <th>Due</th>
-                                                    </tr>
-                                                </thead>
-                                                <tbody id="customerLedgerRows"></tbody>
-                                            </table>
-                                        </div>
+                                        @unless ($editingInvoice)
+                                            <div class="table-responsive">
+                                                <table class="table mb-2 table-sm table-hover">
+                                                    <thead class="table-light">
+                                                        <tr>
+                                                            <th>Date</th>
+                                                            <th>Type / Item</th>
+                                                            <th>Sale</th>
+                                                            <th>Paid</th>
+                                                            <th>Due</th>
+                                                        </tr>
+                                                    </thead>
+                                                    <tbody id="customerLedgerRows"></tbody>
+                                                </table>
+                                            </div>
+                                        @endunless
                                         <div class="form-check">
                                             <input class="form-check-input" type="checkbox" name="include_previous_due"
                                                 id="include_previous_due" value="1"
-                                                {{ old('include_previous_due') ? 'checked' : '' }}>
+                                                {{ old('include_previous_due', $editingInvoice?->include_previous_due) ? 'checked' : '' }}
+                                                @if ($editingInvoice) disabled @endif>
                                             <label class="form-check-label" for="include_previous_due">Add outstanding due to
                                                 this invoice</label>
                                         </div>
                                     </div>
 
-                                    <div id="newCustomerDetails" class="mt-2 row g-3 d-none">
+                                    <div id="newCustomerDetails"
+                                        class="mt-2 row g-3 d-none">
                                         <div class="col-12">
                                             <div class="py-2 mb-0 alert alert-info">This phone number is not registered. You
                                                 can print the invoice without saving a customer record, or choose Yes at
@@ -145,7 +188,7 @@
                                                 </tr>
                                             </thead>
                                             <tbody id="saleItems">
-                                                @foreach (old('items', [['product_id' => '', 'quantity' => 0]]) as $index => $oldItem)
+                                                @foreach ($saleItems as $index => $oldItem)
                                                     @php
                                                         $oldProduct = $products->firstWhere(
                                                             'id',
@@ -168,7 +211,7 @@
                                                                     @php $productSku = 'PRD-' . str_pad($product->id, 5, '0', STR_PAD_LEFT); @endphp
                                                                     <option value="{{ $product->id }}"
                                                                         data-price="{{ $product->price }}"
-                                                                        data-stock="{{ $product->unit }}"
+                                                                        data-stock="{{ (float) $product->unit + (float) (isset($restockByProduct) ? $restockByProduct->get($product->id, 0) : 0) }}"
                                                                         data-unit="{{ $product->quantity_size ?: ($product->stock_unit ?: 'Unit') }}"
                                                                         data-name="{{ strtolower($product->productName) }}"
                                                                         data-code="{{ strtolower($productSku) }}"
@@ -228,10 +271,10 @@
                                                 Type</label>
                                             <select name="discount_type" id="discount_type" class="form-select">
                                                 <option value="amount"
-                                                    {{ old('discount_type', 'amount') === 'amount' ? 'selected' : '' }}>Amount
+                                                    {{ old('discount_type', $editingInvoice?->discount_type ?? 'amount') === 'amount' ? 'selected' : '' }}>Amount
                                                 </option>
                                                 <option value="percentage"
-                                                    {{ old('discount_type') === 'percentage' ? 'selected' : '' }}>Percent
+                                                    {{ old('discount_type', $editingInvoice?->discount_type) === 'percentage' ? 'selected' : '' }}>Percent
                                                 </option>
                                             </select>
                                         </div>
@@ -241,7 +284,7 @@
                                             <div class="input-group">
                                                 <input type="number" name="discount_value" id="discount_value"
                                                     class="form-control" min="0" step="0.01"
-                                                    value="{{ old('discount_value', old('discount_amount', 0)) }}"
+                                                    value="{{ $discountInput }}"
                                                     placeholder="0.00">
                                                 <span class="px-2 input-group-text" id="discount_symbol">৳</span>
                                             </div>
@@ -257,7 +300,7 @@
                                             <div class="input-group">
                                                 <input type="number" name="vat_percentage" id="vat_percentage"
                                                     class="form-control" min="0" max="100" step="0.01"
-                                                    value="{{ old('vat_percentage', 5) }}">
+                                                    value="{{ old('vat_percentage', $editingInvoice ? $vatPercentage : 5) }}">
                                                 <span class="px-2 input-group-text">%</span>
                                             </div>
                                             <input type="hidden" name="vat_amount" id="vat_amount"
@@ -269,7 +312,7 @@
                                             <div class="input-group">
                                                 <input type="number" name="ait_percentage" id="ait_percentage"
                                                     class="form-control" min="0" max="100" step="0.01"
-                                                    value="{{ old('ait_percentage', 0) }}">
+                                                    value="{{ old('ait_percentage', $editingInvoice ? $aitPercentage : 0) }}">
                                                 <span class="px-2 input-group-text">%</span>
                                             </div>
                                             <input type="hidden" name="ait_amount" id="ait_amount"
@@ -283,32 +326,36 @@
                                             <div class="input-group">
                                                 <input type="number" name="amount_paid" id="amount_paid"
                                                     class="form-control" min="0" step="0.01"
-                                                    value="{{ old('amount_paid', 0) }}">
+                                                    value="{{ old('amount_paid', $receivedAmount) }}">
                                                 <span class="px-2 input-group-text">৳</span>
                                             </div>
                                         </div>
                                         <div class="col-6">
                                             <label for="payment_method" class="form-label fw-semibold">Payment Method</label>
-                                            <select name="payment_method" id="payment_method" class="form-select">
+                                            <select name="payment_method" id="payment_method" class="form-select"
+                                                @if ($editingInvoice) disabled @endif>
                                                 <option value="">Select method</option>
                                                 @foreach (['cash' => 'Cash', 'bank' => 'Bank', 'nagad' => 'Nagad', 'bkash' => 'bKash', 'rocket' => 'Rocket', 'upay' => 'Upay'] as $value => $label)
                                                     <option value="{{ $value }}"
-                                                        {{ old('payment_method') === $value ? 'selected' : '' }}>
+                                                            {{ old('payment_method', $editingInvoice?->payment_method) === $value ? 'selected' : '' }}>
                                                         {{ $label }}</option>
                                                 @endforeach
                                             </select>
+                                            @if ($editingInvoice)
+                                                    <input type="hidden" name="payment_method" value="{{ $editingInvoice->payment_method }}">
+                                            @endif
                                         </div>
                                     </div>
                                     <div class="mb-3">
                                         <label for="notes" class="form-label">Notes</label>
-                                        <textarea name="notes" id="notes" rows="2" class="form-control">{{ old('notes') }}</textarea>
+                                        <textarea name="notes" id="notes" rows="2" class="form-control">{{ old('notes', $editingInvoice?->notes) }}</textarea>
                                     </div>
                                     <div class="mb-3">
                                         <label for="terms_conditions" class="form-label fw-semibold">Terms &
                                             Conditions</label>
                                         <textarea name="terms_conditions" id="terms_conditions" rows="5"
                                             class="form-control @error('terms_conditions') is-invalid @enderror"
-                                            placeholder="Input terms and conditions to be displayed on this invoice...">{{ old('terms_conditions', $defaultTerms) }}</textarea>
+                                            placeholder="Input terms and conditions to be displayed on this invoice...">{{ old('terms_conditions', $editingInvoice?->terms_conditions ?: $defaultTerms) }}</textarea>
                                         @error('terms_conditions')
                                             <div class="invalid-feedback">{{ $message }}</div>
                                         @enderror
@@ -333,16 +380,17 @@
                                     <div class="mb-3 d-flex justify-content-between text-danger"><span>Balance
                                             Due</span><strong id="balanceDueText">৳0.00</strong></div>
                                     <button type="submit" id="checkoutButton" class="btn btn-primary w-100">
-                                        <i class="bx bx-printer me-1"></i>Checkout & Print Invoice
+                                        <i class="bx {{ $editingInvoice ? 'bx-save' : 'bx-printer' }} me-1"></i>
+                                        {{ $editingInvoice ? 'Update Invoice' : 'Checkout & Print Invoice' }}
                                     </button>
                                 </div>
                             </div>
                         </div>
                     </div>
                 </form>
-            @endcan
+            @endif
 
-            @canany(['sales.view', 'Voide_today_Invoice', 'Voide_anyday_Invoice'])
+            @canany(['sales.view', 'Voide_today_Invoice', 'Voide_anyday_Invoice', 'Update_today_Invoice'])
                 <div class="mt-4 border-0 shadow-sm card radius-10">
                     <div class="py-3 bg-transparent card-header border-bottom">
                         <h5 class="mb-0 fw-bold text-dark"><i class="bx bx-history text-primary me-2"></i>Recent Invoices</h5>
@@ -721,14 +769,17 @@
                 }
             }
 
-            document.getElementById('lookupCustomer').addEventListener('click', function() {
-                window.clearTimeout(suggestionTimer);
-                if (!/^[+\d\s().-]+$/.test(customerPhone.value.trim())) {
-                    suggestCustomers(true);
-                } else {
-                    lookupCustomer();
-                }
-            });
+            const lookupButton = document.getElementById('lookupCustomer');
+            if (lookupButton) {
+                lookupButton.addEventListener('click', function() {
+                    window.clearTimeout(suggestionTimer);
+                    if (!/^[+\d\s().-]+$/.test(customerPhone.value.trim())) {
+                        suggestCustomers(true);
+                    } else {
+                        lookupCustomer();
+                    }
+                });
+            }
             customerPhone.addEventListener('change', function() {
                 window.clearTimeout(suggestionTimer);
                 if (!/^[+\d\s().-]+$/.test(customerPhone.value.trim())) {
@@ -813,6 +864,11 @@
                     invalidQuantity.reportValidity();
                     return;
                 }
+                @if ($editingInvoice)
+                    saveCustomer.dataset.confirmed = 'yes';
+                    form.requestSubmit();
+                    return;
+                @endif
                 if (!/^[+\d\s().-]+$/.test(customerPhone.value.trim())) {
                     await suggestCustomers(true);
                     if (!/^[+\d\s().-]+$/.test(customerPhone.value.trim())) {
@@ -884,20 +940,22 @@
 
             @if ($errors->any())
                 window.Swal.fire({
-                    title: 'Unable to create sale',
+                    title: @json($editingInvoice ? 'Unable to update invoice' : 'Unable to create sale'),
                     text: @json($errors->all()).join('\n'),
                     icon: 'error',
                 });
             @endif
 
             updateTotals();
-            if (customerPhone.value) {
-                if (/^[+\d\s().-]+$/.test(customerPhone.value.trim())) {
-                    lookupCustomer();
-                } else {
-                    suggestCustomers();
+            @unless ($editingInvoice)
+                if (customerPhone.value) {
+                    if (/^[+\d\s().-]+$/.test(customerPhone.value.trim())) {
+                        lookupCustomer();
+                    } else {
+                        suggestCustomers();
+                    }
                 }
-            }
+            @endunless
         });
     </script>
 @endsection

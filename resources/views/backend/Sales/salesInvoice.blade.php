@@ -9,6 +9,13 @@
                     <a href="{{ route('sales.index') }}" class="btn btn-outline-secondary"><i class="bx bx-arrow-back me-1"></i>New
                         Sale</a>
                 @endcanany
+                @can('Update_today_Invoice')
+                    @if ($invoice->invoice_date?->isToday())
+                        <a href="{{ route('sales.invoice.edit', $invoice->id) }}" class="btn btn-outline-primary">
+                            <i class="bx bx-edit me-1"></i>Update Invoice
+                        </a>
+                    @endif
+                @endcan
                 @if (auth()->user()->can('Voide_anyday_Invoice') ||
                         (auth()->user()->can('Voide_today_Invoice') && $invoice->invoice_date?->isToday()))
                     <form action="{{ route('sales.destroy', $invoice->id) }}" method="POST"
@@ -23,7 +30,7 @@
                 @can('sales.document.watermark')
                     @if ($organization?->logo)
                         <label class="mb-0 btn btn-outline-secondary">
-                            <input type="checkbox" id="watermark-toggle" class="form-check-input me-1">
+                            <input type="checkbox" id="watermark-toggle" class="form-check-input me-1" checked>
                             Print logo watermark
                         </label>
                     @endif
@@ -32,7 +39,8 @@
                         class="bx bx-printer me-1"></i>Print Invoice</button>
             </div>
 
-            <div id="print-document" class="border-0 shadow-sm card print-document invoice-print-area"
+            <div id="print-document"
+                class="border-0 shadow-sm card print-document invoice-print-area @if (auth()->user()->can('sales.document.watermark') && $organization?->logo) watermark-enabled @endif"
                 @if ($organization?->logo) style="--invoice-watermark: url('{{ asset('uploads/organizations/' . $organization->logo) }}');" @endif>
                 <div class="p-4 card-body p-md-5">
                     @if (

@@ -174,7 +174,8 @@ test('sale invoice shows customer details, quotation default terms, and the colo
         ->assertSee('#14ADE0')
         ->assertSee('#ffff')
         ->assertSee('Print logo watermark')
-        ->assertSee('id="watermark-toggle"')
+        ->assertSee('id="watermark-toggle" class="form-check-input me-1" checked', false)
+        ->assertSee('print-document invoice-print-area watermark-enabled', false)
         ->assertDontSee($invoice->invoice_date->format('d M Y, h:i A'));
 
     expect(substr_count($response->getContent(), '<table'))->toBe(1);
