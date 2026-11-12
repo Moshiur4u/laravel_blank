@@ -41,7 +41,11 @@ class OrganizationController extends Controller
             $directory = public_path('uploads/organizations');
             File::ensureDirectoryExists($directory);
 
-            $logoName = $logo->hashName();
+            // প্রতিষ্ঠানের নামকে নিরাপদ ফাইলনেমে রূপান্তর করে logo সংরক্ষণ করে।
+            $logoBaseName = preg_replace('/[^\pL\pN._-]+/u', '-', trim($validated['name']));
+            $logoBaseName = trim($logoBaseName ?? '', '.-_');
+            $logoBaseName = $logoBaseName !== '' ? $logoBaseName : 'organization';
+            $logoName = $logoBaseName . '.' . $logo->extension();
             $logo->move($directory, $logoName);
             $validated['logo'] = $logoName;
         }
@@ -52,6 +56,7 @@ class OrganizationController extends Controller
         if (
             isset($validated['logo'])
             && $oldLogo
+            && $oldLogo !== $validated['logo']
             && File::exists(public_path('uploads/organizations/' . $oldLogo))
         ) {
             File::delete(public_path('uploads/organizations/' . $oldLogo));
