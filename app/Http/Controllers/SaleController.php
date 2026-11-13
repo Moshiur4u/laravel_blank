@@ -470,48 +470,51 @@ class SaleController extends Controller
         $totalPaisa = (int) round($amount * 100);
         $taka = intdiv($totalPaisa, 100);
         $paisa = $totalPaisa % 100;
-        $words = 'Taka ' . $this->numberToWords($taka);
+        $words = $this->numberToWords($taka);
+        //if we want to show Take first the use this
+        // $words = 'Taka ' . $this->numberToWords($taka);
 
         if ($paisa > 0) {
             $words .= ' and ' . $this->numberToWords($paisa) . ' Paisa';
         }
-
-        return ucfirst($words) . ' only.';
+        //Here we add Take befor only (Text) If don't need remove the text
+        return ucfirst($words) . ' Taka Only.';
     }
 
     private function numberToWords(int $number): string
     {
+        //first Aplbate write in Capital latter for show invoice amout will be Capital Word
         $ones = [
-            'zero',
-            'one',
-            'two',
-            'three',
-            'four',
-            'five',
-            'six',
-            'seven',
-            'eight',
-            'nine',
-            'ten',
-            'eleven',
-            'twelve',
-            'thirteen',
-            'fourteen',
-            'fifteen',
-            'sixteen',
-            'seventeen',
-            'eighteen',
-            'nineteen',
+            'Zero',
+            'One',
+            'Two',
+            'Three',
+            'Four',
+            'Five',
+            'Six',
+            'Seven',
+            'Eight',
+            'Nine',
+            'Ten',
+            'Eleven',
+            'Twelve',
+            'Thirteen',
+            'Fourteen',
+            'Fifteen',
+            'Sixteen',
+            'Seventeen',
+            'Eighteen',
+            'Nineteen',
         ];
         $tens = [
-            2 => 'twenty',
-            3 => 'thirty',
-            4 => 'forty',
-            5 => 'fifty',
-            6 => 'sixty',
-            7 => 'seventy',
-            8 => 'eighty',
-            9 => 'ninety',
+            2 => 'Twenty',
+            3 => 'Thirty',
+            4 => 'Forty',
+            5 => 'Fifty',
+            6 => 'Sixty',
+            7 => 'Seventy',
+            8 => 'Eighty',
+            9 => 'Ninety',
         ];
 
         if ($number < 20) {
@@ -525,17 +528,17 @@ class SaleController extends Controller
         }
 
         if ($number < 1000) {
-            $words = $ones[intdiv($number, 100)] . ' hundred';
+            $words = $ones[intdiv($number, 100)] . ' Hundred';
 
             return $number % 100 ? $words . ' and ' . $this->numberToWords($number % 100) : $words;
         }
 
         foreach (
             [
-                1_000_000_000_000 => 'trillion',
-                1_000_000_000 => 'billion',
-                1_000_000 => 'million',
-                1_000 => 'thousand',
+                1_000_000_000_000 => 'Trillion',
+                1_000_000_000 => 'Billion',
+                1_000_000 => 'Million',
+                1_000 => 'Thousand',
             ] as $value => $scale
         ) {
             if ($number >= $value) {
