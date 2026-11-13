@@ -21,7 +21,7 @@ class EmployeePaymentVoucherController extends Controller
      */
     public function index()
     {
-        $employees = User::query()->orderBy('name')->get(['id', 'name', 'salary']);
+        $employees = User::query()->visibleToCurrentUser()->orderBy('name')->get(['id', 'name', 'salary']); // voucher form-এ বর্তমান ব্যবহারকারীর জন্য দৃশ্যমান কর্মী দেখায়।
         $expenseTypes = EmployeePaymentVoucher::EXPENSE_TYPES;
         $paymentMethods = EmployeePaymentVoucher::PAYMENT_METHODS;
         $vouchers = EmployeePaymentVoucher::query()
@@ -37,6 +37,7 @@ class EmployeePaymentVoucherController extends Controller
             'paymentMethods',
             'vouchers',
             'totalAmount'
+
         ));
     }
 
@@ -81,6 +82,11 @@ class EmployeePaymentVoucherController extends Controller
             ->whereDate('employee_payment_vouchers.created_at', '>=', $startDate)
             ->whereDate('employee_payment_vouchers.created_at', '<=', $endDate);
 
+        // Admin role-এর কর্মীকে non-admin ব্যবহারকারীর report থেকে বাদ রাখা হয়।
+        if (! auth()->user()->hasRole('admin')) {
+            $reportQuery->whereDoesntHave('employee.roles', fn ($query) => $query->where('name', 'admin'));
+        }
+
         if (! empty($validated['created_by'])) {
             $reportQuery->where('employee_payment_vouchers.created_by', $validated['created_by']);
         }
@@ -109,9 +115,8 @@ class EmployeePaymentVoucherController extends Controller
             ->latest('employee_payment_vouchers.id')
             ->paginate(30)
             ->withQueryString();
-        $creators = User::query()->orderBy('name')->get(['id', 'name']);
-        $employees = User::query()->orderBy('name')->get(['id', 'name']);
-
+        $creators = User::query()->visibleToCurrentUser()->orderBy('name')->get(['id', 'name']); // creator filter-এ বর্তমান ব্যবহারকারীর জন্য দৃশ্যমান user দেখায়।
+        $employees = User::query()->visibleToCurrentUser()->orderBy('name')->get(['id', 'name']); // employee filter-এ বর্তমান ব্যবহারকারীর জন্য দৃশ্যমান user দেখায়।
         return view('backend.Accounts Entries.VoucherEntries', compact(
             'startDate',
             'endDate',
@@ -163,8 +168,12 @@ class EmployeePaymentVoucherController extends Controller
             ->with(['employee:id,name', 'createdBy:id,name'])
             ->whereDate('employee_payment_vouchers.created_at', '>=', $startDate)
             ->whereDate('employee_payment_vouchers.created_at', '<=', $endDate)
-            ->when($filters['created_by'] ?? null, fn ($query, $creatorId) => $query->where('employee_payment_vouchers.created_by', $creatorId))
-            ->when($filters['employee_id'] ?? null, fn ($query, $employeeId) => $query->where('employee_payment_vouchers.employee_id', $employeeId));
+            ->when($filters['created_by'] ?? null, fn($query, $creatorId) => $query->where('employee_payment_vouchers.created_by', $creatorId))
+            ->when($filters['employee_id'] ?? null, fn($query, $employeeId) => $query->where('employee_payment_vouchers.employee_id', $employeeId));
+        // CSV-তেও non-admin ব্যবহারকারীর জন্য Admin role-এর কর্মীর voucher বাদ থাকে।
+        if (! auth()->user()->hasRole('admin')) {
+            $reportQuery->whereDoesntHave('employee.roles', fn ($query) => $query->where('name', 'admin'));
+        }
         $totalCount = (clone $reportQuery)->count();
         $totalAmount = (float) (clone $reportQuery)->sum('amount');
         $dailySummaries = (clone $reportQuery)
@@ -183,7 +192,7 @@ class EmployeePaymentVoucherController extends Controller
             ->latest('employee_payment_vouchers.id')
             ->lazy(500);
 
-        return ExcelCsvExport::download('employee-voucher-report-'.now()->format('Ymd-His').'.csv', function (callable $writeRow) use (
+        return ExcelCsvExport::download('employee-voucher-report-' . now()->format('Ymd-His') . '.csv', function (callable $writeRow) use (
             $startDate,
             $endDate,
             $totalCount,
@@ -192,7 +201,7 @@ class EmployeePaymentVoucherController extends Controller
             $vouchers
         ): void {
             $writeRow(['Daily Employee Voucher Report']);
-            $writeRow(['Period', $startDate.' - '.$endDate]);
+            $writeRow(['Period', $startDate . ' - ' . $endDate]);
             $writeRow(['Voucher Count', $totalCount]);
             $writeRow(['Total Voucher Amount', number_format($totalAmount, 2, '.', '')]);
             $writeRow([]);

@@ -6,6 +6,7 @@ namespace App\Models;
 use Database\Factories\UserFactory;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Attributes\Hidden;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
@@ -45,5 +46,20 @@ class User extends Authenticatable
             'status' => 'boolean',
             'salary' => 'decimal:2',
         ];
+    }
+
+    /**
+     * বর্তমান ব্যবহারকারীর জন্য দৃশ্যমান user-দের query তৈরি করে।
+     */
+    public function scopeVisibleToCurrentUser(Builder $query): Builder
+    {
+        if (auth()->user()?->hasRole('admin')) { // বর্তমান ব্যবহারকারীর admin role আছে কি না যাচাই করে।
+            return $query; // admin হলে কোনো user-কে query থেকে বাদ দেয় না।
+        } // non-admin হলে নিচের role filter প্রয়োগ হয়।
+
+        return $query->whereDoesntHave( // admin role থাকা user-দের বাদ দেওয়ার query তৈরি করে।
+            'roles', // User model-এর role relation পরীক্ষা করে।
+            fn ($roles) => $roles->where('name', 'admin') // admin নামের role যুক্ত user খুঁজে পায়।
+        ); // admin role নেই এমন user-দের query ফেরায়।
     }
 }

@@ -42,6 +42,7 @@
                                 value="{{ old('end_date', $endDate) }}">
                         </div>
                         <div class="col-md-4 col-lg-3">
+                            {{-- non-admin ব্যবহারকারীর তালিকা থেকে Admin role-এর কর্মী controller-এ বাদ দেওয়া হয়। --}}
                             <label for="employee_id" class="form-label">Employee name</label>
                             <select name="employee_id" id="employee_id" class="form-select">
                                 <option value="">All employees</option>

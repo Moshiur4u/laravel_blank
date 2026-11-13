@@ -3,6 +3,8 @@
 use App\Models\EmployeePaymentVoucher;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Spatie\Permission\Models\Permission;
+use Spatie\Permission\Models\Role;
 
 uses(RefreshDatabase::class);
 
@@ -109,6 +111,57 @@ test('daily voucher report filters by employee name', function () {
             return $summaries->count() === 1
                 && $summaries->first()->employee_name === $selectedEmployee->name;
         });
+});
+
+test('daily voucher report hides admin employees from non-admin users', function () {
+    $viewer = User::factory()->create(['email_verified_at' => now()]);
+    $reportPermission = Permission::findOrCreate('voucher.report.employee', 'web');
+    $viewer->givePermissionTo($reportPermission);
+
+    $admin = User::factory()->create(['name' => 'Admin User', 'email_verified_at' => now()]);
+    $admin->assignRole(Role::findOrCreate('admin', 'web'));
+    $adminEmployee = User::factory()->create(['name' => 'Admin User', 'email_verified_at' => now()]);
+    $adminEmployee->assignRole(Role::findOrCreate('admin', 'web'));
+    $employee = User::factory()->create(['name' => 'Regular Employee']);
+
+    foreach ([
+        ['voucher_no' => 'EPV-ADMIN-VISIBILITY-001', 'employee' => $employee, 'amount' => '25.00'],
+        ['voucher_no' => 'EPV-ADMIN-VISIBILITY-002', 'employee' => $adminEmployee, 'amount' => '50.00'],
+    ] as $voucherData) {
+        EmployeePaymentVoucher::create([
+            'voucher_no' => $voucherData['voucher_no'],
+            'employee_id' => $voucherData['employee']->id,
+            'created_by' => $viewer->id,
+            'employee_name' => $voucherData['employee']->name,
+            'expense_type' => 'conveyance',
+            'payment_date' => today()->toDateString(),
+            'amount' => $voucherData['amount'],
+            'payment_method' => 'cash',
+        ]);
+    }
+
+    $response = $this->actingAs($viewer)
+        ->get(route('employee-payment.report'))
+        ->assertOk()
+        ->assertSee('EPV-ADMIN-VISIBILITY-001')
+        ->assertDontSee('EPV-ADMIN-VISIBILITY-002')
+        ->assertViewHas('employees', fn ($employees) => ! $employees->contains('id', $adminEmployee->id))
+        ->assertViewHas('creators', fn ($creators) => ! $creators->contains('id', $admin->id));
+
+    // non-admin দিয়ে Admin employee ID সরাসরি পাঠালেও তার voucher report-এ আসে না।
+    $this->actingAs($viewer)
+        ->get(route('employee-payment.report', ['employee_id' => $adminEmployee->id]))
+        ->assertOk()
+        ->assertDontSee('EPV-ADMIN-VISIBILITY-002')
+        ->assertViewHas('employees', fn ($employees) => ! $employees->contains('id', $adminEmployee->id));
+
+    $admin->givePermissionTo($reportPermission);
+    $this->actingAs($admin)
+        ->get(route('employee-payment.report', ['employee_id' => $adminEmployee->id]))
+        ->assertOk()
+        ->assertSee('EPV-ADMIN-VISIBILITY-002')
+        ->assertViewHas('employees', fn ($employees) => $employees->contains('id', $adminEmployee->id))
+        ->assertViewHas('creators', fn ($creators) => $creators->contains('id', $admin->id));
 });
 
 test('new employee payment vouchers record the authenticated creator', function () {

@@ -16,14 +16,7 @@ class UserController extends Controller
      */
     public function index()
     {
-        // ইউজারকে খুঁজে বের করা হলো  রোলসহ
-        $usersQuery = User::with('roles');
-
-        if (! auth()->user()->hasRole('admin')) {
-            $usersQuery->whereDoesntHave('roles', fn ($query) => $query->where('name', 'admin'));
-        }
-
-        $Users = $usersQuery->get();
+        $Users = User::with('roles')->visibleToCurrentUser()->get(); // user list-এ Admin role শুধু admin ব্যবহারকারীর জন্য দৃশ্যমান রাখে।
 
         // ইউজারকে ভিউ করা হলো
         return view('frontend.users.userIndex', compact('Users'));

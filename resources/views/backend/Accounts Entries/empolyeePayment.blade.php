@@ -21,10 +21,11 @@
             </div>
 
             <div class="mb-3 d-flex justify-content-end">
-                @canany(['voucher.report.employee', 'reports.all_access']) {{-- employee voucher report-এর নতুন permission। --}}
-                <a href="{{ route('employee-payment.report') }}" class="btn btn-outline-primary">
-                    <i class="bx bx-bar-chart-alt-2 me-1"></i> Daily Voucher Report
-                </a>
+                @canany(['voucher.report.employee', 'reports.all_access'])
+                    {{-- employee voucher report-এর নতুন permission। --}}
+                    <a href="{{ route('employee-payment.report') }}" class="btn btn-outline-primary">
+                        <i class="bx bx-bar-chart-alt-2 me-1"></i> Daily Voucher Report
+                    </a>
                 @endcanany
             </div>
 
@@ -35,9 +36,9 @@
                 </div>
             @endif
 
-            <div class="row g-3 mb-4">
+            <div class="mb-4 row g-3">
                 <div class="col-md-6">
-                    <div class="card border-0 shadow-sm h-100">
+                    <div class="border-0 shadow-sm card h-100">
                         <div class="card-body">
                             <div class="text-muted">Total Employee Expenses</div>
                             <div class="fs-4 fw-bold text-primary">৳{{ number_format((float) $totalAmount, 2) }}</div>
@@ -45,7 +46,7 @@
                     </div>
                 </div>
                 <div class="col-md-6">
-                    <div class="card border-0 shadow-sm h-100">
+                    <div class="border-0 shadow-sm card h-100">
                         <div class="card-body">
                             <div class="text-muted">Voucher Records</div>
                             <div class="fs-4 fw-bold">{{ $vouchers->total() }}</div>
@@ -54,8 +55,8 @@
                 </div>
             </div>
 
-            <div class="card border-0 shadow-sm mb-4">
-                <div class="card-header bg-primary text-white">
+            <div class="mb-4 border-0 shadow-sm card">
+                <div class="text-white card-header bg-primary">
                     <h5 class="mb-0"><i class="bx bx-receipt me-1"></i> Create Employee Payment Voucher</h5>
                 </div>
                 <div class="card-body">
@@ -63,13 +64,13 @@
                         @csrf
                         <div class="row g-3">
                             <div class="col-md-6 col-lg-4">
-                                <label for="employee_id" class="form-label fw-semibold">Employee <span class="text-danger">*</span></label>
+                                <label for="employee_id" class="form-label fw-semibold">Employee <span
+                                        class="text-danger">*</span></label>
                                 <select name="employee_id" id="employee_id"
                                     class="form-select @error('employee_id') is-invalid @enderror" required>
                                     <option value="">-- Select Employee --</option>
                                     @foreach ($employees as $employee)
-                                        <option value="{{ $employee->id }}"
-                                            data-salary="{{ $employee->salary ?? '' }}"
+                                        <option value="{{ $employee->id }}" data-salary="{{ $employee->salary ?? '' }}"
                                             {{ old('employee_id') == $employee->id ? 'selected' : '' }}>
                                             {{ $employee->name }}
                                         </option>
@@ -80,13 +81,14 @@
                                 @enderror
                                 <a id="employee-ledger-link"
                                     data-ledger-url="{{ route('employee-payment.ledger', ['employee' => '__EMPLOYEE__']) }}"
-                                    class="btn btn-sm btn-outline-primary mt-2 d-none" href="#">
+                                    class="mt-2 btn btn-sm btn-outline-primary d-none" href="#">
                                     <i class="bx bx-book-open me-1"></i> View Employee Ledger
                                 </a>
                             </div>
 
                             <div class="col-md-6 col-lg-4">
-                                <label for="expense_type" class="form-label fw-semibold">Expense Type <span class="text-danger">*</span></label>
+                                <label for="expense_type" class="form-label fw-semibold">Expense Type <span
+                                        class="text-danger">*</span></label>
                                 <select name="expense_type" id="expense_type"
                                     class="form-select @error('expense_type') is-invalid @enderror" required>
                                     <option value="">-- Select Expense Type --</option>
@@ -103,7 +105,8 @@
                             </div>
 
                             <div class="col-md-6 col-lg-4">
-                                <label for="payment_date" class="form-label fw-semibold">Payment Date <span class="text-danger">*</span></label>
+                                <label for="payment_date" class="form-label fw-semibold">Payment Date <span
+                                        class="text-danger">*</span></label>
                                 <input type="date" name="payment_date" id="payment_date"
                                     class="form-control @error('payment_date') is-invalid @enderror"
                                     value="{{ old('payment_date', now()->toDateString()) }}"
@@ -114,11 +117,12 @@
                             </div>
 
                             <div class="col-md-6 col-lg-4">
-                                <label for="amount" class="form-label fw-semibold">Amount (৳) <span class="text-danger">*</span></label>
+                                <label for="amount" class="form-label fw-semibold">Amount (৳) <span
+                                        class="text-danger">*</span></label>
                                 <input type="number" name="amount" id="amount"
-                                    class="form-control @error('amount') is-invalid @enderror"
-                                    min="0.01" max="9999999999.99" step="0.01"
-                                    value="{{ old('amount') }}" placeholder="Enter amount" required>
+                                    class="form-control @error('amount') is-invalid @enderror" min="0.01"
+                                    max="9999999999.99" step="0.01" value="{{ old('amount') }}"
+                                    placeholder="Enter amount" required>
                                 <small id="salary-limit-help" class="form-text text-muted">
                                     Salary expense cannot exceed the selected employee's current salary.
                                 </small>
@@ -128,7 +132,8 @@
                             </div>
 
                             <div class="col-md-6 col-lg-4">
-                                <label for="payment_method" class="form-label fw-semibold">Payment Method <span class="text-danger">*</span></label>
+                                <label for="payment_method" class="form-label fw-semibold">Payment Method <span
+                                        class="text-danger">*</span></label>
                                 <select name="payment_method" id="payment_method"
                                     class="form-select @error('payment_method') is-invalid @enderror" required>
                                     <option value="">-- Select Method --</option>
@@ -145,11 +150,11 @@
                             </div>
 
                             <div class="col-md-6 col-lg-4">
-                                <label for="reference" class="form-label fw-semibold">Reference No. <span class="text-muted">(Optional)</span></label>
+                                <label for="reference" class="form-label fw-semibold">Reference No. <span
+                                        class="text-muted">(Optional)</span></label>
                                 <input type="text" name="reference" id="reference"
-                                    class="form-control @error('reference') is-invalid @enderror"
-                                    maxlength="100" value="{{ old('reference') }}"
-                                    placeholder="Transaction or document reference">
+                                    class="form-control @error('reference') is-invalid @enderror" maxlength="100"
+                                    value="{{ old('reference') }}" placeholder="Transaction or document reference">
                                 @error('reference')
                                     <div class="invalid-feedback">{{ $message }}</div>
                                 @enderror
@@ -159,8 +164,7 @@
                                 <label for="notes" class="form-label fw-semibold">
                                     Notes <span class="text-muted">(Required for Other Employee Expense)</span>
                                 </label>
-                                <textarea name="notes" id="notes" rows="2"
-                                    class="form-control @error('notes') is-invalid @enderror"
+                                <textarea name="notes" id="notes" rows="2" class="form-control @error('notes') is-invalid @enderror"
                                     maxlength="2000" placeholder="Additional payment details">{{ old('notes') }}</textarea>
                                 @error('notes')
                                     <div class="invalid-feedback">{{ $message }}</div>
@@ -177,13 +181,13 @@
                 </div>
             </div>
 
-            <div class="card border-0 shadow-sm">
+            <div class="border-0 shadow-sm card">
                 <div class="card-header">
                     <h5 class="mb-0"><i class="bx bx-list-ul me-1"></i> Employee Payment Voucher History</h5>
                 </div>
                 <div class="card-body">
                     <div class="table-responsive">
-                        <table class="table table-striped table-bordered align-middle">
+                        <table class="table align-middle table-striped table-bordered">
                             <thead class="table-light">
                                 <tr>
                                     <th>Voucher No.</th>
@@ -204,17 +208,20 @@
                                         <td>{{ $voucher->payment_date->format('d M Y') }}</td>
                                         <td>{{ $voucher->employee_name }}</td>
                                         <td>{{ $expenseTypes[$voucher->expense_type] ?? $voucher->expense_type }}</td>
-                                        <td>{{ $paymentMethods[$voucher->payment_method] ?? $voucher->payment_method }}</td>
+                                        <td>{{ $paymentMethods[$voucher->payment_method] ?? $voucher->payment_method }}
+                                        </td>
                                         <td>{{ $voucher->reference ?: '—' }}</td>
-                                        <td class="text-end fw-semibold">৳{{ number_format((float) $voucher->amount, 2) }}</td>
+                                        <td class="text-end fw-semibold">৳{{ number_format((float) $voucher->amount, 2) }}
+                                        </td>
                                         <td>{{ $voucher->notes ?: '—' }}</td>
                                         <td>
                                             @if ($voucher->employee_id)
-                                                @canany(['voucher.report.employee', 'reports.all_access']) {{-- employee voucher report-এর নতুন permission। --}}
-                                                <a href="{{ route('employee-payment.ledger', $voucher->employee_id) }}"
-                                                    class="btn btn-sm btn-outline-primary">
-                                                    <i class="bx bx-book-open me-1"></i>View Ledger
-                                                </a>
+                                                @canany(['voucher.report.employee', 'reports.all_access'])
+                                                    {{-- employee voucher report-এর নতুন permission। --}}
+                                                    <a href="{{ route('employee-payment.ledger', $voucher->employee_id) }}"
+                                                        class="btn btn-sm btn-outline-primary">
+                                                        <i class="bx bx-book-open me-1"></i>View Ledger
+                                                    </a>
                                                 @endcanany
                                             @else
                                                 <span class="text-muted">Employee unavailable</span>
@@ -223,7 +230,8 @@
                                     </tr>
                                 @empty
                                     <tr>
-                                        <td colspan="9" class="text-center text-muted py-4">No employee payment vouchers yet.</td>
+                                        <td colspan="9" class="py-4 text-center text-muted">No employee payment
+                                            vouchers yet.</td>
                                     </tr>
                                 @endforelse
                             </tbody>
@@ -237,7 +245,7 @@
 
     <script>
         // Other expense বাছলে notes field বাধ্যতামূলক হয়; server-side validation-ও একই নিয়ম মানে।
-        document.addEventListener('DOMContentLoaded', function () {
+        document.addEventListener('DOMContentLoaded', function() {
             const expenseType = document.getElementById('expense_type');
             const notes = document.getElementById('notes');
             const employee = document.getElementById('employee_id');
@@ -259,10 +267,12 @@
                     salaryLimitHelp.textContent = `Maximum salary amount: ৳${Number(salary).toFixed(2)}`;
                 } else if (isSalary) {
                     amount.max = '0';
-                    salaryLimitHelp.textContent = 'This employee has no salary set. Set the employee salary before creating a salary voucher.';
+                    salaryLimitHelp.textContent =
+                        'This employee has no salary set. Set the employee salary before creating a salary voucher.';
                 } else {
                     amount.max = '9999999999.99';
-                    salaryLimitHelp.textContent = "Salary expense cannot exceed the selected employee's current salary.";
+                    salaryLimitHelp.textContent =
+                        "Salary expense cannot exceed the selected employee's current salary.";
                 }
             }
 

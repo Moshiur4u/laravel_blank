@@ -49,6 +49,20 @@ test('standard roles receive only their intended module permissions', function (
         ->and($admin->hasPermissionTo('Supplier.ledger.delete'))->toBeTrue(); // নতুন casing-এ admin-এর ledger delete অধিকার।
 });
 
+test('non-admin user lists hide admin accounts while admin lists retain them', function () {
+    $admin = User::factory()->create(); // তালিকায় থাকা admin user তৈরি করে।
+    $admin->assignRole('admin'); // user-টিকে admin role দেয়।
+    $viewer = User::factory()->create(); // সাধারণ non-admin viewer তৈরি করে।
+
+    $this->actingAs($viewer); // পরের query-গুলোর বর্তমান user হিসেবে viewer নির্ধারণ করে।
+    $visibleUsers = User::query()->visibleToCurrentUser()->pluck('id')->all(); // viewer-এর জন্য অনুমোদিত user id আনে।
+    expect($visibleUsers)->not->toContain($admin->id); // non-admin তালিকায় admin user নেই নিশ্চিত করে।
+
+    $this->actingAs($admin); // বর্তমান user-কে admin হিসেবে পরিবর্তন করে।
+    $visibleUsers = User::query()->visibleToCurrentUser()->pluck('id')->all(); // admin-এর জন্য user id-গুলো আনে।
+    expect($visibleUsers)->toContain($admin->id)->toContain($viewer->id); // admin উভয় account দেখতে পারে নিশ্চিত করে।
+});
+
 test('legacy permissions migrate to the new names without losing role assignments', function () {
     $manager = Role::findByName('manager');
     $legacyPermission = Permission::create(['name' => 'brand_category.create', 'guard_name' => 'web']);

@@ -125,7 +125,7 @@ class SalesReportController extends Controller
             'endDate' => $endDate,
             'filters' => $filters,
             'categories' => ProductCategory::query()->orderBy('category_name')->get(['id', 'category_name']),
-            'employees' => User::query()->orderBy('name')->get(['id', 'name']),
+            'employees' => User::query()->visibleToCurrentUser()->orderBy('name')->get(['id', 'name']), // sales report filter-এ Admin role-এর কর্মী লুকায়।
             'customers' => Customer::query()->orderBy('name')->get(['id', 'name', 'phone']),
             'invoices' => $invoices,
             'topProducts' => $topProducts,

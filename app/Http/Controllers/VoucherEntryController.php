@@ -127,7 +127,7 @@ class VoucherEntryController extends Controller
             ->latest('id')
             ->paginate(30)
             ->withQueryString();
-        $creators = User::query()->orderBy('name')->get(['id', 'name']);
+        $creators = User::query()->visibleToCurrentUser()->orderBy('name')->get(['id', 'name']); // voucher report filter-এ Admin role-এর user লুকায়।
 
         return view('backend.Accounts Entries.voucherEntryReport', compact(
             'filters',

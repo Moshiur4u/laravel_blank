@@ -39,7 +39,7 @@ class CustomerController extends Controller
      */
     public function create()
     {
-        $employees = User::orderBy('name')->get();
+        $employees = User::query()->visibleToCurrentUser()->orderBy('name')->get(); // customer form-এ বর্তমান ব্যবহারকারীর জন্য দৃশ্যমান কর্মী দেখায়।
 
         return view('backend.customer.addCustomer', compact('employees'));
     }
@@ -97,7 +97,7 @@ class CustomerController extends Controller
             },
         ])->findOrFail($id);
 
-        $employees = User::orderBy('name')->get();
+        $employees = User::query()->visibleToCurrentUser()->orderBy('name')->get(); // customer ledger-এ দৃশ্যমান কর্মীদের নির্বাচনযোগ্য রাখে।
         $totalSales = $customer->ledgers->sum('total_amount');
         $totalPayment = $customer->ledgers->sum('payment_amount');
         $totalDue = (float) $customer->opening_due
@@ -203,7 +203,7 @@ class CustomerController extends Controller
     {
         $ledger = CustomerLedger::with(['payments.receiver'])->findOrFail($id); // edit form-এর জন্য ledger ও payment history লোড করে।
         $customer = Customer::with('employee')->findOrFail($ledger->customer_id); // customer তথ্য ও দায়িত্বপ্রাপ্ত কর্মী আনে।
-        $employees = User::orderBy('name')->get(); // dropdown-এ কর্মীদের সাজানো তালিকা দেয়।
+        $employees = User::query()->visibleToCurrentUser()->orderBy('name')->get(); // dropdown-এ অনুমোদিত কর্মীদের সাজানো তালিকা দেয়।
         $ledgers = CustomerLedger::with(['receiver', 'employee', 'payments.receiver'])->where('customer_id', $customer->id)->latest()->get(); // edit অবস্থাতেও সম্পূর্ণ ledger table দেখায়।
         $totalSales = $ledgers->sum('total_amount'); // edit page summary-র মোট বিক্রি।
         $totalPayment = $ledgers->sum('payment_amount'); // edit page summary-র মোট আদায়।
@@ -497,7 +497,7 @@ class CustomerController extends Controller
     public function edit($id)
     {
         $customer = Customer::findOrFail($id);
-        $employees = User::orderBy('name')->get();
+        $employees = User::query()->visibleToCurrentUser()->orderBy('name')->get(); // customer edit form-এ দৃশ্যমান কর্মীদের তালিকা দেয়।
 
         return view('backend.customer.addCustomer', compact('customer', 'employees'));
     }

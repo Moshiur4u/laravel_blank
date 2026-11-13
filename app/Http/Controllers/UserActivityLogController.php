@@ -12,6 +12,7 @@ class UserActivityLogController extends Controller
     public function index(Request $request)
     {
         $users = User::query()
+            ->visibleToCurrentUser() // activity log filter-এ non-admin থেকে Admin role-এর user লুকায়।
             ->orderBy('name')
             ->get(['id', 'name', 'email']);
 

@@ -81,10 +81,7 @@ class CombinedVoucherReportController extends Controller
             ->paginate(30)
             ->withQueryString();
 
-        $creatorsQuery = User::query();
-        if (! auth()->user()->hasRole('admin')) {
-            $creatorsQuery->whereDoesntHave('roles', fn ($query) => $query->where('name', 'admin'));
-        }
+        $creatorsQuery = User::query()->visibleToCurrentUser(); // combined report-এ বর্তমান user-এর জন্য দৃশ্যমান creator-দের query করে।
 
         return view('backend.Accounts Entries.combinedVoucherReport', [
             'period' => $period,
