@@ -18,23 +18,25 @@
 
             <div class="row justify-content-center">
                 <div class="col-lg-7 col-xl-6">
-                    <div class="card radius-10 border-0 shadow-sm">
-                        <div class="card-header bg-transparent border-bottom py-3">
+                    <div class="border-0 shadow-sm card radius-10">
+                        <div class="py-3 bg-transparent card-header border-bottom">
                             <h5 class="mb-0 fw-bold"><i class="bx bx-ruler text-primary me-2"></i>Create Qty/Size</h5>
                         </div>
-                        <div class="card-body p-4">
+                        <div class="p-4 card-body">
                             <form action="{{ route('quantity-size.store') }}" method="POST" id="quantity-size-create-form">
                                 @csrf
                                 <div class="mb-4">
-                                    <label for="name" class="form-label fw-semibold">Qty/Size <span class="text-danger">*</span></label>
+                                    <label for="name" class="form-label fw-semibold">Qty/Size <span
+                                            class="text-danger">*</span></label>
                                     <input type="text" name="name" id="name"
-                                        class="form-control @error('name') is-invalid @enderror"
-                                        maxlength="50" value="{{ old('name') }}" placeholder="e.g. RIM, pcs" required autofocus>
+                                        class="form-control @error('name') is-invalid @enderror" maxlength="50"
+                                        value="{{ old('name') }}" placeholder="e.g. Pcs,Box,Ream,SET, etc..." required
+                                        autofocus>
                                     @error('name')
                                         <div class="invalid-feedback">{{ $message }}</div>
                                     @enderror
                                 </div>
-                                <div class="d-flex justify-content-end gap-2 border-top pt-3">
+                                <div class="gap-2 pt-3 d-flex justify-content-end border-top">
                                     @can('quantity-size.index')
                                         <a href="{{ route('quantity-size.index') }}" class="btn btn-light">Cancel</a>
                                     @endcan

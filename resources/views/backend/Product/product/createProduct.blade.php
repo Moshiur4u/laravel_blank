@@ -89,8 +89,7 @@
                                                 <button type="button"
                                                     class="input-group-text bg-light text-secondary border-end-0"
                                                     data-bs-toggle="modal" data-bs-target="#categoryCreateModal"
-                                                    aria-label="Create a product category"
-                                                    title="Create a product category">
+                                                    aria-label="Create a product category" title="Create a product category">
                                                     <i class="bx bx-category"></i>
                                                 </button>
                                             @else
@@ -128,8 +127,7 @@
                                                 <button type="button"
                                                     class="input-group-text bg-light text-secondary border-end-0"
                                                     data-bs-toggle="modal" data-bs-target="#brandCreateModal"
-                                                    aria-label="Create a brand"
-                                                    title="Create a brand">
+                                                    aria-label="Create a brand" title="Create a brand">
                                                     <i class="bx bx-tag"></i>
                                                 </button>
                                             @else
@@ -168,8 +166,7 @@
                                                 <button type="button"
                                                     class="input-group-text bg-light text-secondary border-end-0"
                                                     data-bs-toggle="modal" data-bs-target="#supplierCreateModal"
-                                                    aria-label="Create a supplier"
-                                                    title="Create a supplier">
+                                                    aria-label="Create a supplier" title="Create a supplier">
                                                     <i class="bx bx-store"></i>
                                                 </button>
                                             @else
@@ -260,14 +257,15 @@
                                         </label>
                                         <div class="input-group">
                                             @can('quantity-size.create')
-                                            <button type="button"
-                                                class="input-group-text bg-light text-secondary border-end-0"
-                                                data-bs-toggle="modal" data-bs-target="#quantitySizeModal"
-                                                aria-label="Create Qty/Size option" title="Create Qty/Size option">
-                                                <i class="bx bx-ruler"></i>
-                                            </button>
+                                                <button type="button"
+                                                    class="input-group-text bg-light text-secondary border-end-0"
+                                                    data-bs-toggle="modal" data-bs-target="#quantitySizeModal"
+                                                    aria-label="Create Qty/Size option" title="Create Qty/Size option">
+                                                    <i class="bx bx-ruler"></i>
+                                                </button>
                                             @else
-                                                <span class="input-group-text bg-light text-secondary border-end-0" aria-hidden="true">
+                                                <span class="input-group-text bg-light text-secondary border-end-0"
+                                                    aria-hidden="true">
                                                     <i class="bx bx-ruler"></i>
                                                 </span>
                                             @endcan
@@ -443,26 +441,28 @@
             </form>
 
             @can('quantity-size.create')
-                <div class="modal fade" id="quantitySizeModal" tabindex="-1"
-                    aria-labelledby="quantitySizeModalLabel" aria-hidden="true">
+                <div class="modal fade" id="quantitySizeModal" tabindex="-1" aria-labelledby="quantitySizeModalLabel"
+                    aria-hidden="true">
                     <div class="modal-dialog modal-dialog-centered">
                         <div class="modal-content">
                             <form id="quantitySizeForm" action="{{ route('quantity-size.store') }}" method="POST">
                                 @csrf
                                 <div class="modal-header">
                                     <h5 class="modal-title" id="quantitySizeModalLabel">Create Qty/Size Option</h5>
-                                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                                    <button type="button" class="btn-close" data-bs-dismiss="modal"
+                                        aria-label="Close"></button>
                                 </div>
                                 <div class="modal-body">
                                     <div class="alert alert-danger d-none" id="quantitySizeModalError" role="alert"></div>
                                     <label for="quantitySizeModalInput" class="form-label">Qty/Size</label>
                                     <input type="text" name="name" id="quantitySizeModalInput" class="form-control"
-                                        maxlength="50" placeholder="e.g. RIM, pcs" required>
+                                        maxlength="50" placeholder="e.g. Pcs,Box,Ream,SET, etc..." required>
                                     <div class="form-text">This option will also be available on other product forms.</div>
                                 </div>
                                 <div class="modal-footer">
                                     @can('quantity-size.index')
-                                        <a href="{{ route('quantity-size.index') }}" class="btn btn-outline-secondary">Manage options</a>
+                                        <a href="{{ route('quantity-size.index') }}" class="btn btn-outline-secondary">Manage
+                                            options</a>
                                     @endcan
                                     <button type="button" class="btn btn-light" data-bs-dismiss="modal">Cancel</button>
                                     <button type="submit" class="btn btn-primary">Create &amp; Use</button>
@@ -474,8 +474,8 @@
             @endcan
 
             @can('product.category.create')
-                <div class="modal fade" id="categoryCreateModal" tabindex="-1"
-                    aria-labelledby="categoryCreateModalLabel" aria-hidden="true">
+                <div class="modal fade" id="categoryCreateModal" tabindex="-1" aria-labelledby="categoryCreateModalLabel"
+                    aria-hidden="true">
                     <div class="modal-dialog modal-dialog-centered">
                         <div class="modal-content">
                             <div class="modal-header">
@@ -495,8 +495,8 @@
             @endcan
 
             @can('supplier.create')
-                <div class="modal fade" id="supplierCreateModal" tabindex="-1"
-                    aria-labelledby="supplierCreateModalLabel" aria-hidden="true">
+                <div class="modal fade" id="supplierCreateModal" tabindex="-1" aria-labelledby="supplierCreateModalLabel"
+                    aria-hidden="true">
                     <div class="modal-dialog modal-dialog-centered modal-lg">
                         <div class="modal-content">
                             <div class="modal-header">
@@ -516,8 +516,8 @@
             @endcan
 
             @can('brand.create')
-                <div class="modal fade" id="brandCreateModal" tabindex="-1"
-                    aria-labelledby="brandCreateModalLabel" aria-hidden="true">
+                <div class="modal fade" id="brandCreateModal" tabindex="-1" aria-labelledby="brandCreateModalLabel"
+                    aria-hidden="true">
                     <div class="modal-dialog modal-dialog-centered">
                         <div class="modal-content">
                             <div class="modal-header">
@@ -610,24 +610,30 @@
                                 message.toLowerCase().includes('exist')
                             );
                             // Server-এ আগে থেকে থাকা option-এর জন্যও একই নির্দিষ্ট বার্তা দেখানো হয়।
-                            throw new Error(duplicateMessage
-                                ? 'This Qty/Size is existing'
-                                : validationMessages.join(' ')
-                                || result.message
-                                || 'Please check the Qty/Size value and try again.');
+                            throw new Error(duplicateMessage ?
+                                'This Qty/Size is existing' :
+                                validationMessages.join(' ') ||
+                                result.message ||
+                                'Please check the Qty/Size value and try again.');
                         }
                         if (!response.ok || !result.quantity_size) {
-                            throw new Error(result.message || `Unable to create Qty/Size (HTTP ${response.status}).`);
+                            throw new Error(result.message ||
+                                `Unable to create Qty/Size (HTTP ${response.status}).`);
                         }
 
                         // Modal-এ তৈরি option dropdown-এ যোগ করে নতুন product-এ নির্বাচন করা হয়।
-                        if (![...quantitySizeInput.options].some((option) => option.value === result.quantity_size.name)) {
-                            quantitySizeInput.add(new Option(result.quantity_size.name, result.quantity_size.name));
+                        if (![...quantitySizeInput.options].some((option) => option.value === result
+                                .quantity_size.name)) {
+                            quantitySizeInput.add(new Option(result.quantity_size.name, result
+                                .quantity_size.name));
                         }
                         // option যোগ করার পর value বসালে form submit-এ Qty/Size পাঠানো নিশ্চিত হয়।
                         quantitySizeInput.value = result.quantity_size.name;
-                        quantitySizeInput.dispatchEvent(new Event('change', { bubbles: true }));
-                        bootstrap.Modal.getOrCreateInstance(document.getElementById('quantitySizeModal')).hide();
+                        quantitySizeInput.dispatchEvent(new Event('change', {
+                            bubbles: true
+                        }));
+                        bootstrap.Modal.getOrCreateInstance(document.getElementById(
+                            'quantitySizeModal')).hide();
                     } catch (error) {
                         errorBox.textContent = error.message;
                         errorBox.classList.remove('d-none');
@@ -711,10 +717,12 @@
                         });
 
                         if (!response.ok) {
-                            throw new Error(`Unable to load ${config.label} form (HTTP ${response.status}).`);
+                            throw new Error(
+                                `Unable to load ${config.label} form (HTTP ${response.status}).`);
                         }
 
-                        const page = new DOMParser().parseFromString(await response.text(), 'text/html');
+                        const page = new DOMParser().parseFromString(await response.text(),
+                        'text/html');
                         const form = page.getElementById(config.formId);
 
                         if (!form) {
@@ -725,7 +733,8 @@
                         modalBody.replaceChildren(form);
                         form.querySelector('input:not([type="hidden"])')?.focus();
                     } catch (error) {
-                        modalBody.innerHTML = '<div class="mb-0 alert alert-danger" role="alert"></div>';
+                        modalBody.innerHTML =
+                        '<div class="mb-0 alert alert-danger" role="alert"></div>';
                         modalBody.querySelector('.alert').textContent = error.message;
                     }
                 });
@@ -737,8 +746,10 @@
                     }
 
                     event.preventDefault();
-                    form.querySelectorAll('.is-invalid').forEach((input) => input.classList.remove('is-invalid'));
-                    form.querySelectorAll('.quick-create-validation-error').forEach((error) => error.remove());
+                    form.querySelectorAll('.is-invalid').forEach((input) => input.classList.remove(
+                        'is-invalid'));
+                    form.querySelectorAll('.quick-create-validation-error').forEach((error) => error
+                        .remove());
                     form.querySelector('.quick-create-submit-error')?.remove();
                     form.querySelector('.quick-create-validation-summary')?.remove();
                     const submitButton = form.querySelector('[type="submit"]');
@@ -766,7 +777,8 @@
                         if (response.status === 422 && result.errors) {
                             if (config.showValidationSummary) {
                                 const summary = document.createElement('div');
-                                summary.className = 'alert alert-danger quick-create-validation-summary';
+                                summary.className =
+                                'alert alert-danger quick-create-validation-summary';
                                 summary.setAttribute('role', 'alert');
                                 summary.textContent = Object.values(result.errors).flat().join(' ');
                                 form.prepend(summary);
@@ -777,14 +789,16 @@
                                     return;
                                 }
 
-                                const input = Array.from(form.elements).find((element) => element.name === field);
+                                const input = Array.from(form.elements).find((element) =>
+                                    element.name === field);
                                 if (!input) {
                                     return;
                                 }
 
                                 input.classList.add('is-invalid');
                                 const feedback = document.createElement('div');
-                                feedback.className = 'invalid-feedback d-block quick-create-validation-error';
+                                feedback.className =
+                                    'invalid-feedback d-block quick-create-validation-error';
                                 feedback.textContent = messages[0];
                                 input.closest('.mb-3, .mb-4')?.append(feedback);
                             });
@@ -797,8 +811,11 @@
                                 `Unable to save ${config.label} (HTTP ${response.status}).`);
                         }
 
-                        select.add(new Option(createdRecord[config.nameKey], createdRecord.id, true, true));
-                        select.dispatchEvent(new Event('change', { bubbles: true }));
+                        select.add(new Option(createdRecord[config.nameKey], createdRecord.id, true,
+                            true));
+                        select.dispatchEvent(new Event('change', {
+                            bubbles: true
+                        }));
                         bootstrap.Modal.getOrCreateInstance(modal).hide();
                     } catch (error) {
                         const alert = document.createElement('div');
