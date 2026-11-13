@@ -110,7 +110,7 @@
                                         </td>
                                         <td class="text-end">৳{{ number_format((float) $item->unit_price, 2) }}</td>
                                         <td class="text-center">{{ $item->quantity }}</td>
-                                        <td class="text-center">{{ $item->product?->quantity_size ?: ($item->product?->stock_unit ?: 'Unit') }}</td>
+                                        <td class="text-center">{{ $item->quantity_size ?: ($item->product?->quantity_size ?: ($item->product?->stock_unit ?: 'Unit')) }}</td> {{-- quotation-এ সংরক্ষিত unit আগে দেখায়, পুরোনো item-এ product unit দিয়ে fallback করে। --}}
                                         <td class="text-end fw-bold">৳{{ number_format((float) $item->line_total, 2) }}
                                         </td>
                                     </tr>

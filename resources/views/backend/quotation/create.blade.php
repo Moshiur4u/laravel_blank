@@ -177,6 +177,7 @@
                                     @foreach (old('items', [['product_name' => '', 'product_id' => '', 'unit_price' => '0.00', 'quantity' => 0]]) as $index => $oldItem)
                                         @php
                                             $oldProduct = $products->firstWhere('id', $oldItem['product_id'] ?? null);
+                                            $selectedQuantitySize = $oldItem['quantity_size'] ?? $oldProduct?->quantity_size ?? ''; // পুরোনো ইনপুটের unit, না থাকলে product-এর unit বেছে নেয়।
                                         @endphp
                                         <tr class="item-row">
                                             <td>
@@ -201,7 +202,14 @@
                                                     name="items[{{ $index }}][quantity]"
                                                     value="{{ $oldItem['quantity'] ?? 0 }}" required>
                                             </td>
-                                            <td class="item-unit text-center">{{ $oldProduct ? ($oldProduct->quantity_size ?: ($oldProduct->stock_unit ?: 'Unit')) : '—' }}</td>
+                                            <td class="item-unit text-center"> {{-- quotation item-এর unit dropdown cell শুরু করে। --}}
+                                                <select name="items[{{ $index }}][quantity_size]" class="form-select form-select-sm item-unit-select"> {{-- নির্বাচিত unit-কে form data-তে পাঠায়। --}}
+                                                    <option value="">-- Select Unit --</option> {{-- unit নির্বাচন না করলে ফাঁকা মান পাঠায়। --}}
+                                                    @foreach ($quantitySizes as $quantitySize) {{-- QuantitySize table থেকে আনা প্রতিটি unit option বানায়। --}}
+                                                        <option value="{{ $quantitySize->name }}" {{ $selectedQuantitySize === $quantitySize->name ? 'selected' : '' }}>{{ $quantitySize->name }}</option> {{-- unit-এর নাম value ও label হিসেবে রাখে, পূর্বনির্বাচিত হলে select করে। --}}
+                                                    @endforeach {{-- unit option-গুলোর loop শেষ করে। --}}
+                                                </select> {{-- unit dropdown শেষ করে। --}}
+                                            </td> {{-- unit dropdown cell শেষ করে। --}}
                                             <td class="text-end fw-bold">
                                                 <span class="item-line-total text-dark">0.00</span>
                                             </td>
@@ -223,6 +231,7 @@
                                 {{-- <option value="{{ $product->display_name }}" data-id="{{ $product->id }}" data-price="{{ $product->price ?? 0 }}"> --}}
                                 {{-- এখন নামের সঙ্গে Product code রাখা হয়েছে; Unit আলাদা টেবিল কলামে দেখানো হয়। --}}
                                 <option value="{{ $product->productName }} — PRD-{{ str_pad($product->id, 5, '0', STR_PAD_LEFT) }}"
+                                    data-unit="{{ $product->quantity_size }}"> {{-- পণ্য নির্বাচন করলে তার quantity_size dropdown-এ preselect করার জন্য রাখে। --}}
                                     {{-- data-id="{{ $product->id }}" --}}
                                     {{-- data-id="{{ $product->productName }}" --}}
                                     {{-- data-price="{{ $product->price ?? 0 }}" --}}
@@ -230,6 +239,12 @@
                                 </option>
                             @endforeach
                         </datalist>
+                        <template id="quotationUnitOptions"> {{-- নতুন item row-এর unit dropdown-এর option-গুলো রাখে। --}}
+                            <option value="">-- Select Unit --</option> {{-- নতুন row-এ ফাঁকা unit option দেয়। --}}
+                            @foreach ($quantitySizes as $quantitySize) {{-- QuantitySize table-এর প্রতিটি record template-এ যোগ করে। --}}
+                                <option value="{{ $quantitySize->name }}">{{ $quantitySize->name }}</option> {{-- একই unit name value ও visible label হিসেবে ব্যবহার করে। --}}
+                            @endforeach {{-- নতুন row-এর unit option loop শেষ করে। --}}
+                        </template> {{-- নতুন row-এর জন্য unit options template শেষ করে। --}}
                     </div>
                 </div>
 
@@ -354,6 +369,7 @@
         }, 0);
         const addItemBtn = document.getElementById('addItemBtn');
         const productDatalist = document.getElementById('quotationProductOptions');
+        const unitOptionsTemplate = document.getElementById('quotationUnitOptions'); // database-ভিত্তিক unit option-গুলো নতুন row-তে কপি করার template নেয়।
 
         const displaySubtotal = document.getElementById('displaySubtotal');
         const displayDiscountAmount = document.getElementById('displayDiscountAmount');
@@ -459,7 +475,7 @@
                 productMap[opt.value.trim().toLowerCase()] = {
                     id: opt.getAttribute('data-id'),
                     price: parseFloat(opt.getAttribute('data-price')) || 0,
-                    unit: opt.getAttribute('data-unit') || 'Unit'
+                    unit: opt.getAttribute('data-unit') || '' // product-এর quantity_size না থাকলে dropdown ফাঁকা রাখে।
                 };
             });
         }
@@ -470,19 +486,20 @@
             const hiddenId = row.querySelector('.product-id-hidden');
             const unitPriceInput = row.querySelector('.item-unit-price');
             const quantityInput = row.querySelector('.item-quantity');
+            const unitSelect = row.querySelector('.item-unit-select'); // বর্তমান item row-এর unit dropdown ধরে।
             const removeBtn = row.querySelector('.remove-item-btn');
 
             nameInput.addEventListener('input', function () {
                 const val = this.value.trim().toLowerCase();
                 if (productMap[val]) {
                     hiddenId.value = productMap[val].id;
-                    row.querySelector('.item-unit').textContent = productMap[val].unit;
+                    unitSelect.value = productMap[val].unit; // নির্বাচিত product-এর quantity_size থাকলে dropdown-এ সেট করে।
                     if (!parseFloat(unitPriceInput.value) || parseFloat(unitPriceInput.value) === 0) {
                         unitPriceInput.value = productMap[val].price.toFixed(2);
                     }
                 } else {
                     hiddenId.value = '';
-                    row.querySelector('.item-unit').textContent = '—';
+                    unitSelect.value = ''; // অজানা product লিখলে আগের unit নির্বাচন সরিয়ে দেয়।
                 }
                 updateTotals();
             });
@@ -520,7 +537,11 @@
                     <input type="number" min="1" step="1" class="form-control text-center item-quantity"
                         name="items[${rowIndex}][quantity]" value="0" required>
                 </td>
-                <td class="item-unit text-center">—</td>
+                <td class="item-unit text-center"> {{-- নতুন quotation row-এর unit cell তৈরি করে। --}}
+                    <select name="items[${rowIndex}][quantity_size]" class="form-select form-select-sm item-unit-select"> {{-- নতুন row-এর নির্বাচিত unit form-এ পাঠায়। --}}
+                        ${unitOptionsTemplate.innerHTML} {{-- QuantitySize table থেকে render করা option-গুলো এখানে বসায়। --}}
+                    </select> {{-- নতুন row-এর unit dropdown শেষ করে। --}}
+                </td> {{-- নতুন row-এর unit cell শেষ করে। --}}
                 <td class="text-end fw-bold">
                     <span class="item-line-total text-dark">0.00</span>
                 </td>

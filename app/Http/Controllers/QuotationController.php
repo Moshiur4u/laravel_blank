@@ -7,6 +7,7 @@ use App\Models\Organization;
 use App\Models\Product;
 use App\Models\Quotation;
 use App\Models\QuotationItem;
+use App\Models\QuantitySize; // QuantitySize table থেকে quotation unit dropdown-এর option আনে।
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -34,6 +35,7 @@ class QuotationController extends Controller
     public function create()
     {
         $products = Product::query()->orderBy('productName')->get();
+        $quantitySizes = QuantitySize::query()->orderBy('name')->get(['name']); // database থেকে সাজানো unit option আনে।
         $organization = Organization::query()->find(1);
 
         // Generate next quotation number format: QT-YYYYMM-0001
@@ -53,7 +55,7 @@ class QuotationController extends Controller
 
         $defaultTerms = "1. This quotation is valid for 15 days from the date of issue.\n2. Prices are inclusive/exclusive of applicable taxes as indicated.\n3. Delivery will be scheduled upon confirmation of the order.\n4. Payment terms: 50% advance, balance upon delivery.";
 
-        return view('backend.quotation.create', compact('products', 'organization', 'generatedQuotationNo', 'defaultTerms'));
+        return view('backend.quotation.create', compact('products', 'quantitySizes', 'organization', 'generatedQuotationNo', 'defaultTerms')); // product form-এর সঙ্গে unit options-ও Blade-এ পাঠায়।
     }
 
     /**
@@ -102,6 +104,7 @@ class QuotationController extends Controller
             'items.*.product_id' => 'nullable|exists:products,id',
             'items.*.product_name' => 'required|string|max:255',
             'items.*.quantity' => 'required|numeric|min:1',
+            'items.*.quantity_size' => 'nullable|string|max:50|exists:quantity_sizes,name', // প্রতিটি item-এর unit QuantitySize table-এ আছে কি না যাচাই করে।
             'items.*.unit_price' => 'required|numeric|min:0',
             'discount_type' => 'nullable|in:flat,percentage',
             'discount_value' => 'nullable|numeric|min:0',
@@ -149,6 +152,7 @@ class QuotationController extends Controller
                 $itemsData[] = [
                     'product_id' => !empty($item['product_id']) ? $item['product_id'] : null,
                     'product_name' => $product?->productName ?? trim($item['product_name']),
+                    'quantity_size' => $item['quantity_size'] ?? $product?->quantity_size, // নির্বাচিত unit সংরক্ষণ করে; পুরোনো request হলে product-এর unit নেয়।
                     'unit_price' => $unitPrice,
                     'quantity' => $qty,
                     'line_total' => $lineTotal,
