@@ -301,12 +301,12 @@ class CombinedVoucherReportController extends Controller
             ->orderByDesc('voucher_code')
             ->cursor();
 
-        return ExcelCsvExport::download('combined-voucher-report-'.now()->format('Ymd-His').'.csv', function (callable $writeRow) use (
+        return ExcelCsvExport::download('cashbook-report-'.now()->format('Ymd-His').'.csv', function (callable $writeRow) use ( // downloaded file-এর নাম CashBook রাখে।
             $periodLabel,
             $totals,
             $vouchers
         ): void {
-            $writeRow(['Combined Voucher Report']);
+            $writeRow(['CashBook Report']); // export file-এর report title-কে CashBook নামে দেখায়।
             $writeRow(['Period', $periodLabel]);
             $writeRow(['Employee Voucher Count', (int) $totals->employee_voucher_count]);
             $writeRow(['Debit Voucher Count', (int) $totals->debit_voucher_count]);

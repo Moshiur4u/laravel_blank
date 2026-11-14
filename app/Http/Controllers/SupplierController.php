@@ -180,7 +180,7 @@ class SupplierController extends Controller
         if ($hasVouchers) {
             return redirect()->route('supplier.index')->with(
                 'error',
-                'Delete this supplier’s associated vouchers from the Combined Voucher Report before deleting the supplier.'
+                'Delete this supplier’s associated vouchers from the CashBook Report before deleting the supplier.' // report-এর নতুন নাম error message-এ দেখায়।
             );
         }
 

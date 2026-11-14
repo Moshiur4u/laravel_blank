@@ -4,10 +4,12 @@ namespace Tests\Feature;
 
 use App\Http\Controllers\ProductInventoryReportController;
 use App\Models\Product;
+use App\Models\ProductCategory;
 use App\Models\SaleItem;
 use App\Models\Supplier;
 use App\Models\Supplierledger;
 use Illuminate\Database\Schema\Blueprint;
+use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Facades\Schema;
 use Tests\TestCase;
@@ -95,7 +97,7 @@ class ProductInventoryReportTest extends TestCase
             'line_total' => '50.00',
         ]);
 
-        $view = app(ProductInventoryReportController::class)->index();
+        $view = app(ProductInventoryReportController::class)->index(Request::create('/reports/product-inventory', 'GET'));
         $data = $view->getData();
         $row = $data['rows']->firstWhere('name', 'Rice');
 
@@ -121,8 +123,73 @@ class ProductInventoryReportTest extends TestCase
         $this->assertSame(1, $data['total_expired_products']);
     }
 
+    public function test_report_filters_products_by_category_and_stock_status(): void
+    {
+        if (! extension_loaded('pdo_sqlite')) {
+            $this->markTestSkipped('The pdo_sqlite extension is required for the report filter test.');
+        }
+
+        $this->createReportSchema();
+
+        $category = ProductCategory::create(['category_name' => 'Food']);
+        $otherCategory = ProductCategory::create(['category_name' => 'Drinks']);
+        $lowStockProduct = Product::create([
+            'productName' => 'Low stock food',
+            'product_categorie_id' => $category->id,
+            'unit' => '5',
+        ]);
+        Product::create([
+            'productName' => 'Regular stock food',
+            'product_categorie_id' => $category->id,
+            'unit' => '15',
+        ]);
+        $outOfStockProduct = Product::create([
+            'productName' => 'Out of stock food',
+            'product_categorie_id' => $category->id,
+            'unit' => '0',
+        ]);
+        Product::create([
+            'productName' => 'Low stock drink',
+            'product_categorie_id' => $otherCategory->id,
+            'unit' => '3',
+        ]);
+
+        $view = app(ProductInventoryReportController::class)->index(Request::create(
+            '/reports/product-inventory',
+            'GET',
+            ['category_id' => $category->id, 'stock_status' => 'low_stock']
+        ));
+        $data = $view->getData();
+
+        $this->assertSame([$lowStockProduct->id], $data['rows']->pluck('id')->all());
+        $this->assertSame(1, $data['total_products']);
+        $this->assertEquals(5, $data['total_stock']);
+        $this->assertSame((string) $category->id, (string) $data['filters']['category_id']);
+        $this->assertCount(2, $data['categories']);
+
+        $inStockView = app(ProductInventoryReportController::class)->index(Request::create(
+            '/reports/product-inventory',
+            'GET',
+            ['stock_status' => 'in_stock']
+        ));
+        $this->assertCount(3, $inStockView->getData()['rows']);
+
+        $outOfStockView = app(ProductInventoryReportController::class)->index(Request::create(
+            '/reports/product-inventory',
+            'GET',
+            ['stock_status' => 'out_of_stock']
+        ));
+        $this->assertSame([$outOfStockProduct->id], $outOfStockView->getData()['rows']->pluck('id')->all());
+    }
+
     private function createReportSchema(): void
     {
+        Schema::create('product_categories', function (Blueprint $table): void {
+            $table->id();
+            $table->string('category_name');
+            $table->timestamps();
+        });
+
         Schema::create('suppliers', function (Blueprint $table): void {
             $table->id();
             $table->string('name');
@@ -133,6 +200,7 @@ class ProductInventoryReportTest extends TestCase
         Schema::create('products', function (Blueprint $table): void {
             $table->id();
             $table->string('productName');
+            $table->unsignedBigInteger('product_categorie_id')->nullable();
             $table->string('unit');
             $table->date('expiry_date')->nullable();
             $table->foreignId('supplier_id')->nullable();

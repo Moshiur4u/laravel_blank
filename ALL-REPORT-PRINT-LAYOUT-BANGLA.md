@@ -1,10 +1,25 @@
 # নির্বাচিত রিপোর্টগুলোর Print Layout — বাংলা Code Guide
 
-এই পরিবর্তনে Product Inventory, Combined Voucher, Sales, Employee Payment Voucher, Voucher Entry, Employee Payment Ledger, Purchase Return এবং Product Return report-এর print layout একরকম করা হয়েছে। সব report portrait কাগজে ছাপে, organization তথ্য দেখায়, সংরক্ষিত organization logo-কে হালকা watermark হিসেবে প্রতিটি printed page-এ বসায়, table-কে page width-এর মধ্যে রাখে এবং অতিরিক্ত blank page তৈরি করতে পারে এমন viewport-height ও forced row-break সরায়। Screen layout ও report-এর হিসাব অপরিবর্তিত।
+এই পরিবর্তনে Product Inventory, CashBook, Sales, Employee Payment Voucher, Voucher Entry, Employee Payment Ledger, Purchase Return এবং Product Return report-এর print layout একরকম করা হয়েছে। সব report portrait কাগজে ছাপে, organization তথ্য দেখায়, সংরক্ষিত organization logo-কে হালকা watermark হিসেবে প্রতিটি printed page-এ বসায়, table-কে page width-এর মধ্যে রাখে এবং অতিরিক্ত blank page তৈরি করতে পারে এমন viewport-height ও forced row-break সরায়। Inventory-তে Category ও Stock filter যোগ হয়েছে; নির্বাচিত row অনুযায়ী totals ও export-ও বদলায়।
 
 ## Controller (Code and Explanation)
 
-**কোনো Controller পরিবর্তন করা হয়নি।** report-এর আগে থেকে তৈরি totals, summary values এবং paginator-ই Blade view-তে ব্যবহার করা হয়েছে। Print layout-এর জন্য নতুন query বা business logic যোগ করার প্রয়োজন ছিল না।
+Combined report-এর export filename ও CSV title `CashBook Report` করা হয়েছে। Voucher query, totals বা calculation অপরিবর্তিত।
+Customer ও Supplier-এর সংশ্লিষ্ট voucher delete-সংক্রান্ত error message-এও নতুন report name ব্যবহার করা হয়েছে।
+
+```php
+        return ExcelCsvExport::download('cashbook-report-'.now()->format('Ymd-His').'.csv', function (callable $writeRow) use ( // downloaded file-এর নাম CashBook রাখে।
+            $periodLabel,
+            $totals,
+            $vouchers
+        ): void {
+            $writeRow(['CashBook Report']); // export file-এর report title-কে CashBook নামে দেখায়।
+```
+
+```php
+                'Delete this supplier’s associated vouchers from the CashBook Report before deleting the supplier.' // report-এর নতুন নাম error message-এ দেখায়।
+                'Delete this customer’s associated vouchers from the CashBook Report before deleting the customer.' // report-এর নতুন নাম error message-এ দেখায়।
+```
 
 ## Migration (Code and Explanation)
 
@@ -457,13 +472,17 @@ Print summary-তে selected period-এর voucher count ও amount দেখ�
 </div> {{-- voucher entry count block শেষ করে। --}}
 ```
 
-### Combined Voucher Report
+### CashBook Report
 
 **ফাইল:** `resources/views/backend/Accounts Entries/combinedVoucherReport.blade.php`
 
-Print summary-তে cash in hand, employee vouchers/payment, debit vouchers/amount এবং credit vouchers/amount সাধারণ text-এ দেখানো হয়।
+Report-এর browser title, page heading এবং print organization header-এ “CashBook Report” নাম দেখানো হয়। Print summary-তে cash in hand, employee vouchers/payment, debit vouchers/amount এবং credit vouchers/amount সাধারণ text-এ দেখানো হয়।
 
 ```blade
+@section('title', 'CashBook Report') {{-- browser tab-এ নতুন report name দেখায়। --}}
+<h4 class="mt-2 mb-0">CashBook Report</h4> {{-- page breadcrumb-এ CashBook name দেখায়। --}}
+                        'reportTitle' => 'CashBook Report', // print header-এ CashBook name দেখায়।
+<h2 class="mb-1 text-primary fw-bold d-print-none">CashBook Report</h2> {{-- report content-এ CashBook name দেখায়। --}}
 <div class="mb-4 row g-3 print-summary print-summary-cards d-print-none"> {{-- summary card শুধু screen-এ দেখায়। --}}
 <div class="d-none d-print-block print-summary-text"> {{-- প্রিন্টে combined voucher summary text দেখায়। --}}
     <p class="mb-1"> {{-- cash in hand আলাদা লাইনে দেখায়। --}}

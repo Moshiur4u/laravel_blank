@@ -579,7 +579,7 @@ class CustomerController extends Controller
         if ($hasVouchers) {
             return redirect()->route('customer.index')->with(
                 'error',
-                'Delete this customer’s associated vouchers from the Combined Voucher Report before deleting the customer.'
+                'Delete this customer’s associated vouchers from the CashBook Report before deleting the customer.' // report-এর নতুন নাম error message-এ দেখায়।
             );
         }
 

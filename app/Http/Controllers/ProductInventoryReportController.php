@@ -3,9 +3,11 @@
 namespace App\Http\Controllers;
 
 use App\Models\Product;
+use App\Models\ProductCategory;
 use App\Models\SaleItem;
 use App\Models\Supplierledger;
 use App\Support\ExcelCsvExport;
+use Illuminate\Http\Request;
 use Illuminate\Support\Collection;
 use Illuminate\View\View;
 use Symfony\Component\HttpFoundation\StreamedResponse;
@@ -13,14 +15,20 @@ use Symfony\Component\HttpFoundation\StreamedResponse;
 class ProductInventoryReportController extends Controller
 {
     /**
-     * সব পণ্যের ক্রয়, বর্তমান মজুত, মেয়াদ ও supplier তথ্যসহ inventory report দেখায়।
+     * নির্বাচিত category ও stock status অনুযায়ী inventory report দেখায়।
      */
-    public function index(): View
+    public function index(Request $request): View
     {
-        $rows = $this->reportRows();
+        $filters = $this->validatedFilters($request); // URL-এর category ও stock filter যাচাই করে।
+        $rows = $this->filteredRows($filters); // নির্বাচিত filter অনুযায়ী report row বেছে নেয়।
+        $categories = ProductCategory::query() // dropdown-এর category তালিকা তৈরি করে।
+            ->orderBy('category_name') // category-গুলো নাম অনুযায়ী সাজায়।
+            ->get(['id', 'category_name']); // শুধু dropdown-এর দরকারি field নেয়।
 
         return view('backend.reports.productinventory', [
             'rows' => $rows,
+            'categories' => $categories, // Blade form-এ category option পাঠায়।
+            'filters' => $filters, // নির্বাচিত filter Blade-এ ফেরত পাঠায়।
             'total_products' => $rows->count(),
             'total_purchased_quantity' => $rows->sum('purchased_quantity'),
             // যেসব product-এর মোট ক্রয়কৃত quantity শূন্যের বেশি, সেগুলো একবার করে গণনা করা হয়।
@@ -34,11 +42,12 @@ class ProductInventoryReportController extends Controller
     }
 
     /**
-     * Downloads the complete inventory report in an Excel-compatible format.
+     * নির্বাচিত category ও stock status অনুযায়ী inventory export করে।
      */
-    public function export(): StreamedResponse
+    public function export(Request $request): StreamedResponse
     {
-        $rows = $this->reportRows();
+        $filters = $this->validatedFilters($request); // export request-এর filter একইভাবে যাচাই করে।
+        $rows = $this->filteredRows($filters); // export-এও report-এর নির্বাচিত filter প্রয়োগ করে।
         $totalProducts = $rows->count();
         $totalPurchasedQuantity = $rows->sum('purchased_quantity');
         $totalPurchaseAmount = $rows->sum('purchase_amount');
@@ -106,6 +115,43 @@ class ProductInventoryReportController extends Controller
     }
 
     /**
+     * Inventory report-এর অনুমোদিত category ও stock filter যাচাই করে।
+     */
+    private function validatedFilters(Request $request): array
+    {
+        return $request->validate([
+            'category_id' => ['nullable', 'integer', 'exists:product_categories,id'], // থাকা category ID-ই গ্রহণ করে।
+            'stock_status' => ['nullable', 'in:in_stock,low_stock,out_of_stock'], // নির্দিষ্ট stock status-ই গ্রহণ করে।
+        ]);
+    }
+
+    /**
+     * Category ও stock status অনুযায়ী product row বেছে নেয়।
+     */
+    private function filteredRows(array $filters): Collection
+    {
+        return $this->reportRows()
+            ->filter(static function (array $row) use ($filters): bool {
+                if (
+                    isset($filters['category_id'])
+                    && (int) $row['category_id'] !== (int) $filters['category_id']
+                ) {
+                    return false; // অন্য category-র product বাদ দেয়।
+                }
+
+                $stock = $row['stock']; // বর্তমান stock quantity নেয়।
+
+                return match ($filters['stock_status'] ?? null) {
+                    'in_stock' => $stock > 0, // একের বেশি stock থাকা product রাখে।
+                    'low_stock' => $stock > 0 && $stock <= 10, // ১ থেকে ১০ stock থাকা product রাখে।
+                    'out_of_stock' => $stock <= 0, // শূন্য বা ঋণাত্মক stock থাকা product রাখে।
+                    default => true, // filter না থাকলে সব product রাখে।
+                };
+            })
+            ->values(); // filter-এর পর table row numbering ধারাবাহিক রাখে।
+    }
+
+    /**
      * Builds the inventory rows shared by the report page and its export.
      */
     private function reportRows(): Collection
@@ -159,6 +205,7 @@ class ProductInventoryReportController extends Controller
 
             return [
                 'id' => $product->id,
+                'category_id' => $product->product_categorie_id, // category filter-এর জন্য category ID রাখে।
                 // Unit-কে আলাদা কলামে দেখানো হয়, তাই Product নামের সঙ্গে জোড়া হয় না।
                 'name' => $product->productName,
                 'unit_label' => $product->quantity_size ?: ($product->stock_unit ?: 'Unit'),

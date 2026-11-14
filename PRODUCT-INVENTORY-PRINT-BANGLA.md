@@ -4,7 +4,42 @@
 
 ## Controller (Code and Explanation)
 
-**পরিবর্তন নেই।** বিদ্যমান Controller থেকে আসা `$total_products`, `$total_purchase_amount`, `$unique_products_purchased`, `$total_purchased_quantity`, `$total_stock` ও `$total_expired_products` value-গুলোই format করে দেখানো হয়। নতুন হিসাব বা Controller code যোগ করা হয়নি।
+`ProductInventoryReportController` category ও stock status যাচাই করে। একই filter report এবং CSV export—দুই জায়গাতেই ব্যবহৃত হয়; summary total-ও filtered row থেকে গণনা হয়।
+
+```php
+    private function validatedFilters(Request $request): array
+    {
+        return $request->validate([
+            'category_id' => ['nullable', 'integer', 'exists:product_categories,id'], // থাকা category ID-ই গ্রহণ করে।
+            'stock_status' => ['nullable', 'in:in_stock,low_stock,out_of_stock'], // নির্দিষ্ট stock status-ই গ্রহণ করে।
+        ]);
+    }
+
+    private function filteredRows(array $filters): Collection
+    {
+        return $this->reportRows()
+            ->filter(static function (array $row) use ($filters): bool {
+                if (
+                    isset($filters['category_id'])
+                    && (int) $row['category_id'] !== (int) $filters['category_id']
+                ) {
+                    return false; // অন্য category-র product বাদ দেয়।
+                }
+
+                $stock = $row['stock']; // বর্তমান stock quantity নেয়।
+
+                return match ($filters['stock_status'] ?? null) {
+                    'in_stock' => $stock > 0, // একের বেশি stock থাকা product রাখে।
+                    'low_stock' => $stock > 0 && $stock <= 10, // ১ থেকে ১০ stock থাকা product রাখে।
+                    'out_of_stock' => $stock <= 0, // শূন্য বা ঋণাত্মক stock থাকা product রাখে।
+                    default => true, // filter না থাকলে সব product রাখে।
+                };
+            })
+            ->values(); // filter-এর পর table row numbering ধারাবাহিক রাখে।
+    }
+```
+
+`index()` এই validated filter দিয়ে `rows`, category option ও নির্বাচিত filter Blade-এ পাঠায়। `export()` একই `filteredRows()` ব্যবহার করে, তাই Export Excel link-এ filter-গুলো query string হিসেবে যোগ করা হয়েছে।
 
 ## Migration (Code and Explanation)
 
@@ -12,7 +47,7 @@
 
 ## Route (Code and Explanation)
 
-**পরিবর্তন নেই।** Report route এবং `window.print()` button আগের মতোই কাজ করে।
+**নতুন Route যোগ হয়নি।** আগের `product.inventory.report` GET route-এই `category_id` ও `stock_status` query parameter পাঠানো হয়; export route-এও একই filter parameter যায়।
 
 ## Model (Code and Explanation)
 
@@ -21,6 +56,59 @@
 ## Blade Template (Code and Explanation)
 
 **ফাইল:** `resources/views/backend/reports/productinventory.blade.php`
+
+### Category ও Stock filter
+
+Category dropdown-এ সব বিদ্যমান category থাকে। Stock dropdown-এর `In Stock` মানে stock শূন্যের বেশি; `Low Stock` মানে ১–১০; `Out of Stock` মানে শূন্য বা তার নিচে। Reset link filter সরিয়ে আগের পূর্ণ report দেখায়।
+
+```blade
+            <div class="mb-4 border-0 shadow-sm card no-print"> {{-- category ও stock filter-কে print থেকে বাদ রাখে। --}}
+                <div class="card-header"> {{-- filter panel-এর শিরোনাম দেখায়। --}}
+                    <h5 class="mb-0">Inventory Filters</h5> {{-- filter panel-এর নাম দেখায়। --}}
+                </div> {{-- filter panel header শেষ করে। --}}
+                <div class="card-body"> {{-- filter input-গুলোর container তৈরি করে। --}}
+                    @if ($errors->any()) {{-- filter validation error থাকলে দেখায়। --}}
+                        <div class="mb-3 alert alert-danger" role="alert"> {{-- error message-গুলোকে দৃশ্যমান করে। --}}
+                            @foreach ($errors->all() as $message) {{-- validation message-গুলো একে একে নেয়। --}}
+                                <div>{{ $message }}</div> {{-- একটি validation message দেখায়। --}}
+                            @endforeach {{-- validation message loop শেষ করে। --}}
+                        </div> {{-- validation alert শেষ করে। --}}
+                    @endif {{-- error না থাকলে alert দেখায় না। --}}
+                    <form action="{{ route('product.inventory.report') }}" method="GET" class="row g-3 align-items-end"> {{-- নির্বাচিত filter URL-এ পাঠায়। --}}
+                        <div class="col-md-5"> {{-- category dropdown-এর responsive column তৈরি করে। --}}
+                            <label for="category_id" class="form-label">Category</label> {{-- category dropdown-এর label দেখায়। --}}
+                            <select name="category_id" id="category_id" class="form-select"> {{-- category filter-এর মান বেছে নেয়। --}}
+                                <option value="">All Categories</option> {{-- category filter না থাকলে সব category রাখে। --}}
+                                @foreach ($categories as $category) {{-- controller থেকে পাওয়া category-গুলো দেখায়। --}}
+                                    <option value="{{ $category->id }}" @selected((string) ($filters['category_id'] ?? '') === (string) $category->id)> {{-- বর্তমান category নির্বাচন করে। --}}
+                                        {{ $category->category_name }} {{-- category-র নাম দেখায়। --}}
+                                    </option> {{-- একটি category option শেষ করে। --}}
+                                @endforeach {{-- category list loop শেষ করে। --}}
+                            </select> {{-- category dropdown শেষ করে। --}}
+                        </div> {{-- category filter column শেষ করে। --}}
+                        <div class="col-md-4"> {{-- stock dropdown-এর responsive column তৈরি করে। --}}
+                            <label for="stock_status" class="form-label">Stock</label> {{-- stock dropdown-এর label দেখায়। --}}
+                            <select name="stock_status" id="stock_status" class="form-select"> {{-- stock status বেছে নেয়। --}}
+                                <option value="" @selected(empty($filters['stock_status']))>All Stock Statuses</option> {{-- সব stock status দেখায়। --}}
+                                <option value="in_stock" @selected(($filters['stock_status'] ?? '') === 'in_stock')>In Stock (&gt; 0)</option> {{-- positive stock থাকা product দেখায়। --}}
+                                <option value="low_stock" @selected(($filters['stock_status'] ?? '') === 'low_stock')>Low Stock (1–10)</option> {{-- ১ থেকে ১০ stock থাকা product দেখায়। --}}
+                                <option value="out_of_stock" @selected(($filters['stock_status'] ?? '') === 'out_of_stock')>Out of Stock (0 or below)</option> {{-- শূন্য বা ঋণাত্মক stock থাকা product দেখায়। --}}
+                            </select> {{-- stock dropdown শেষ করে। --}}
+                        </div> {{-- stock filter column শেষ করে। --}}
+                        <div class="col-md-3 d-flex gap-2"> {{-- apply ও reset button-এর responsive column তৈরি করে। --}}
+                            <button type="submit" class="btn btn-primary">Apply Filters</button> {{-- নির্বাচিত filter report-এ প্রয়োগ করে। --}}
+                            <a href="{{ route('product.inventory.report') }}" class="btn btn-outline-secondary">Reset</a> {{-- সব filter মুছে দেয়। --}}
+                        </div> {{-- filter action column শেষ করে। --}}
+                    </form> {{-- GET filter form শেষ করে। --}}
+                </div> {{-- filter panel body শেষ করে। --}}
+            </div> {{-- filter panel শেষ করে। --}}
+```
+
+Export button selection ধরে রাখে:
+
+```blade
+<a href="{{ route('product.inventory.report.export', request()->only(['category_id', 'stock_status'])) }}" class="btn btn-success"> {{-- বর্তমান filter-গুলো CSV export-এ পাঠায়। --}}
+```
 
 ### Summary card-গুলো screen-এ রাখা
 

@@ -1,6 +1,6 @@
 @extends('dashboard.dashboard')
 
-@section('title', 'Combined Voucher Report')
+@section('title', 'CashBook Report') {{-- browser tab-এ নতুন report name দেখায়। --}}
 
 @section('content')
     <div class="page-wrapper">
@@ -8,7 +8,7 @@
             <div class="flex-wrap gap-2 mb-3 d-flex align-items-center justify-content-between no-print">
                 <div>
                     <div class="breadcrumb-title pe-3">Reports</div>
-                    <h4 class="mt-2 mb-0">Cashbook Report</h4>
+                    <h4 class="mt-2 mb-0">CashBook Report</h4> {{-- page breadcrumb-এ CashBook name দেখায়। --}}
                 </div>
                 <div class="gap-2 d-flex">
                     <a href="{{ route('dashboardbody') }}" class="btn btn-outline-secondary">
@@ -86,7 +86,7 @@
             <div class="border-0 shadow-sm card print-report">
                 <div class="p-4 card-body p-md-5">
                     @include('backend.partials.organizationHeader', [
-                        'reportTitle' => 'Combined Voucher Report',
+                        'reportTitle' => 'CashBook Report', // print header-এ CashBook name দেখায়।
                         'reportSubtitle' =>
                             'Period: ' .
                             ($period === 'daily'
@@ -96,7 +96,7 @@
                     ])
                     <div class="mb-4 row align-items-start d-print-none">
                         <div class="col-7">
-                            <h2 class="mb-1 text-primary fw-bold d-print-none">Cashbook Report</h2>
+                            <h2 class="mb-1 text-primary fw-bold d-print-none">CashBook Report</h2> {{-- report content-এ CashBook name দেখায়। --}}
                             <div class="text-muted">
                                 Period:
                                 <strong>
