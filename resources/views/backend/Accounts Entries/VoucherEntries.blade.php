@@ -110,7 +110,7 @@
                     </div>
                 </div>
 
-            <div class="row g-3 mb-4 print-summary">
+            <div class="row g-3 mb-4 print-summary print-summary-cards d-print-none"> {{-- summary card শুধু screen-এ দেখায়। --}}
                 <div class="col-md-6 summary-card">
                     <div class="card border-0 bg-light h-100">
                         <div class="card-body">
@@ -128,6 +128,17 @@
                     </div>
                 </div>
             </div>
+
+            <div class="d-none d-print-block print-summary-text"> {{-- প্রিন্টে employee voucher summary text দেখায়। --}}
+                <p class="mb-1"> {{-- voucher count আলাদা লাইনে দেখায়। --}}
+                    <strong>Vouchers created in selected period:</strong> {{-- নির্বাচিত সময়ে voucher count-এর label দেখায়। --}}
+                    {{ number_format($totalCount) }} {{-- voucher সংখ্যা format করে দেখায়। --}}
+                </p> {{-- voucher count-এর লাইন শেষ করে। --}}
+                <p class="mb-3"> {{-- মোট voucher amount আলাদা লাইনে দেখায়। --}}
+                    <strong>Total voucher amount:</strong> {{-- মোট voucher amount-এর label দেখায়। --}}
+                    ৳{{ number_format((float) $totalAmount, 2) }} {{-- মোট voucher amount format করে দেখায়। --}}
+                </p> {{-- মোট voucher amount-এর লাইন শেষ করে। --}}
+            </div> {{-- print summary block শেষ করে। --}}
 
             <div class="card border-0 shadow-sm mb-4 print-report-card">
                 <div class="card-header">
@@ -207,6 +218,9 @@
                         </table>
                     </div>
                     {{ $vouchers->links('pagination::bootstrap-5') }}
+                    <div class="d-none d-print-block print-pagination-info"> {{-- প্রিন্টে voucher pagination-এর entry count দেখায়। --}}
+                        Showing {{ $vouchers->firstItem() ?? 0 }} to {{ $vouchers->lastItem() ?? 0 }} of {{ number_format($vouchers->total()) }} entries {{-- voucher-এর বর্তমান range ও মোট সংখ্যা দেখায়। --}}
+                    </div> {{-- voucher entry count block শেষ করে। --}}
                 </div>
             </div>
             </div>
@@ -215,11 +229,6 @@
 
     <style>
         @media print {
-            @page {
-                size: landscape;
-                margin: 12mm;
-            }
-
             header,
             .topbar,
             .sidebar-wrapper,
@@ -287,4 +296,5 @@
             }
         }
     </style>
+    @include('backend.partials.reportPrintStyles') {{-- সব report-এর একই portrait print layout প্রয়োগ করে। --}}
 @endsection

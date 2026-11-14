@@ -116,11 +116,6 @@
     </div>
 
     <style>
-        @page {
-            size: landscape;
-            margin: 10mm;
-        }
-
         @media print {
             header,
             .topbar,
@@ -175,4 +170,5 @@
             }
         }
     </style>
+    @include('backend.partials.reportPrintStyles') {{-- employee payment ledger-এ একই portrait print style প্রয়োগ করে। --}}
 @endsection

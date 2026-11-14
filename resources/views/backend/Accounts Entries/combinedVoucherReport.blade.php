@@ -113,7 +113,7 @@
                         </div>
                     </div>
 
-                    <div class="mb-4 row g-3 print-summary">
+                    <div class="mb-4 row g-3 print-summary print-summary-cards d-print-none"> {{-- summary card শুধু screen-এ দেখায়। --}}
                         <div class="col-12 col-sm-6 col-xl">
                             <div class="border-0 card bg-light h-100">
                                 <div class="card-body">
@@ -205,6 +205,28 @@
                             </div>
                         </div>
                     </div>
+
+                    <div class="d-none d-print-block print-summary-text"> {{-- প্রিন্টে combined voucher summary text দেখায়। --}}
+                        <p class="mb-1"> {{-- cash in hand আলাদা লাইনে দেখায়। --}}
+                            <strong>Cash in Hand:</strong> {{-- cash in hand-এর label দেখায়। --}}
+                            ৳{{ number_format($cashInHandTotal, 2) }} {{-- cash balance format করে দেখায়। --}}
+                        </p> {{-- cash in hand-এর লাইন শেষ করে। --}}
+                        <p class="mb-1"> {{-- employee voucher count আলাদা লাইনে দেখায়। --}}
+                            <strong>Employee Vouchers:</strong> {{-- employee voucher summary label দেখায়। --}}
+                            {{ number_format($employeeVoucherCount) }} vouchers, {{-- employee voucher-এর সংখ্যা দেখায়। --}}
+                            Payment ৳{{ number_format($employeeTotal, 2) }} {{-- employee payment-এর মোট টাকা দেখায়। --}}
+                        </p> {{-- employee voucher summary লাইন শেষ করে। --}}
+                        <p class="mb-1"> {{-- debit voucher summary আলাদা লাইনে দেখায়। --}}
+                            <strong>Debit Vouchers:</strong> {{-- debit voucher summary label দেখায়। --}}
+                            {{ number_format($debitVoucherCount) }} vouchers, {{-- debit voucher-এর সংখ্যা দেখায়। --}}
+                            Amount ৳{{ number_format($debitTotal, 2) }} {{-- debit-এর মোট টাকা দেখায়। --}}
+                        </p> {{-- debit voucher summary লাইন শেষ করে। --}}
+                        <p class="mb-3"> {{-- credit voucher summary আলাদা লাইনে দেখায়। --}}
+                            <strong>Credit Vouchers:</strong> {{-- credit voucher summary label দেখায়। --}}
+                            {{ number_format($creditVoucherCount) }} vouchers, {{-- credit voucher-এর সংখ্যা দেখায়। --}}
+                            Amount ৳{{ number_format($creditTotal, 2) }} {{-- credit-এর মোট টাকা দেখায়। --}}
+                        </p> {{-- credit voucher summary লাইন শেষ করে। --}}
+                    </div> {{-- print summary block শেষ করে। --}}
 
                     <div class="table-responsive">
                         <table class="table align-middle table-bordered table-striped">
@@ -377,6 +399,9 @@
                         </table>
                     </div>
                     {{ $vouchers->links('pagination::bootstrap-5') }}
+                    <div class="d-none d-print-block print-pagination-info"> {{-- প্রিন্টে voucher pagination-এর entry count দেখায়। --}}
+                        Showing {{ $vouchers->firstItem() ?? 0 }} to {{ $vouchers->lastItem() ?? 0 }} of {{ number_format($vouchers->total()) }} entries {{-- voucher-এর বর্তমান range ও মোট সংখ্যা দেখায়। --}}
+                    </div> {{-- voucher entry count block শেষ করে। --}}
                 </div>
             </div>
         </div>
@@ -392,11 +417,6 @@
         }
 
         @media print {
-            @page {
-                size: landscape;
-                margin: 10mm;
-            }
-
             header,
             .topbar,
             .sidebar-wrapper,
@@ -488,6 +508,7 @@
             document.getElementById('monthly-date-field').style.display = isMonthly ? 'block' : 'none';
         });
     </script>
+    @include('backend.partials.reportPrintStyles') {{-- সব report-এর একই portrait print layout প্রয়োগ করে। --}}
 @endsection
 
 @section('scripts')

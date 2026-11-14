@@ -123,7 +123,7 @@
                         </div>
                     </div>
 
-                    <div class="mb-4 row g-3 print-summary">
+                    <div class="mb-4 row g-3 print-summary print-summary-cards d-print-none"> {{-- summary card শুধু screen-এ দেখায়। --}}
                         <div class="col-6 col-md-3 summary-card">
                             <div class="border-0 card bg-light h-100">
                                 <div class="card-body">
@@ -158,7 +158,26 @@
                         </div>
                     </div>
 
-                    <div class="mb-3 d-flex align-items-center justify-content-between">
+                    <div class="d-none d-print-block print-summary-text"> {{-- প্রিন্টে sales summary card-এর বদলে সাধারণ text দেখায়। --}}
+                        <p class="mb-1"> {{-- মোট sales amount আলাদা লাইনে দেখায়। --}}
+                            <strong>Total Sale Amount:</strong> {{-- মোট বিক্রির label দেখায়। --}}
+                            ৳{{ number_format($totalSalesAmount, 2) }} {{-- মোট বিক্রির টাকা format করে দেখায়। --}}
+                        </p> {{-- মোট sales amount-এর লাইন শেষ করে। --}}
+                        <p class="mb-1"> {{-- মোট profit আলাদা লাইনে দেখায়। --}}
+                            <strong>Total Profit:</strong> {{-- মোট লাভের label দেখায়। --}}
+                            ৳{{ number_format($totalProfit ?? 0, 2) }} {{-- মোট লাভের টাকা format করে দেখায়। --}}
+                        </p> {{-- মোট profit-এর লাইন শেষ করে। --}}
+                        <p class="mb-1"> {{-- মোট due আলাদা লাইনে দেখায়। --}}
+                            <strong>Total Due:</strong> {{-- বকেয়া টাকার label দেখায়। --}}
+                            ৳{{ number_format($totalDue, 2) }} {{-- মোট বকেয়া format করে দেখায়। --}}
+                        </p> {{-- মোট due-এর লাইন শেষ করে। --}}
+                        <p class="mb-3"> {{-- মোট invoice সংখ্যা আলাদা লাইনে দেখায়। --}}
+                            <strong>Total Sales (Invoices):</strong> {{-- invoice সংখ্যার label দেখায়। --}}
+                            {{ number_format($totalSalesCount) }} {{-- মোট invoice সংখ্যা format করে দেখায়। --}}
+                        </p> {{-- মোট invoice-এর লাইন শেষ করে। --}}
+                    </div> {{-- print summary block শেষ করে। --}}
+
+                    <div class="mb-3 d-flex align-items-center justify-content-between d-print-none"> {{-- product-wise section heading প্রিন্টে লুকায়। --}}
                         <h5 class="mb-0 fw-bold"><i class="bx bx-package text-primary me-2"></i>Product-wise Sales &
                             Profit</h5>
                         <small class="text-muted">Purchase price and individual product profit</small>
@@ -237,7 +256,7 @@
                         </table>
                     </div>
 
-                    <h5 class="mb-3 fw-bold"><i class="bx bx-receipt text-primary me-2"></i>Sales Details</h5>
+                    <h5 class="mb-3 fw-bold d-print-none"><i class="bx bx-receipt text-primary me-2"></i>Sales Details</h5> {{-- sales detail heading প্রিন্টে লুকায়। --}}
                     <div class="table-responsive">
                         <table class="table align-middle table-bordered table-striped">
                             <thead class="table-light">
@@ -314,17 +333,15 @@
                     <div class="no-print">
                         {{ $invoices->links() }}
                     </div>
+                    <div class="d-none d-print-block print-pagination-info"> {{-- প্রিন্টে invoice pagination-এর entry count দেখায়। --}}
+                        Showing {{ $invoices->firstItem() ?? 0 }} to {{ $invoices->lastItem() ?? 0 }} of {{ number_format($invoices->total()) }} entries {{-- invoice-এর বর্তমান range ও মোট সংখ্যা দেখায়। --}}
+                    </div> {{-- invoice entry count block শেষ করে। --}}
                 </div>
             </div>
         </div>
     </div>
 
     <style>
-        @page {
-            size: landscape;
-            margin: 10mm;
-        }
-
         @media print {
 
             .no-print,
@@ -404,4 +421,5 @@
             }
         }
     </style>
+    @include('backend.partials.reportPrintStyles') {{-- সব report-এর একই portrait print layout প্রয়োগ করে। --}}
 @endsection

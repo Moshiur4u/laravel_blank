@@ -67,6 +67,8 @@ class AppServiceProvider extends ServiceProvider
             'backend.Accounts Entries.voucherEntryReport',
             'backend.Accounts Entries.VoucherEntries',
             'backend.Accounts Entries.employeePaymentLedger',
+            'backend.PurchaseReturns.report', // purchase return report-এ প্রতিষ্ঠানের তথ্য পাঠায়।
+            'backend.ProductReturns.report', // product return report-এ প্রতিষ্ঠানের তথ্য পাঠায়।
             'backend.customer.customerLedger',
             'backend.customer.customerLedgerInvoice',
             'backend.Supplier.supplierledger',

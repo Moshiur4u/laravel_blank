@@ -4,7 +4,7 @@
 
 @section('content')
     <div class="page-wrapper">
-        <div class="page-content">
+        <div class="page-content print-report"> {{-- shared print style-কে এই report-এ সীমাবদ্ধ রাখে। --}}
             <div class="flex-wrap gap-2 mb-3 d-flex align-items-center justify-content-between no-print">
                 <div>
                     <div class="breadcrumb-title pe-3">Reports</div>
@@ -23,7 +23,7 @@
             </div>
 
             @if ($errors->any())
-                <div class="alert alert-danger" role="alert">
+                <div class="alert alert-danger d-print-none" role="alert"> {{-- validation error screen-এ রাখে, print-এ নয়। --}}
                     @foreach ($errors->all() as $message)
                         <div>{{ $message }}</div>
                     @endforeach
@@ -54,7 +54,14 @@
                 </div>
             </div>
 
-            <div class="row g-3 mb-4">
+            {{-- print report-এ প্রতিষ্ঠানের পরিচয়, report-এর সময় ও date period দেখায়। --}}
+            @include('backend.partials.organizationHeader', [
+                'reportTitle' => 'Purchase Return Report', // report-এর শিরোনাম দেখায়।
+                'reportSubtitle' => 'Period: ' . $fromDate . ' to ' . $toDate, // বাছাই করা সময়সীমা দেখায়।
+                'reportGeneratedAt' => now()->format('d M Y, h:i A'), // report তৈরির সময় দেখায়।
+            ])
+
+            <div class="row g-3 mb-4 print-summary-cards d-print-none"> {{-- summary card শুধু screen-এ দেখায়। --}}
                 <div class="col-6 col-xl-3">
                     <div class="card border-0 shadow-sm h-100">
                         <div class="card-body">
@@ -88,6 +95,29 @@
                     </div>
                 </div>
             </div>
+
+            <div class="d-none d-print-block print-summary-text"> {{-- প্রিন্টে purchase return summary text দেখায়। --}}
+                <p class="mb-1"> {{-- report-এর date period আলাদা লাইনে দেখায়। --}}
+                    <strong>Period:</strong> {{-- নির্বাচিত date period-এর label দেখায়। --}}
+                    {{ $fromDate }} to {{ $toDate }} {{-- নির্বাচিত শুরু ও শেষ তারিখ দেখায়। --}}
+                </p> {{-- date period-এর লাইন শেষ করে। --}}
+                <p class="mb-1"> {{-- return transaction count আলাদা লাইনে দেখায়। --}}
+                    <strong>Return Transactions:</strong> {{-- transaction count-এর label দেখায়। --}}
+                    {{ number_format($returnCount) }} {{-- মোট return transaction দেখায়। --}}
+                </p> {{-- transaction count-এর লাইন শেষ করে। --}}
+                <p class="mb-1"> {{-- returned quantity আলাদা লাইনে দেখায়। --}}
+                    <strong>Returned Quantity:</strong> {{-- returned quantity-এর label দেখায়। --}}
+                    {{ number_format($totalQuantity, 3) }} {{-- returned quantity তিন decimal-এ দেখায়। --}}
+                </p> {{-- returned quantity-এর লাইন শেষ করে। --}}
+                <p class="mb-1"> {{-- return value আলাদা লাইনে দেখায়। --}}
+                    <strong>Return Value:</strong> {{-- return value-এর label দেখায়। --}}
+                    ৳{{ number_format($totalReturnAmount, 2) }} {{-- return value format করে দেখায়। --}}
+                </p> {{-- return value-এর লাইন শেষ করে। --}}
+                <p class="mb-3"> {{-- refund amount আলাদা লাইনে দেখায়। --}}
+                    <strong>Refund Received:</strong> {{-- পাওয়া refund-এর label দেখায়। --}}
+                    ৳{{ number_format($totalRefundAmount, 2) }} {{-- refund amount format করে দেখায়। --}}
+                </p> {{-- refund amount-এর লাইন শেষ করে। --}}
+            </div> {{-- print summary block শেষ করে। --}}
 
             <div class="border-0 shadow-sm card">
                 <div class="card-header">
@@ -136,9 +166,13 @@
                             @endforelse
                         </tbody>
                     </table>
-                    <div class="mt-3">{{ $rows->links() }}</div>
+                    <div class="mt-3 no-print">{{ $rows->links() }}</div> {{-- pagination link screen-এ রাখে। --}}
+                    <div class="d-none d-print-block print-pagination-info"> {{-- প্রিন্টে return pagination-এর entry count দেখায়। --}}
+                        Showing {{ $rows->firstItem() ?? 0 }} to {{ $rows->lastItem() ?? 0 }} of {{ number_format($rows->total()) }} entries {{-- return-এর বর্তমান range ও মোট সংখ্যা দেখায়। --}}
+                    </div> {{-- return entry count block শেষ করে। --}}
                 </div>
             </div>
         </div>
     </div>
+    @include('backend.partials.reportPrintStyles') {{-- সব report-এর একই portrait print layout প্রয়োগ করে। --}}
 @endsection
