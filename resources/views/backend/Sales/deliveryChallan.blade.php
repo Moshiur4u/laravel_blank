@@ -11,7 +11,7 @@
                 </a>
                 @can('sales.document.watermark')
                     @if ($organization?->logo)
-                        <label class="btn btn-outline-secondary mb-0">
+                        <label class="mb-0 btn btn-outline-secondary">
                             <input type="checkbox" id="watermark-toggle" class="form-check-input me-1">
                             Print logo watermark
                         </label>
@@ -26,7 +26,7 @@
                 @if ($organization?->logo) style="--invoice-watermark: url('{{ asset('uploads/organizations/' . $organization->logo) }}');" @endif>
                 <div class="p-4 card-body p-md-5">
                     @if ($organization?->logo || $organization?->name)
-                        <div class="d-flex align-items-center gap-3 mb-4 pb-3 border-bottom invoice-organization">
+                        <div class="gap-3 pb-3 mb-4 d-flex align-items-center border-bottom invoice-organization">
                             @if ($organization?->logo)
                                 <img src="{{ asset('uploads/organizations/' . $organization->logo) }}"
                                     alt="{{ $organization->name ?: 'Organization logo' }}"
@@ -49,16 +49,19 @@
 
                     <div class="mb-4 row align-items-start">
                         <div class="col-7">
-                            <h2 class="mb-1 text-primary fw-bold">Delivery Challan</h2>
+                            <h5 class="mb-1 text-primary fw-bold">Delivery Challan</h5>
                             <div class="text-muted">Invoice: <strong>{{ $invoice->invoice_no }}</strong></div>
                             <div class="text-muted">Date: {{ $invoice->invoice_date->format('d M Y') }}</div>
                         </div>
                         <div class="col-5 text-end">
                             <h5 class="mb-1 fw-bold">Customer</h5>
-                            <div><i class="bx bx-user me-1" aria-hidden="true"></i>Name: {{ $invoice->customer_name ?? $invoice->customer?->name ?? 'Walk-in Customer' }}</div>
-                            <div><i class="bx bx-phone me-1" aria-hidden="true"></i>Phone: {{ $invoice->customer_phone ?? $invoice->customer?->phone ?? 'N/A' }}</div>
+                            <div><i class="bx bx-user me-1" aria-hidden="true"></i>Name:
+                                {{ $invoice->customer_name ?? ($invoice->customer?->name ?? 'Walk-in Customer') }}</div>
+                            <div><i class="bx bx-phone me-1" aria-hidden="true"></i>Phone:
+                                {{ $invoice->customer_phone ?? ($invoice->customer?->phone ?? 'N/A') }}</div>
                             @if ($invoice->customer_address ?? $invoice->customer?->address)
-                                <div><i class="bx bx-map me-1" aria-hidden="true"></i>Address: {{ $invoice->customer_address ?? $invoice->customer?->address }}</div>
+                                <div><i class="bx bx-map me-1" aria-hidden="true"></i>Address:
+                                    {{ $invoice->customer_address ?? $invoice->customer?->address }}</div>
                             @endif
                         </div>
                     </div>
@@ -79,7 +82,9 @@
                                         <td>{{ $key + 1 }}</td>
                                         <td>{{ $item->display_product_name }}</td>
                                         <td class="text-center">{{ $item->remaining_quantity }}</td>
-                                        <td class="text-center">{{ $item->product?->quantity_size ?: ($item->product?->stock_unit ?: 'Unit') }}</td>
+                                        <td class="text-center">
+                                            {{ $item->product?->quantity_size ?: ($item->product?->stock_unit ?: 'Unit') }}
+                                        </td>
                                     </tr>
                                 @endforeach
                                 <tr class="table-light fw-bold">
@@ -95,8 +100,12 @@
                         <div class="mt-4"><strong>Notes:</strong> {{ $invoice->notes }}</div>
                     @endif
                     <div class="pt-4 mt-5 row">
-                        <div class="col-6"><div class="pt-2 border-top">Customer Signature</div></div>
-                        <div class="col-6 text-end"><div class="pt-2 border-top">Delivered by {{ $invoice->employee->name ?? 'N/A' }}</div></div>
+                        <div class="col-6">
+                            <div class="pt-2 border-top">Customer Signature</div>
+                        </div>
+                        <div class="col-6 text-end">
+                            <div class="pt-2 border-top">Delivered by {{ $invoice->employee->name ?? 'N/A' }}</div>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -105,19 +114,48 @@
 
     <style>
         @media print {
+
             header,
             .topbar,
             .sidebar-wrapper,
             .no-print,
             .page-footer,
-            .footer { display: none !important; }
-            .page-wrapper { margin: 0 !important; padding: 0 !important; }
-            .page-content { padding: 0 !important; }
-            .card { box-shadow: none !important; border: 0 !important; }
-            body { background: #fff !important; }
-            .table-responsive { overflow: visible !important; }
-            * { -webkit-print-color-adjust: exact !important; print-color-adjust: exact !important; }
-            .print-document { position: relative; isolation: isolate; }
+            .footer {
+                display: none !important;
+            }
+
+            .page-wrapper {
+                margin: 0 !important;
+                padding: 0 !important;
+            }
+
+            .page-content {
+                padding: 0 !important;
+            }
+
+            .card {
+                box-shadow: none !important;
+                border: 0 !important;
+            }
+
+            body {
+                background: #fff !important;
+            }
+
+            .table-responsive {
+                overflow: visible !important;
+            }
+
+            * {
+                -webkit-print-color-adjust: exact !important;
+                print-color-adjust: exact !important;
+            }
+
+            .print-document {
+                position: relative;
+                isolation: isolate;
+            }
+
             .print-document.watermark-enabled::before {
                 content: '';
                 position: fixed;
@@ -130,13 +168,17 @@
                 opacity: .09;
                 pointer-events: none;
             }
-            .print-document > .card-body { position: relative; z-index: 1; }
+
+            .print-document>.card-body {
+                position: relative;
+                z-index: 1;
+            }
         }
     </style>
     @can('sales.document.watermark')
         @if ($organization?->logo)
             <script>
-                document.getElementById('watermark-toggle')?.addEventListener('change', function () {
+                document.getElementById('watermark-toggle')?.addEventListener('change', function() {
                     document.getElementById('print-document')?.classList.toggle('watermark-enabled', this.checked);
                 });
             </script>

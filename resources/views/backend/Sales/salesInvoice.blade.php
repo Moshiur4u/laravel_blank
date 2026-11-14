@@ -76,7 +76,7 @@
                     {{-- ইনভয়েসের পরিচিতি ও গ্রাহকের তথ্য আলাদা কলামে রাখলে প্রিন্টে দ্রুত পড়া যায়। --}}
                     <div class="mb-4 row align-items-start invoice-header">
                         <div class="col-7 invoice-header-details">
-                            <h2 class="mb-1 text-primary fw-bold">Sales Invoice</h2>
+                            <h5 class="mb-1 text-primary fw-bold">Sales Invoice</h5>
                             <div class="text-muted">Invoice: <strong>{{ $invoice->invoice_no }}</strong></div>
                             <div class="text-muted">Date: {{ $invoice->invoice_date->format('d M Y') }}</div>
                         </div>
