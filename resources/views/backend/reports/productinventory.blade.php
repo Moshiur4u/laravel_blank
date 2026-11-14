@@ -13,7 +13,8 @@
                     <a href="{{ route('dashboardbody') }}" class="btn btn-outline-secondary">
                         <i class="bx bx-arrow-back me-1"></i>Dashboard
                     </a>
-                    <a href="{{ route('product.inventory.report.export', request()->only(['category_id', 'stock_status'])) }}" class="btn btn-success"> {{-- বর্তমান filter-গুলো CSV export-এ পাঠায়। --}}
+                    <a href="{{ route('product.inventory.report.export', request()->only(['category_id', 'stock_status'])) }}"
+                        class="btn btn-success"> {{-- বর্তমান filter-গুলো CSV export-এ পাঠায়। --}}
                         <i class="bx bx-spreadsheet me-1"></i>Export Excel
                     </a>
                     <button type="button" class="btn btn-primary" onclick="window.print()">
@@ -27,19 +28,23 @@
                     <h5 class="mb-0">Inventory Filters</h5> {{-- filter panel-এর নাম দেখায়। --}}
                 </div> {{-- filter panel header শেষ করে। --}}
                 <div class="card-body"> {{-- filter input-গুলোর container তৈরি করে। --}}
-                    @if ($errors->any()) {{-- filter validation error থাকলে দেখায়। --}}
+                    @if ($errors->any())
+                        {{-- filter validation error থাকলে দেখায়। --}}
                         <div class="mb-3 alert alert-danger" role="alert"> {{-- error message-গুলোকে দৃশ্যমান করে। --}}
-                            @foreach ($errors->all() as $message) {{-- validation message-গুলো একে একে নেয়। --}}
+                            @foreach ($errors->all() as $message)
+                                {{-- validation message-গুলো একে একে নেয়। --}}
                                 <div>{{ $message }}</div> {{-- একটি validation message দেখায়। --}}
                             @endforeach {{-- validation message loop শেষ করে। --}}
                         </div> {{-- validation alert শেষ করে। --}}
                     @endif {{-- error না থাকলে alert দেখায় না। --}}
-                    <form action="{{ route('product.inventory.report') }}" method="GET" class="row g-3 align-items-end"> {{-- নির্বাচিত filter URL-এ পাঠায়। --}}
+                    <form action="{{ route('product.inventory.report') }}" method="GET" class="row g-3 align-items-end">
+                        {{-- নির্বাচিত filter URL-এ পাঠায়। --}}
                         <div class="col-md-5"> {{-- category dropdown-এর responsive column তৈরি করে। --}}
                             <label for="category_id" class="form-label">Category</label> {{-- category dropdown-এর label দেখায়। --}}
                             <select name="category_id" id="category_id" class="form-select"> {{-- category filter-এর মান বেছে নেয়। --}}
                                 <option value="">All Categories</option> {{-- category filter না থাকলে সব category রাখে। --}}
-                                @foreach ($categories as $category) {{-- controller থেকে পাওয়া category-গুলো দেখায়। --}}
+                                @foreach ($categories as $category)
+                                    {{-- controller থেকে পাওয়া category-গুলো দেখায়। --}}
                                     <option value="{{ $category->id }}" @selected((string) ($filters['category_id'] ?? '') === (string) $category->id)> {{-- বর্তমান category নির্বাচন করে। --}}
                                         {{ $category->category_name }} {{-- category-র নাম দেখায়। --}}
                                     </option> {{-- একটি category option শেষ করে। --}}
@@ -49,15 +54,20 @@
                         <div class="col-md-4"> {{-- stock dropdown-এর responsive column তৈরি করে। --}}
                             <label for="stock_status" class="form-label">Stock</label> {{-- stock dropdown-এর label দেখায়। --}}
                             <select name="stock_status" id="stock_status" class="form-select"> {{-- stock status বেছে নেয়। --}}
-                                <option value="" @selected(empty($filters['stock_status']))>All Stock Statuses</option> {{-- সব stock status দেখায়। --}}
-                                <option value="in_stock" @selected(($filters['stock_status'] ?? '') === 'in_stock')>In Stock (&gt; 0)</option> {{-- positive stock থাকা product দেখায়। --}}
-                                <option value="low_stock" @selected(($filters['stock_status'] ?? '') === 'low_stock')>Low Stock (1–10)</option> {{-- ১ থেকে ১০ stock থাকা product দেখায়। --}}
-                                <option value="out_of_stock" @selected(($filters['stock_status'] ?? '') === 'out_of_stock')>Out of Stock (0 or below)</option> {{-- শূন্য বা ঋণাত্মক stock থাকা product দেখায়। --}}
+                                <option value="" @selected(empty($filters['stock_status']))>All Stock Statuses</option>
+                                {{-- সব stock status দেখায়। --}}
+                                <option value="in_stock" @selected(($filters['stock_status'] ?? '') === 'in_stock')>In Stock (&gt; 0)</option>
+                                {{-- positive stock থাকা product দেখায়। --}}
+                                <option value="low_stock" @selected(($filters['stock_status'] ?? '') === 'low_stock')>Low Stock (1–10)</option>
+                                {{-- ১ থেকে ১০ stock থাকা product দেখায়। --}}
+                                <option value="out_of_stock" @selected(($filters['stock_status'] ?? '') === 'out_of_stock')>Out of Stock (0 or below)</option>
+                                {{-- শূন্য বা ঋণাত্মক stock থাকা product দেখায়। --}}
                             </select> {{-- stock dropdown শেষ করে। --}}
                         </div> {{-- stock filter column শেষ করে। --}}
-                        <div class="col-md-3 d-flex gap-2"> {{-- apply ও reset button-এর responsive column তৈরি করে। --}}
+                        <div class="gap-2 col-md-3 d-flex"> {{-- apply ও reset button-এর responsive column তৈরি করে। --}}
                             <button type="submit" class="btn btn-primary">Apply Filters</button> {{-- নির্বাচিত filter report-এ প্রয়োগ করে। --}}
-                            <a href="{{ route('product.inventory.report') }}" class="btn btn-outline-secondary">Reset</a> {{-- সব filter মুছে দেয়। --}}
+                            <a href="{{ route('product.inventory.report') }}" class="btn btn-outline-secondary">Reset</a>
+                            {{-- সব filter মুছে দেয়। --}}
                         </div> {{-- filter action column শেষ করে। --}}
                     </form> {{-- GET filter form শেষ করে। --}}
                 </div> {{-- filter panel body শেষ করে। --}}
@@ -86,7 +96,7 @@
                             <div class="border-0 card bg-light h-100">
                                 <div class="card-body">
                                     <div class="text-muted">Total Products inStore</div>
-                                    <div class="fs-4 fw-bold text-center">{{ number_format($total_products) }}</div>
+                                    <div class="text-center fs-4 fw-bold">{{ number_format($total_products) }}</div>
                                 </div>
                             </div>
                         </div>
@@ -120,7 +130,7 @@
                             <div class="border-0 card bg-light h-100">
                                 <div class="card-body">
                                     <div class="text-muted">Total Purchase Amount</div>
-                                    <div class="fs-4 fw-bold text-primary text-center">
+                                    <div class="text-center fs-4 fw-bold text-primary">
                                         ৳{{ number_format($total_purchase_amount, 2) }}
                                     </div>
                                 </div>
@@ -130,7 +140,7 @@
                             <div class="border-0 card bg-light h-100">
                                 <div class="card-body">
                                     <div class="text-muted">Current Stock</div>
-                                    <div class="fs-4 fw-bold text-center">
+                                    <div class="text-center fs-4 fw-bold">
                                         {{ number_format($total_stock) }}
                                     </div>
                                 </div>
@@ -140,7 +150,7 @@
                             <div class="border-0 card bg-light h-100">
                                 <div class="card-body">
                                     <div class="text-muted">Expired Products</div>
-                                    <div class="fs-4 fw-bold text-danger text-center">
+                                    <div class="text-center fs-4 fw-bold text-danger">
                                         {{ number_format($total_expired_products) }}
                                     </div>
                                 </div>
@@ -148,7 +158,7 @@
                         </div>
                     </div>
 
-                    <div class="d-none d-print-block mb-3 print-summary-text"> {{-- প্রিন্টে শুধু প্রয়োজনীয় summary text দেখায়। --}}
+                    <div class="mb-3 d-none d-print-block print-summary-text"> {{-- প্রিন্টে শুধু প্রয়োজনীয় summary text দেখায়। --}}
                         <p class="mb-1"> {{-- মোট পণ্যের সংখ্যা আলাদা লাইনে রাখে। --}}
                             <strong>Total Products in Store:</strong> {{-- মোট পণ্যের সংখ্যার label দেখায়। --}}
                             {{ number_format($total_products) }} {{-- মোট পণ্যের সংখ্যা format করে দেখায়। --}}
@@ -172,14 +182,17 @@
                         </p> {{-- expired product-এর লাইন শেষ করে। --}}
                     </div> {{-- প্রিন্ট summary container শেষ করে। --}}
 
-                    <div class="flex-wrap gap-2 mb-3 d-flex align-items-center justify-content-between d-print-none"> {{-- Inventory Details heading প্রিন্টে লুকায়। --}}
+                    <div class="flex-wrap gap-2 mb-3 d-flex align-items-center justify-content-between d-print-none">
+                        {{-- Inventory Details heading প্রিন্টে লুকায়। --}}
                         <h5 class="mb-0 fw-bold">Inventory Details</h5>
                         <span class="text-muted small">{{ number_format($total_products) }} products</span>
                     </div>
 
                     <h6 class="mb-3 fw-bold d-print-none">Stock, Expiry &amp; Supplier Details</h6> {{-- subtitle প্রিন্টে লুকায়। --}}
                     <div class="table-responsive">
-                        <table id="myTable" class="table mb-0 align-middle table-bordered table-striped product-inventory-table"> {{-- portrait page-এ ১২টি column fit করার print style পায়। --}}
+                        <table id="myTable"
+                            class="table mb-0 align-middle table-bordered table-striped product-inventory-table">
+                            {{-- portrait page-এ ১২টি column fit করার print style পায়। --}}
                             <thead class="table-light">
                                 <tr>
                                     <th scope="col">#</th>
@@ -203,7 +216,7 @@
                                         <td>{{ $index + 1 }}</td>
                                         <td class="text-nowrap">SKU:
                                             #PRD-{{ str_pad((string) $row['id'], 5, '0', STR_PAD_LEFT) }}</td>
-                                        <td class="text">{{ $row['name'] }}</td>
+                                        <td class="text-wrap">{{ $row['name'] }}</td>
                                         <td class="text-end">{{ number_format($row['purchased_quantity']) }}
                                             {{ $row['unit_label'] }}</td>
                                         <td class="text-end">৳{{ number_format($row['purchase_amount'], 2) }}</td>
@@ -402,7 +415,7 @@
                 /* পাঁচটি summary line-কে page-এর মাঝখানে দেখায়। */
             }
 
-            #myTable_wrapper > .dt-layout-row:first-child {
+            #myTable_wrapper>.dt-layout-row:first-child {
                 /* page size ও Search থাকা DataTable-এর উপরের row নির্বাচন করে। */
                 display: none !important;
                 /* উপরের controls-সহ পুরো row প্রিন্টে লুকায়। */

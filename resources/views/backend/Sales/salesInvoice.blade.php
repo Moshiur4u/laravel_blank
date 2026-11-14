@@ -118,7 +118,7 @@
                                 @foreach ($invoice->items as $key => $item)
                                     <tr>
                                         <td>{{ $key + 1 }}</td>
-                                        <td class="invoice-product-name">{{ $item->product_name }}</td>
+                                        <td class="invoice-product-name text-wrap">{{ $item->product_name }}</td>
                                         {{-- sale তৈরির সময় Product-এর selling price sale item-এ snapshot হয়ে invoice-এ দেখায়। --}}
                                         <td class="text-end">৳{{ number_format($item->unit_price, 2) }}</td>
                                         <td class="text-center">{{ $item->remaining_quantity }}</td>

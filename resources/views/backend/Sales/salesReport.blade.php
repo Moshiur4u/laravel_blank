@@ -177,7 +177,8 @@
                         </p> {{-- মোট invoice-এর লাইন শেষ করে। --}}
                     </div> {{-- print summary block শেষ করে। --}}
 
-                    <div class="mb-3 d-flex align-items-center justify-content-between d-print-none"> {{-- product-wise section heading প্রিন্টে লুকায়। --}}
+                    <div class="mb-3 d-flex align-items-center justify-content-between d-print-none">
+                        {{-- product-wise section heading প্রিন্টে লুকায়। --}}
                         <h5 class="mb-0 fw-bold"><i class="bx bx-package text-primary me-2"></i>Product-wise Sales &
                             Profit</h5>
                         <small class="text-muted">Purchase price and individual product profit</small>
@@ -204,13 +205,14 @@
                                 @forelse ($topProducts as $index => $topProduct)
                                     <tr>
                                         <td>{{ $index + 1 }}</td>
-                                        <td class="fw-semibold">{{ $topProduct->product_name }}</td>
+                                        <td class="fw-semibold text-wrap">{{ $topProduct->product_name }}</td>
                                         <td>{{ $topProduct->category_name ?: 'Uncategorized' }}</td>
                                         <td class="text-end">
                                             ৳{{ number_format((float) ($topProduct->purchase_price ?? 0), 2) }}</td>
                                         <td class="text-end">
                                             ৳{{ number_format((float) ($topProduct->avg_selling_price ?? 0), 2) }}</td>
-                                        <td class="text-end">{{ number_format((int) $topProduct->quantity_sold) }} {{ $topProduct->quantity_size ?: ($topProduct->stock_unit ?: 'Unit') }}</td>
+                                        <td class="text-end">{{ number_format((int) $topProduct->quantity_sold) }}
+                                            {{ $topProduct->quantity_size ?: ($topProduct->stock_unit ?: 'Unit') }}</td>
                                         <td class="text-end">৳{{ number_format((float) $topProduct->revenue, 2) }}</td>
                                         <td class="text-end">
                                             ৳{{ number_format((float) ($topProduct->total_cost ?? 0), 2) }}</td>
@@ -256,7 +258,8 @@
                         </table>
                     </div>
 
-                    <h5 class="mb-3 fw-bold d-print-none"><i class="bx bx-receipt text-primary me-2"></i>Sales Details</h5> {{-- sales detail heading প্রিন্টে লুকায়। --}}
+                    <h5 class="mb-3 fw-bold d-print-none"><i class="bx bx-receipt text-primary me-2"></i>Sales Details
+                    </h5> {{-- sales detail heading প্রিন্টে লুকায়। --}}
                     <div class="table-responsive">
                         <table class="table align-middle table-bordered table-striped">
                             <thead class="table-light">
@@ -277,7 +280,8 @@
                                         $invoiceReturnedGross = $invoice->items->sum(
                                             fn($item) => $item->quantity > 0
                                                 ? $item->returns->sum(
-                                                    fn($return) => (float) $item->line_total * $return->quantity / $item->quantity,
+                                                    fn($return) => ((float) $item->line_total * $return->quantity) /
+                                                        $item->quantity,
                                                 )
                                                 : 0,
                                         );
@@ -288,7 +292,8 @@
                                         );
                                         $invoiceReturnedDiscount =
                                             (float) $invoice->subtotal > 0
-                                                ? $invoiceReturnedGross * (float) $invoice->discount_amount / (float) $invoice->subtotal
+                                                ? ($invoiceReturnedGross * (float) $invoice->discount_amount) /
+                                                    (float) $invoice->subtotal
                                                 : 0;
                                         $invoiceReturnedAmount = (float) $invoice->productReturns->sum('return_amount');
                                         $invoiceProfit =
@@ -334,7 +339,8 @@
                         {{ $invoices->links() }}
                     </div>
                     <div class="d-none d-print-block print-pagination-info"> {{-- প্রিন্টে invoice pagination-এর entry count দেখায়। --}}
-                        Showing {{ $invoices->firstItem() ?? 0 }} to {{ $invoices->lastItem() ?? 0 }} of {{ number_format($invoices->total()) }} entries {{-- invoice-এর বর্তমান range ও মোট সংখ্যা দেখায়। --}}
+                        Showing {{ $invoices->firstItem() ?? 0 }} to {{ $invoices->lastItem() ?? 0 }} of
+                        {{ number_format($invoices->total()) }} entries {{-- invoice-এর বর্তমান range ও মোট সংখ্যা দেখায়। --}}
                     </div> {{-- invoice entry count block শেষ করে। --}}
                 </div>
             </div>
