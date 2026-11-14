@@ -174,12 +174,14 @@
                         </p> {{-- Purchase Summary-র লাইন শেষ করে। --}}
                         <p class="mb-1"> {{-- বর্তমান stock আলাদা লাইনে রাখে। --}}
                             <strong>Current Stock:</strong> {{-- বর্তমান stock-এর label দেখায়। --}}
-                            {{ number_format($total_stock) }} {{-- বর্তমান stock-এর পরিমাণ দেখায়। --}}
-                        </p> {{-- বর্তমান stock-এর লাইন শেষ করে। --}}
-                        <p class="mb-3"> {{-- expired product-এর সংখ্যা আলাদা লাইনে রাখে। --}}
+                            {{ number_format($total_stock) }}
+                            {{-- বর্তমান stock-এর পরিমাণ দেখায়। --}}
+                            {{-- বর্তমান stock-এর লাইন শেষ করে। --}}
+                            {{-- expired product-এর সংখ্যা আলাদা লাইনে রাখে। --}}
                             <strong>Expired Products:</strong> {{-- মেয়াদোত্তীর্ণ পণ্যের label দেখায়। --}}
                             {{ number_format($total_expired_products) }} {{-- মেয়াদোত্তীর্ণ পণ্যের সংখ্যা দেখায়। --}}
-                        </p> {{-- expired product-এর লাইন শেষ করে। --}}
+                            {{-- expired product-এর লাইন শেষ করে। --}}
+                        </p>
                     </div> {{-- প্রিন্ট summary container শেষ করে। --}}
 
                     <div class="flex-wrap gap-2 mb-3 d-flex align-items-center justify-content-between d-print-none">
@@ -199,12 +201,15 @@
                                     <th scope="col">Product ID</th>
                                     <th scope="col">Product</th>
                                     {{-- প্রতিটি quantity-র সঙ্গে তার Unit একই cell-এ রাখলে অতিরিক্ত কলাম লাগে না। --}}
-                                    <th scope="col" class="text-end column-width-by-header">Purchased Qty&Unit</th> {{-- column-কে header-এর প্রয়োজনীয় প্রস্থ নিতে বলে। --}}
+                                    <th scope="col" class="text-end column-width-by-header">Purchased Qty&Unit</th>
+                                    {{-- column-কে header-এর প্রয়োজনীয় প্রস্থ নিতে বলে। --}}
                                     <th scope="col" class="text-end">Purchase Rate</th>
-                                    <th scope="col" class="text-end column-width-by-header">Total Sold Qty&Unit</th> {{-- column-কে header-এর প্রয়োজনীয় প্রস্থ নিতে বলে। --}}
+                                    <th scope="col" class="text-end column-width-by-header">Total Sold Qty&Unit</th>
+                                    {{-- column-কে header-এর প্রয়োজনীয় প্রস্থ নিতে বলে। --}}
                                     <th scope="col" class="text-end">Total Sales</th>
                                     <th scope="col" class="text-end">Profit</th>
-                                    <th scope="col" class="text-end column-width-by-header">Stock Qty&Unit</th> {{-- column-কে header-এর প্রয়োজনীয় প্রস্থ নিতে বলে। --}}
+                                    <th scope="col" class="text-end column-width-by-header">Stock Qty&Unit</th>
+                                    {{-- column-কে header-এর প্রয়োজনীয় প্রস্থ নিতে বলে। --}}
                                     <th scope="col">Expiry</th>
                                     <th scope="col">Supplier</th>
                                     <th scope="col">Phone Number</th>
@@ -259,7 +264,8 @@
                                         </td>
                                         <td>
                                             @forelse ($row['suppliers'] as $supplier)
-                                                <div class="text-nowrap phone-number">{{ $supplier['phone'] ?: 'N/A' }}</div>
+                                                <div class="text-nowrap phone-number">{{ $supplier['phone'] ?: 'N/A' }}
+                                                </div>
                                             @empty
                                                 <span class="text-muted">N/A</span>
                                             @endforelse
@@ -463,60 +469,117 @@
         }
     </style>
     @include('backend.partials.reportPrintStyles') {{-- inventory report-এ shared portrait print style প্রয়োগ করে। --}}
-    <style> {{-- shared style-এর পরে শুধু inventory table-এর column layout নির্ধারণ করে। --}}
-        @media print { /* নিচের content-based layout নিয়ম শুধু প্রিন্টে প্রয়োগ করে। */
-            .print-report .product-inventory-table { /* Inventory report-এর table-কে আলাদা করে নির্বাচন করে। */
-                width: auto !important; /* table-কে অযথা পুরো পৃষ্ঠা জুড়ে না রেখে content অনুযায়ী রাখে। */
-                max-width: 100% !important; /* table-কে মুদ্রণযোগ্য পৃষ্ঠার প্রস্থ ছাড়াতে দেয় না। */
-                table-layout: auto !important; /* cell content অনুযায়ী ১২টি column-এর প্রস্থ নির্ধারণ করে। */
-            } /* Inventory table-এর automatic layout শেষ করে। */
+    <style>
+        {{-- shared style-এর পরে শুধু inventory table-এর column layout নির্ধারণ করে। --}} @media print {
 
-            .print-report .product-inventory-table th:nth-child(n), /* সব column-এর header cell নির্বাচন করে। */
-            .print-report .product-inventory-table td:nth-child(n) { /* সব column-এর data cell নির্বাচন করে। */
-                width: auto !important; /* shared CSS-এর নির্দিষ্ট width বাদ দিয়ে content-এর মাপ নিতে দেয়। */
-                height: auto !important; /* প্রতিটি cell-এর উচ্চতা content অনুযায়ী স্বাভাবিক রাখে। */
-            } /* ১২টি column-এর স্বয়ংক্রিয় মাপ নির্ধারণ শেষ করে। */
+            /* নিচের content-based layout নিয়ম শুধু প্রিন্টে প্রয়োগ করে। */
+            .print-report .product-inventory-table {
+                /* Inventory report-এর table-কে আলাদা করে নির্বাচন করে। */
+                width: auto !important;
+                /* table-কে অযথা পুরো পৃষ্ঠা জুড়ে না রেখে content অনুযায়ী রাখে। */
+                max-width: 100% !important;
+                /* table-কে মুদ্রণযোগ্য পৃষ্ঠার প্রস্থ ছাড়াতে দেয় না। */
+                table-layout: auto !important;
+                /* cell content অনুযায়ী ১২টি column-এর প্রস্থ নির্ধারণ করে। */
+            }
 
-            .print-report .product-inventory-table th, /* সব column heading-এ text wrap চালু করে। */
-            .print-report .product-inventory-table td, /* সব data cell-এ text wrap চালু করে। */
-            .print-report .product-inventory-table th *, /* heading-এর ভেতরের text element-ও wrap করে। */
-            .print-report .product-inventory-table td * { /* cell-এর ভেতরের text element-ও wrap করে। */
-                font-size: 5.5pt !important; /* সব column-এর লেখা Product নামের সমান font size-এ রাখে। */
-                white-space: normal !important; /* লম্বা লেখা পরের লাইনে যাওয়ার অনুমতি দেয়। */
-                overflow-wrap: anywhere !important; /* ফাঁকবিহীন দীর্ঘ text-ও ভেঙে column সরু রাখে। */
-            } /* সব column-এর দীর্ঘ text wrap করার নিয়ম শেষ করে। */
+            /* Inventory table-এর automatic layout শেষ করে। */
 
-            .print-report .product-inventory-table th:nth-child(4), /* Purchased Qty&Unit header নির্বাচন করে। */
-            .print-report .product-inventory-table td:nth-child(4), /* Purchased Qty&Unit data নির্বাচন করে। */
-            .print-report .product-inventory-table th:nth-child(5), /* Purchase Rate header নির্বাচন করে। */
-            .print-report .product-inventory-table td:nth-child(5), /* Purchase Rate data নির্বাচন করে। */
-            .print-report .product-inventory-table th:nth-child(6), /* Total Sold Qty&Unit header নির্বাচন করে। */
-            .print-report .product-inventory-table td:nth-child(6), /* Total Sold Qty&Unit data নির্বাচন করে। */
-            .print-report .product-inventory-table th:nth-child(7), /* Total Sales header নির্বাচন করে। */
-            .print-report .product-inventory-table td:nth-child(7), /* Total Sales data নির্বাচন করে। */
-            .print-report .product-inventory-table th:nth-child(8), /* Profit header নির্বাচন করে। */
-            .print-report .product-inventory-table td:nth-child(8), /* Profit data নির্বাচন করে। */
-            .print-report .product-inventory-table th:nth-child(9), /* Stock Qty&Unit header নির্বাচন করে। */
-            .print-report .product-inventory-table td:nth-child(9) { /* Stock Qty&Unit data নির্বাচন করে। */
-                padding: 0 !important; /* এই numeric column-গুলো থেকে অতিরিক্ত cell ফাঁকা জায়গা সরায়। */
-                white-space: nowrap !important; /* numeric ও quantity/unit text এক লাইনে রাখে। */
-                overflow-wrap: normal !important; /* লম্বা numeric text ভেঙে পরের লাইনে যেতে দেয় না। */
-            } /* ছয়টি content-sized numeric column-এর নিয়ম শেষ করে। */
+            .print-report .product-inventory-table th:nth-child(n),
+            /* সব column-এর header cell নির্বাচন করে। */
+            .print-report .product-inventory-table td:nth-child(n) {
+                /* সব column-এর data cell নির্বাচন করে। */
+                width: auto !important;
+                /* shared CSS-এর নির্দিষ্ট width বাদ দিয়ে content-এর মাপ নিতে দেয়। */
+                height: auto !important;
+                /* প্রতিটি cell-এর উচ্চতা content অনুযায়ী স্বাভাবিক রাখে। */
+            }
 
-            .print-report .product-inventory-table td:nth-child(8) * { /* Profit cell-এর ভেতরের লেখাও নির্বাচন করে। */
-                white-space: nowrap !important; /* Profit amount-কে span-এর ভেতরেও এক লাইনে রাখে। */
-                overflow-wrap: normal !important; /* Profit amount-এর সংখ্যাগুলোকে ভাঙতে দেয় না। */
-            } /* Profit cell-এর nested text wrap বন্ধ করে। */
+            /* ১২টি column-এর স্বয়ংক্রিয় মাপ নির্ধারণ শেষ করে। */
 
-            .print-report .product-inventory-table th.column-width-by-header { /* তিনটি quantity/unit header নির্বাচন করে। */
-                white-space: nowrap !important; /* header text-কে এক লাইনে রেখে column-এর প্রয়োজনীয় প্রস্থ তৈরি করে। */
-                overflow-wrap: normal !important; /* header-এর শব্দ ভেঙে ছোট column হতে বাধা দেয়। */
-            } /* নির্বাচিত column-এর প্রস্থ header অনুযায়ী রাখে। */
+            .print-report .product-inventory-table th,
+            /* সব column heading-এ text wrap চালু করে। */
+            .print-report .product-inventory-table td,
+            /* সব data cell-এ text wrap চালু করে। */
+            .print-report .product-inventory-table th *,
+            /* heading-এর ভেতরের text element-ও wrap করে। */
+            .print-report .product-inventory-table td * {
+                /* cell-এর ভেতরের text element-ও wrap করে। */
+                font-size: 5.5pt !important;
+                /* সব column-এর লেখা Product নামের সমান font size-এ রাখে। */
+                white-space: normal !important;
+                /* লম্বা লেখা পরের লাইনে যাওয়ার অনুমতি দেয়। */
+                overflow-wrap: anywhere !important;
+                /* ফাঁকবিহীন দীর্ঘ text-ও ভেঙে column সরু রাখে। */
+            }
 
-            .print-report .product-inventory-table .phone-number { /* Phone Number column-এর cell নির্বাচন করে। */
-                white-space: nowrap !important; /* phone number-কে এক লাইনে রাখে। */
-                overflow-wrap: normal !important; /* phone number-এর মাঝখানে line break হতে দেয় না। */
-            } /* Phone Number column-এর এক-লাইন নিয়ম শেষ করে। */
-        } /* Inventory table-এর print-only content sizing শেষ করে। */
+            /* সব column-এর দীর্ঘ text wrap করার নিয়ম শেষ করে। */
+
+            .print-report .product-inventory-table th:nth-child(4),
+            /* Purchased Qty&Unit header নির্বাচন করে। */
+            .print-report .product-inventory-table td:nth-child(4),
+            /* Purchased Qty&Unit data নির্বাচন করে। */
+            .print-report .product-inventory-table th:nth-child(5),
+            /* Purchase Rate header নির্বাচন করে। */
+            .print-report .product-inventory-table td:nth-child(5),
+            /* Purchase Rate data নির্বাচন করে। */
+            .print-report .product-inventory-table th:nth-child(6),
+            /* Total Sold Qty&Unit header নির্বাচন করে। */
+            .print-report .product-inventory-table td:nth-child(6),
+            /* Total Sold Qty&Unit data নির্বাচন করে। */
+            .print-report .product-inventory-table th:nth-child(7),
+            /* Total Sales header নির্বাচন করে। */
+            .print-report .product-inventory-table td:nth-child(7),
+            /* Total Sales data নির্বাচন করে। */
+            .print-report .product-inventory-table th:nth-child(8),
+            /* Profit header নির্বাচন করে। */
+            .print-report .product-inventory-table td:nth-child(8),
+            /* Profit data নির্বাচন করে। */
+            .print-report .product-inventory-table th:nth-child(9),
+            /* Stock Qty&Unit header নির্বাচন করে। */
+            .print-report .product-inventory-table td:nth-child(9) {
+                /* Stock Qty&Unit data নির্বাচন করে। */
+                padding: 0 !important;
+                /* এই numeric column-গুলো থেকে অতিরিক্ত cell ফাঁকা জায়গা সরায়। */
+                white-space: nowrap !important;
+                /* numeric ও quantity/unit text এক লাইনে রাখে। */
+                overflow-wrap: normal !important;
+                /* লম্বা numeric text ভেঙে পরের লাইনে যেতে দেয় না। */
+            }
+
+            /* ছয়টি content-sized numeric column-এর নিয়ম শেষ করে। */
+
+            .print-report .product-inventory-table td:nth-child(8) * {
+                /* Profit cell-এর ভেতরের লেখাও নির্বাচন করে। */
+                white-space: nowrap !important;
+                /* Profit amount-কে span-এর ভেতরেও এক লাইনে রাখে। */
+                overflow-wrap: normal !important;
+                /* Profit amount-এর সংখ্যাগুলোকে ভাঙতে দেয় না। */
+            }
+
+            /* Profit cell-এর nested text wrap বন্ধ করে। */
+
+            .print-report .product-inventory-table th.column-width-by-header {
+                /* তিনটি quantity/unit header নির্বাচন করে। */
+                white-space: nowrap !important;
+                /* header text-কে এক লাইনে রেখে column-এর প্রয়োজনীয় প্রস্থ তৈরি করে। */
+                overflow-wrap: normal !important;
+                /* header-এর শব্দ ভেঙে ছোট column হতে বাধা দেয়। */
+            }
+
+            /* নির্বাচিত column-এর প্রস্থ header অনুযায়ী রাখে। */
+
+            .print-report .product-inventory-table .phone-number {
+                /* Phone Number column-এর cell নির্বাচন করে। */
+                white-space: nowrap !important;
+                /* phone number-কে এক লাইনে রাখে। */
+                overflow-wrap: normal !important;
+                /* phone number-এর মাঝখানে line break হতে দেয় না। */
+            }
+
+            /* Phone Number column-এর এক-লাইন নিয়ম শেষ করে। */
+        }
+
+        /* Inventory table-এর print-only content sizing শেষ করে। */
     </style> {{-- Inventory report-এর scoped print style শেষ করে। --}}
 @endsection
