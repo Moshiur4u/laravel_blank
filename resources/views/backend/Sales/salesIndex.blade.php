@@ -8,11 +8,13 @@
             'items',
             $editingInvoice
                 ? $editingInvoice->items
-                    ->map(fn($item) => [
-                        'product_id' => $item->product_id,
-                        'quantity' => $item->quantity,
-                        'unit_price' => $item->unit_price,
-                    ])
+                    ->map(
+                        fn($item) => [
+                            'product_id' => $item->product_id,
+                            'quantity' => $item->quantity,
+                            'unit_price' => $item->unit_price,
+                        ],
+                    )
                     ->all()
                 : [['product_id' => '', 'quantity' => 0]],
         );
@@ -24,9 +26,7 @@
                     : $editingInvoice->discount_amount)
                 : old('discount_amount', 0),
         );
-        $receivedAmount = $editingInvoice
-            ? $editingInvoice->amount_paid
-            : old('amount_paid', 0);
+        $receivedAmount = $editingInvoice ? $editingInvoice->amount_paid : old('amount_paid', 0);
     @endphp
     <div class="page-wrapper">
         <div class="page-content">
@@ -78,18 +78,21 @@
 
                             <div class="mt-4 border-0 shadow-sm card radius-10">
                                 <div class="py-3 bg-transparent card-header border-bottom">
-                                    <h5 class="mb-0 fw-bold text-dark"><i class="bx bx-user text-primary me-2"></i>Customer</h5>
+                                    <h5 class="mb-0 fw-bold text-dark"><i class="bx bx-user text-primary me-2"></i>Customer
+                                    </h5>
                                 </div>
                                 <div class="card-body">
                                     <div class="row g-3">
                                         <div class="col-md-6">
-                                            <label for="customer_phone" class="form-label fw-semibold">Customer Name or Phone <span
-                                                    class="text-danger">*</span></label>
+                                            <label for="customer_phone" class="form-label fw-semibold">Customer Name or
+                                                Phone <span class="text-danger">*</span></label>
                                             <div class="input-group">
                                                 <input type="text" name="customer_phone" id="customer_phone"
-                                                    class="form-control" value="{{ old('customer_phone', $editingInvoice?->customer_phone) }}"
+                                                    class="form-control"
+                                                    value="{{ old('customer_phone', $editingInvoice?->customer_phone) }}"
                                                     list="customerSuggestions" placeholder="Type customer name or phone"
-                                                    autocomplete="off" required @if ($editingInvoice) readonly @endif>
+                                                    autocomplete="off" required
+                                                    @if ($editingInvoice) readonly @endif>
                                                 @unless ($editingInvoice)
                                                     <button type="button" id="lookupCustomer"
                                                         class="btn btn-outline-primary">Find</button>
@@ -137,27 +140,28 @@
                                                 id="include_previous_due" value="1"
                                                 {{ old('include_previous_due', $editingInvoice?->include_previous_due) ? 'checked' : '' }}
                                                 @if ($editingInvoice) disabled @endif>
-                                            <label class="form-check-label" for="include_previous_due">Add outstanding due to
+                                            <label class="form-check-label" for="include_previous_due">Add outstanding due
+                                                to
                                                 this invoice</label>
                                         </div>
                                     </div>
 
-                                    <div id="newCustomerDetails"
-                                        class="mt-2 row g-3 d-none">
+                                    <div id="newCustomerDetails" class="mt-2 row g-3 d-none">
                                         <div class="col-12">
                                             <div class="py-2 mb-0 alert alert-info">This phone number is not registered. You
                                                 can print the invoice without saving a customer record, or choose Yes at
                                                 checkout and enter their details.</div>
                                         </div>
                                         <div class="col-md-4">
-                                            <label for="customer_name" class="form-label">Name (needed only if saving)</label>
-                                            <input type="text" name="customer_name" id="customer_name" class="form-control"
-                                                value="{{ old('customer_name') }}">
+                                            <label for="customer_name" class="form-label">Name (needed only if
+                                                saving)</label>
+                                            <input type="text" name="customer_name" id="customer_name"
+                                                class="form-control" value="{{ old('customer_name') }}">
                                         </div>
                                         <div class="col-md-4">
                                             <label for="customer_email" class="form-label">Email (optional)</label>
-                                            <input type="email" name="customer_email" id="customer_email" class="form-control"
-                                                value="{{ old('customer_email') }}">
+                                            <input type="email" name="customer_email" id="customer_email"
+                                                class="form-control" value="{{ old('customer_email') }}">
                                         </div>
                                         <div class="col-md-4">
                                             <label for="customer_address" class="form-label">Address (optional)</label>
@@ -169,7 +173,8 @@
                             </div>
                             <div class="border-0 shadow-sm card radius-10">
                                 <div class="py-3 bg-transparent card-header border-bottom">
-                                    <h5 class="mb-0 fw-bold text-dark"><i class="bx bx-cart text-primary me-2"></i>Sale Items
+                                    <h5 class="mb-0 fw-bold text-dark"><i class="bx bx-cart text-primary me-2"></i>Sale
+                                        Items
                                     </h5>
                                 </div>
                                 <div class="card-body">
@@ -200,7 +205,8 @@
                                                             <input type="search" class="form-control product-search"
                                                                 list="saleProductOptions"
                                                                 placeholder="Search product name or code"
-                                                                aria-label="Search product by name or code" autocomplete="off"
+                                                                aria-label="Search product by name or code"
+                                                                autocomplete="off"
                                                                 value="{{ $oldProduct ? $oldProduct->productName . ' — PRD-' . str_pad($oldProduct->id, 5, '0', STR_PAD_LEFT) : '' }}"
                                                                 required>
                                                             <select name="items[{{ $index }}][product_id]"
@@ -223,22 +229,27 @@
                                                             </select>
                                                         </td>
                                                         <td class="stock-cell text-muted">—</td>
-                                                        <td><input type="number" name="items[{{ $index }}][quantity]"
-                                                                class="form-control quantity-input" min="1" step="1"
-                                                                value="{{ $oldItem['quantity'] ?? 0 }}" required></td>
-                                                        <td class="text-center unit-cell">{{ $oldProduct ? ($oldProduct->quantity_size ?: ($oldProduct->stock_unit ?: 'Unit')) : '—' }}</td>
+                                                        <td><input type="number"
+                                                                name="items[{{ $index }}][quantity]"
+                                                                class="form-control quantity-input" min="1"
+                                                                step="1" value="{{ $oldItem['quantity'] ?? 0 }}"
+                                                                required></td>
+                                                        <td class="text-center unit-cell">
+                                                            {{ $oldProduct ? ($oldProduct->quantity_size ?: ($oldProduct->stock_unit ?: 'Unit')) : '—' }}
+                                                        </td>
                                                         <td>
                                                             <input type="number"
                                                                 name="items[{{ $index }}][unit_price]"
                                                                 class="form-control unit-price-input" min="0"
                                                                 max="9999999999999.99" step="0.01"
-                                                                value="{{ old("items.$index.unit_price", $oldItem['unit_price'] ?? $oldProduct?->price ?? 0) }}"
+                                                                value="{{ old("items.$index.unit_price", $oldItem['unit_price'] ?? ($oldProduct?->price ?? 0)) }}"
                                                                 required>
                                                         </td>
                                                         <td class="line-total-cell fw-semibold">৳0.00</td>
                                                         <td><button type="button"
                                                                 class="btn btn-sm btn-outline-danger remove-item"
-                                                                title="Remove item"><i class="bx bx-trash"></i></button></td>
+                                                                title="Remove item"><i class="bx bx-trash"></i></button>
+                                                        </td>
                                                     </tr>
                                                 @endforeach
                                             </tbody>
@@ -261,7 +272,8 @@
                         <div class="col-12 col-lg-5 col-xl-4">
                             <div class="border-0 shadow-sm card radius-10">
                                 <div class="py-3 bg-transparent card-header border-bottom">
-                                    <h5 class="mb-0 fw-bold text-dark"><i class="bx bx-receipt text-primary me-2"></i>Invoice
+                                    <h5 class="mb-0 fw-bold text-dark"><i
+                                            class="bx bx-receipt text-primary me-2"></i>Invoice
                                         & Payment</h5>
                                 </div>
                                 <div class="card-body">
@@ -271,10 +283,12 @@
                                                 Type</label>
                                             <select name="discount_type" id="discount_type" class="form-select">
                                                 <option value="amount"
-                                                    {{ old('discount_type', $editingInvoice?->discount_type ?? 'amount') === 'amount' ? 'selected' : '' }}>Amount
+                                                    {{ old('discount_type', $editingInvoice?->discount_type ?? 'amount') === 'amount' ? 'selected' : '' }}>
+                                                    Amount
                                                 </option>
                                                 <option value="percentage"
-                                                    {{ old('discount_type', $editingInvoice?->discount_type) === 'percentage' ? 'selected' : '' }}>Percent
+                                                    {{ old('discount_type', $editingInvoice?->discount_type) === 'percentage' ? 'selected' : '' }}>
+                                                    Percent
                                                 </option>
                                             </select>
                                         </div>
@@ -284,8 +298,7 @@
                                             <div class="input-group">
                                                 <input type="number" name="discount_value" id="discount_value"
                                                     class="form-control" min="0" step="0.01"
-                                                    value="{{ $discountInput }}"
-                                                    placeholder="0.00">
+                                                    value="{{ $discountInput }}" placeholder="0.00">
                                                 <span class="px-2 input-group-text" id="discount_symbol">৳</span>
                                             </div>
                                             <input type="hidden" name="discount_amount" id="discount_amount"
@@ -300,7 +313,7 @@
                                             <div class="input-group">
                                                 <input type="number" name="vat_percentage" id="vat_percentage"
                                                     class="form-control" min="0" max="100" step="0.01"
-                                                    value="{{ old('vat_percentage', $editingInvoice ? $vatPercentage : 5) }}">
+                                                    value="{{ old('vat_percentage', $editingInvoice ? $vatPercentage : 0) }}">
                                                 <span class="px-2 input-group-text">%</span>
                                             </div>
                                             <input type="hidden" name="vat_amount" id="vat_amount"
@@ -331,12 +344,13 @@
                                             </div>
                                         </div>
                                         <div class="col-6">
-                                            <label for="payment_method" class="form-label fw-semibold">Payment Method</label>
+                                            <label for="payment_method" class="form-label fw-semibold">Payment
+                                                Method</label>
                                             <select name="payment_method" id="payment_method" class="form-select">
                                                 <option value="">Select method</option>
                                                 @foreach (['cash' => 'Cash', 'bank' => 'Bank', 'nagad' => 'Nagad', 'bkash' => 'bKash', 'rocket' => 'Rocket', 'upay' => 'Upay'] as $value => $label)
                                                     <option value="{{ $value }}"
-                                                            {{ old('payment_method', $editingInvoice?->payment_method) === $value ? 'selected' : '' }}>
+                                                        {{ old('payment_method', $editingInvoice?->payment_method) === $value ? 'selected' : '' }}>
                                                         {{ $label }}</option>
                                                 @endforeach
                                             </select>
@@ -361,13 +375,16 @@
                                             id="subtotalText">৳0.00</strong></div>
                                     {{-- সাবটোটালের পর ডিসকাউন্ট ও শতাংশ থেকে হিসাব করা VAT দেখানো হয়। --}}
                                     <div class="mb-2 d-flex justify-content-between"><span
-                                            id="discountSummaryLabel">Discount</span><strong id="discountText">৳0.00</strong>
+                                            id="discountSummaryLabel">Discount</span><strong
+                                            id="discountText">৳0.00</strong>
                                     </div>
                                     <div class="mb-2 d-flex justify-content-between"><span>VAT (<span
-                                                id="vatPercentageText">5%</span>)</span><strong id="vatText">৳0.00</strong>
+                                                id="vatPercentageText">5%</span>)</span><strong
+                                            id="vatText">৳0.00</strong>
                                     </div>
                                     <div class="mb-2 d-flex justify-content-between"><span>AIT (<span
-                                                id="aitPercentageText">0%</span>)</span><strong id="aitText">৳0.00</strong>
+                                                id="aitPercentageText">0%</span>)</span><strong
+                                            id="aitText">৳0.00</strong>
                                     </div>
                                     <div class="mb-2 d-flex justify-content-between"><span>Previous Due</span><strong
                                             id="previousDueText">৳0.00</strong></div>
@@ -386,7 +403,8 @@
                 </form>
             @endif
 
-            @canany(['sales.view', 'Voide_today_Invoice', 'Voide_anyday_Invoice', 'Update_today_Invoice', 'Update_anyday_Invoice'])
+            @canany(['sales.view', 'Voide_today_Invoice', 'Voide_anyday_Invoice', 'Update_today_Invoice',
+                'Update_anyday_Invoice'])
                 <div class="mt-4 border-0 shadow-sm card radius-10">
                     <div class="py-3 bg-transparent card-header border-bottom">
                         <h5 class="mb-0 fw-bold text-dark"><i class="bx bx-history text-primary me-2"></i>Recent Invoices</h5>
@@ -683,7 +701,8 @@
                             }
                             row.appendChild(itemCell);
 
-                            [money(entry.amount), money(entry.payment), money(entry.due)].forEach((value) => {
+                            [money(entry.amount), money(entry.payment), money(entry.due)].forEach((
+                                value) => {
                                 const cell = document.createElement('td');
                                 cell.textContent = value;
                                 row.appendChild(cell);
@@ -746,7 +765,8 @@
                     const exactNameMatches = result.suggestions.filter((customer) =>
                         customer.name.trim().toLocaleLowerCase() === search.toLocaleLowerCase()
                     );
-                    const exactMatch = exactPhone || (exactNameMatches.length === 1 ? exactNameMatches[0] : null);
+                    const exactMatch = exactPhone || (exactNameMatches.length === 1 ? exactNameMatches[0] :
+                        null);
 
                     if (exactMatch && (resolveExactMatch || exactPhone)) {
                         customerPhone.value = exactMatch.phone;
