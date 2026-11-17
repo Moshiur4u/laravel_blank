@@ -188,8 +188,9 @@
                                                         </div>
                                                     @endif
                                                 </div>
-                                                <div>
-                                                    <h6 class="mb-0 fw-semibold text-dark">
+                                                <div style="min-width: 0; max-width: 260px;">
+                                                    <h6 class="mb-0 fw-semibold text-dark"
+                                                        style="white-space: normal; overflow-wrap: anywhere;">
                                                         {{ $product->productName }}
                                                         @if ($product->isExpired())
                                                             <span class="badge bg-danger ms-1">Expired</span>
