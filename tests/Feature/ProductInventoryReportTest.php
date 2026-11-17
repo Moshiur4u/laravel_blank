@@ -5,6 +5,7 @@ namespace Tests\Feature;
 use App\Http\Controllers\ProductInventoryReportController;
 use App\Models\Product;
 use App\Models\ProductCategory;
+use App\Models\ProductSubcategory;
 use App\Models\SaleItem;
 use App\Models\Supplier;
 use App\Models\Supplierledger;
@@ -182,11 +183,53 @@ class ProductInventoryReportTest extends TestCase
         $this->assertSame([$outOfStockProduct->id], $outOfStockView->getData()['rows']->pluck('id')->all());
     }
 
+    public function test_report_filters_products_by_subcategory(): void
+    {
+        if (! extension_loaded('pdo_sqlite')) {
+            $this->markTestSkipped('The pdo_sqlite extension is required for the subcategory report filter test.');
+        }
+
+        $this->createReportSchema();
+
+        $category = ProductCategory::create(['category_name' => 'Food']);
+        $rice = ProductSubcategory::create(['category_id' => $category->id, 'name' => 'Rice']);
+        $flour = ProductSubcategory::create(['category_id' => $category->id, 'name' => 'Flour']);
+        $riceProduct = Product::create([
+            'productName' => 'Basmati Rice',
+            'product_categorie_id' => $category->id,
+            'subcategory_id' => $rice->id,
+            'unit' => '4',
+        ]);
+        Product::create([
+            'productName' => 'Wheat Flour',
+            'product_categorie_id' => $category->id,
+            'subcategory_id' => $flour->id,
+            'unit' => '6',
+        ]);
+
+        $view = app(ProductInventoryReportController::class)->index(Request::create(
+            '/reports/product-inventory',
+            'GET',
+            ['subcategory_id' => $rice->id]
+        ));
+
+        $this->assertSame([$riceProduct->id], $view->getData()['rows']->pluck('id')->all());
+        $this->assertSame((string) $rice->id, (string) $view->getData()['filters']['subcategory_id']);
+        $this->assertCount(2, $view->getData()['subcategories']);
+    }
+
     private function createReportSchema(): void
     {
         Schema::create('product_categories', function (Blueprint $table): void {
             $table->id();
             $table->string('category_name');
+            $table->timestamps();
+        });
+
+        Schema::create('product_subcategories', function (Blueprint $table): void {
+            $table->id();
+            $table->unsignedBigInteger('category_id');
+            $table->string('name');
             $table->timestamps();
         });
 
@@ -201,6 +244,7 @@ class ProductInventoryReportTest extends TestCase
             $table->id();
             $table->string('productName');
             $table->unsignedBigInteger('product_categorie_id')->nullable();
+            $table->unsignedBigInteger('subcategory_id')->nullable();
             $table->string('unit');
             $table->date('expiry_date')->nullable();
             $table->foreignId('supplier_id')->nullable();

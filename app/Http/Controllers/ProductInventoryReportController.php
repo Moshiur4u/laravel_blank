@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\Product;
 use App\Models\ProductCategory;
+use App\Models\ProductSubcategory;
 use App\Models\SaleItem;
 use App\Models\Supplierledger;
 use App\Support\ExcelCsvExport;
@@ -24,10 +25,15 @@ class ProductInventoryReportController extends Controller
         $categories = ProductCategory::query() // dropdown-এর category তালিকা তৈরি করে।
             ->orderBy('category_name') // category-গুলো নাম অনুযায়ী সাজায়।
             ->get(['id', 'category_name']); // শুধু dropdown-এর দরকারি field নেয়।
+        $subcategories = ProductSubcategory::query()
+            ->with('category:id,category_name')
+            ->orderBy('name')
+            ->get(['id', 'category_id', 'name']);
 
         return view('backend.reports.productinventory', [
             'rows' => $rows,
             'categories' => $categories, // Blade form-এ category option পাঠায়।
+            'subcategories' => $subcategories,
             'filters' => $filters, // নির্বাচিত filter Blade-এ ফেরত পাঠায়।
             'total_products' => $rows->count(),
             'total_purchased_quantity' => $rows->sum('purchased_quantity'),
@@ -121,6 +127,7 @@ class ProductInventoryReportController extends Controller
     {
         return $request->validate([
             'category_id' => ['nullable', 'integer', 'exists:product_categories,id'], // থাকা category ID-ই গ্রহণ করে।
+            'subcategory_id' => ['nullable', 'integer', 'exists:product_subcategories,id'],
             'stock_status' => ['nullable', 'in:in_stock,low_stock,out_of_stock'], // নির্দিষ্ট stock status-ই গ্রহণ করে।
         ]);
     }
@@ -137,6 +144,13 @@ class ProductInventoryReportController extends Controller
                     && (int) $row['category_id'] !== (int) $filters['category_id']
                 ) {
                     return false; // অন্য category-র product বাদ দেয়।
+                }
+
+                if (
+                    isset($filters['subcategory_id'])
+                    && (int) $row['subcategory_id'] !== (int) $filters['subcategory_id']
+                ) {
+                    return false;
                 }
 
                 $stock = $row['stock']; // বর্তমান stock quantity নেয়।
@@ -206,6 +220,7 @@ class ProductInventoryReportController extends Controller
             return [
                 'id' => $product->id,
                 'category_id' => $product->product_categorie_id, // category filter-এর জন্য category ID রাখে।
+                'subcategory_id' => $product->subcategory_id,
                 // Unit-কে আলাদা কলামে দেখানো হয়, তাই Product নামের সঙ্গে জোড়া হয় না।
                 'name' => $product->productName,
                 'unit_label' => $product->quantity_size ?: ($product->stock_unit ?: 'Unit'),

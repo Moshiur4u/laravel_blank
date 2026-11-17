@@ -60,7 +60,13 @@ class ProductController extends Controller
     {
         $request->validate([
             'productName' => 'nullable',
-            'product_categorie_id' => 'nullable',
+            'product_categorie_id' => ['required', 'integer', 'exists:product_categories,id'],
+            'subcategory_id' => [
+                'required',
+                'integer',
+                Rule::exists('product_subcategories', 'id')
+                    ->where('category_id', $request->input('product_categorie_id')),
+            ],
             'brand_id' => 'nullable',
             'price' => 'nullable',
             // দুটো field-ই একসঙ্গে ঐচ্ছিক; supplier দিলে purchase price-ও দিতে হবে।
@@ -98,6 +104,7 @@ class ProductController extends Controller
             $product = Product::create([
                 'productName' => $request->productName,
                 'product_categorie_id' => $request->product_categorie_id,
+                'subcategory_id' => $request->subcategory_id,
                 'brand_id' => $request->brand_id,
                 // price আগের বিক্রয়মূল্য; ক্রয়মূল্য আলাদা কলামে এবং supplier আলাদা সম্পর্ক হিসেবে রাখা হয়।
                 'supplier_id' => $request->supplier_id,
@@ -181,7 +188,13 @@ $suppliers = $suppliers->orderBy('name')->get();
         // ১. ভ্যালিডেশন
         $request->validate([
             'productName' => 'nullable|string|max:255',
-            'product_categorie_id' => 'nullable',
+            'product_categorie_id' => ['required', 'integer', 'exists:product_categories,id'],
+            'subcategory_id' => [
+                'required',
+                'integer',
+                Rule::exists('product_subcategories', 'id')
+                    ->where('category_id', $request->input('product_categorie_id')),
+            ],
             'brand_id' => 'nullable',
             'supplier_id' => 'nullable',
             'purchase_price' => 'nullable',
@@ -254,6 +267,7 @@ $suppliers = $suppliers->orderBy('name')->get();
             $product->update([
                 'productName'          => $request->productName,
                 'product_categorie_id' => $request->product_categorie_id,
+                'subcategory_id'       => $request->subcategory_id,
                 'brand_id'             => $request->brand_id,
                 'supplier_id'          => $request->supplier_id,
                 'purchase_price'       => $request->purchase_price,

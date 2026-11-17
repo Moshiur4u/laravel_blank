@@ -11,6 +11,7 @@ use App\Http\Controllers\ProductCategoryController;
 use App\Http\Controllers\ProductController;
 use App\Http\Controllers\ProductInventoryReportController;
 use App\Http\Controllers\ProductReturnController;
+use App\Http\Controllers\ProductSubcategoryController;
 use App\Http\Controllers\QuantitySizeController;
 use App\Http\Controllers\PurchaseReturnController;
 use App\Http\Controllers\QuotationController;
@@ -173,6 +174,27 @@ Route::middleware(['auth', 'verified'])->group(function () {
         ->name('category.destroy');
 });
 
+Route::middleware(['auth', 'verified'])->group(function () {
+    Route::get('/product/subcategories', [ProductSubcategoryController::class, 'index'])
+        ->middleware('permission:product.subcategory.index')
+        ->name('subcategories.index');
+    Route::get('/product/subcategories/create', [ProductSubcategoryController::class, 'create'])
+        ->middleware('permission:product.subcategory.create')
+        ->name('subcategories.create');
+    Route::post('/product/subcategories', [ProductSubcategoryController::class, 'store'])
+        ->middleware('permission:product.subcategory.create')
+        ->name('subcategories.store');
+    Route::get('/product/subcategories/{subcategory}/edit', [ProductSubcategoryController::class, 'edit'])
+        ->middleware('permission:product.subcategory.edit')
+        ->name('subcategories.edit');
+    Route::put('/product/subcategories/{subcategory}', [ProductSubcategoryController::class, 'update'])
+        ->middleware('permission:product.subcategory.update')
+        ->name('subcategories.update');
+    Route::delete('/product/subcategories/{subcategory}', [ProductSubcategoryController::class, 'destroy'])
+        ->middleware('permission:product.subcategory.delete')
+        ->name('subcategories.destroy');
+});
+
 // মিডলওয়্যার সহ প্রোডক্ট ব্রান্ড রাউট শুরু
 Route::middleware(['auth', 'verified'])->group(function () {
     Route::get('/product/brand/index', [BrandController::class, 'index'])->middleware('permission:brand.index') // brand তালিকার নতুন permission।
@@ -221,6 +243,10 @@ Route::middleware(['auth', 'verified'])->group(function () {
 
 // মিডলওয়্যার সহ প্রোডক্ট রাউট শুরু
 Route::middleware(['auth', 'verified'])->group(function () {
+    Route::get('/product/categories/{category}/subcategories', [ProductSubcategoryController::class, 'options'])
+        ->middleware('permission:product.create|product.edit')
+        ->whereNumber('category')
+        ->name('product.subcategories');
     Route::get('/product/index', [ProductController::class, 'index'])->middleware('permission:product.index') // product তালিকার নতুন permission।
         ->name('product.index');
     Route::get('/product/create', [ProductController::class, 'create'])->middleware('permission:product.create') // product তৈরির নতুন permission।

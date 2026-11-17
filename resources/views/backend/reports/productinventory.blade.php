@@ -13,7 +13,7 @@
                     <a href="{{ route('dashboardbody') }}" class="btn btn-outline-secondary">
                         <i class="bx bx-arrow-back me-1"></i>Dashboard
                     </a>
-                    <a href="{{ route('product.inventory.report.export', request()->only(['category_id', 'stock_status'])) }}"
+                    <a href="{{ route('product.inventory.report.export', request()->only(['category_id', 'subcategory_id', 'stock_status'])) }}"
                         class="btn btn-success"> {{-- বর্তমান filter-গুলো CSV export-এ পাঠায়। --}}
                         <i class="bx bx-spreadsheet me-1"></i>Export Excel
                     </a>
@@ -39,7 +39,7 @@
                     @endif {{-- error না থাকলে alert দেখায় না। --}}
                     <form action="{{ route('product.inventory.report') }}" method="GET" class="row g-3 align-items-end">
                         {{-- নির্বাচিত filter URL-এ পাঠায়। --}}
-                        <div class="col-md-5"> {{-- category dropdown-এর responsive column তৈরি করে। --}}
+                        <div class="col-md-4"> {{-- category dropdown-এর responsive column তৈরি করে। --}}
                             <label for="category_id" class="form-label">Category</label> {{-- category dropdown-এর label দেখায়। --}}
                             <select name="category_id" id="category_id" class="form-select"> {{-- category filter-এর মান বেছে নেয়। --}}
                                 <option value="">All Categories</option> {{-- category filter না থাকলে সব category রাখে। --}}
@@ -51,7 +51,19 @@
                                 @endforeach {{-- category list loop শেষ করে। --}}
                             </select> {{-- category dropdown শেষ করে। --}}
                         </div> {{-- category filter column শেষ করে। --}}
-                        <div class="col-md-4"> {{-- stock dropdown-এর responsive column তৈরি করে। --}}
+                        <div class="col-md-4">
+                            <label for="subcategory_id" class="form-label">Filter by Subcategory</label>
+                            <select name="subcategory_id" id="subcategory_id" class="form-select">
+                                <option value="">All Subcategories</option>
+                                @foreach ($subcategories as $subcategory)
+                                    <option value="{{ $subcategory->id }}"
+                                        @selected((string) ($filters['subcategory_id'] ?? '') === (string) $subcategory->id)>
+                                        {{ $subcategory->category->category_name }} — {{ $subcategory->name }}
+                                    </option>
+                                @endforeach
+                            </select>
+                        </div>
+                        <div class="col-md-2"> {{-- stock dropdown-এর responsive column তৈরি করে। --}}
                             <label for="stock_status" class="form-label">Stock</label> {{-- stock dropdown-এর label দেখায়। --}}
                             <select name="stock_status" id="stock_status" class="form-select"> {{-- stock status বেছে নেয়। --}}
                                 <option value="" @selected(empty($filters['stock_status']))>All Stock Statuses</option>
@@ -64,7 +76,7 @@
                                 {{-- শূন্য বা ঋণাত্মক stock থাকা product দেখায়। --}}
                             </select> {{-- stock dropdown শেষ করে। --}}
                         </div> {{-- stock filter column শেষ করে। --}}
-                        <div class="gap-2 col-md-3 d-flex"> {{-- apply ও reset button-এর responsive column তৈরি করে। --}}
+                        <div class="gap-2 col-md-2 d-flex"> {{-- apply ও reset button-এর responsive column তৈরি করে। --}}
                             <button type="submit" class="btn btn-primary">Apply Filters</button> {{-- নির্বাচিত filter report-এ প্রয়োগ করে। --}}
                             <a href="{{ route('product.inventory.report') }}" class="btn btn-outline-secondary">Reset</a>
                             {{-- সব filter মুছে দেয়। --}}

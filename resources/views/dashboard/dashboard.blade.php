@@ -291,7 +291,9 @@
                 @endcan
 
                 @canany(['category.index', 'product.category.create', 'product.category.edit',
-                    'product.category.update', 'product.category.delete']) {{-- Category menu-তে নতুন permission key ব্যবহৃত। --}}
+                    'product.category.update', 'product.category.delete', 'product.subcategory.index',
+                    'product.subcategory.create', 'product.subcategory.edit', 'product.subcategory.update',
+                    'product.subcategory.delete']) {{-- Category menu-তে নতুন permission key ব্যবহৃত। --}}
                     <li>
                         <a href="javascript:;" class="has-arrow">
                             <div class="parent-icon"><i class="bx bx-customize "></i></div>
@@ -309,6 +311,18 @@
                                 <li>
                                     <a href="{{ route('category.create') }}"><i class='bx bx-plus-medical'></i>Create
                                         Category</a>
+                                </li>
+                            @endcan
+                            @can('product.subcategory.index')
+                                <li>
+                                    <a href="{{ route('subcategories.index') }}"><i class='bx bx-list-ul'></i>All
+                                        Subcategories</a>
+                                </li>
+                            @endcan
+                            @can('product.subcategory.create')
+                                <li>
+                                    <a href="{{ route('subcategories.create') }}"><i class='bx bx-plus-medical'></i>New
+                                        Subcategory</a>
                                 </li>
                             @endcan
                         </ul>

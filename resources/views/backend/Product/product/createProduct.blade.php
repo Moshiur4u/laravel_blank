@@ -117,6 +117,10 @@
                                         @enderror
                                     </div>
 
+                                    @include('backend.Product.product.partials.subcategory-field', [
+                                        'selectedSubcategoryId' => old('subcategory_id', ''),
+                                    ])
+
                                     <!-- Brand -->
                                     <div class="col-md-6">
                                         <label for="brand_id" class="form-label fw-semibold text-secondary">
@@ -440,6 +444,8 @@
                 </div>
             </form>
 
+            @include('backend.Product.product.partials.subcategory-modal')
+
             @can('quantity-size.create')
                 <div class="modal fade" id="quantitySizeModal" tabindex="-1" aria-labelledby="quantitySizeModalLabel"
                     aria-hidden="true">
@@ -694,6 +700,7 @@
 @endsection
 
 @section('scripts')
+    @include('backend.Product.product.partials.subcategory-script')
     <script>
         document.addEventListener('DOMContentLoaded', function() {
             function bindQuickCreateModal(config) {

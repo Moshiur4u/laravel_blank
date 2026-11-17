@@ -43,6 +43,11 @@ class RolePermissionSeeder extends Seeder
                 'product.category.edit', // নতুন category edit permission।
                 'product.category.update', // নতুন category update permission।
                 'product.category.delete', // নতুন category delete permission।
+                'product.subcategory.index',
+                'product.subcategory.create',
+                'product.subcategory.edit',
+                'product.subcategory.update',
+                'product.subcategory.delete',
                 'voucher.report.view', // পুরোনো reports.vouchers এবং All Vouchers-এর বদলে report permission।
                 'voucher',
                 'voucher.entry',
