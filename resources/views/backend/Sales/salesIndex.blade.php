@@ -406,7 +406,8 @@
             @canany(['sales.view', 'Voide_today_Invoice', 'Voide_anyday_Invoice', 'Update_today_Invoice',
                 'Update_anyday_Invoice'])
                 <div class="mt-4 border-0 shadow-sm card radius-10">
-                    <div class="py-3 bg-transparent card-header border-bottom d-flex flex-wrap justify-content-between align-items-center gap-2">
+                    <div
+                        class="flex-wrap gap-2 py-3 bg-transparent card-header border-bottom d-flex justify-content-between align-items-center">
                         <h5 class="mb-0 fw-bold text-dark"><i class="bx bx-history text-primary me-2"></i>Recent Invoices</h5>
                         <div style="width: 100%; max-width: 360px">
                             <label for="recentInvoiceSearch" class="visually-hidden">Search recent invoices</label>

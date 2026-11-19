@@ -98,27 +98,28 @@
                             {{-- নির্দিষ্ট প্রস্থ পণ্যের নামকে পাশের মূল্য কলামে ঢুকে পড়া থেকে আটকায়। --}}
                             <colgroup>
                                 <col style="width: 5%;">
-                                <col style="width: 32%;">
-                                <col style="width: 18%;">
-                                <col style="width: 12%;">
-                                <col style="width: 13%;">
-                                <col style="width: 20%;">
+                                <col style="width: 40%;">
+                                <col style="width: 3%">
+                                <col style="width: 3%">
+                                <col style="width: 5%">
+                                <col style="width: 7%">
                             </colgroup>
                             <thead>
                                 <tr>
                                     <th class="text-center">#</th>
                                     <th>Product</th>
-                                    <th class="text-end">Unit Selling Price</th>
-                                    <th class="text-center">QTY</th>
-                                    <th class="text-center">Unit</th>
-                                    <th class="text-end">Amount</th>
+                                    <th class="text-end fit-content-column">Price</th>
+                                    <th class="text-center fit-content-column">QTY</th>
+                                    <th class="text-center fit-content-column">Unit</th>
+                                    <th class="text-end fit-content-column">Amount</th>
                                 </tr>
                             </thead>
                             <tbody>
                                 @foreach ($invoice->items as $key => $item)
                                     <tr>
                                         <td>{{ $key + 1 }}</td>
-                                        <td class="invoice-product-name text-wrap">{{ $item->product_name }}</td>
+                                        <td class="invoice-product-name text-wrap fit-content-column">
+                                            {{ $item->product_name }}</td>
                                         {{-- sale তৈরির সময় Product-এর selling price sale item-এ snapshot হয়ে invoice-এ দেখায়। --}}
                                         <td class="text-end">৳{{ number_format($item->unit_price, 2) }}</td>
                                         <td class="text-center">{{ $item->remaining_quantity }}</td>
@@ -266,8 +267,13 @@
 
             /* নির্দিষ্ট টেবিল প্রস্থ প্রিন্টে পণ্যের কলামগুলোকে সঠিক জায়গায় রাখে। */
             .invoice-table {
-                width: 100% !important;
-                table-layout: fixed;
+                /* width: 100% !important; */
+                table-layout: auto;
+            }
+
+            .invoice-table .fit-content-column {
+                width: 1%;
+                white-space: nowrap;
             }
 
             .invoice-table tr {

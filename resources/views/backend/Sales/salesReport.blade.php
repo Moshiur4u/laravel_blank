@@ -193,7 +193,7 @@
                                     <th class="text-end">Purchase Rate</th>
                                     <th class="text-end">Selling Price</th>
                                     {{-- পরিমাণ ও একক একই cell-এ থাকায় report table সংকীর্ণ থাকে। --}}
-                                    <th class="text-end">Sold QTY/Unit</th>
+                                    <th class="text-end">Sold QTY</th>
                                     <th class="text-end">Total Sales</th>
                                     <th class="text-end">Purchase Cost </th>
                                     <th class="text-end">Profit</th>

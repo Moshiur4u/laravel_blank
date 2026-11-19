@@ -56,8 +56,7 @@
                             <select name="subcategory_id" id="subcategory_id" class="form-select">
                                 <option value="">All Subcategories</option>
                                 @foreach ($subcategories as $subcategory)
-                                    <option value="{{ $subcategory->id }}"
-                                        @selected((string) ($filters['subcategory_id'] ?? '') === (string) $subcategory->id)>
+                                    <option value="{{ $subcategory->id }}" @selected((string) ($filters['subcategory_id'] ?? '') === (string) $subcategory->id)>
                                         {{ $subcategory->category->category_name }} — {{ $subcategory->name }}
                                     </option>
                                 @endforeach
@@ -213,14 +212,14 @@
                                     <th scope="col">Product ID</th>
                                     <th scope="col">Product</th>
                                     {{-- প্রতিটি quantity-র সঙ্গে তার Unit একই cell-এ রাখলে অতিরিক্ত কলাম লাগে না। --}}
-                                    <th scope="col" class="text-end column-width-by-header">Purchased Qty&Unit</th>
+                                    <th scope="col" class="text-end column-width-by-header">Purchased QTY</th>
                                     {{-- column-কে header-এর প্রয়োজনীয় প্রস্থ নিতে বলে। --}}
                                     <th scope="col" class="text-end">Purchase Rate</th>
-                                    <th scope="col" class="text-end column-width-by-header">Total Sold Qty&Unit</th>
+                                    <th scope="col" class="text-end column-width-by-header">Total Sold QTY</th>
                                     {{-- column-কে header-এর প্রয়োজনীয় প্রস্থ নিতে বলে। --}}
                                     <th scope="col" class="text-end">Total Sales</th>
                                     <th scope="col" class="text-end">Profit</th>
-                                    <th scope="col" class="text-end column-width-by-header">Stock Qty&Unit</th>
+                                    <th scope="col" class="text-end column-width-by-header">Stock QTY</th>
                                     {{-- column-কে header-এর প্রয়োজনীয় প্রস্থ নিতে বলে। --}}
                                     <th scope="col">Expiry</th>
                                     <th scope="col">Supplier</th>

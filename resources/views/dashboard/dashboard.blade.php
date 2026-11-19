@@ -216,31 +216,6 @@
 
                     </li>
                 @endcan
-                <li class="menu-label">Regural Operation</li>
-                <li>
-                    <a href="javascript:;" class="has-arrow">
-                        <div class="parent-icon"><i class='bx bx-cart-alt'></i></div>
-                        <div class="menu-title">Sales</div>
-                    </a>
-                    <ul>
-                        @can('billing.record')
-                            <li>
-                                <a href="{{ route('billing.records') }}">
-                                    <div class="parent-icon"><i class='bx bx-history'></i></div>
-                                    <div class="menu-title">BillingRecord</div>
-                                </a>
-                            </li>
-                        @endcan
-                        @can('billing.entry')
-                            <li>
-                                <a href="{{ route('billing.entry') }}">
-                                    <div class="parent-icon"><i class='bx bx-receipt'></i></div>
-                                    <div class="menu-title">BillingEntry</div>
-                                </a>
-                            </li>
-                        @endcan
-                    </ul>
-                </li>
                 @canany(['sales.create', 'product.return'])
                     <li class="menu-label">Regural Operation</li>
                     <li>
@@ -646,6 +621,37 @@
                         @endcan
                     </li>
                 @endcanany
+                <li class="menu-label">Billing Info</li>
+                <li>
+                    <a href="javascript:;" class="has-arrow">
+                        <div class="parent-icon"><i class='bx bx-receipt'></i></div>
+                        <div class="menu-title">Bill & Other's</div>
+                    </a>
+                    <ul>
+                        @can('billing.entry')
+                            <li>
+                                <a href="{{ route('billing.entry') }}">
+                                    <div class="parent-icon"><i class='bx bx-receipt'></i></div>
+                                    <div class="menu-title">BillingEntry</div>
+                                </a>
+                            </li>
+                        @endcan
+                        @can('billing.record')
+                            <li>
+                                <a href="{{ route('billing.records') }}">
+                                    <div class="parent-icon"><i class='bx bx-history'></i></div>
+                                    <div class="menu-title">BillingRecord</div>
+                                </a>
+                            </li>
+                        @endcan
+                        <li>
+                            <a href="#">
+                                <div class="parent-icon"><i class='bx bxs-receipt'></i></div>
+                                <div class="menu-title">USERS GUIDE</div>
+                            </a>
+                        </li>
+                    </ul>
+                </li>
 
                 @can(['user.activity.logs', 'reports.all_access'])
                     {{-- dedicated Activity Log permission ও আগের broad access menu দেখায়। --}}
