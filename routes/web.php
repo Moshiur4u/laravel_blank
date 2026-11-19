@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\BillingController;
 use App\Http\Controllers\BrandController;
 use App\Http\Controllers\CombinedVoucherReportController;
 use App\Http\Controllers\CustomerController;
@@ -61,6 +62,38 @@ Route::middleware(['auth', 'verified'])->group(function () {
 Route::middleware(['auth', 'verified'])->group(function () {
     Route::get('/organization', [OrganizationController::class, 'edit'])->middleware('permission:organization info.access')->name('organization.edit');
     Route::put('/organization', [OrganizationController::class, 'update'])->middleware('permission:organization info.access')->name('organization.update');
+});
+Route::middleware(['auth', 'verified'])->group(function () {
+    Route::get('/billing-entry', [BillingController::class, 'entry'])
+        ->middleware('permission:billing.entry')
+        ->name('billing.entry');
+    Route::post('/billing-entry/generate', [BillingController::class, 'generate'])
+        ->middleware('permission:billing.entry')
+        ->name('billing.generate');
+    Route::post('/billing-entry/{billingEntry}/payments', [BillingController::class, 'storePayment'])
+        ->whereNumber('billingEntry')
+        ->middleware('permission:billing.entry')
+        ->name('billing.payments.store');
+    Route::post('/billing-entry/settings', [BillingController::class, 'updateSettings'])
+        ->middleware('permission:billing.entry')
+        ->name('billing.settings.update');
+    Route::post('/billing-entry/access-off', [BillingController::class, 'accessOff'])
+        ->middleware('permission:billing.entry')
+        ->name('billing.access-off');
+    Route::get('/billing-records', [BillingController::class, 'records'])
+        ->middleware('permission:billing.record')
+        ->name('billing.records');
+    Route::get('/billing-transactions', [BillingController::class, 'transactions'])
+        ->middleware('permission:billing.record')
+        ->name('billing.transactions');
+    Route::put('/billing-records/{billingRecord}', [BillingController::class, 'updateRecord'])
+        ->whereNumber('billingRecord')
+        ->middleware('permission:billing.record')
+        ->name('billing.records.update');
+    Route::post('/billing-records/{billingRecord}/revert', [BillingController::class, 'revertRecord'])
+        ->whereNumber('billingRecord')
+        ->middleware('permission:billing.record')
+        ->name('billing.records.revert');
 });
 // সাধারণ Debit/Credit voucher entry ও দৈনিক report login এবং email verification চায়।
 Route::middleware(['auth', 'verified'])->group(function () {

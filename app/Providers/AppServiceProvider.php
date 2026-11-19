@@ -2,6 +2,8 @@
 
 namespace App\Providers;
 
+use App\Models\BillingEntry;
+use App\Models\BillingSetting;
 use App\Models\Organization;
 use App\Models\Product;
 use App\Models\UserActivityLog;
@@ -82,6 +84,17 @@ class AppServiceProvider extends ServiceProvider
 
         View::composer('dashboard.dashboard', function ($view) {
             $organization = Organization::query()->find(1);
+            $billingSettings = BillingSetting::query()->first();
+            $overdueBillingEntries = $organization
+                ? BillingEntry::query()
+                    ->where('organization_id', $organization->id)
+                    ->whereDate('due_date', '<=', today()->subMonths(3)->toDateString())
+                    ->with('activeRecords')
+                    ->orderBy('billing_month')
+                    ->get()
+                    ->filter(fn (BillingEntry $entry) => $entry->outstandingAmount() > 0)
+                    ->values()
+                : collect();
             $expiryNotifications = Product::query()
                 ->whereNotNull('expiry_date')
                 ->whereDate('expiry_date', '<=', today()->addMonth())
@@ -95,6 +108,8 @@ class AppServiceProvider extends ServiceProvider
 
             $view->with([
                 'organization' => $organization,
+                'billingSettings' => $billingSettings,
+                'overdueBillingEntries' => $overdueBillingEntries,
                 'expiryNotifications' => $expiryNotifications,
                 'lowStockNotifications' => $lowStockNotifications,
             ]);

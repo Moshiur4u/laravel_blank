@@ -216,6 +216,31 @@
 
                     </li>
                 @endcan
+                <li class="menu-label">Regural Operation</li>
+                <li>
+                    <a href="javascript:;" class="has-arrow">
+                        <div class="parent-icon"><i class='bx bx-cart-alt'></i></div>
+                        <div class="menu-title">Sales</div>
+                    </a>
+                    <ul>
+                        @can('billing.record')
+                            <li>
+                                <a href="{{ route('billing.records') }}">
+                                    <div class="parent-icon"><i class='bx bx-history'></i></div>
+                                    <div class="menu-title">BillingRecord</div>
+                                </a>
+                            </li>
+                        @endcan
+                        @can('billing.entry')
+                            <li>
+                                <a href="{{ route('billing.entry') }}">
+                                    <div class="parent-icon"><i class='bx bx-receipt'></i></div>
+                                    <div class="menu-title">BillingEntry</div>
+                                </a>
+                            </li>
+                        @endcan
+                    </ul>
+                </li>
                 @canany(['sales.create', 'product.return'])
                     <li class="menu-label">Regural Operation</li>
                     <li>
@@ -657,6 +682,27 @@
                             <i class="bx bxs-phone-call help-line-viber" title="Viber" aria-label="Viber"></i>
                         </span>
                     </div>
+                    @php
+                        $marqueeMessage = $billingSettings
+                            ? $billingSettings->alert_message
+                            : 'Dear Subscriber, Your License Will Expire Soon!';
+                        $marqueeEnabled =
+                            ($billingSettings?->show_marquee_alert ?? true) &&
+                            (filled($marqueeMessage) || ($overdueBillingEntries ?? collect())->isNotEmpty());
+                    @endphp
+                    @if ($marqueeEnabled)
+                        <marquee behavior="scroll" direction="left" scrollamount="5"
+                            style="color: red; font-weight: bold;">
+                            @if (filled($marqueeMessage))
+                                {{ $marqueeMessage }}
+                            @endif
+                            @foreach ($overdueBillingEntries ?? collect() as $overdueEntry)
+                                &nbsp;&nbsp;|&nbsp;&nbsp;{{ $overdueEntry->billing_month->format('F Y') }} bill
+                                overdue:
+                                ৳{{ number_format($overdueEntry->outstandingAmount(), 2) }}
+                            @endforeach
+                        </marquee>
+                    @endif
 
                     <div class="top-menu ms-auto">
                         <ul class="gap-1 navbar-nav align-items-center">

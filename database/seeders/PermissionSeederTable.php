@@ -122,6 +122,8 @@ class PermissionSeederTable extends Seeder
             'role.delete',
             'Organization Information',
             'organization info.access',
+            'billing.entry',
+            'billing.record',
             'user.activity.logs',
             'blank-invoice',
             'money-receipt',
