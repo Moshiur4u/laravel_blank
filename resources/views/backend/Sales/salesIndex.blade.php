@@ -442,11 +442,11 @@
                                             <a href="{{ route('sales.invoice', $invoice->id) }}"
                                                 class="btn btn-sm btn-outline-primary" title="View Invoice"
                                                 aria-label="View invoice {{ $invoice->invoice_no }}">
-                                                <i class="bx bx-show"></i>
+                                                <i class="bx bx-show me-1"></i>Invoice
                                             </a>
                                             <a href="{{ route('sales.delivery-challan', $invoice->id) }}"
                                                 class="btn btn-sm btn-outline-success" title="Delivery Challan">
-                                                <i class="bx bx-package me-1"></i>Delivery Challan
+                                                <i class="bx bx-package me-1"></i>Challan
                                             </a>
                                         </td>
                                     </tr>
