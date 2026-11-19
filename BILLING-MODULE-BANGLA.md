@@ -227,6 +227,112 @@ Dashboard marquee-তে তিন মাসের due date পার হওয়�
 
 `ShowMarqueeAlert` বন্ধ থাকলে custom message এবং স্বয়ংক্রিয় due notice—দুটিই লুকানো থাকে। কোনো settings record না থাকলে আগের dashboard message-টিই প্রাথমিক বার্তা হিসেবে থাকে।
 
+### Recent Invoices পাশে Search
+
+Source file: [salesIndex.blade.php](resources/views/backend/Sales/salesIndex.blade.php)। Search box-টি Recent Invoices heading-এর পাশে থাকে এবং বর্তমানে দেখানো invoice row-গুলোকে browser-এই filter করে; অতিরিক্ত request বা controller পরিবর্তনের প্রয়োজন হয় না।
+
+#### Raw Blade code
+
+```blade
+<div class="py-3 bg-transparent card-header border-bottom d-flex flex-wrap justify-content-between align-items-center gap-2">
+    <h5 class="mb-0 fw-bold text-dark"><i class="bx bx-history text-primary me-2"></i>Recent Invoices</h5>
+    <div style="width: 100%; max-width: 360px">
+        <label for="recentInvoiceSearch" class="visually-hidden">Search recent invoices</label>
+        <input type="search" id="recentInvoiceSearch" class="form-control"
+            placeholder="Search invoice, phone, employee..." autocomplete="off"
+            aria-controls="recent-invoices-table">
+    </div>
+</div>
+<table id="recent-invoices-table" class="table mb-0 align-middle table-hover">
+    <tbody>
+        @forelse ($invoices as $invoice)
+            <tr data-recent-invoice-row>
+                <td>{{ $invoice->invoice_no }}</td>
+                <td>{{ $invoice->invoice_date->format('d M Y') }}</td>
+                <td>{{ $invoice->customer_phone }}</td>
+                <td>{{ $invoice->employee->name ?? 'N/A' }}</td>
+                <td>৳{{ number_format($invoice->total_amount, 2) }}</td>
+                <td>৳{{ number_format($invoice->due_amount, 2) }}</td>
+                <td class="text-nowrap">
+                    <a href="{{ route('sales.invoice', $invoice->id) }}"
+                        class="btn btn-sm btn-outline-primary" title="View Invoice"
+                        aria-label="View invoice {{ $invoice->invoice_no }}">
+                        <i class="bx bx-show"></i>
+                    </a>
+                    <a href="{{ route('sales.delivery-challan', $invoice->id) }}"
+                        class="btn btn-sm btn-outline-success" title="Delivery Challan">
+                        <i class="bx bx-package me-1"></i>Delivery Challan
+                    </a>
+                </td>
+            </tr>
+        @empty
+            <tr>
+                <td colspan="7">No invoices have been created yet.</td>
+            </tr>
+        @endforelse
+        <tr id="recentInvoicesNoResults" class="d-none">
+            <td colspan="7" class="py-4 text-center text-muted">No matching invoices found.</td>
+        </tr>
+    </tbody>
+</table>
+```
+
+#### Raw JavaScript code
+
+```javascript
+document.addEventListener('DOMContentLoaded', function() {
+    const searchInput = document.getElementById('recentInvoiceSearch');
+
+    if (!searchInput) {
+        return;
+    }
+
+    const invoiceRows = document.querySelectorAll('[data-recent-invoice-row]');
+    const noResultsRow = document.getElementById('recentInvoicesNoResults');
+
+    // সার্চ বক্সের লেখা দিয়ে শুধু Recent Invoices টেবিলের row-গুলো তাৎক্ষণিকভাবে filter করে।
+    searchInput.addEventListener('input', function() {
+        const searchTerm = searchInput.value.trim().toLowerCase();
+        let matchingRows = 0;
+
+        invoiceRows.forEach(function(row) {
+            const matches = row.textContent.toLowerCase().includes(searchTerm);
+            row.classList.toggle('d-none', !matches);
+            matchingRows += matches ? 1 : 0;
+        });
+
+        if (noResultsRow) {
+            noResultsRow.classList.toggle('d-none', !searchTerm || matchingRows > 0);
+        }
+    });
+});
+```
+
+#### Line-by-line ব্যাখ্যা
+
+| Raw code line | বাংলা ব্যাখ্যা |
+|---|---|
+| `document.addEventListener('DOMContentLoaded', function() {` | HTML তৈরি হওয়ার পর search setup চালু করে। |
+| `const searchInput = document.getElementById('recentInvoiceSearch');` | Search input-টি page থেকে খুঁজে নেয়। |
+| `if (!searchInput) {` | Search input না থাকলে পরের setup চালানো আটকায়। |
+| `return;` | Input না থাকলে event handler থেকে বের হয়ে যায়। |
+| `}` | Input যাচাইয়ের `if` block শেষ করে। |
+| `const invoiceRows = document.querySelectorAll('[data-recent-invoice-row]');` | প্রতিটি invoice-এর marked table row সংগ্রহ করে। |
+| `const noResultsRow = document.getElementById('recentInvoicesNoResults');` | কোনো invoice না মিললে দেখানোর row খুঁজে নেয়। |
+| `searchInput.addEventListener('input', function() {` | টাইপ বা clear করার প্রতিবার filter চালায়। |
+| `const searchTerm = searchInput.value.trim().toLowerCase();` | Search text-এর বাড়তি space সরিয়ে lowercase করে। |
+| `let matchingRows = 0;` | কতটি invoice মিলে তা গোনার counter শুরু করে। |
+| `invoiceRows.forEach(function(row) {` | প্রতিটি invoice row আলাদাভাবে পরীক্ষা করে। |
+| `const matches = row.textContent.toLowerCase().includes(searchTerm);` | Invoice row-এর লেখা search text ধারণ করে কি না যাচাই করে। |
+| `row.classList.toggle('d-none', !matches);` | না-মেলা row লুকায় এবং মেলা row দেখায়। |
+| `matchingRows += matches ? 1 : 0;` | মিলে গেলে matching invoice-এর সংখ্যা এক বাড়ায়। |
+| `});` | সব invoice row পরীক্ষা শেষ করে। |
+| `if (noResultsRow) {` | No-results row page-এ থাকলেই সেটি update করে। |
+| `noResultsRow.classList.toggle('d-none', !searchTerm \|\| matchingRows > 0);` | Search খালি বা কোনো row মিললে বার্তাটি লুকায়; নইলে দেখায়। |
+| `}` | No-results row-এর `if` block শেষ করে। |
+| `});` | Search input-এর event handler শেষ করে। |
+| `});` | Page load-এর handler শেষ করে। |
+
 ### Migration ও যাচাই
 
 ```powershell

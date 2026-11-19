@@ -406,11 +406,17 @@
             @canany(['sales.view', 'Voide_today_Invoice', 'Voide_anyday_Invoice', 'Update_today_Invoice',
                 'Update_anyday_Invoice'])
                 <div class="mt-4 border-0 shadow-sm card radius-10">
-                    <div class="py-3 bg-transparent card-header border-bottom">
+                    <div class="py-3 bg-transparent card-header border-bottom d-flex flex-wrap justify-content-between align-items-center gap-2">
                         <h5 class="mb-0 fw-bold text-dark"><i class="bx bx-history text-primary me-2"></i>Recent Invoices</h5>
+                        <div style="width: 100%; max-width: 360px">
+                            <label for="recentInvoiceSearch" class="visually-hidden">Search recent invoices</label>
+                            <input type="search" id="recentInvoiceSearch" class="form-control"
+                                placeholder="Search invoice, phone, employee..." autocomplete="off"
+                                aria-controls="recent-invoices-table">
+                        </div>
                     </div>
                     <div class="card-body table-responsive">
-                        <table class="table mb-0 align-middle table-hover">
+                        <table id="recent-invoices-table" class="table mb-0 align-middle table-hover">
                             <thead class="table-light">
                                 <tr>
                                     <th>Invoice</th>
@@ -424,7 +430,7 @@
                             </thead>
                             <tbody>
                                 @forelse ($invoices as $invoice)
-                                    <tr>
+                                    <tr data-recent-invoice-row>
                                         <td>{{ $invoice->invoice_no }}</td>
                                         <td>{{ $invoice->invoice_date->format('d M Y') }}</td>
                                         <td>{{ $invoice->customer_phone }}</td>
@@ -449,6 +455,9 @@
                                             yet.</td>
                                     </tr>
                                 @endforelse
+                                <tr id="recentInvoicesNoResults" class="d-none">
+                                    <td colspan="7" class="py-4 text-center text-muted">No matching invoices found.</td>
+                                </tr>
                             </tbody>
                         </table>
                     </div>
@@ -972,6 +981,34 @@
                     }
                 }
             @endunless
+        });
+    </script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const searchInput = document.getElementById('recentInvoiceSearch');
+
+            if (!searchInput) {
+                return;
+            }
+
+            const invoiceRows = document.querySelectorAll('[data-recent-invoice-row]');
+            const noResultsRow = document.getElementById('recentInvoicesNoResults');
+
+            // সার্চ বক্সের লেখা দিয়ে শুধু Recent Invoices টেবিলের row-গুলো তাৎক্ষণিকভাবে filter করে।
+            searchInput.addEventListener('input', function() {
+                const searchTerm = searchInput.value.trim().toLowerCase();
+                let matchingRows = 0;
+
+                invoiceRows.forEach(function(row) {
+                    const matches = row.textContent.toLowerCase().includes(searchTerm);
+                    row.classList.toggle('d-none', !matches);
+                    matchingRows += matches ? 1 : 0;
+                });
+
+                if (noResultsRow) {
+                    noResultsRow.classList.toggle('d-none', !searchTerm || matchingRows > 0);
+                }
+            });
         });
     </script>
 @endsection
