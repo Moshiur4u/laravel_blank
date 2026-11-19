@@ -620,6 +620,17 @@
                             </ul>
                         @endcan
                     </li>
+
+                    @can(['user.activity.logs', 'reports.all_access'])
+                        {{-- dedicated Activity Log permission ও আগের broad access menu দেখায়। --}}
+                        <li>
+                            <a href="{{ route('user-activity-logs.index') }}">
+                                <div class="parent-icon"><i class='bx bx-history'></i></div>
+                                <div class="menu-title">User Activity Log</div>
+                            </a>
+                        </li>
+                    @endcan
+
                 @endcanany
                 <li class="menu-label">Billing Info</li>
                 <li>
@@ -652,17 +663,6 @@
                         </li>
                     </ul>
                 </li>
-
-                @can(['user.activity.logs', 'reports.all_access'])
-                    {{-- dedicated Activity Log permission ও আগের broad access menu দেখায়। --}}
-                    <li>
-                        <a href="{{ route('user-activity-logs.index') }}">
-                            <div class="parent-icon"><i class='bx bx-history'></i></div>
-                            <div class="menu-title">User Activity Log</div>
-                        </a>
-                    </li>
-                @endcan
-
             </ul>
             <!--end navigation-->
         </div>
