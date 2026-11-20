@@ -216,6 +216,12 @@
 
                     </li>
                 @endcan
+                <li>
+                    <a href="{{ route('User.Guide') }}">
+                        <div class="parent-icon"><i class='bx bxs-receipt'></i></div>
+                        <div class="menu-title">USERS GUIDE</div>
+                    </a>
+                </li>
                 @canany(['sales.create', 'product.return'])
                     <li class="menu-label">Regural Operation</li>
                     <li>
@@ -297,7 +303,7 @@
                     <li>
                         <a href="javascript:;" class="has-arrow">
                             <div class="parent-icon"><i class="bx bx-customize "></i></div>
-                            <div class="menu-title">Product Categories</div>
+                            <div class="menu-title">Categories & SubCategory</div>
                         </a>
                         <ul>
                             @can('category.index')
@@ -655,12 +661,6 @@
                                 </a>
                             </li>
                         @endcan
-                        <li>
-                            <a href="#">
-                                <div class="parent-icon"><i class='bx bxs-receipt'></i></div>
-                                <div class="menu-title">USERS GUIDE</div>
-                            </a>
-                        </li>
                     </ul>
                 </li>
             </ul>
@@ -830,7 +830,7 @@
                                                             </div>
                                                         </div>
                                                         <div class="flex-grow-1">
-                                                            <h6 class="mb-0 cart-product-title">
+                                                            <h6 class="mb-0 cart-product-title text-wrap">
                                                                 {{ $stockProduct->display_name }}
                                                             </h6>
                                                             <p class="mb-0 cart-product-price">

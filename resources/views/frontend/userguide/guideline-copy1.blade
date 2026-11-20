@@ -1,0 +1,1773 @@
+@extends('dashboard.dashboard')
+@section('title', 'ব্যবহারকারী নির্দেশিকা')
+
+@section('content')
+    <div class="page-wrapper">
+        <div class="page-content">
+            <div id="user-guide">
+                <!DOCTYPE html>
+                <html lang="bn" class="scroll-smooth">
+
+                <head>
+                    <meta charset="UTF-8">
+                    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+                    <title>ব্যবহারকারী নির্দেশিকা: Login ও সকল Module/Menu</title>
+
+                    <!-- Google Fonts: Hind Siliguri, Noto Sans Bengali, Inter & JetBrains Mono -->
+                    <link rel="preconnect" href="https://fonts.googleapis.com">
+                    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+                    <link
+                        href="https://fonts.googleapis.com/css2?family=Hind+Siliguri:wght@400;500;600;700&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&family=Noto+Sans+Bengali:wght@400;500;600;700&display=swap"
+                        rel="stylesheet">
+
+                    <!-- Tailwind CSS -->
+                    <script src="https://cdn.tailwindcss.com"></script>
+                    <script>
+                        tailwind.config = {
+                            darkMode: 'class',
+                            theme: {
+                                extend: {
+                                    fontFamily: {
+                                        sans: ['"Hind Siliguri"', '"Noto Sans Bengali"', '"Inter"', 'sans-serif'],
+                                        mono: ['"JetBrains Mono"', '"Inter"', 'monospace'],
+                                    },
+                                    colors: {
+                                        alabaster: '#FBFBF9',
+                                        stonecard: '#F5F4F0',
+                                        obsidian: '#0B0F19',
+                                        charcoal: '#111827',
+                                        accent: {
+                                            50: '#ecfdf5',
+                                            100: '#d1fae5',
+                                            500: '#10b981',
+                                            600: '#059669',
+                                            700: '#047857',
+                                        },
+                                        indigoAccent: {
+                                            50: '#eef2ff',
+                                            100: '#e0e7ff',
+                                            500: '#6366f1',
+                                            600: '#4f46e5',
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    </script>
+
+                    <!-- Lucide Icons -->
+                    <script src="https://unpkg.com/lucide@latest"></script>
+
+                    <style>
+                        body {
+                            font-family: 'Hind Siliguri', 'Noto Sans Bengali', 'Inter', sans-serif;
+                            -webkit-font-smoothing: antialiased;
+                        }
+
+                        code,
+                        .font-mono {
+                            font-family: 'JetBrains Mono', 'Inter', monospace;
+                        }
+
+                        /* Subtle dot grid background */
+                        .bg-dot-pattern {
+                            background-image: radial-gradient(rgba(148, 163, 184, 0.25) 1px, transparent 1px);
+                            background-size: 20px 20px;
+                        }
+
+                        .dark .bg-dot-pattern {
+                            background-image: radial-gradient(rgba(148, 163, 184, 0.1) 1px, transparent 1px);
+                        }
+
+                        /* Custom Scrollbar */
+                        ::-webkit-scrollbar {
+                            width: 6px;
+                            height: 6px;
+                        }
+
+                        ::-webkit-scrollbar-track {
+                            background: transparent;
+                        }
+
+                        ::-webkit-scrollbar-thumb {
+                            background: rgba(148, 163, 184, 0.35);
+                            border-radius: 9999px;
+                        }
+
+                        ::-webkit-scrollbar-thumb:hover {
+                            background: rgba(100, 116, 139, 0.6);
+                        }
+
+                        .no-scrollbar::-webkit-scrollbar {
+                            display: none;
+                        }
+
+                        .no-scrollbar {
+                            -ms-overflow-style: none;
+                            scrollbar-width: none;
+                        }
+
+                        /* Search Highlight */
+                        mark.search-highlight {
+                            background-color: #fde047;
+                            color: #0f172a;
+                            padding: 1px 4px;
+                            border-radius: 4px;
+                            font-weight: 600;
+                            box-shadow: 0 1px 2px rgba(0, 0, 0, 0.08);
+                        }
+
+                        .dark mark.search-highlight {
+                            background-color: #facc15;
+                            color: #090d16;
+                        }
+
+                        /* Print Styles */
+                        @media print {
+                            .no-print {
+                                display: none !important;
+                            }
+
+                            body {
+                                background: #ffffff !important;
+                                color: #0f172a !important;
+                            }
+
+                            main {
+                                max-width: 100% !important;
+                                padding: 0 !important;
+                            }
+
+                            section {
+                                break-inside: avoid-page;
+                                border: 1px solid #e2e8f0 !important;
+                                box-shadow: none !important;
+                            }
+                        }
+                    </style>
+                </head>
+
+                <body
+                    class="transition-colors duration-200 bg-alabaster text-slate-800 dark:bg-obsidian dark:text-slate-200 bg-dot-pattern">
+
+                    <!-- Glassmorphic Sticky Top Bar: Compact Nav + Command Search + Utilities -->
+                    <header
+                        class="sticky top-0 z-50 w-full transition-colors border-b bg-alabaster/85 dark:bg-obsidian/85 backdrop-blur-xl border-slate-200/80 dark:border-slate-800/80 no-print">
+                        <div class="max-w-6xl px-4 mx-auto sm:px-6 lg:px-8">
+
+                            <!-- Top Row: Compact Single-Row Horizontal Navigation Menu (সূচিপত্র) & Actions -->
+                            <div class="py-2.5 flex items-center justify-between gap-3">
+
+                                <!-- Horizontal Navigation Pills (সূচিপত্র) -->
+                                <nav aria-label="সূচিপত্র"
+                                    class="flex items-center flex-1 gap-2 overflow-x-auto no-scrollbar">
+                                    <span
+                                        class="inline-flex items-center gap-1.5 text-xs font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400 shrink-0 pr-2 border-r border-slate-200 dark:border-slate-800">
+                                        <i data-lucide="compass"
+                                            class="w-3.5 h-3.5 text-accent-600 dark:text-accent-500"></i>
+                                        সূচিপত্র
+                                    </span>
+                                    <div class="flex items-center gap-1.5 shrink-0" id="top-nav-links">
+                                        <a href="#section-login" data-target="section-login"
+                                            class="toc-nav-item active inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs sm:text-sm font-semibold bg-slate-900 text-white dark:bg-accent-600 dark:text-white shadow-xs transition-all whitespace-nowrap">
+                                            <span>১.</span> Login Page
+                                        </a>
+                                        <a href="#section-modules" data-target="section-modules"
+                                            class="toc-nav-item inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs sm:text-sm font-medium bg-white/80 dark:bg-charcoal text-slate-600 dark:text-slate-300 border border-slate-200/80 dark:border-slate-800 hover:border-slate-300 dark:hover:border-slate-700 hover:text-slate-900 dark:hover:text-white transition-all whitespace-nowrap">
+                                            <span>২.</span> সব Menu ও Module
+                                        </a>
+                                        <a href="#section-dashboard" data-target="section-dashboard"
+                                            class="toc-nav-item inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs sm:text-sm font-medium bg-white/80 dark:bg-charcoal text-slate-600 dark:text-slate-300 border border-slate-200/80 dark:border-slate-800 hover:border-slate-300 dark:hover:border-slate-700 hover:text-slate-900 dark:hover:text-white transition-all whitespace-nowrap">
+                                            <span>৩.</span> Dashboard
+                                        </a>
+                                        <a href="#section-sales" data-target="section-sales"
+                                            class="toc-nav-item inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs sm:text-sm font-medium bg-white/80 dark:bg-charcoal text-slate-600 dark:text-slate-300 border border-slate-200/80 dark:border-slate-800 hover:border-slate-300 dark:hover:border-slate-700 hover:text-slate-900 dark:hover:text-white transition-all whitespace-nowrap">
+                                            <span>৪.</span> Sales Menu
+                                        </a>
+                                        <a href="#section-invoices" data-target="section-invoices"
+                                            class="toc-nav-item inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs sm:text-sm font-medium bg-white/80 dark:bg-charcoal text-slate-600 dark:text-slate-300 border border-slate-200/80 dark:border-slate-800 hover:border-slate-300 dark:hover:border-slate-700 hover:text-slate-900 dark:hover:text-white transition-all whitespace-nowrap">
+                                            <span>৫.</span> Recent Invoices
+                                        </a>
+                                    </div>
+                                </nav>
+
+                                <!-- Right Utility Controls: Command Search, Theme Toggle, Print -->
+                                <div class="flex items-center gap-2 shrink-0">
+                                    <!-- Command Search Input -->
+                                    <div class="relative hidden md:block w-60 lg:w-72">
+                                        <i data-lucide="search"
+                                            class="w-3.5 h-3.5 text-slate-400 absolute left-3 top-1/2 -translate-y-1/2 pointer-events-none"></i>
+                                        <input type="text" id="search-input" placeholder="দ্রুত খুঁজুন..."
+                                            class="w-full pl-8 pr-12 py-1.5 text-xs sm:text-sm bg-white dark:bg-charcoal border border-slate-200/90 dark:border-slate-700/90 focus:border-accent-500 dark:focus:border-accent-500 rounded-xl outline-none transition-all text-slate-800 dark:text-slate-100 placeholder-slate-400 shadow-2xs">
+                                        <kbd id="search-kbd"
+                                            class="absolute right-2.5 top-1/2 -translate-y-1/2 px-1.5 py-0.5 text-[10px] font-mono font-semibold text-slate-400 bg-slate-100 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded">/</kbd>
+                                        <button id="clear-search"
+                                            class="absolute hidden -translate-y-1/2 right-2 top-1/2 text-slate-400 hover:text-slate-600 dark:hover:text-slate-200"
+                                            title="Clear">
+                                            <i data-lucide="x" class="w-3.5 h-3.5"></i>
+                                        </button>
+                                    </div>
+
+                                    <!-- Mobile Search Toggle Button -->
+                                    <button id="mobile-search-btn" type="button"
+                                        class="p-2 transition-colors bg-white border md:hidden rounded-xl dark:bg-charcoal border-slate-200 dark:border-slate-800 text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800"
+                                        title="Search">
+                                        <i data-lucide="search" class="w-4 h-4"></i>
+                                    </button>
+
+                                    <!-- Dark Mode Toggle -->
+                                    <button id="theme-toggle" type="button"
+                                        class="p-2 transition-colors bg-white border rounded-xl dark:bg-charcoal border-slate-200 dark:border-slate-800 text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 shadow-2xs"
+                                        title="পর্দার light/dark theme বদলান">
+                                        <i data-lucide="moon" class="w-4 h-4 dark:hidden"></i>
+                                        <i data-lucide="sun" class="hidden w-4 h-4 dark:block text-amber-400"></i>
+                                    </button>
+
+                                    <!-- Print / PDF -->
+                                    <button onclick="window.print()" type="button"
+                                        class="inline-flex items-center gap-1.5 px-3 py-2 rounded-xl bg-accent-600 hover:bg-accent-700 text-white text-xs sm:text-sm font-semibold shadow-xs transition-all">
+                                        <i data-lucide="printer" class="w-4 h-4"></i>
+                                        <span class="hidden sm:inline">Print</span>
+                                    </button>
+                                </div>
+                            </div>
+
+                            <!-- Mobile Search Drawer -->
+                            <div id="mobile-search-bar" class="hidden md:hidden pb-2.5">
+                                <div class="relative">
+                                    <i data-lucide="search"
+                                        class="absolute w-4 h-4 -translate-y-1/2 text-slate-400 left-3 top-1/2"></i>
+                                    <input type="text" id="mobile-search-input"
+                                        placeholder="নির্দেশিকা খুঁজুন (যেমন: VAT, Return, Due)..."
+                                        class="w-full py-2 pr-8 text-sm bg-white border outline-none pl-9 dark:bg-charcoal border-slate-200 dark:border-slate-700 rounded-xl focus:border-accent-500 text-slate-800 dark:text-slate-100">
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Live Search Match Counter Banner -->
+                        <div id="search-status"
+                            class="hidden px-4 py-1 text-xs font-semibold text-center border-t bg-accent-50 dark:bg-accent-950/60 border-accent-200/70 dark:border-accent-800/50 text-accent-700 dark:text-accent-300">
+                            মোট <span id="search-count">0</span> টি অংশে মিলেছে
+                        </div>
+                    </header>
+
+                    <!-- Main Container -->
+                    <main id="manual-content" class="max-w-6xl px-4 py-6 pb-20 mx-auto space-y-10 sm:px-6 lg:px-8 sm:py-8">
+
+                        <!-- Intro Context Banner -->
+                        <div
+                            class="flex flex-col justify-between gap-3 p-4 border rounded-2xl bg-white/90 dark:bg-charcoal/90 border-slate-200/90 dark:border-slate-800 shadow-2xs sm:flex-row sm:items-center">
+                            <div class="flex items-start gap-3">
+                                <div
+                                    class="p-2 rounded-xl bg-indigoAccent-50 dark:bg-indigoAccent-500/10 text-indigoAccent-600 dark:text-indigo-400 shrink-0 mt-0.5">
+                                    <i data-lucide="shield-check" class="w-4 h-4"></i>
+                                </div>
+                                <p class="text-xs leading-relaxed sm:text-sm text-slate-600 dark:text-slate-300">
+                                    এই handout-এ অ্যাপের <strong>Login</strong>, sidebar-এর সব <strong>menu/module</strong>,
+                                    <strong>Dashboard</strong> এবং <strong>Sales</strong>-এর সাধারণ কাজগুলো ব্যাখ্যা করা
+                                    হয়েছে। ব্যবহারকারীর <code
+                                        class="px-1.5 py-0.5 rounded bg-slate-100 dark:bg-slate-800 text-slate-800 dark:text-slate-200 text-xs font-semibold">role</code>
+                                    ও <code
+                                        class="px-1.5 py-0.5 rounded bg-slate-100 dark:bg-slate-800 text-slate-800 dark:text-slate-200 text-xs font-semibold">permission</code>
+                                    অনুযায়ী কিছু menu বা button দেখা নাও যেতে পারে।
+                                </p>
+                            </div>
+                        </div>
+
+                        <!-- ========================================================= -->
+                        <!-- CHAPTER 1: LOGIN PAGE (2-Column Split UI Preview & Matrix)-->
+                        <!-- ========================================================= -->
+                        <section id="section-login"
+                            class="overflow-hidden bg-white border shadow-xs searchable-section scroll-mt-24 dark:bg-charcoal rounded-3xl border-slate-200/90 dark:border-slate-800">
+                            <!-- Section Header -->
+                            <div
+                                class="flex items-center justify-between px-6 py-5 border-b sm:px-8 border-slate-100 dark:border-slate-800/80 bg-stonecard/50 dark:bg-slate-900/40">
+                                <div class="flex items-center gap-3.5">
+                                    <span
+                                        class="flex items-center justify-center text-base font-bold text-white w-9 h-9 rounded-xl bg-slate-900 dark:bg-accent-600 shadow-2xs">১</span>
+                                    <div>
+                                        <h2
+                                            class="text-lg font-bold tracking-tight sm:text-xl text-slate-900 dark:text-white">
+                                            Login Page</h2>
+                                        <p class="text-xs sm:text-sm text-slate-500 dark:text-slate-400">অ্যাকাউন্টে
+                                            প্রবেশের নিয়মাবলি ও লগইন ত্রুটি সমাধান</p>
+                                    </div>
+                                </div>
+                                <span
+                                    class="hidden sm:inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-emerald-50 dark:bg-emerald-950/60 text-emerald-700 dark:text-emerald-400 text-xs font-mono font-medium border border-emerald-200/70 dark:border-emerald-800/50">
+                                    <span class="w-1.5 h-1.5 rounded-full bg-emerald-500"></span> /login
+                                </span>
+                            </div>
+
+                            <div class="grid grid-cols-1 gap-8 p-6 sm:p-8 lg:grid-cols-12">
+
+                                <!-- Left Column (5 cols): Visual Login Mockup + 3 Steps -->
+                                <div class="space-y-5 lg:col-span-5">
+                                    <div
+                                        class="flex items-center gap-2 text-sm font-bold text-slate-800 dark:text-slate-100">
+                                        <i data-lucide="log-in" class="w-4 h-4 text-accent-600"></i>
+                                        <span>লগইন করার নিয়ম</span>
+                                    </div>
+
+                                    <!-- Interactive Mini Login UI Preview Card -->
+                                    <div
+                                        class="p-5 space-y-4 border shadow-inner rounded-2xl bg-alabaster dark:bg-obsidian border-slate-200/90 dark:border-slate-800">
+                                        <div class="space-y-1.5">
+                                            <label
+                                                class="flex items-center justify-between text-xs font-semibold text-slate-600 dark:text-slate-400">
+                                                <span>1. Email</span>
+                                                <span class="font-mono text-[11px] text-slate-400">name@example.com</span>
+                                            </label>
+                                            <div
+                                                class="flex items-center gap-2 px-3 py-2 text-xs bg-white border rounded-xl dark:bg-charcoal border-slate-200 dark:border-slate-700 sm:text-sm text-slate-500">
+                                                <i data-lucide="mail" class="w-3.5 h-3.5 text-slate-400"></i>
+                                                <span>Login page-এ আপনার account-এর Email লিখুন</span>
+                                            </div>
+                                        </div>
+
+                                        <div class="space-y-1.5">
+                                            <label
+                                                class="flex items-center justify-between text-xs font-semibold text-slate-600 dark:text-slate-400">
+                                                <span>2. Password</span>
+                                                <span
+                                                    class="text-[11px] text-indigoAccent-600 dark:text-indigo-400 flex items-center gap-1">
+                                                    <i data-lucide="eye" class="w-3 h-3"></i> দেখুন / লুকান
+                                                </span>
+                                            </label>
+                                            <div
+                                                class="flex items-center justify-between px-3 py-2 text-xs bg-white border rounded-xl dark:bg-charcoal border-slate-200 dark:border-slate-700 sm:text-sm text-slate-500">
+                                                <div class="flex items-center gap-2">
+                                                    <i data-lucide="lock" class="w-3.5 h-3.5 text-slate-400"></i>
+                                                    <span>••••••••••••</span>
+                                                </div>
+                                                <button type="button" id="demo-eye-btn"
+                                                    class="transition-colors text-slate-400 hover:text-slate-700 dark:hover:text-slate-200"
+                                                    title="চোখের আইকনে ক্লিক করলে password দেখা বা লুকানো যায়">
+                                                    <i data-lucide="eye" class="w-4 h-4"></i>
+                                                </button>
+                                            </div>
+                                            <p class="text-xs text-slate-500 dark:text-slate-400">
+                                                Password লিখুন। চোখের আইকনে ক্লিক করলে password দেখা বা লুকানো যায়।
+                                            </p>
+                                        </div>
+
+                                        <div class="pt-1">
+                                            <div
+                                                class="w-full py-2.5 px-4 rounded-xl bg-slate-900 dark:bg-accent-600 text-white text-center text-xs sm:text-sm font-semibold shadow-xs">
+                                                Sign in চাপুন
+                                            </div>
+                                            <p
+                                                class="text-xs text-center text-emerald-700 dark:text-emerald-400 font-medium mt-2.5">
+                                                ✓ তথ্য সঠিক এবং account সক্রিয় হলে Dashboard খুলবে।
+                                            </p>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!-- Right Column (7 cols): Login Error Troubleshooting Matrix -->
+                                <div class="space-y-4 lg:col-span-7">
+                                    <div
+                                        class="flex items-center gap-2 text-sm font-bold text-slate-800 dark:text-slate-100">
+                                        <i data-lucide="alert-triangle" class="w-4 h-4 text-rose-500"></i>
+                                        <span>Login ব্যর্থ হলে যে বার্তাগুলো আসতে পারে</span>
+                                    </div>
+
+                                    <div
+                                        class="overflow-hidden border rounded-2xl border-slate-200/90 dark:border-slate-800">
+                                        <table class="w-full text-left border-collapse">
+                                            <thead>
+                                                <tr
+                                                    class="text-xs font-bold tracking-wider uppercase border-b bg-stonecard dark:bg-slate-900/90 text-slate-700 dark:text-slate-300 border-slate-200 dark:border-slate-800">
+                                                    <th class="w-5/12 px-4 py-3">সমস্যা</th>
+                                                    <th class="px-4 py-3">করণীয়</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody
+                                                class="text-xs divide-y divide-slate-200/80 dark:divide-slate-800 sm:text-sm">
+                                                <tr
+                                                    class="transition-colors hover:bg-slate-50/80 dark:hover:bg-slate-800/30">
+                                                    <td class="px-4 py-3 font-semibold text-rose-600 dark:text-rose-400">
+                                                        Email ফাঁকা রাখা হয়েছে</td>
+                                                    <td class="px-4 py-3 text-slate-700 dark:text-slate-300">Email লিখে
+                                                        আবার চেষ্টা করুন।</td>
+                                                </tr>
+                                                <tr
+                                                    class="transition-colors hover:bg-slate-50/80 dark:hover:bg-slate-800/30">
+                                                    <td class="px-4 py-3 font-semibold text-rose-600 dark:text-rose-400">
+                                                        Email-এর format সঠিক নয়</td>
+                                                    <td class="px-4 py-3 text-slate-700 dark:text-slate-300">সঠিক format-এর
+                                                        email দিন, যেমন <code
+                                                            class="px-1.5 py-0.5 rounded bg-slate-100 dark:bg-slate-800 text-xs font-semibold">name@example.com</code>।
+                                                    </td>
+                                                </tr>
+                                                <tr
+                                                    class="transition-colors hover:bg-slate-50/80 dark:hover:bg-slate-800/30">
+                                                    <td class="px-4 py-3 font-semibold text-rose-600 dark:text-rose-400">
+                                                        Email account পাওয়া যায়নি অথবা password মেলেনি</td>
+                                                    <td class="px-4 py-3 text-slate-700 dark:text-slate-300">Email ও
+                                                        password যাচাই করুন; প্রয়োজনে administrator-এর সঙ্গে যোগাযোগ করুন।
+                                                    </td>
+                                                </tr>
+                                                <tr
+                                                    class="transition-colors hover:bg-slate-50/80 dark:hover:bg-slate-800/30">
+                                                    <td class="px-4 py-3 font-semibold text-amber-600 dark:text-amber-400">
+                                                        Account নিষ্ক্রিয়</td>
+                                                    <td class="px-4 py-3 text-slate-700 dark:text-slate-300">
+                                                        Administrator-কে account সক্রিয় করতে বলুন।</td>
+                                                </tr>
+                                                <tr
+                                                    class="transition-colors hover:bg-slate-50/80 dark:hover:bg-slate-800/30">
+                                                    <td class="px-4 py-3 font-semibold text-amber-600 dark:text-amber-400">
+                                                        একই email ও device/network থেকে বারবার ব্যর্থ চেষ্টা</td>
+                                                    <td class="px-4 py-3 text-slate-700 dark:text-slate-300">দেখানো সময়
+                                                        অপেক্ষা করে আবার চেষ্টা করুন।</td>
+                                                </tr>
+                                                <tr
+                                                    class="transition-colors hover:bg-slate-50/80 dark:hover:bg-slate-800/30">
+                                                    <td class="px-4 py-3 font-semibold text-rose-600 dark:text-rose-400">
+                                                        Password ফাঁকা</td>
+                                                    <td class="px-4 py-3 text-slate-700 dark:text-slate-300">Password লিখে
+                                                        আবার চেষ্টা করুন।</td>
+                                                </tr>
+                                            </tbody>
+                                        </table>
+                                    </div>
+
+                                    <!-- Important Note Callout -->
+                                    <div
+                                        class="p-3.5 rounded-2xl bg-amber-50/80 dark:bg-amber-950/30 border border-amber-200/80 dark:border-amber-800/40 flex items-start gap-2.5 text-xs sm:text-sm text-amber-900 dark:text-amber-200">
+                                        <i data-lucide="info"
+                                            class="w-4 h-4 text-amber-600 dark:text-amber-400 shrink-0 mt-0.5"></i>
+                                        <p class="leading-relaxed">
+                                            ভুল credential-এর বার্তাটি email-এর নিচে দেখানো হয়, যদিও সমস্যাটি password-ও
+                                            হতে পারে। তাই বার্তাটি দেখে একা email-কে ভুল ধরে নেবেন না।
+                                        </p>
+                                    </div>
+                                </div>
+
+                            </div>
+                        </section>
+
+                        <!-- ========================================================= -->
+                        <!-- CHAPTER 2: সব MENU ও MODULE পরিচিতি                      -->
+                        <!-- ========================================================= -->
+                        <section id="section-modules"
+                            class="overflow-hidden bg-white border shadow-xs searchable-section scroll-mt-24 dark:bg-charcoal rounded-3xl border-slate-200/90 dark:border-slate-800">
+                            <!-- Section Header -->
+                            <div
+                                class="flex flex-col justify-between gap-3 px-6 py-5 border-b sm:px-8 border-slate-100 dark:border-slate-800/80 sm:flex-row sm:items-center bg-stonecard/50 dark:bg-slate-900/40">
+                                <div class="flex items-center gap-3.5">
+                                    <span
+                                        class="flex items-center justify-center text-base font-bold text-white w-9 h-9 rounded-xl bg-slate-900 dark:bg-accent-600 shadow-2xs">২</span>
+                                    <div>
+                                        <h2
+                                            class="text-lg font-bold tracking-tight sm:text-xl text-slate-900 dark:text-white">
+                                            সব Menu ও Module পরিচিতি</h2>
+                                        <p class="text-xs sm:text-sm text-slate-500 dark:text-slate-400">Sidebar-এর সব
+                                            বিভাগ, সাব-মেনু ও Header-এর শর্টকাট সুবিধা</p>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="p-6 space-y-6 sm:p-8">
+                                <p class="text-xs sm:text-sm text-slate-600 dark:text-slate-300">
+                                    Sidebar-এর menu-গুলো user role ও permission অনুযায়ী দেখা যায়। তাই নিচের কোনো submenu
+                                    আপনার পর্দায় না থাকলে administrator-এর কাছে access চাইতে পারেন।
+                                </p>
+
+                                <!-- Segmented Pill Filter Bar -->
+                                <div class="p-1.5 rounded-2xl bg-stonecard dark:bg-obsidian border border-slate-200/80 dark:border-slate-800 flex flex-wrap gap-1.5 no-print"
+                                    id="module-tabs">
+                                    <button data-filter="all"
+                                        class="module-tab active px-3.5 py-1.5 rounded-xl text-xs sm:text-sm font-semibold bg-white dark:bg-charcoal text-slate-900 dark:text-white shadow-2xs border border-slate-200/60 dark:border-slate-700 transition-all">
+                                        সবগুলো
+                                    </button>
+                                    <button data-filter="regular"
+                                        class="module-tab px-3.5 py-1.5 rounded-xl text-xs sm:text-sm font-medium text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white transition-all">
+                                        Regular Operation
+                                    </button>
+                                    <button data-filter="managerial"
+                                        class="module-tab px-3.5 py-1.5 rounded-xl text-xs sm:text-sm font-medium text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white transition-all">
+                                        Managerial Operations
+                                    </button>
+                                    <button data-filter="administration"
+                                        class="module-tab px-3.5 py-1.5 rounded-xl text-xs sm:text-sm font-medium text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white transition-all">
+                                        Administration Operations
+                                    </button>
+                                    <button data-filter="reports"
+                                        class="module-tab px-3.5 py-1.5 rounded-xl text-xs sm:text-sm font-medium text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white transition-all">
+                                        Reports
+                                    </button>
+                                    <button data-filter="header"
+                                        class="module-tab px-3.5 py-1.5 rounded-xl text-xs sm:text-sm font-medium text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white transition-all">
+                                        Header-এর সুবিধা
+                                    </button>
+                                </div>
+
+                                <!-- Module Groups -->
+                                <div class="space-y-8" id="module-groups">
+
+                                    <!-- 2.1 Regular Operation -->
+                                    <div class="space-y-3 module-group" data-category="regular">
+                                        <div class="flex items-center gap-2">
+                                            <span
+                                                class="px-2.5 py-0.5 rounded-md bg-emerald-50 dark:bg-emerald-950/60 text-emerald-700 dark:text-emerald-400 text-xs font-bold border border-emerald-200/70 dark:border-emerald-800/50">
+                                                Regular Operation
+                                            </span>
+                                        </div>
+                                        <div
+                                            class="overflow-x-auto border rounded-2xl border-slate-200/90 dark:border-slate-800">
+                                            <table class="w-full text-left border-collapse">
+                                                <thead>
+                                                    <tr
+                                                        class="text-xs font-bold tracking-wider uppercase border-b bg-stonecard dark:bg-slate-900/80 text-slate-600 dark:text-slate-400 border-slate-200 dark:border-slate-800">
+                                                        <th class="w-1/3 px-4 py-3">Menu / Submenu</th>
+                                                        <th class="px-4 py-3">কী কাজে ব্যবহার করবেন</th>
+                                                    </tr>
+                                                </thead>
+                                                <tbody
+                                                    class="text-xs divide-y divide-slate-200/70 dark:divide-slate-800 sm:text-sm">
+                                                    <tr class="hover:bg-slate-50/70 dark:hover:bg-slate-800/30">
+                                                        <td
+                                                            class="py-3.5 px-4 font-mono font-semibold text-emerald-700 dark:text-emerald-400">
+                                                            Dashboard</td>
+                                                        <td class="py-3.5 px-4 text-slate-700 dark:text-slate-300">ব্যবসার
+                                                            দৈনিক/সাপ্তাহিক/মাসিক সারাংশ, লাভের trend এবং top-selling তালিকা
+                                                            দেখুন।</td>
+                                                    </tr>
+                                                    <tr class="hover:bg-slate-50/70 dark:hover:bg-slate-800/30">
+                                                        <td
+                                                            class="py-3.5 px-4 font-mono font-semibold text-emerald-700 dark:text-emerald-400">
+                                                            Sales → Create Sale</td>
+                                                        <td class="py-3.5 px-4 text-slate-700 dark:text-slate-300">নতুন
+                                                            বিক্রি তৈরি, payment নেওয়া এবং invoice তৈরি/print করুন।
+                                                            বিস্তারিত ধাপ নিচের Sales অংশে আছে।</td>
+                                                    </tr>
+                                                    <tr class="hover:bg-slate-50/70 dark:hover:bg-slate-800/30">
+                                                        <td
+                                                            class="py-3.5 px-4 font-mono font-semibold text-emerald-700 dark:text-emerald-400">
+                                                            Sales page shortcuts → Print Blank Invoice / Print Money Receipt
+                                                        </td>
+                                                        <td class="py-3.5 px-4 text-slate-700 dark:text-slate-300">ফাঁকা
+                                                            sales invoice অথবা money receipt print করুন; permission থাকলে
+                                                            Create Sale page-এর উপরের shortcut-এ পাওয়া যায়।</td>
+                                                    </tr>
+                                                    <tr class="hover:bg-slate-50/70 dark:hover:bg-slate-800/30">
+                                                        <td
+                                                            class="py-3.5 px-4 font-mono font-semibold text-emerald-700 dark:text-emerald-400">
+                                                            Sales → Sales Return</td>
+                                                        <td class="py-3.5 px-4 text-slate-700 dark:text-slate-300">customer
+                                                            বা invoice খুঁজে বিক্রি করা পণ্যের return রেকর্ড করুন।
+                                                            Invoice-এর পণ্য, আগে ফেরত হওয়া quantity ও ফেরতযোগ্য quantity
+                                                            যাচাই করে return quantity, date ও optional reason দিয়ে নিশ্চিত
+                                                            করুন। Return Report-ও এই পৃষ্ঠা থেকে খোলা যায়।</td>
+                                                    </tr>
+                                                    <tr class="hover:bg-slate-50/70 dark:hover:bg-slate-800/30">
+                                                        <td
+                                                            class="py-3.5 px-4 font-mono font-semibold text-emerald-700 dark:text-emerald-400">
+                                                            Quotation → Get Quotation</td>
+                                                        <td class="py-3.5 px-4 text-slate-700 dark:text-slate-300">customer
+                                                            ও পণ্য নির্বাচন করে quotation তৈরি করুন; quotation invoice নয়,
+                                                            এটি বিক্রির প্রস্তাব/মূল্যপত্র।</td>
+                                                    </tr>
+                                                    <tr class="hover:bg-slate-50/70 dark:hover:bg-slate-800/30">
+                                                        <td
+                                                            class="py-3.5 px-4 font-mono font-semibold text-emerald-700 dark:text-emerald-400">
+                                                            Quotation → All Quotations</td>
+                                                        <td class="py-3.5 px-4 text-slate-700 dark:text-slate-300">আগের
+                                                            quotation-গুলোর তালিকা দেখুন; সেখান থেকে quotation খুলে
+                                                            দেখা/print করা বা অনুমতি থাকলে মুছতে পারেন।</td>
+                                                    </tr>
+                                                </tbody>
+                                            </table>
+                                        </div>
+                                    </div>
+
+                                    <!-- 2.2 Managerial Operations -->
+                                    <div class="space-y-3 module-group" data-category="managerial">
+                                        <div class="flex items-center gap-2">
+                                            <span
+                                                class="px-2.5 py-0.5 rounded-md bg-blue-50 dark:bg-blue-950/60 text-blue-700 dark:text-blue-400 text-xs font-bold border border-blue-200/70 dark:border-blue-800/50">
+                                                Managerial Operations
+                                            </span>
+                                        </div>
+                                        <div
+                                            class="overflow-x-auto border rounded-2xl border-slate-200/90 dark:border-slate-800">
+                                            <table class="w-full text-left border-collapse">
+                                                <thead>
+                                                    <tr
+                                                        class="text-xs font-bold tracking-wider uppercase border-b bg-stonecard dark:bg-slate-900/80 text-slate-600 dark:text-slate-400 border-slate-200 dark:border-slate-800">
+                                                        <th class="w-1/3 px-4 py-3">Menu / Submenu</th>
+                                                        <th class="px-4 py-3">কী কাজে ব্যবহার করবেন</th>
+                                                    </tr>
+                                                </thead>
+                                                <tbody
+                                                    class="text-xs divide-y divide-slate-200/70 dark:divide-slate-800 sm:text-sm">
+                                                    <tr class="hover:bg-slate-50/70 dark:hover:bg-slate-800/30">
+                                                        <td
+                                                            class="py-3.5 px-4 font-mono font-semibold text-blue-700 dark:text-blue-400">
+                                                            Product → All Product</td>
+                                                        <td class="py-3.5 px-4 text-slate-700 dark:text-slate-300">পণ্যের
+                                                            তালিকা, stock, price ও বিস্তারিত দেখুন; access থাকলে edit/manage
+                                                            করুন।</td>
+                                                    </tr>
+                                                    <tr class="hover:bg-slate-50/70 dark:hover:bg-slate-800/30">
+                                                        <td
+                                                            class="py-3.5 px-4 font-mono font-semibold text-blue-700 dark:text-blue-400">
+                                                            Product → Create Product</td>
+                                                        <td class="py-3.5 px-4 text-slate-700 dark:text-slate-300">নতুন
+                                                            পণ্য, category/brand, price, stock quantity, unit, supplier,
+                                                            purchase price এবং অন্যান্য বিবরণ যোগ করুন।</td>
+                                                    </tr>
+                                                    <tr class="hover:bg-slate-50/70 dark:hover:bg-slate-800/30">
+                                                        <td
+                                                            class="py-3.5 px-4 font-mono font-semibold text-blue-700 dark:text-blue-400">
+                                                            Product → Purchase Return</td>
+                                                        <td class="py-3.5 px-4 text-slate-700 dark:text-slate-300">Supplier
+                                                            বা purchase invoice খুঁজে কেনা পণ্যের return রেকর্ড করুন। কেনা,
+                                                            আগে ফেরত ও অবশিষ্ট quantity দেখে return নিশ্চিত করুন। Return
+                                                            amount আগে supplier due-তে সমন্বয় হয়; due ছাড়ালে অতিরিক্ত
+                                                            টাকা cash refund হিসেবে নথিভুক্ত হয়।</td>
+                                                    </tr>
+                                                    <tr class="hover:bg-slate-50/70 dark:hover:bg-slate-800/30">
+                                                        <td
+                                                            class="py-3.5 px-4 font-mono font-semibold text-blue-700 dark:text-blue-400">
+                                                            Product Categories → All Category / Create Category</td>
+                                                        <td class="py-3.5 px-4 text-slate-700 dark:text-slate-300">Product
+                                                            category তালিকা দেখুন বা নতুন category তৈরি করুন।</td>
+                                                    </tr>
+                                                    <tr class="hover:bg-slate-50/70 dark:hover:bg-slate-800/30">
+                                                        <td
+                                                            class="py-3.5 px-4 font-mono font-semibold text-blue-700 dark:text-blue-400">
+                                                            Customers → All Customer / Create Customer</td>
+                                                        <td class="py-3.5 px-4 text-slate-700 dark:text-slate-300">Customer
+                                                            record দেখুন/তৈরি করুন। Customer detail/ledger-এ sale, payment ও
+                                                            বকেয়া পর্যালোচনা করা যায়।</td>
+                                                    </tr>
+                                                    <tr class="hover:bg-slate-50/70 dark:hover:bg-slate-800/30">
+                                                        <td
+                                                            class="py-3.5 px-4 font-mono font-semibold text-blue-700 dark:text-blue-400">
+                                                            Brand → Brand List / New Brand Entry</td>
+                                                        <td class="py-3.5 px-4 text-slate-700 dark:text-slate-300">
+                                                            Product-এর brand তালিকা দেখুন বা নতুন brand যোগ করুন।</td>
+                                                    </tr>
+                                                    <tr class="hover:bg-slate-50/70 dark:hover:bg-slate-800/30">
+                                                        <td
+                                                            class="py-3.5 px-4 font-mono font-semibold text-blue-700 dark:text-blue-400">
+                                                            Qty/Size → Qty/Size List / New Qty/Size</td>
+                                                        <td class="py-3.5 px-4 text-slate-700 dark:text-slate-300">
+                                                            Product-এর quantity/size unit বা option তালিকা দেখুন এবং নতুন
+                                                            option যোগ করুন।</td>
+                                                    </tr>
+                                                    <tr class="hover:bg-slate-50/70 dark:hover:bg-slate-800/30">
+                                                        <td
+                                                            class="py-3.5 px-4 font-mono font-semibold text-blue-700 dark:text-blue-400">
+                                                            Supplier → Supplier List / New Supplier Entry</td>
+                                                        <td class="py-3.5 px-4 text-slate-700 dark:text-slate-300">Supplier
+                                                            তালিকা, supplier-এর contact ও purchase/ledger বিবরণ দেখুন; নতুন
+                                                            supplier যোগ করুন। Supplier ledger থেকে purchase/payment ও due
+                                                            অনুসরণ করা যায়।</td>
+                                                    </tr>
+                                                </tbody>
+                                            </table>
+                                        </div>
+                                    </div>
+
+                                    <!-- 2.3 Administration Operations -->
+                                    <div class="space-y-3 module-group" data-category="administration">
+                                        <div class="flex items-center gap-2">
+                                            <span
+                                                class="px-2.5 py-0.5 rounded-md bg-indigo-50 dark:bg-indigo-950/60 text-indigo-700 dark:text-indigo-400 text-xs font-bold border border-indigo-200/70 dark:border-indigo-800/50">
+                                                Administration Operations
+                                            </span>
+                                        </div>
+                                        <div
+                                            class="overflow-x-auto border rounded-2xl border-slate-200/90 dark:border-slate-800">
+                                            <table class="w-full text-left border-collapse">
+                                                <thead>
+                                                    <tr
+                                                        class="text-xs font-bold tracking-wider uppercase border-b bg-stonecard dark:bg-slate-900/80 text-slate-600 dark:text-slate-400 border-slate-200 dark:border-slate-800">
+                                                        <th class="w-1/3 px-4 py-3">Menu / Submenu</th>
+                                                        <th class="px-4 py-3">কী কাজে ব্যবহার করবেন</th>
+                                                    </tr>
+                                                </thead>
+                                                <tbody
+                                                    class="text-xs divide-y divide-slate-200/70 dark:divide-slate-800 sm:text-sm">
+                                                    <tr class="hover:bg-slate-50/70 dark:hover:bg-slate-800/30">
+                                                        <td
+                                                            class="py-3.5 px-4 font-mono font-semibold text-indigo-700 dark:text-indigo-400">
+                                                            Accounts → Voucher Entries</td>
+                                                        <td class="py-3.5 px-4 text-slate-700 dark:text-slate-300">সাধারণ
+                                                            business আয়/ব্যয়ের Debit বা Credit voucher তৈরি করুন। Account,
+                                                            date, amount দিয়ে optional reference/description যোগ করে Save
+                                                            করুন; Recent Vouchers-এ এন্ট্রি দেখা যায়।</td>
+                                                    </tr>
+                                                    <tr class="hover:bg-slate-50/70 dark:hover:bg-slate-800/30">
+                                                        <td
+                                                            class="py-3.5 px-4 font-mono font-semibold text-indigo-700 dark:text-indigo-400">
+                                                            Accounts → Employee Payment</td>
+                                                        <td class="py-3.5 px-4 text-slate-700 dark:text-slate-300">Employee
+                                                            নির্বাচন করে salary/advance/অন্যান্য employee expense-এর payment
+                                                            voucher তৈরি করুন। Expense type, date, amount, payment method
+                                                            এবং প্রয়োজনে reference/notes দিন। Employee ledger-ও খোলা যায়।
+                                                        </td>
+                                                    </tr>
+                                                    <tr class="hover:bg-slate-50/70 dark:hover:bg-slate-800/30">
+                                                        <td
+                                                            class="py-3.5 px-4 font-mono font-semibold text-indigo-700 dark:text-indigo-400">
+                                                            Accounts → Voucher Account Add</td>
+                                                        <td class="py-3.5 px-4 text-slate-700 dark:text-slate-300">Voucher
+                                                            তৈরিতে ব্যবহারের জন্য account যোগ করুন। Voucher Entry form-এর
+                                                            Account তালিকায় এগুলো পাওয়া যায়।</td>
+                                                    </tr>
+                                                    <tr class="hover:bg-slate-50/70 dark:hover:bg-slate-800/30">
+                                                        <td
+                                                            class="py-3.5 px-4 font-mono font-semibold text-indigo-700 dark:text-indigo-400">
+                                                            Employee → All Empolyee / Create Empolyee</td>
+                                                        <td class="py-3.5 px-4 text-slate-700 dark:text-slate-300">
+                                                            Employee/user record তালিকা দেখুন বা নতুন employee account তৈরি
+                                                            করুন। Employee detail/profile ও login access role অনুযায়ী সীমিত
+                                                            হতে পারে।</td>
+                                                    </tr>
+                                                    <tr class="hover:bg-slate-50/70 dark:hover:bg-slate-800/30">
+                                                        <td
+                                                            class="py-3.5 px-4 font-mono font-semibold text-indigo-700 dark:text-indigo-400">
+                                                            Role and Permission → All Roles / Create Role</td>
+                                                        <td class="py-3.5 px-4 text-slate-700 dark:text-slate-300">Role
+                                                            তৈরি/পর্যালোচনা করুন এবং role-এ কোন menu/action-এর permission
+                                                            থাকবে তা নির্ধারণ করুন। ভুল permission দিলে menu দেখা বা কাজ করা
+                                                            বন্ধ হতে পারে; administrator-এর সহায়তা নিন।</td>
+                                                    </tr>
+                                                    <tr class="hover:bg-slate-50/70 dark:hover:bg-slate-800/30">
+                                                        <td
+                                                            class="py-3.5 px-4 font-mono font-semibold text-indigo-700 dark:text-indigo-400">
+                                                            Organization → Organization Information</td>
+                                                        <td class="py-3.5 px-4 text-slate-700 dark:text-slate-300">
+                                                            প্রতিষ্ঠানের নাম, যোগাযোগের তথ্য ও logo-সহ organization profile
+                                                            হালনাগাদ করুন। Invoice/report-এর header বা print watermark-এ এসব
+                                                            তথ্য ব্যবহৃত হতে পারে।</td>
+                                                    </tr>
+                                                </tbody>
+                                            </table>
+                                        </div>
+                                    </div>
+
+                                    <!-- 2.4 Reports -->
+                                    <div class="space-y-3 module-group" data-category="reports">
+                                        <div class="flex items-center gap-2">
+                                            <span
+                                                class="px-2.5 py-0.5 rounded-md bg-amber-50 dark:bg-amber-950/60 text-amber-700 dark:text-amber-400 text-xs font-bold border border-amber-200/70 dark:border-amber-800/50">
+                                                Reports
+                                            </span>
+                                        </div>
+                                        <div
+                                            class="overflow-x-auto border rounded-2xl border-slate-200/90 dark:border-slate-800">
+                                            <table class="w-full text-left border-collapse">
+                                                <thead>
+                                                    <tr
+                                                        class="text-xs font-bold tracking-wider uppercase border-b bg-stonecard dark:bg-slate-900/80 text-slate-600 dark:text-slate-400 border-slate-200 dark:border-slate-800">
+                                                        <th class="w-1/3 px-4 py-3">Menu / Submenu</th>
+                                                        <th class="px-4 py-3">কী দেখায় এবং কীভাবে ব্যবহার করবেন</th>
+                                                    </tr>
+                                                </thead>
+                                                <tbody
+                                                    class="text-xs divide-y divide-slate-200/70 dark:divide-slate-800 sm:text-sm">
+                                                    <tr class="hover:bg-slate-50/70 dark:hover:bg-slate-800/30">
+                                                        <td
+                                                            class="py-3.5 px-4 font-mono font-semibold text-amber-700 dark:text-amber-400">
+                                                            Accounts → Cashbook</td>
+                                                        <td class="py-3.5 px-4 text-slate-700 dark:text-slate-300">একত্রিত
+                                                            accounts/voucher লেনদেন দেখুন; সময়সীমা বা তারিখ দিয়ে filter
+                                                            করে প্রয়োজনমতো print করুন।</td>
+                                                    </tr>
+                                                    <tr class="hover:bg-slate-50/70 dark:hover:bg-slate-800/30">
+                                                        <td
+                                                            class="py-3.5 px-4 font-mono font-semibold text-amber-700 dark:text-amber-400">
+                                                            Accounts → Employee Payment</td>
+                                                        <td class="py-3.5 px-4 text-slate-700 dark:text-slate-300">Employee
+                                                            payment voucher-গুলোর report দেখুন; employee payment history
+                                                            যাচাই করুন।</td>
+                                                    </tr>
+                                                    <tr class="hover:bg-slate-50/70 dark:hover:bg-slate-800/30">
+                                                        <td
+                                                            class="py-3.5 px-4 font-mono font-semibold text-amber-700 dark:text-amber-400">
+                                                            Accounts → Miscellaneous Voucher</td>
+                                                        <td class="py-3.5 px-4 text-slate-700 dark:text-slate-300">সাধারণ
+                                                            Debit/Credit voucher-এর report দেখুন ও filter করুন।</td>
+                                                    </tr>
+                                                    <tr class="hover:bg-slate-50/70 dark:hover:bg-slate-800/30">
+                                                        <td
+                                                            class="py-3.5 px-4 font-mono font-semibold text-amber-700 dark:text-amber-400">
+                                                            Sale Reports → Sales Report</td>
+                                                        <td class="py-3.5 px-4 text-slate-700 dark:text-slate-300">From/To
+                                                            date, category, employee ও customer দিয়ে sale filter করুন। Sale
+                                                            amount, due, invoice count এবং product-wise sales/profit দেখুন;
+                                                            Export Excel বা Print Report ব্যবহার করুন।</td>
+                                                    </tr>
+                                                    <tr class="hover:bg-slate-50/70 dark:hover:bg-slate-800/30">
+                                                        <td
+                                                            class="py-3.5 px-4 font-mono font-semibold text-amber-700 dark:text-amber-400">
+                                                            Sale Reports → Sale Return Report</td>
+                                                        <td class="py-3.5 px-4 text-slate-700 dark:text-slate-300">Customer
+                                                            sale থেকে ফেরত হওয়া পণ্যের report দেখুন এবং return date
+                                                            অনুযায়ী তথ্য যাচাই করুন।</td>
+                                                    </tr>
+                                                    <tr class="hover:bg-slate-50/70 dark:hover:bg-slate-800/30">
+                                                        <td
+                                                            class="py-3.5 px-4 font-mono font-semibold text-amber-700 dark:text-amber-400">
+                                                            Inventory Reports → Product Inventory</td>
+                                                        <td class="py-3.5 px-4 text-slate-700 dark:text-slate-300">Category
+                                                            ও stock status দিয়ে inventory filter করুন। Purchased/sold
+                                                            quantity, purchase rate, sales/profit, বর্তমান stock, expiry ও
+                                                            supplier তথ্য দেখুন; Excel export বা print করুন।</td>
+                                                    </tr>
+                                                    <tr class="hover:bg-slate-50/70 dark:hover:bg-slate-800/30">
+                                                        <td
+                                                            class="py-3.5 px-4 font-mono font-semibold text-amber-700 dark:text-amber-400">
+                                                            Inventory Reports → Purchase Return Report</td>
+                                                        <td class="py-3.5 px-4 text-slate-700 dark:text-slate-300">Supplier
+                                                            purchase থেকে ফেরত হওয়া পণ্যের report দেখুন ও return date
+                                                            অনুযায়ী filter করুন।</td>
+                                                    </tr>
+                                                    <tr class="hover:bg-slate-50/70 dark:hover:bg-slate-800/30">
+                                                        <td
+                                                            class="py-3.5 px-4 font-mono font-semibold text-amber-700 dark:text-amber-400">
+                                                            User Activity Log</td>
+                                                        <td class="py-3.5 px-4 text-slate-700 dark:text-slate-300">
+                                                            ব্যবহারকারীর activity history দেখুন; access থাকলে প্রয়োজনে
+                                                            date/user filter দিয়ে নির্দিষ্ট কার্যকলাপ অনুসন্ধান করুন।</td>
+                                                    </tr>
+                                                </tbody>
+                                            </table>
+                                        </div>
+                                    </div>
+
+                                    <!-- 2.5 Header-এর সুবিধা -->
+                                    <div class="space-y-3 module-group" data-category="header">
+                                        <div class="flex items-center gap-2">
+                                            <span
+                                                class="px-2.5 py-0.5 rounded-md bg-teal-50 dark:bg-teal-950/60 text-teal-700 dark:text-teal-400 text-xs font-bold border border-teal-200/70 dark:border-teal-800/50">
+                                                Header-এর সুবিধা
+                                            </span>
+                                        </div>
+                                        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3.5">
+                                            <div
+                                                class="p-4 rounded-2xl bg-alabaster dark:bg-obsidian border border-slate-200/80 dark:border-slate-800 space-y-1.5">
+                                                <div
+                                                    class="flex items-center gap-2 text-sm font-bold text-slate-900 dark:text-white">
+                                                    <span
+                                                        class="p-1.5 rounded-lg bg-indigo-100 dark:bg-indigo-950 text-indigo-600 dark:text-indigo-400">
+                                                        <i data-lucide="moon" class="w-3.5 h-3.5"></i>
+                                                    </span>
+                                                    <span>Dark Mode icon</span>
+                                                </div>
+                                                <p class="text-xs sm:text-sm text-slate-600 dark:text-slate-300">পর্দার
+                                                    light/dark theme বদলান।</p>
+                                            </div>
+
+                                            <div
+                                                class="p-4 rounded-2xl bg-alabaster dark:bg-obsidian border border-slate-200/80 dark:border-slate-800 space-y-1.5">
+                                                <div
+                                                    class="flex items-center gap-2 text-sm font-bold text-slate-900 dark:text-white">
+                                                    <span
+                                                        class="p-1.5 rounded-lg bg-amber-100 dark:bg-amber-950 text-amber-600 dark:text-amber-400">
+                                                        <i data-lucide="bell" class="w-3.5 h-3.5"></i>
+                                                    </span>
+                                                    <span>Expiry Notifications (bell)</span>
+                                                </div>
+                                                <p class="text-xs sm:text-sm text-slate-600 dark:text-slate-300">
+                                                    মেয়াদোত্তীর্ণ বা এক মাসের মধ্যে মেয়াদ শেষ হবে এমন পণ্যের notification।
+                                                    পণ্য নির্বাচন করলে তার details/edit page খোলে।</p>
+                                            </div>
+
+                                            <div
+                                                class="p-4 rounded-2xl bg-alabaster dark:bg-obsidian border border-slate-200/80 dark:border-slate-800 space-y-1.5">
+                                                <div
+                                                    class="flex items-center gap-2 text-sm font-bold text-slate-900 dark:text-white">
+                                                    <span
+                                                        class="p-1.5 rounded-lg bg-rose-100 dark:bg-rose-950 text-rose-600 dark:text-rose-400">
+                                                        <i data-lucide="shopping-bag" class="w-3.5 h-3.5"></i>
+                                                    </span>
+                                                    <span>Stock Alert (shopping bag)</span>
+                                                </div>
+                                                <p class="text-xs sm:text-sm text-slate-600 dark:text-slate-300">১০ বা তার
+                                                    কম stock থাকা পণ্যের সতর্কতা; stock না থাকলে Out of Stock দেখায়। পণ্য
+                                                    নির্বাচন করে inventory record দেখুন।</p>
+                                            </div>
+
+                                            <div
+                                                class="p-4 rounded-2xl bg-alabaster dark:bg-obsidian border border-slate-200/80 dark:border-slate-800 space-y-1.5 sm:col-span-2 lg:col-span-2">
+                                                <div
+                                                    class="flex items-center gap-2 text-sm font-bold text-slate-900 dark:text-white">
+                                                    <span
+                                                        class="p-1.5 rounded-lg bg-blue-100 dark:bg-blue-950 text-blue-600 dark:text-blue-400">
+                                                        <i data-lucide="user-circle" class="w-3.5 h-3.5"></i>
+                                                    </span>
+                                                    <span>Profile menu</span>
+                                                </div>
+                                                <p class="text-xs sm:text-sm text-slate-600 dark:text-slate-300">অনুমতি
+                                                    থাকলে Profile খুলুন; Dashboard-এ ফিরুন বা Logout করে বের হয়ে যান।
+                                                    Settings link বর্তমানে কোনো নির্দিষ্ট settings page-এ নিয়ে যায় না।</p>
+                                            </div>
+
+                                            <div
+                                                class="p-4 rounded-2xl bg-alabaster dark:bg-obsidian border border-slate-200/80 dark:border-slate-800 space-y-1.5">
+                                                <div
+                                                    class="flex items-center gap-2 text-sm font-bold text-slate-900 dark:text-white">
+                                                    <span
+                                                        class="p-1.5 rounded-lg bg-emerald-100 dark:bg-emerald-950 text-emerald-600 dark:text-emerald-400">
+                                                        <i data-lucide="phone-call" class="w-3.5 h-3.5"></i>
+                                                    </span>
+                                                    <span>Help Line</span>
+                                                </div>
+                                                <p class="text-xs sm:text-sm text-slate-600 dark:text-slate-300">Header-এ
+                                                    প্রদর্শিত নম্বরে business support-এর জন্য যোগাযোগ করুন।</p>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                </div>
+                            </div>
+                        </section>
+
+                        <!-- ========================================================= -->
+                        <!-- CHAPTER 3: DASHBOARD (KPI Preview Strip + Formula Matrix) -->
+                        <!-- ========================================================= -->
+                        <section id="section-dashboard"
+                            class="overflow-hidden bg-white border shadow-xs searchable-section scroll-mt-24 dark:bg-charcoal rounded-3xl border-slate-200/90 dark:border-slate-800">
+                            <!-- Section Header -->
+                            <div
+                                class="flex items-center justify-between px-6 py-5 border-b sm:px-8 border-slate-100 dark:border-slate-800/80 bg-stonecard/50 dark:bg-slate-900/40">
+                                <div class="flex items-center gap-3.5">
+                                    <span
+                                        class="flex items-center justify-center text-base font-bold text-white w-9 h-9 rounded-xl bg-slate-900 dark:bg-accent-600 shadow-2xs">৩</span>
+                                    <div>
+                                        <h2
+                                            class="text-lg font-bold tracking-tight sm:text-xl text-slate-900 dark:text-white">
+                                            Dashboard</h2>
+                                        <p class="text-xs sm:text-sm text-slate-500 dark:text-slate-400">৫টি প্রধান KPI
+                                            কার্ড, হিসাবের উৎস, সময় গণনা ও Profit Trend চার্ট</p>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="p-6 space-y-6 sm:p-8">
+                                <p class="text-xs leading-relaxed sm:text-sm text-slate-600 dark:text-slate-300">
+                                    Dashboard-এর পাঁচটি card-এ বড় অঙ্কটি <strong>চলতি মাসের</strong>; তার নিচে
+                                    <strong>Weekly</strong> ও <strong>Daily</strong> অঙ্ক দেখানো হয়। অঙ্কগুলো টাকা হিসেবে
+                                    দেখানো হয় এবং card-এর মান বর্তমান সময়সীমার রেকর্ড থেকে হিসাব হয়।
+                                </p>
+
+                                <!-- Visual KPI Card Preview Strip -->
+                                <div class="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-5">
+                                    <div
+                                        class="p-3.5 rounded-2xl bg-alabaster dark:bg-obsidian border border-slate-200/80 dark:border-slate-800">
+                                        <div
+                                            class="text-[11px] font-bold uppercase tracking-wider text-blue-600 dark:text-blue-400">
+                                            Total Purchase</div>
+                                        <div class="mt-1 font-mono text-lg font-bold text-slate-900 dark:text-white">৳ চলতি
+                                            মাস</div>
+                                        <div
+                                            class="text-[11px] text-slate-500 mt-1 flex items-center justify-between border-t border-slate-200/60 dark:border-slate-800 pt-1">
+                                            <span>Weekly</span>
+                                            <span>Daily</span>
+                                        </div>
+                                    </div>
+                                    <div
+                                        class="p-3.5 rounded-2xl bg-alabaster dark:bg-obsidian border border-slate-200/80 dark:border-slate-800">
+                                        <div
+                                            class="text-[11px] font-bold uppercase tracking-wider text-emerald-600 dark:text-emerald-400">
+                                            Total Revenue</div>
+                                        <div class="mt-1 font-mono text-lg font-bold text-slate-900 dark:text-white">৳ চলতি
+                                            মাস</div>
+                                        <div
+                                            class="text-[11px] text-slate-500 mt-1 flex items-center justify-between border-t border-slate-200/60 dark:border-slate-800 pt-1">
+                                            <span>Weekly</span>
+                                            <span>Daily</span>
+                                        </div>
+                                    </div>
+                                    <div
+                                        class="p-3.5 rounded-2xl bg-alabaster dark:bg-obsidian border border-slate-200/80 dark:border-slate-800">
+                                        <div
+                                            class="text-[11px] font-bold uppercase tracking-wider text-amber-600 dark:text-amber-400">
+                                            Total Due</div>
+                                        <div class="mt-1 font-mono text-lg font-bold text-slate-900 dark:text-white">৳ চলতি
+                                            মাস</div>
+                                        <div
+                                            class="text-[11px] text-slate-500 mt-1 flex items-center justify-between border-t border-slate-200/60 dark:border-slate-800 pt-1">
+                                            <span>Weekly</span>
+                                            <span>Daily</span>
+                                        </div>
+                                    </div>
+                                    <div
+                                        class="p-3.5 rounded-2xl bg-alabaster dark:bg-obsidian border border-slate-200/80 dark:border-slate-800">
+                                        <div
+                                            class="text-[11px] font-bold uppercase tracking-wider text-rose-600 dark:text-rose-400">
+                                            Total Expense</div>
+                                        <div class="mt-1 font-mono text-lg font-bold text-slate-900 dark:text-white">৳ চলতি
+                                            মাস</div>
+                                        <div
+                                            class="text-[11px] text-slate-500 mt-1 flex items-center justify-between border-t border-slate-200/60 dark:border-slate-800 pt-1">
+                                            <span>Weekly</span>
+                                            <span>Daily</span>
+                                        </div>
+                                    </div>
+                                    <div
+                                        class="col-span-2 sm:col-span-1 p-3.5 rounded-2xl bg-emerald-50/70 dark:bg-emerald-950/30 border border-emerald-200/80 dark:border-emerald-800/50">
+                                        <div
+                                            class="text-[11px] font-bold uppercase tracking-wider text-emerald-700 dark:text-emerald-300">
+                                            Net Profit</div>
+                                        <div
+                                            class="mt-1 font-mono text-lg font-bold text-emerald-900 dark:text-emerald-200">
+                                            ৳ চলতি মাস</div>
+                                        <div
+                                            class="text-[11px] text-emerald-700/80 dark:text-emerald-400/80 mt-1 flex items-center justify-between border-t border-emerald-200/60 dark:border-emerald-800/50 pt-1">
+                                            <span>Weekly</span>
+                                            <span>Daily</span>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!-- Card Definitions & Calculation Sources Table -->
+                                <div class="overflow-x-auto border rounded-2xl border-slate-200/90 dark:border-slate-800">
+                                    <table class="w-full text-left border-collapse">
+                                        <thead>
+                                            <tr
+                                                class="text-xs font-bold tracking-wider uppercase border-b bg-stonecard dark:bg-slate-900/80 text-slate-600 dark:text-slate-400 border-slate-200 dark:border-slate-800">
+                                                <th class="w-1/5 px-4 py-3">Card</th>
+                                                <th class="w-1/3 px-4 py-3">কী বোঝায়</th>
+                                                <th class="px-4 py-3">হিসাবের মূল উৎস</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody
+                                            class="text-xs divide-y divide-slate-200/70 dark:divide-slate-800 sm:text-sm">
+                                            <tr class="hover:bg-slate-50/70 dark:hover:bg-slate-800/30">
+                                                <td class="py-3.5 px-4 font-bold text-slate-900 dark:text-white">Total
+                                                    Purchase</td>
+                                                <td class="py-3.5 px-4 text-slate-700 dark:text-slate-300">নির্বাচিত
+                                                    সময়সীমায় supplier ledger-এ নথিভুক্ত মোট purchase</td>
+                                                <td class="py-3.5 px-4 text-slate-600 dark:text-slate-400"><code
+                                                        class="text-xs bg-slate-100 dark:bg-slate-800 px-1.5 py-0.5 rounded">supplierledgers</code>-এর
+                                                    total; রেকর্ড তৈরির তারিখ (<code
+                                                        class="text-xs bg-slate-100 dark:bg-slate-800 px-1.5 py-0.5 rounded">created_at</code>)
+                                                    অনুযায়ী</td>
+                                            </tr>
+                                            <tr class="hover:bg-slate-50/70 dark:hover:bg-slate-800/30">
+                                                <td class="py-3.5 px-4 font-bold text-slate-900 dark:text-white">Total
+                                                    Revenue</td>
+                                                <td class="py-3.5 px-4 text-slate-700 dark:text-slate-300">নির্বাচিত
+                                                    সময়সীমার বিক্রি ও গণ্য business income</td>
+                                                <td class="py-3.5 px-4 text-slate-600 dark:text-slate-400">Sales invoice-এর
+                                                    subtotal থেকে discount বাদ দিয়ে VAT ও AIT যোগ; invoice-এর সঙ্গে যুক্ত
+                                                    নয় এমন customer-ledger sale এবং customer payment নয় এমন credit
+                                                    voucher-ও যুক্ত হয়। আগের বকেয়া নতুন revenue হিসেবে পুনরায় যোগ হয় না।
+                                                </td>
+                                            </tr>
+                                            <tr class="hover:bg-slate-50/70 dark:hover:bg-slate-800/30">
+                                                <td class="py-3.5 px-4 font-bold text-slate-900 dark:text-white">Total Due
+                                                </td>
+                                                <td class="py-3.5 px-4 text-slate-700 dark:text-slate-300">সময়সীমার
+                                                    বিক্রি/লেনদেনে তৈরি বকেয়া</td>
+                                                <td class="py-3.5 px-4 text-slate-600 dark:text-slate-400"><code
+                                                        class="text-xs bg-slate-100 dark:bg-slate-800 px-1.5 py-0.5 rounded">sale_invoices</code>-এর
+                                                    due এবং invoice-এর সঙ্গে যুক্ত নয় এমন <code
+                                                        class="text-xs bg-slate-100 dark:bg-slate-800 px-1.5 py-0.5 rounded">customer_ledgers</code>-এর
+                                                    sale due; invoice date বা sale date অনুযায়ী</td>
+                                            </tr>
+                                            <tr class="hover:bg-slate-50/70 dark:hover:bg-slate-800/30">
+                                                <td class="py-3.5 px-4 font-bold text-slate-900 dark:text-white">Total
+                                                    Expense</td>
+                                                <td class="py-3.5 px-4 text-slate-700 dark:text-slate-300">সময়সীমার
+                                                    employee payment ও debit voucher-এর মোট</td>
+                                                <td class="py-3.5 px-4 text-slate-600 dark:text-slate-400"><code
+                                                        class="text-xs bg-slate-100 dark:bg-slate-800 px-1.5 py-0.5 rounded">employee_payment_vouchers.amount</code>
+                                                    (payment date) এবং <code
+                                                        class="text-xs bg-slate-100 dark:bg-slate-800 px-1.5 py-0.5 rounded">voucher_entries.amount</code>-এর
+                                                    debit রেকর্ড (voucher date)</td>
+                                            </tr>
+                                            <tr
+                                                class="hover:bg-slate-50/70 dark:hover:bg-slate-800/30 bg-emerald-50/30 dark:bg-emerald-950/10">
+                                                <td class="py-3.5 px-4 font-bold text-emerald-800 dark:text-emerald-300">
+                                                    Net Profit</td>
+                                                <td class="py-3.5 px-4 text-slate-700 dark:text-slate-300">revenue থেকে
+                                                    purchase ও ব্যয়-সংক্রান্ত খরচ বাদ দেওয়ার পরের dashboard হিসাব</td>
+                                                <td class="py-3.5 px-4 text-slate-600 dark:text-slate-400">Revenue থেকে
+                                                    supplier ledger purchase, employee payment এবং supplier payment হিসেবে
+                                                    গণনা না হওয়া debit voucher বাদ দিয়ে হিসাব করা হয়। এটি dashboard-এর
+                                                    business summary; হিসাবের source record ও সময়সীমার ওপর নির্ভরশীল।</td>
+                                            </tr>
+                                        </tbody>
+                                    </table>
+                                </div>
+
+                                <!-- Time Calculation & Profit Trend Grid -->
+                                <div class="grid grid-cols-1 gap-4 md:grid-cols-2">
+                                    <div
+                                        class="p-4 space-y-2 border rounded-2xl bg-alabaster dark:bg-obsidian border-slate-200/80 dark:border-slate-800">
+                                        <h3
+                                            class="flex items-center gap-2 text-sm font-bold text-slate-900 dark:text-white">
+                                            <i data-lucide="clock" class="w-4 h-4 text-accent-600"></i>
+                                            সময় গণনা
+                                        </h3>
+                                        <p class="text-xs leading-relaxed sm:text-sm text-slate-600 dark:text-slate-300">
+                                            <strong>Daily</strong> হলো আজকের দিন; <strong>Weekly</strong> হলো সোমবার থেকে
+                                            পরের সোমবারের আগ পর্যন্ত চলতি সপ্তাহ; <strong>মাসিক card-এর অঙ্ক</strong> হলো
+                                            চলতি calendar month। Dashboard-এর হিসাব server/application-এর তারিখ ব্যবহার করে।
+                                        </p>
+                                    </div>
+
+                                    <div
+                                        class="p-4 space-y-2 border rounded-2xl bg-alabaster dark:bg-obsidian border-slate-200/80 dark:border-slate-800">
+                                        <h3
+                                            class="flex items-center gap-2 text-sm font-bold text-slate-900 dark:text-white">
+                                            <i data-lucide="bar-chart-2" class="w-4 h-4 text-indigoAccent-600"></i>
+                                            Profit Trend ও অন্যান্য তথ্য
+                                        </h3>
+                                        <ul
+                                            class="pl-4 space-y-1 text-xs list-disc sm:text-sm text-slate-600 dark:text-slate-300">
+                                            <li>Profit Trend chart-এ <strong>Revenue column</strong> এবং <strong>Profit
+                                                    line</strong> হিসেবে দেখায়।</li>
+                                            <li>Chart-এর selector দিয়ে <strong>Daily, Weekly, Monthly</strong> বা
+                                                <strong>Yearly</strong> সময়সীমা বেছে নেওয়া যায়। Daily-তে আজ, Weekly ও
+                                                Monthly-তে সংশ্লিষ্ট দিনগুলো, আর Yearly-তে মাসভিত্তিক মান দেখা যায়।</li>
+                                            <li>নিচের <strong>Top Selling Products</strong> এবং <strong>Top Sales
+                                                    Employees</strong> অংশে সর্বোচ্চ বিক্রির পণ্য ও কর্মীদের তালিকা থাকে।
+                                            </li>
+                                        </ul>
+                                    </div>
+                                </div>
+
+                                <!-- Dashboard Note -->
+                                <div
+                                    class="p-3.5 rounded-2xl bg-amber-50/80 dark:bg-amber-950/30 border border-amber-200/80 dark:border-amber-800/40 flex items-start gap-2.5 text-xs sm:text-sm text-amber-900 dark:text-amber-200">
+                                    <i data-lucide="lightbulb"
+                                        class="w-4 h-4 text-amber-600 dark:text-amber-400 shrink-0 mt-0.5"></i>
+                                    <p>
+                                        <strong>নোট:</strong> Dashboard-এর card-গুলোর অঙ্ক গোল করে দেখানো হতে পারে। Card-এর
+                                        সময়সীমা ও chart-এর selector এক জিনিস নয়—chart-এর selector বদলালে card-এর
+                                        Daily/Weekly/Monthly মান বদলায় না।
+                                    </p>
+                                </div>
+                            </div>
+                        </section>
+
+                        <!-- ========================================================= -->
+                        <!-- CHAPTER 4: SALES MENU: SALE -> CREATE SALE (Stepper Flow) -->
+                        <!-- ========================================================= -->
+                        <section id="section-sales"
+                            class="overflow-hidden bg-white border shadow-xs searchable-section scroll-mt-24 dark:bg-charcoal rounded-3xl border-slate-200/90 dark:border-slate-800">
+                            <!-- Section Header -->
+                            <div
+                                class="flex items-center justify-between px-6 py-5 border-b sm:px-8 border-slate-100 dark:border-slate-800/80 bg-stonecard/50 dark:bg-slate-900/40">
+                                <div class="flex items-center gap-3.5">
+                                    <span
+                                        class="flex items-center justify-center text-base font-bold text-white w-9 h-9 rounded-xl bg-slate-900 dark:bg-accent-600 shadow-2xs">৪</span>
+                                    <div>
+                                        <h2
+                                            class="text-lg font-bold tracking-tight sm:text-xl text-slate-900 dark:text-white">
+                                            Sales Menu: Sale → Create Sale</h2>
+                                        <p class="text-xs sm:text-sm text-slate-500 dark:text-slate-400">বিক্রি তৈরির ৫টি
+                                            ধারাবাহিক ধাপ, পেমেন্ট অপশন ও ইনভয়েস অ্যাকশন</p>
+                                    </div>
+                                </div>
+                                <span
+                                    class="hidden sm:inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-indigoAccent-50 dark:bg-indigo-950/60 text-indigoAccent-600 dark:text-indigo-400 text-xs font-mono font-medium border border-indigo-200/70 dark:border-indigo-800/50">
+                                    Sales → Create Sale
+                                </span>
+                            </div>
+
+                            <div class="p-6 space-y-6 sm:p-8">
+                                <!-- Connected Vertical Stepper -->
+                                <div
+                                    class="relative space-y-6 before:absolute before:inset-0 before:ml-4 sm:before:ml-5 before:-translate-x-px before:h-full before:w-0.5 before:bg-slate-200 dark:before:bg-slate-800">
+
+                                    <!-- ধাপ ১ -->
+                                    <div class="relative flex items-start gap-4 sm:gap-5">
+                                        <div
+                                            class="z-10 flex items-center justify-center w-8 h-8 text-xs font-bold text-white sm:w-10 sm:h-10 rounded-xl bg-slate-900 dark:bg-accent-600 sm:text-sm shrink-0 shadow-2xs">
+                                            ধাপ ১
+                                        </div>
+                                        <div
+                                            class="flex-1 p-4 space-y-2 border sm:p-5 rounded-2xl bg-alabaster dark:bg-obsidian border-slate-200/80 dark:border-slate-800">
+                                            <h3 class="text-base font-bold text-slate-900 dark:text-white">Create Sale খোলা
+                                            </h3>
+                                            <ol
+                                                class="pl-5 space-y-1 text-xs list-decimal sm:text-sm text-slate-700 dark:text-slate-300">
+                                                <li>Menu-তে <strong>Sales</strong> খুলুন।</li>
+                                                <li><strong>Create Sale</strong> নির্বাচন করুন।</li>
+                                            </ol>
+                                            <p class="text-xs sm:text-sm text-slate-500 dark:text-slate-400">
+                                                Customer, Sale Items এবং Invoice & Payment অংশ পূরণ করুন। প্রয়োজনীয়
+                                                permission না থাকলে এই menu বা form দেখা যাবে না।
+                                            </p>
+                                        </div>
+                                    </div>
+
+                                    <!-- ধাপ ২ -->
+                                    <div class="relative flex items-start gap-4 sm:gap-5">
+                                        <div
+                                            class="z-10 flex items-center justify-center w-8 h-8 text-xs font-bold text-white sm:w-10 sm:h-10 rounded-xl bg-slate-900 dark:bg-accent-600 sm:text-sm shrink-0 shadow-2xs">
+                                            ধাপ ২
+                                        </div>
+                                        <div
+                                            class="flex-1 p-4 sm:p-5 rounded-2xl bg-alabaster dark:bg-obsidian border border-slate-200/80 dark:border-slate-800 space-y-2.5">
+                                            <h3 class="text-base font-bold text-slate-900 dark:text-white">Customer খোঁজা
+                                            </h3>
+                                            <ol
+                                                class="list-decimal pl-5 space-y-1.5 text-xs sm:text-sm text-slate-700 dark:text-slate-300">
+                                                <li><strong>Customer Name or Phone</strong> ঘরে গ্রাহকের নাম বা ফোন নম্বর
+                                                    লিখুন।</li>
+                                                <li>নাম লিখলে মিলে যাওয়া customer suggestion দেখুন এবং সঠিক গ্রাহকের
+                                                    suggestion নির্বাচন করুন। ফোন নম্বর লিখলে বা <strong>Find</strong> চাপলে
+                                                    customer lookup হয়।</li>
+                                                <li>আগে থেকে থাকা customer পাওয়া গেলে তার নাম ও ledger load হবে।
+                                                    <strong>Outstanding</strong>-এ বর্তমান বকেয়া এবং ledger-এ সংশ্লিষ্ট
+                                                    লেনদেন দেখা যায়।</li>
+                                                <li><strong>Add outstanding due to this invoice</strong> checkbox-এ টিক দিলে
+                                                    আগের বকেয়াটি এই invoice total-এ যোগ হবে। টিক না দিলে আগের বকেয়া নতুন
+                                                    invoice total-এ যোগ হবে না।</li>
+                                                <li>Customer না পাওয়া গেলে saved customer balance দেখানো হবে না।
+                                                    Checkout-এর সময় নতুন customer save করা অথবা walk-in হিসেবে বিক্রি করার
+                                                    বিকল্প আসবে।</li>
+                                            </ol>
+                                            <div
+                                                class="p-3 text-xs border rounded-xl bg-amber-50/90 dark:bg-amber-950/30 border-amber-200/80 dark:border-amber-800/40 text-amber-900 dark:text-amber-200">
+                                                <strong>গুরুত্বপূর্ণ:</strong> Customer বাছাই হয় name/phone search ও
+                                                suggestion দিয়ে। Checkbox-টি customer select করার জন্য নয়; এটি আগের বকেয়া
+                                                invoice-এ যোগ করার জন্য।
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <!-- ধাপ ৩ -->
+                                    <div class="relative flex items-start gap-4 sm:gap-5">
+                                        <div
+                                            class="z-10 flex items-center justify-center w-8 h-8 text-xs font-bold text-white sm:w-10 sm:h-10 rounded-xl bg-slate-900 dark:bg-accent-600 sm:text-sm shrink-0 shadow-2xs">
+                                            ধাপ ৩
+                                        </div>
+                                        <div
+                                            class="flex-1 p-4 sm:p-5 rounded-2xl bg-alabaster dark:bg-obsidian border border-slate-200/80 dark:border-slate-800 space-y-2.5">
+                                            <h3 class="text-base font-bold text-slate-900 dark:text-white">Sale Items যোগ
+                                                করা</h3>
+                                            <ol
+                                                class="list-decimal pl-5 space-y-1.5 text-xs sm:text-sm text-slate-700 dark:text-slate-300">
+                                                <li><strong>Product</strong> ঘরে পণ্যের নাম বা code লিখুন।</li>
+                                                <li>Inventory-তে থাকা এবং বিক্রির জন্য stock থাকা পণ্য suggestion-এ আসবে;
+                                                    সঠিক পণ্যটি নির্বাচন করুন।</li>
+                                                <li>পণ্য নির্বাচন হলে inventory-র selling price ও unit বসে এবং quantity
+                                                    সাধারণত <strong>1</strong> দিয়ে শুরু হয়।</li>
+                                                <li><strong>Quantity</strong> লিখুন। প্রতিটি লাইনের
+                                                    <strong>LineTotal</strong> স্বয়ংক্রিয়ভাবে <code
+                                                        class="px-1.5 py-0.5 rounded bg-slate-200/80 dark:bg-slate-800 text-xs font-semibold">UnitPrice
+                                                        × Quantity</code> হিসেবে আপডেট হবে। <strong>Subtotal</strong>-ও
+                                                    সঙ্গে সঙ্গে পুনর্গণনা হয়।</li>
+                                                <li>আরও পণ্য যোগ করতে <strong>Add Product</strong> চাপুন। কোনো পণ্য সরাতে
+                                                    তার সারির delete আইকন ব্যবহার করুন।</li>
+                                            </ol>
+                                            <p class="text-xs font-medium text-rose-600 dark:text-rose-400">
+                                                ⚠ Stock-এর বেশি quantity দিলে সতর্কতা দেখাবে; প্রয়োজনমতো quantity কমান।
+                                            </p>
+                                        </div>
+                                    </div>
+
+                                    <!-- ধাপ ৪ -->
+                                    <div class="relative flex items-start gap-4 sm:gap-5">
+                                        <div
+                                            class="z-10 flex items-center justify-center w-8 h-8 text-xs font-bold text-white sm:w-10 sm:h-10 rounded-xl bg-slate-900 dark:bg-accent-600 sm:text-sm shrink-0 shadow-2xs">
+                                            ধাপ ৪
+                                        </div>
+                                        <div
+                                            class="flex-1 p-4 space-y-3 border sm:p-5 rounded-2xl bg-alabaster dark:bg-obsidian border-slate-200/80 dark:border-slate-800">
+                                            <h3 class="text-base font-bold text-slate-900 dark:text-white">Invoice &
+                                                Payment</h3>
+                                            <ol
+                                                class="pl-5 space-y-2 text-xs list-decimal sm:text-sm text-slate-700 dark:text-slate-300">
+                                                <li><strong>Discount Type</strong> থেকে <strong>Amount</strong> (নির্দিষ্ট
+                                                    টাকা) অথবা <strong>Percent</strong> বেছে নিন; পাশের ঘরে discount লিখুন।
+                                                </li>
+                                                <li><strong>VAT (%)</strong> ও <strong>AIT (%)</strong>-এ শতাংশের হার দিন।
+                                                    Discount বাদ দেওয়ার পরের অঙ্কের ওপর এগুলোর টাকা স্বয়ংক্রিয়ভাবে হিসাব
+                                                    হয়।</li>
+                                                <li><strong>Amount Received</strong>-এ এখন যে টাকা নিচ্ছেন তা লিখুন।
+                                                    <strong>Invoice Total</strong> ও <strong>Balance Due</strong>
+                                                    স্বয়ংক্রিয়ভাবে আপডেট হবে।</li>
+                                                <li>
+                                                    টাকা গ্রহণ করলে <strong>Payment Method</strong> নির্বাচন করুন:
+                                                    <div class="flex flex-wrap gap-1.5 mt-1.5">
+                                                        <span
+                                                            class="px-2 py-0.5 rounded-md bg-white dark:bg-charcoal border border-slate-200 dark:border-slate-700 font-mono text-xs font-semibold">Cash</span>
+                                                        <span
+                                                            class="px-2 py-0.5 rounded-md bg-white dark:bg-charcoal border border-slate-200 dark:border-slate-700 font-mono text-xs font-semibold">Bank</span>
+                                                        <span
+                                                            class="px-2 py-0.5 rounded-md bg-white dark:bg-charcoal border border-slate-200 dark:border-slate-700 font-mono text-xs font-semibold">Nagad</span>
+                                                        <span
+                                                            class="px-2 py-0.5 rounded-md bg-white dark:bg-charcoal border border-slate-200 dark:border-slate-700 font-mono text-xs font-semibold">bKash</span>
+                                                        <span
+                                                            class="px-2 py-0.5 rounded-md bg-white dark:bg-charcoal border border-slate-200 dark:border-slate-700 font-mono text-xs font-semibold">Rocket</span>
+                                                        <span
+                                                            class="px-2 py-0.5 rounded-md bg-white dark:bg-charcoal border border-slate-200 dark:border-slate-700 font-mono text-xs font-semibold">Upay</span>
+                                                    </div>
+                                                </li>
+                                                <li>
+                                                    <strong>Checkout</strong> চাপলে নতুন customer-এর ক্ষেত্রে একটি
+                                                    confirmation আসবে:
+                                                    <div class="grid grid-cols-1 sm:grid-cols-3 gap-2.5 mt-2">
+                                                        <div
+                                                            class="p-2.5 rounded-xl bg-emerald-50/70 dark:bg-emerald-950/30 border border-emerald-200/70 dark:border-emerald-800/40 text-xs">
+                                                            <div class="font-bold text-emerald-800 dark:text-emerald-300">
+                                                                Yes, save customer</div>
+                                                            <p class="text-slate-600 dark:text-slate-400 mt-0.5">গ্রাহকের
+                                                                নাম লিখুন; Email ও Address ঐচ্ছিক। এরপর checkout সম্পন্ন
+                                                                হবে।</p>
+                                                        </div>
+                                                        <div
+                                                            class="p-2.5 rounded-xl bg-blue-50/70 dark:bg-blue-950/30 border border-blue-200/70 dark:border-blue-800/40 text-xs">
+                                                            <div class="font-bold text-blue-800 dark:text-blue-300">No,
+                                                                walk-in</div>
+                                                            <p class="text-slate-600 dark:text-slate-400 mt-0.5">customer
+                                                                record সংরক্ষণ হবে না। Amount Received-এ invoice-এর পুরো মোট
+                                                                টাকা বসবে; Payment Method নির্বাচন করে checkout করুন।
+                                                                Walk-in sale-এ পুরো invoice amount পরিশোধ করতে হয়।</p>
+                                                        </div>
+                                                        <div
+                                                            class="p-2.5 rounded-xl bg-rose-50/70 dark:bg-rose-950/30 border border-rose-200/70 dark:border-rose-800/40 text-xs">
+                                                            <div class="font-bold text-rose-800 dark:text-rose-300">Cancel
+                                                                sale</div>
+                                                            <p class="text-slate-600 dark:text-slate-400 mt-0.5">checkout
+                                                                বাতিল হবে।</p>
+                                                        </div>
+                                                    </div>
+                                                </li>
+                                                <li><strong>Checkout & Print Invoice</strong> চাপুন। Sale সংরক্ষণের পর
+                                                    invoice page খুলবে এবং print dialog চালু হতে পারে। Sale-এর পরে stock কমে
+                                                    যায়।</li>
+                                            </ol>
+                                            <div
+                                                class="p-3 text-xs bg-white border rounded-xl dark:bg-charcoal border-slate-200 dark:border-slate-700 text-slate-600 dark:text-slate-300">
+                                                Invoice-এর মোট অঙ্কে Subtotal, discount, VAT, AIT এবং checkbox দিয়ে যোগ করা
+                                                হলে Previous Due থাকে। <strong>Balance Due</strong> হলো Invoice Total থেকে
+                                                Amount Received বাদ দেওয়ার পরের বাকি টাকা।
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <!-- ধাপ ৫ -->
+                                    <div class="relative flex items-start gap-4 sm:gap-5">
+                                        <div
+                                            class="z-10 flex items-center justify-center w-8 h-8 text-xs font-bold text-white sm:w-10 sm:h-10 rounded-xl bg-slate-900 dark:bg-accent-600 sm:text-sm shrink-0 shadow-2xs">
+                                            ধাপ ৫
+                                        </div>
+                                        <div
+                                            class="flex-1 p-4 sm:p-5 rounded-2xl bg-alabaster dark:bg-obsidian border border-slate-200/80 dark:border-slate-800 space-y-2.5">
+                                            <h3 class="text-base font-bold text-slate-900 dark:text-white">Invoice দেখা,
+                                                update ও print</h3>
+                                            <p class="text-xs sm:text-sm text-slate-600 dark:text-slate-300">
+                                                Invoice page-এ permission অনুযায়ী নিচের action-গুলো থাকতে পারে:
+                                            </p>
+                                            <ul class="space-y-2 text-xs sm:text-sm text-slate-700 dark:text-slate-300">
+                                                <li class="flex items-start gap-2">
+                                                    <span
+                                                        class="px-2 py-0.5 rounded bg-emerald-100 dark:bg-emerald-950 text-emerald-800 dark:text-emerald-300 font-mono font-semibold text-xs shrink-0">New
+                                                        Sale</span>
+                                                    <span>Create Sale page-এ ফেরে।</span>
+                                                </li>
+                                                <li class="flex items-start gap-2">
+                                                    <span
+                                                        class="px-2 py-0.5 rounded bg-blue-100 dark:bg-blue-950 text-blue-800 dark:text-blue-300 font-mono font-semibold text-xs shrink-0">Update
+                                                        Invoice</span>
+                                                    <span>Invoice edit form খোলে; items, quantity, unit price, discount,
+                                                        VAT/AIT, payment received, notes বা terms সংশোধন করে Update Invoice
+                                                        চাপুন। সংরক্ষণের পর stock, customer ledger, voucher ও
+                                                        dashboard-সংশ্লিষ্ট totals সমন্বয় হয়। গ্রাহকের পরিচয় update
+                                                        form-এ অপরিবর্তিত থাকে।</span>
+                                                </li>
+                                                <li class="flex items-start gap-2">
+                                                    <span
+                                                        class="px-2 py-0.5 rounded bg-rose-100 dark:bg-rose-950 text-rose-800 dark:text-rose-300 font-mono font-semibold text-xs shrink-0">Void
+                                                        Invoice</span>
+                                                    <span>confirmation-এর পর invoice বাতিল করে সংশ্লিষ্ট stock, ledger,
+                                                        payment/voucher ও due entries reverse করে। এটি সাধারণ edit নয়;
+                                                        প্রয়োজন নিশ্চিত হয়ে তবেই ব্যবহার করুন।</span>
+                                                </li>
+                                                <li class="flex items-start gap-2">
+                                                    <span
+                                                        class="px-2 py-0.5 rounded bg-indigo-100 dark:bg-indigo-950 text-indigo-800 dark:text-indigo-300 font-mono font-semibold text-xs shrink-0">Print
+                                                        logo watermark</span>
+                                                    <span>সংস্থার logo থাকলে এবং অনুমতি থাকলে printout-এ logo watermark
+                                                        চালু/বন্ধ করে।</span>
+                                                </li>
+                                                <li class="flex items-start gap-2">
+                                                    <span
+                                                        class="px-2 py-0.5 rounded bg-slate-200 dark:bg-slate-800 text-slate-800 dark:text-slate-200 font-mono font-semibold text-xs shrink-0">Print
+                                                        Invoice</span>
+                                                    <span>invoice print dialog খোলে। Watermark চাইলে আগে Print logo
+                                                        watermark নির্বাচন করুন।</span>
+                                                </li>
+                                            </ul>
+                                            <p class="pt-1 text-xs text-slate-500 dark:text-slate-400">
+                                                Update Invoice এবং Void Invoice role/permission এবং invoice-এর তারিখ
+                                                অনুযায়ী দেখা যায়। কোনো button না থাকলে administrator-এর সঙ্গে যোগাযোগ
+                                                করুন।
+                                            </p>
+                                        </div>
+                                    </div>
+
+                                </div>
+                            </div>
+                        </section>
+
+                        <!-- ========================================================= -->
+                        <!-- CHAPTER 5: RECENT INVOICES (Live Preview Table + Guide)   -->
+                        <!-- ========================================================= -->
+                        <section id="section-invoices"
+                            class="overflow-hidden bg-white border shadow-xs searchable-section scroll-mt-24 dark:bg-charcoal rounded-3xl border-slate-200/90 dark:border-slate-800">
+                            <!-- Section Header -->
+                            <div
+                                class="flex items-center justify-between px-6 py-5 border-b sm:px-8 border-slate-100 dark:border-slate-800/80 bg-stonecard/50 dark:bg-slate-900/40">
+                                <div class="flex items-center gap-3.5">
+                                    <span
+                                        class="flex items-center justify-center text-base font-bold text-white w-9 h-9 rounded-xl bg-slate-900 dark:bg-accent-600 shadow-2xs">৫</span>
+                                    <div>
+                                        <h2
+                                            class="text-lg font-bold tracking-tight sm:text-xl text-slate-900 dark:text-white">
+                                            Recent Invoices</h2>
+                                        <p class="text-xs sm:text-sm text-slate-500 dark:text-slate-400">সর্বশেষ ১০টি
+                                            ইনভয়েসের টেবিল কলাম ও অ্যাকশন বাটন পরিচিতি</p>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="p-6 space-y-6 sm:p-8">
+                                <p class="text-xs sm:text-sm text-slate-600 dark:text-slate-300">
+                                    Recent Invoices টেবিলে সর্বশেষ ১০টি invoice থাকে। প্রতিটি কলামের অর্থ:
+                                </p>
+
+                                <!-- Column Definitions Table -->
+                                <div class="overflow-x-auto border rounded-2xl border-slate-200/90 dark:border-slate-800">
+                                    <table class="w-full text-left border-collapse">
+                                        <thead>
+                                            <tr
+                                                class="text-xs font-bold tracking-wider uppercase border-b bg-stonecard dark:bg-slate-900/80 text-slate-600 dark:text-slate-400 border-slate-200 dark:border-slate-800">
+                                                <th class="w-1/3 px-4 py-3">কলাম</th>
+                                                <th class="px-4 py-3">অর্থ</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody
+                                            class="text-xs divide-y divide-slate-200/70 dark:divide-slate-800 sm:text-sm">
+                                            <tr class="hover:bg-slate-50/70 dark:hover:bg-slate-800/30">
+                                                <td class="px-4 py-3 font-mono font-bold text-slate-900 dark:text-white">
+                                                    Invoice</td>
+                                                <td class="px-4 py-3 text-slate-700 dark:text-slate-300">Invoice নম্বর</td>
+                                            </tr>
+                                            <tr class="hover:bg-slate-50/70 dark:hover:bg-slate-800/30">
+                                                <td class="px-4 py-3 font-mono font-bold text-slate-900 dark:text-white">
+                                                    Date</td>
+                                                <td class="px-4 py-3 text-slate-700 dark:text-slate-300">Invoice তৈরির
+                                                    তারিখ</td>
+                                            </tr>
+                                            <tr class="hover:bg-slate-50/70 dark:hover:bg-slate-800/30">
+                                                <td class="px-4 py-3 font-mono font-bold text-slate-900 dark:text-white">
+                                                    Customer Phone</td>
+                                                <td class="px-4 py-3 text-slate-700 dark:text-slate-300">Invoice-এ সংরক্ষিত
+                                                    customer phone</td>
+                                            </tr>
+                                            <tr class="hover:bg-slate-50/70 dark:hover:bg-slate-800/30">
+                                                <td class="px-4 py-3 font-mono font-bold text-slate-900 dark:text-white">
+                                                    Employee</td>
+                                                <td class="px-4 py-3 text-slate-700 dark:text-slate-300">Sale তৈরি করা
+                                                    employee; পাওয়া না গেলে <code
+                                                        class="text-xs bg-slate-100 dark:bg-slate-800 px-1.5 py-0.5 rounded font-semibold">N/A</code>
+                                                </td>
+                                            </tr>
+                                            <tr class="hover:bg-slate-50/70 dark:hover:bg-slate-800/30">
+                                                <td class="px-4 py-3 font-mono font-bold text-slate-900 dark:text-white">
+                                                    Total</td>
+                                                <td class="px-4 py-3 text-slate-700 dark:text-slate-300">Invoice-এর মোট
+                                                    টাকা</td>
+                                            </tr>
+                                            <tr class="hover:bg-slate-50/70 dark:hover:bg-slate-800/30">
+                                                <td class="px-4 py-3 font-mono font-bold text-slate-900 dark:text-white">
+                                                    Due</td>
+                                                <td class="px-4 py-3 text-slate-700 dark:text-slate-300">Invoice-এর বকেয়া
+                                                    টাকা</td>
+                                            </tr>
+                                        </tbody>
+                                    </table>
+                                </div>
+
+                                <!-- Row Action Buttons & Notes -->
+                                <div class="space-y-3">
+                                    <h3 class="text-sm font-bold text-slate-900 dark:text-white">প্রতিটি row-এর action
+                                        button:</h3>
+                                    <div class="grid grid-cols-1 md:grid-cols-2 gap-3.5">
+                                        <div
+                                            class="flex items-start gap-3 p-4 border rounded-2xl bg-alabaster dark:bg-obsidian border-slate-200/80 dark:border-slate-800">
+                                            <span
+                                                class="p-2 rounded-xl bg-indigoAccent-50 dark:bg-indigo-950 text-indigoAccent-600 dark:text-indigo-400 shrink-0">
+                                                <i data-lucide="eye" class="w-4 h-4"></i>
+                                            </span>
+                                            <div>
+                                                <h4 class="text-xs font-bold text-slate-900 dark:text-white sm:text-sm">
+                                                    View Invoice (চোখের আইকন)</h4>
+                                                <p class="text-xs sm:text-sm text-slate-600 dark:text-slate-300 mt-0.5">
+                                                    সম্পূর্ণ invoice ও তার print/update/void action-গুলো খোলে।</p>
+                                            </div>
+                                        </div>
+                                        <div
+                                            class="flex items-start gap-3 p-4 border rounded-2xl bg-alabaster dark:bg-obsidian border-slate-200/80 dark:border-slate-800">
+                                            <span
+                                                class="p-2 rounded-xl bg-emerald-50 dark:bg-emerald-950 text-emerald-600 dark:text-emerald-400 shrink-0">
+                                                <i data-lucide="truck" class="w-4 h-4"></i>
+                                            </span>
+                                            <div>
+                                                <h4 class="text-xs font-bold text-slate-900 dark:text-white sm:text-sm">
+                                                    Delivery Challan</h4>
+                                                <p class="text-xs sm:text-sm text-slate-600 dark:text-slate-300 mt-0.5">ওই
+                                                    sale-এর পণ্য ও delivery-সংক্রান্ত challan খোলে।</p>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <div
+                                        class="p-4 rounded-2xl bg-stonecard dark:bg-obsidian border border-slate-200/80 dark:border-slate-800 text-xs sm:text-sm text-slate-600 dark:text-slate-300 space-y-1.5">
+                                        <p>
+                                            Update/Void button Recent Invoices row-তে নেই; সেগুলো invoice খুললে permission
+                                            অনুযায়ী দেখা যায়।
+                                        </p>
+                                        <p>
+                                            নতুন invoice না থাকলে <code
+                                                class="px-2 py-0.5 rounded bg-white dark:bg-charcoal border border-slate-200 dark:border-slate-700 font-mono text-xs text-slate-800 dark:text-slate-200">No
+                                                invoices have been created yet.</code> বার্তাটি দেখানো হয়।
+                                        </p>
+                                    </div>
+                                </div>
+                            </div>
+                        </section>
+
+                    </main>
+
+                    <!-- Interactive Script -->
+                    <script>
+                        document.addEventListener('DOMContentLoaded', () => {
+                            if (window.lucide) {
+                                lucide.createIcons();
+                            }
+
+                            // 1. Dark Mode Toggle
+                            const themeToggle = document.getElementById('theme-toggle');
+                            const htmlEl = document.documentElement;
+
+                            if (localStorage.getItem('manual-theme') === 'dark' ||
+                                (!localStorage.getItem('manual-theme') && window.matchMedia('(prefers-color-scheme: dark)').matches)
+                                ) {
+                                htmlEl.classList.add('dark');
+                            }
+
+                            themeToggle.addEventListener('click', () => {
+                                htmlEl.classList.toggle('dark');
+                                localStorage.setItem('manual-theme', htmlEl.classList.contains('dark') ? 'dark' : 'light');
+                            });
+
+                            // 2. Demo Eye Toggle in Login Preview Card
+                            const demoEyeBtn = document.getElementById('demo-eye-btn');
+                            if (demoEyeBtn) {
+                                let shown = false;
+                                demoEyeBtn.addEventListener('click', () => {
+                                    shown = !shown;
+                                    const span = demoEyeBtn.previousElementSibling.querySelector('span');
+                                    span.textContent = shown ? 'MySecretPass123' : '••••••••••••';
+                                });
+                            }
+
+                            // 3. Module Segmented Pill Filter
+                            const moduleTabs = document.querySelectorAll('.module-tab');
+                            const moduleGroups = document.querySelectorAll('.module-group');
+
+                            moduleTabs.forEach(tab => {
+                                tab.addEventListener('click', () => {
+                                    const filter = tab.getAttribute('data-filter');
+
+                                    moduleTabs.forEach(t => {
+                                        t.classList.remove('bg-white', 'dark:bg-charcoal', 'text-slate-900',
+                                            'dark:text-white', 'shadow-2xs', 'border',
+                                            'border-slate-200/60', 'dark:border-slate-700',
+                                            'font-semibold');
+                                        t.classList.add('text-slate-600', 'dark:text-slate-400',
+                                            'font-medium');
+                                    });
+
+                                    tab.classList.remove('text-slate-600', 'dark:text-slate-400', 'font-medium');
+                                    tab.classList.add('bg-white', 'dark:bg-charcoal', 'text-slate-900',
+                                        'dark:text-white', 'shadow-2xs', 'border', 'border-slate-200/60',
+                                        'dark:border-slate-700', 'font-semibold');
+
+                                    moduleGroups.forEach(group => {
+                                        if (filter === 'all' || group.getAttribute('data-category') ===
+                                            filter) {
+                                            group.classList.remove('hidden');
+                                        } else {
+                                            group.classList.add('hidden');
+                                        }
+                                    });
+                                });
+                            });
+
+                            // 4. Command Search ('/' shortcut) & Live Highlighting
+                            const searchInput = document.getElementById('search-input');
+                            const mobileSearchInput = document.getElementById('mobile-search-input');
+                            const mobileSearchBtn = document.getElementById('mobile-search-btn');
+                            const mobileSearchBar = document.getElementById('mobile-search-bar');
+                            const clearSearchBtn = document.getElementById('clear-search');
+                            const searchKbd = document.getElementById('search-kbd');
+                            const searchStatus = document.getElementById('search-status');
+                            const searchCount = document.getElementById('search-count');
+
+                            if (mobileSearchBtn) {
+                                mobileSearchBtn.addEventListener('click', () => {
+                                    mobileSearchBar.classList.toggle('hidden');
+                                    if (!mobileSearchBar.classList.contains('hidden')) {
+                                        mobileSearchInput.focus();
+                                    }
+                                });
+                            }
+
+                            // Keyboard '/' shortcut to focus search
+                            document.addEventListener('keydown', (e) => {
+                                if (e.key === '/' && document.activeElement !== searchInput && document.activeElement !==
+                                    mobileSearchInput) {
+                                    e.preventDefault();
+                                    searchInput.focus();
+                                } else if (e.key === 'Escape' && (document.activeElement === searchInput || document
+                                        .activeElement === mobileSearchInput)) {
+                                    searchInput.value = '';
+                                    mobileSearchInput.value = '';
+                                    performSearch('');
+                                    document.activeElement.blur();
+                                }
+                            });
+
+                            const searchableBlocks = document.querySelectorAll(
+                                '#manual-content p, #manual-content td, #manual-content li, #manual-content h2, #manual-content h3, #manual-content h4'
+                                );
+                            searchableBlocks.forEach(el => {
+                                el.dataset.originalHtml = el.innerHTML;
+                            });
+
+                            function escapeRegExp(string) {
+                                return string.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+                            }
+
+                            function performSearch(rawQuery) {
+                                const query = rawQuery.trim();
+
+                                if (!query) {
+                                    clearSearchBtn.classList.add('hidden');
+                                    searchKbd.classList.remove('hidden');
+                                    searchStatus.classList.add('hidden');
+                                    searchableBlocks.forEach(el => {
+                                        el.innerHTML = el.dataset.originalHtml;
+                                    });
+                                    return;
+                                }
+
+                                clearSearchBtn.classList.remove('hidden');
+                                searchKbd.classList.add('hidden');
+                                moduleGroups.forEach(g => g.classList.remove('hidden'));
+
+                                const regex = new RegExp(`(${escapeRegExp(query)})`, 'gi');
+                                let matchCount = 0;
+
+                                searchableBlocks.forEach(el => {
+                                    const original = el.dataset.originalHtml;
+                                    const parts = original.split(/(<[^>]+>)/g);
+                                    let hasMatch = false;
+
+                                    const highlighted = parts.map(part => {
+                                        if (part.startsWith('<')) return part;
+                                        if (regex.test(part)) {
+                                            hasMatch = true;
+                                            return part.replace(regex, '<mark class="search-highlight">$1</mark>');
+                                        }
+                                        return part;
+                                    }).join('');
+
+                                    el.innerHTML = highlighted;
+                                    if (hasMatch) matchCount++;
+                                });
+
+                                searchCount.textContent = matchCount;
+                                searchStatus.classList.remove('hidden');
+                            }
+
+                            searchInput.addEventListener('input', (e) => {
+                                mobileSearchInput.value = e.target.value;
+                                performSearch(e.target.value);
+                            });
+
+                            mobileSearchInput.addEventListener('input', (e) => {
+                                searchInput.value = e.target.value;
+                                performSearch(e.target.value);
+                            });
+
+                            clearSearchBtn.addEventListener('click', () => {
+                                searchInput.value = '';
+                                mobileSearchInput.value = '';
+                                performSearch('');
+                                searchInput.focus();
+                            });
+
+                            // 5. Scroll-Spy for Top Horizontal Navigation Menu
+                            const navItems = document.querySelectorAll('.toc-nav-item');
+                            const sections = document.querySelectorAll('.searchable-section');
+
+                            function setActiveNavItem(targetId) {
+                                navItems.forEach(link => {
+                                    if (link.getAttribute('data-target') === targetId) {
+                                        link.classList.remove('bg-white/80', 'dark:bg-charcoal', 'text-slate-600',
+                                            'dark:text-slate-300', 'border', 'border-slate-200/80',
+                                            'dark:border-slate-800', 'font-medium');
+                                        link.classList.add('bg-slate-900', 'text-white', 'dark:bg-accent-600',
+                                            'dark:text-white', 'shadow-xs', 'font-semibold');
+                                        link.scrollIntoView({
+                                            behavior: 'smooth',
+                                            block: 'nearest',
+                                            inline: 'center'
+                                        });
+                                    } else {
+                                        link.classList.remove('bg-slate-900', 'text-white', 'dark:bg-accent-600',
+                                            'dark:text-white', 'shadow-xs', 'font-semibold');
+                                        link.classList.add('bg-white/80', 'dark:bg-charcoal', 'text-slate-600',
+                                            'dark:text-slate-300', 'border', 'border-slate-200/80',
+                                            'dark:border-slate-800', 'font-medium');
+                                    }
+                                });
+                            }
+
+                            navItems.forEach(link => {
+                                link.addEventListener('click', () => {
+                                    setActiveNavItem(link.getAttribute('data-target'));
+                                });
+                            });
+
+                            const sectionObserver = new IntersectionObserver((entries) => {
+                                entries.forEach(entry => {
+                                    if (entry.isIntersecting) {
+                                        setActiveNavItem(entry.target.id);
+                                    }
+                                });
+                            }, {
+                                root: null,
+                                rootMargin: '-100px 0px -65% 0px',
+                                threshold: 0
+                            });
+
+                            sections.forEach(sec => sectionObserver.observe(sec));
+                        });
+                    </script>
+                </body>
+
+                </html>
+            </div>
+        </div>
+    </div>
+@endsection

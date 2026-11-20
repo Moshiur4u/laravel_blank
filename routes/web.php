@@ -23,6 +23,7 @@ use App\Http\Controllers\SupplierController;
 use App\Http\Controllers\SupplierledgerController;
 use App\Http\Controllers\UserController;
 use App\Http\Controllers\UserActivityLogController;
+use App\Http\Controllers\UserGuide;
 use App\Http\Controllers\VoucherAccountController;
 use App\Http\Controllers\VoucherEntryController;
 use Illuminate\Support\Facades\Route;
@@ -52,6 +53,9 @@ Route::middleware(['auth', 'verified'])->group(function () {
 
 Route::middleware(['auth', 'verified'])->group(function () {
     Route::get('/logout', [UserController::class, 'logout'])->name('logout');
+});
+Route::middleware(['auth', 'verified'])->group(function () {
+    Route::get('/UserGuide', [UserGuide::class, 'UserGuide'])->name('User.Guide');
 });
 // মিডলওয়্যার সহ ড্যাশবোর্ড রাউট শুরু
 Route::middleware(['auth', 'verified'])->group(function () {
