@@ -273,7 +273,8 @@
                                                                         value="1"
                                                                         {{ $showWarrantyRow ? '' : 'disabled' }}
                                                                         {{ $warrantyCoverEnabled ? 'checked' : '' }}>
-                                                                    <label class="form-check-label fw-semibold small"
+                                                                    <label
+                                                                        class="form-check-label fw-semibold small text-danger"
                                                                         for="warranty_cover_{{ $index }}">warrantyCover</label>
                                                                 </div>
                                                                 <div
@@ -425,7 +426,7 @@
                                         <textarea name="notes" id="notes" rows="2" class="form-control">{{ old('notes', $editingInvoice?->notes) }}</textarea>
                                     </div>
                                     <!--Terms & Conditions Create Invoice এ বন্ধ রাখার জন্য ও d-none ব্যবহার করা হয়েছে
-                                                    দেখতে চাইলে আবার d-none মুছে ফেললে হবে-->
+                                                            দেখতে চাইলে আবার d-none মুছে ফেললে হবে-->
                                     <div class="mb-3 d-none">
                                         <label for="terms_conditions" class="form-label fw-semibold">Terms &
                                             Conditions</label>
