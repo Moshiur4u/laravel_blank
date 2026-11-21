@@ -119,7 +119,14 @@
                                     <tr>
                                         <td>{{ $key + 1 }}</td>
                                         <td class="invoice-product-name text-wrap fit-content-column">
-                                            {{ $item->product_name }}</td>
+                                            {{ $item->product_name }}
+                                            @if ($item->warranty_cover)
+                                                <div class="mt-1 small text-muted">
+                                                    Warranty: {{ $item->warranty_year }} Year(s)
+                                                    Serial/MAC: {{ $item->serial_mac }}
+                                                </div>
+                                            @endif
+                                        </td>
                                         {{-- sale তৈরির সময় Product-এর selling price sale item-এ snapshot হয়ে invoice-এ দেখায়। --}}
                                         <td class="text-end">৳{{ number_format($item->unit_price, 2) }}</td>
                                         <td class="text-center">{{ $item->remaining_quantity }}</td>

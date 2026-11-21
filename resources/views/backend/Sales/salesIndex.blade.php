@@ -13,6 +13,9 @@
                             'product_id' => $item->product_id,
                             'quantity' => $item->quantity,
                             'unit_price' => $item->unit_price,
+                            'warranty_cover' => $item->warranty_cover,
+                            'warranty_year' => $item->warranty_year,
+                            'serial_mac' => $item->serial_mac,
                         ],
                     )
                     ->all()
@@ -249,6 +252,51 @@
                                                         <td><button type="button"
                                                                 class="btn btn-sm btn-outline-danger remove-item"
                                                                 title="Remove item"><i class="bx bx-trash"></i></button>
+                                                        </td>
+                                                    </tr>
+                                                    @php
+                                                        $warrantyCoverEnabled = (bool) old(
+                                                            "items.$index.warranty_cover",
+                                                            $oldItem['warranty_cover'] ?? false,
+                                                        );
+                                                    @endphp
+                                                    <tr class="warranty-row">
+                                                        <td colspan="7" class="pt-0">
+                                                            <div class="d-flex flex-wrap align-items-center gap-3">
+                                                                <div class="form-check">
+                                                                    <input type="checkbox"
+                                                                        id="warranty_cover_{{ $index }}"
+                                                                        name="items[{{ $index }}][warranty_cover]"
+                                                                        class="form-check-input warranty-cover-toggle"
+                                                                        value="1"
+                                                                        {{ $warrantyCoverEnabled ? 'checked' : '' }}>
+                                                                    <label class="form-check-label fw-semibold"
+                                                                        for="warranty_cover_{{ $index }}">warrantyCover</label>
+                                                                </div>
+                                                                <div class="warranty-fields d-flex flex-wrap align-items-center gap-2 {{ $warrantyCoverEnabled ? '' : 'd-none' }}">
+                                                                    <label class="visually-hidden"
+                                                                        for="warranty_year_{{ $index }}">Warranty Year</label>
+                                                                    <input type="number"
+                                                                        id="warranty_year_{{ $index }}"
+                                                                        name="items[{{ $index }}][warranty_year]"
+                                                                        class="form-control warranty-year-input"
+                                                                        style="width: 150px" min="1" max="100"
+                                                                        step="1" placeholder="Warranty Year"
+                                                                        value="{{ old("items.$index.warranty_year", $oldItem['warranty_year'] ?? '') }}"
+                                                                        {{ $warrantyCoverEnabled ? 'required' : 'disabled' }}>
+                                                                    <label class="visually-hidden"
+                                                                        for="serial_mac_{{ $index }}">Serial/MAC</label>
+                                                                    <input type="text"
+                                                                        id="serial_mac_{{ $index }}"
+                                                                        name="items[{{ $index }}][serial_mac]"
+                                                                        class="form-control serial-mac-input"
+                                                                        style="max-width: 280px"
+                                                                        placeholder="Device Serial / MAC"
+                                                                        maxlength="255"
+                                                                        value="{{ old("items.$index.serial_mac", $oldItem['serial_mac'] ?? '') }}"
+                                                                        {{ $warrantyCoverEnabled ? 'required' : 'disabled' }}>
+                                                                </div>
+                                                            </div>
                                                         </td>
                                                     </tr>
                                                 @endforeach
@@ -628,6 +676,7 @@
             function addRow() {
                 const first = itemsBody.querySelector('.sale-item-row');
                 const row = first.cloneNode(true);
+                const warrantyRow = first.nextElementSibling.cloneNode(true);
                 row.querySelector('.product-search').value = '';
                 row.querySelector('.product-select').name = `items[${rowIndex}][product_id]`;
                 row.querySelector('.product-select').value = '';
@@ -639,7 +688,28 @@
                 row.querySelector('.quantity-input').name = `items[${rowIndex}][quantity]`;
                 row.querySelector('.quantity-input').value = '0';
                 row.querySelector('.quantity-input').classList.remove('is-invalid');
+                const warrantyToggle = warrantyRow.querySelector('.warranty-cover-toggle');
+                warrantyToggle.name = `items[${rowIndex}][warranty_cover]`;
+                warrantyToggle.id = `warranty_cover_${rowIndex}`;
+                warrantyToggle.checked = false;
+                warrantyRow.querySelector('label[for^="warranty_cover_"]').htmlFor = warrantyToggle.id;
+                warrantyRow.querySelector('.warranty-year-input').name = `items[${rowIndex}][warranty_year]`;
+                warrantyRow.querySelector('.warranty-year-input').id = `warranty_year_${rowIndex}`;
+                warrantyRow.querySelector('.warranty-year-input').value = '';
+                warrantyRow.querySelector('.warranty-year-input').disabled = true;
+                warrantyRow.querySelector('.warranty-year-input').required = false;
+                warrantyRow.querySelector('label[for^="warranty_year_"]').htmlFor =
+                    warrantyRow.querySelector('.warranty-year-input').id;
+                warrantyRow.querySelector('.serial-mac-input').name = `items[${rowIndex}][serial_mac]`;
+                warrantyRow.querySelector('.serial-mac-input').id = `serial_mac_${rowIndex}`;
+                warrantyRow.querySelector('.serial-mac-input').value = '';
+                warrantyRow.querySelector('.serial-mac-input').disabled = true;
+                warrantyRow.querySelector('.serial-mac-input').required = false;
+                warrantyRow.querySelector('label[for^="serial_mac_"]').htmlFor =
+                    warrantyRow.querySelector('.serial-mac-input').id;
+                warrantyRow.querySelector('.warranty-fields').classList.add('d-none');
                 itemsBody.appendChild(row);
+                itemsBody.appendChild(warrantyRow);
                 rowIndex++;
                 updateTotals();
             }
@@ -838,6 +908,15 @@
                 if (event.target.matches('.product-search')) {
                     syncProductSearch(event.target.closest('.sale-item-row'));
                 }
+                if (event.target.matches('.warranty-cover-toggle')) {
+                    const warrantyFields = event.target.closest('.warranty-row').querySelector('.warranty-fields');
+                    warrantyFields.classList.toggle('d-none', !event.target.checked);
+                    warrantyFields.querySelectorAll('input').forEach((input) => {
+                        input.disabled = !event.target.checked;
+                        input.required = event.target.checked;
+                        if (!event.target.checked) input.value = '';
+                    });
+                }
                 updateTotals();
             });
             itemsBody.addEventListener('input', updateTotals);
@@ -856,8 +935,19 @@
                     row.querySelector('.product-search').value = '';
                     row.querySelector('.unit-price-input').value = '';
                     row.querySelector('.quantity-input').value = '0';
+                    const warrantyRow = row.nextElementSibling;
+                    const warrantyToggle = warrantyRow.querySelector('.warranty-cover-toggle');
+                    warrantyToggle.checked = false;
+                    warrantyRow.querySelector('.warranty-fields').classList.add('d-none');
+                    warrantyRow.querySelectorAll('.warranty-fields input').forEach((input) => {
+                        input.value = '';
+                        input.disabled = true;
+                        input.required = false;
+                    });
                 } else {
-                    button.closest('.sale-item-row').remove();
+                    const row = button.closest('.sale-item-row');
+                    row.nextElementSibling.remove();
+                    row.remove();
                 }
                 updateTotals();
             });

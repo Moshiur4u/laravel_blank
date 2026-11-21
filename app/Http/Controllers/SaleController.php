@@ -131,11 +131,7 @@ class SaleController extends Controller
             'payment_method' => 'nullable|in:' . implode(',', self::PAYMENT_METHODS),
             'notes' => 'nullable|string|max:2000',
             'terms_conditions' => 'nullable|string|max:5000',
-            'items' => 'required|array|min:1',
-            'items.*.product_id' => 'required|integer|exists:products,id',
-            'items.*.quantity' => 'required|integer|min:1',
-            'items.*.unit_price' => 'required|numeric|min:0|max:9999999999999.99',
-        ]);
+        ] + $this->saleItemValidationRules($request));
 
         $customerPhone = trim($validated['customer_phone']);
         $requestedPaymentAmount = round((float) ($validated['amount_paid'] ?? 0), 2);
@@ -191,7 +187,18 @@ class SaleController extends Controller
                 $unitPrice = round((float) $item['unit_price'], 2);
                 $lineTotal = round($unitPrice * $quantity, 2);
                 $subtotal += $lineTotal;
-                $lineItems[] = compact('product', 'quantity', 'unitPrice', 'lineTotal');
+                $warrantyCover = (bool) ($item['warranty_cover'] ?? false);
+                $warrantyYear = $warrantyCover ? (int) $item['warranty_year'] : null;
+                $serialMac = $warrantyCover ? trim($item['serial_mac']) : null;
+                $lineItems[] = compact(
+                    'product',
+                    'quantity',
+                    'unitPrice',
+                    'lineTotal',
+                    'warrantyCover',
+                    'warrantyYear',
+                    'serialMac'
+                );
             }
 
             $subtotal = round($subtotal, 2);
@@ -289,6 +296,9 @@ class SaleController extends Controller
                     'purchase_price' => $product->purchase_price !== null ? (float) $product->purchase_price : null,
                     'unit_price' => $lineItem['unitPrice'],
                     'line_total' => $lineItem['lineTotal'],
+                    'warranty_cover' => $lineItem['warrantyCover'],
+                    'warranty_year' => $lineItem['warrantyYear'],
+                    'serial_mac' => $lineItem['serialMac'],
                 ]);
 
                 $product->unit = (string) ((float) $product->unit - $quantity);
@@ -430,11 +440,7 @@ class SaleController extends Controller
             'payment_method' => 'nullable|in:' . implode(',', self::PAYMENT_METHODS),
             'notes' => 'nullable|string|max:2000',
             'terms_conditions' => 'nullable|string|max:5000',
-            'items' => 'required|array|min:1',
-            'items.*.product_id' => 'required|integer|exists:products,id',
-            'items.*.quantity' => 'required|integer|min:1',
-            'items.*.unit_price' => 'required|numeric|min:0|max:9999999999999.99',
-        ]);
+        ] + $this->saleItemValidationRules($request));
 
         $invoice = app(SaleInvoiceUpdateService::class)->update(
             (int) $id,
@@ -463,6 +469,31 @@ class SaleController extends Controller
         ])->findOrFail($id);
 
         return view('backend.Sales.deliveryChallan', compact('invoice'));
+    }
+
+    private function saleItemValidationRules(Request $request): array
+    {
+        $rules = [
+            'items' => 'required|array|min:1',
+            'items.*.product_id' => 'required|integer|exists:products,id',
+            'items.*.quantity' => 'required|integer|min:1',
+            'items.*.unit_price' => 'required|numeric|min:0|max:9999999999999.99',
+            'items.*.warranty_cover' => 'nullable|boolean',
+            'items.*.warranty_year' => 'nullable|integer|between:1,100',
+            'items.*.serial_mac' => 'nullable|string|max:255',
+        ];
+        $items = $request->input('items', []);
+
+        foreach (is_array($items) ? $items : [] as $index => $item) {
+            if (! is_array($item) || ! filter_var($item['warranty_cover'] ?? false, FILTER_VALIDATE_BOOLEAN)) {
+                continue;
+            }
+
+            $rules["items.{$index}.warranty_year"] = 'required|integer|between:1,100';
+            $rules["items.{$index}.serial_mac"] = 'required|string|max:255';
+        }
+
+        return $rules;
     }
 
     private function amountInWords(float $amount): string

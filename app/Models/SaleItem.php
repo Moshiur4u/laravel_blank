@@ -15,12 +15,17 @@ class SaleItem extends Model
         'purchase_price',
         'unit_price',
         'line_total',
+        'warranty_cover',
+        'warranty_year',
+        'serial_mac',
     ];
 
     protected $casts = [
         'purchase_price' => 'decimal:2',
         'unit_price' => 'decimal:2',
         'line_total' => 'decimal:2',
+        'warranty_cover' => 'boolean',
+        'warranty_year' => 'integer',
     ];
 
     public function invoice()
