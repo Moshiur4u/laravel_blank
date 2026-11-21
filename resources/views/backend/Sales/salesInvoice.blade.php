@@ -121,8 +121,14 @@
                                         <td class="invoice-product-name text-wrap fit-content-column">
                                             {{ $item->product_name }}
                                             @if ($item->warranty_cover)
-                                                <div class="mt-1 small text-muted">
-                                                    Warranty: {{ $item->warranty_year }} Year(s)
+                                                <div class="mt-1 small text-muted text-nowrap">
+                                                    Warranty:
+                                                    @if ((int) $item->warranty_year > 0)
+                                                        {{ $item->warranty_year }} Year(s)
+                                                    @endif
+                                                    @if ((int) ($item->warranty_months ?? 0) > 0)
+                                                        {{ $item->warranty_months }} Month(s)
+                                                    @endif
                                                     Serial/MAC: {{ $item->serial_mac }}
                                                 </div>
                                             @endif

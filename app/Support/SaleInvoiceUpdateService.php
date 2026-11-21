@@ -16,7 +16,7 @@ class SaleInvoiceUpdateService
     /**
      * Updates invoice items and synchronizes stock, ledger and any walk-in receipt voucher.
      *
-     * @param array<int, array{product_id: int|string, quantity: int|string, unit_price: int|float|string, warranty_cover?: bool|int|string, warranty_year?: int|string|null, serial_mac?: string|null}> $items
+     * @param array<int, array{product_id: int|string, quantity: int|string, unit_price: int|float|string, warranty_cover?: bool|int|string, warranty_year?: int|string|null, warranty_months?: int|string|null, serial_mac?: string|null}> $items
      * @param array<string, mixed> $attributes
      */
     public function update(int $id, array $items, array $attributes = []): SaleInvoice
@@ -97,6 +97,7 @@ class SaleInvoiceUpdateService
                         : $product->purchase_price,
                     'warranty_cover' => (bool) ($item['warranty_cover'] ?? false),
                     'warranty_year' => ! empty($item['warranty_cover']) ? (int) $item['warranty_year'] : null,
+                    'warranty_months' => ! empty($item['warranty_cover']) ? (int) $item['warranty_months'] : null,
                     'serial_mac' => ! empty($item['warranty_cover']) ? trim($item['serial_mac']) : null,
                 ];
             }
@@ -192,6 +193,7 @@ class SaleInvoiceUpdateService
                     'line_total' => $lineItem['line_total'],
                     'warranty_cover' => $lineItem['warranty_cover'],
                     'warranty_year' => $lineItem['warranty_year'],
+                    'warranty_months' => $lineItem['warranty_months'],
                     'serial_mac' => $lineItem['serial_mac'],
                 ]);
             }

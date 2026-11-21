@@ -15,6 +15,7 @@
                             'unit_price' => $item->unit_price,
                             'warranty_cover' => $item->warranty_cover,
                             'warranty_year' => $item->warranty_year,
+                            'warranty_months' => $item->warranty_months,
                             'serial_mac' => $item->serial_mac,
                         ],
                     )
@@ -259,8 +260,9 @@
                                                             "items.$index.warranty_cover",
                                                             $oldItem['warranty_cover'] ?? false,
                                                         );
+                                                        $showWarrantyRow = $warrantyCoverEnabled || $loop->last;
                                                     @endphp
-                                                    <tr class="warranty-row">
+                                                    <tr class="warranty-row {{ $showWarrantyRow ? '' : 'd-none' }}">
                                                         <td colspan="7" class="pt-0">
                                                             <div class="d-flex flex-wrap align-items-center gap-3">
                                                                 <div class="form-check">
@@ -269,20 +271,31 @@
                                                                         name="items[{{ $index }}][warranty_cover]"
                                                                         class="form-check-input warranty-cover-toggle"
                                                                         value="1"
+                                                                        {{ $showWarrantyRow ? '' : 'disabled' }}
                                                                         {{ $warrantyCoverEnabled ? 'checked' : '' }}>
-                                                                    <label class="form-check-label fw-semibold"
+                                                                    <label class="form-check-label fw-semibold small"
                                                                         for="warranty_cover_{{ $index }}">warrantyCover</label>
                                                                 </div>
                                                                 <div class="warranty-fields d-flex flex-wrap align-items-center gap-2 {{ $warrantyCoverEnabled ? '' : 'd-none' }}">
                                                                     <label class="visually-hidden"
-                                                                        for="warranty_year_{{ $index }}">Warranty Year</label>
+                                                                        for="warranty_year_{{ $index }}">Warranty Years</label>
                                                                     <input type="number"
                                                                         id="warranty_year_{{ $index }}"
                                                                         name="items[{{ $index }}][warranty_year]"
                                                                         class="form-control warranty-year-input"
-                                                                        style="width: 150px" min="1" max="100"
-                                                                        step="1" placeholder="Warranty Year"
-                                                                        value="{{ old("items.$index.warranty_year", $oldItem['warranty_year'] ?? '') }}"
+                                                                        style="width: 130px" min="0" max="100"
+                                                                        step="1" placeholder="Years"
+                                                                        value="{{ old("items.$index.warranty_year", $oldItem['warranty_year'] ?? 0) }}"
+                                                                        {{ $warrantyCoverEnabled ? 'required' : 'disabled' }}>
+                                                                    <label class="visually-hidden"
+                                                                        for="warranty_months_{{ $index }}">Warranty Months</label>
+                                                                    <input type="number"
+                                                                        id="warranty_months_{{ $index }}"
+                                                                        name="items[{{ $index }}][warranty_months]"
+                                                                        class="form-control warranty-months-input"
+                                                                        style="width: 130px" min="0" max="11"
+                                                                        step="1" placeholder="Months"
+                                                                        value="{{ old("items.$index.warranty_months", $oldItem['warranty_months'] ?? 0) }}"
                                                                         {{ $warrantyCoverEnabled ? 'required' : 'disabled' }}>
                                                                     <label class="visually-hidden"
                                                                         for="serial_mac_{{ $index }}">Serial/MAC</label>
@@ -673,6 +686,26 @@
                     'Choose a product from the suggested name and code.');
             }
 
+            function refreshWarrantyRows() {
+                const productRows = Array.from(itemsBody.querySelectorAll('.sale-item-row'));
+                productRows.forEach((row, index) => {
+                    const warrantyRow = row.nextElementSibling;
+                    const warrantyToggle = warrantyRow.querySelector('.warranty-cover-toggle');
+                    const warrantyEnabled = warrantyToggle.checked;
+                    const showWarrantyRow = warrantyEnabled || index === productRows.length - 1;
+                    const warrantyFields = warrantyRow.querySelector('.warranty-fields');
+
+                    warrantyRow.classList.toggle('d-none', !showWarrantyRow);
+                    warrantyToggle.disabled = !showWarrantyRow;
+                    warrantyFields.classList.toggle('d-none', !warrantyEnabled);
+                    warrantyFields.querySelectorAll('input').forEach((input) => {
+                        input.disabled = !warrantyEnabled;
+                        input.required = warrantyEnabled;
+                        if (!warrantyEnabled) input.value = '';
+                    });
+                });
+            }
+
             function addRow() {
                 const first = itemsBody.querySelector('.sale-item-row');
                 const row = first.cloneNode(true);
@@ -700,6 +733,13 @@
                 warrantyRow.querySelector('.warranty-year-input').required = false;
                 warrantyRow.querySelector('label[for^="warranty_year_"]').htmlFor =
                     warrantyRow.querySelector('.warranty-year-input').id;
+                warrantyRow.querySelector('.warranty-months-input').name = `items[${rowIndex}][warranty_months]`;
+                warrantyRow.querySelector('.warranty-months-input').id = `warranty_months_${rowIndex}`;
+                warrantyRow.querySelector('.warranty-months-input').value = '';
+                warrantyRow.querySelector('.warranty-months-input').disabled = true;
+                warrantyRow.querySelector('.warranty-months-input').required = false;
+                warrantyRow.querySelector('label[for^="warranty_months_"]').htmlFor =
+                    warrantyRow.querySelector('.warranty-months-input').id;
                 warrantyRow.querySelector('.serial-mac-input').name = `items[${rowIndex}][serial_mac]`;
                 warrantyRow.querySelector('.serial-mac-input').id = `serial_mac_${rowIndex}`;
                 warrantyRow.querySelector('.serial-mac-input').value = '';
@@ -711,6 +751,7 @@
                 itemsBody.appendChild(row);
                 itemsBody.appendChild(warrantyRow);
                 rowIndex++;
+                refreshWarrantyRows();
                 updateTotals();
             }
 
@@ -909,13 +950,7 @@
                     syncProductSearch(event.target.closest('.sale-item-row'));
                 }
                 if (event.target.matches('.warranty-cover-toggle')) {
-                    const warrantyFields = event.target.closest('.warranty-row').querySelector('.warranty-fields');
-                    warrantyFields.classList.toggle('d-none', !event.target.checked);
-                    warrantyFields.querySelectorAll('input').forEach((input) => {
-                        input.disabled = !event.target.checked;
-                        input.required = event.target.checked;
-                        if (!event.target.checked) input.value = '';
-                    });
+                    refreshWarrantyRows();
                 }
                 updateTotals();
             });
@@ -949,6 +984,7 @@
                     row.nextElementSibling.remove();
                     row.remove();
                 }
+                refreshWarrantyRows();
                 updateTotals();
             });
             ['discount_type', 'discount_value', 'vat_percentage', 'ait_percentage', 'amount_paid',

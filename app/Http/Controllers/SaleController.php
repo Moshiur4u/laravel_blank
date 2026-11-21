@@ -132,6 +132,7 @@ class SaleController extends Controller
             'notes' => 'nullable|string|max:2000',
             'terms_conditions' => 'nullable|string|max:5000',
         ] + $this->saleItemValidationRules($request));
+        $this->validateWarrantyDurations($validated['items']);
 
         $customerPhone = trim($validated['customer_phone']);
         $requestedPaymentAmount = round((float) ($validated['amount_paid'] ?? 0), 2);
@@ -189,6 +190,7 @@ class SaleController extends Controller
                 $subtotal += $lineTotal;
                 $warrantyCover = (bool) ($item['warranty_cover'] ?? false);
                 $warrantyYear = $warrantyCover ? (int) $item['warranty_year'] : null;
+                $warrantyMonths = $warrantyCover ? (int) $item['warranty_months'] : null;
                 $serialMac = $warrantyCover ? trim($item['serial_mac']) : null;
                 $lineItems[] = compact(
                     'product',
@@ -197,6 +199,7 @@ class SaleController extends Controller
                     'lineTotal',
                     'warrantyCover',
                     'warrantyYear',
+                    'warrantyMonths',
                     'serialMac'
                 );
             }
@@ -298,6 +301,7 @@ class SaleController extends Controller
                     'line_total' => $lineItem['lineTotal'],
                     'warranty_cover' => $lineItem['warrantyCover'],
                     'warranty_year' => $lineItem['warrantyYear'],
+                    'warranty_months' => $lineItem['warrantyMonths'],
                     'serial_mac' => $lineItem['serialMac'],
                 ]);
 
@@ -441,6 +445,7 @@ class SaleController extends Controller
             'notes' => 'nullable|string|max:2000',
             'terms_conditions' => 'nullable|string|max:5000',
         ] + $this->saleItemValidationRules($request));
+        $this->validateWarrantyDurations($validated['items']);
 
         $invoice = app(SaleInvoiceUpdateService::class)->update(
             (int) $id,
@@ -479,7 +484,8 @@ class SaleController extends Controller
             'items.*.quantity' => 'required|integer|min:1',
             'items.*.unit_price' => 'required|numeric|min:0|max:9999999999999.99',
             'items.*.warranty_cover' => 'nullable|boolean',
-            'items.*.warranty_year' => 'nullable|integer|between:1,100',
+            'items.*.warranty_year' => 'nullable|integer|between:0,100',
+            'items.*.warranty_months' => 'nullable|integer|between:0,11',
             'items.*.serial_mac' => 'nullable|string|max:255',
         ];
         $items = $request->input('items', []);
@@ -489,11 +495,29 @@ class SaleController extends Controller
                 continue;
             }
 
-            $rules["items.{$index}.warranty_year"] = 'required|integer|between:1,100';
+            $rules["items.{$index}.warranty_year"] = 'required|integer|between:0,100';
+            $rules["items.{$index}.warranty_months"] = 'required|integer|between:0,11';
             $rules["items.{$index}.serial_mac"] = 'required|string|max:255';
         }
 
         return $rules;
+    }
+
+    private function validateWarrantyDurations(array $items): void
+    {
+        foreach ($items as $index => $item) {
+            if (
+                ! filter_var($item['warranty_cover'] ?? false, FILTER_VALIDATE_BOOLEAN)
+                || (int) $item['warranty_year'] > 0
+                || (int) $item['warranty_months'] > 0
+            ) {
+                continue;
+            }
+
+            throw ValidationException::withMessages([
+                "items.{$index}.warranty_months" => 'The warranty duration must be at least one month.',
+            ]);
+        }
     }
 
     private function amountInWords(float $amount): string

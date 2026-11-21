@@ -17,6 +17,7 @@ class SaleItem extends Model
         'line_total',
         'warranty_cover',
         'warranty_year',
+        'warranty_months',
         'serial_mac',
     ];
 
@@ -26,6 +27,7 @@ class SaleItem extends Model
         'line_total' => 'decimal:2',
         'warranty_cover' => 'boolean',
         'warranty_year' => 'integer',
+        'warranty_months' => 'integer',
     ];
 
     public function invoice()
