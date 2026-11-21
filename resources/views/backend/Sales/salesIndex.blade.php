@@ -276,25 +276,29 @@
                                                                     <label class="form-check-label fw-semibold small"
                                                                         for="warranty_cover_{{ $index }}">warrantyCover</label>
                                                                 </div>
-                                                                <div class="warranty-fields d-flex flex-wrap align-items-center gap-2 {{ $warrantyCoverEnabled ? '' : 'd-none' }}">
+                                                                <div
+                                                                    class="warranty-fields d-flex flex-nowrap align-items-center gap-2 {{ $warrantyCoverEnabled ? '' : 'd-none' }}">
                                                                     <label class="visually-hidden"
-                                                                        for="warranty_year_{{ $index }}">Warranty Years</label>
+                                                                        for="warranty_year_{{ $index }}">Warranty
+                                                                        Years</label>
                                                                     <input type="number"
                                                                         id="warranty_year_{{ $index }}"
                                                                         name="items[{{ $index }}][warranty_year]"
                                                                         class="form-control warranty-year-input"
-                                                                        style="width: 130px" min="0" max="100"
-                                                                        step="1" placeholder="Years"
+                                                                        style="width: 130px" min="0"
+                                                                        max="100" step="1" placeholder="Years"
                                                                         value="{{ old("items.$index.warranty_year", $oldItem['warranty_year'] ?? 0) }}"
                                                                         {{ $warrantyCoverEnabled ? 'required' : 'disabled' }}>
                                                                     <label class="visually-hidden"
-                                                                        for="warranty_months_{{ $index }}">Warranty Months</label>
+                                                                        for="warranty_months_{{ $index }}">Warranty
+                                                                        Months</label>
                                                                     <input type="number"
                                                                         id="warranty_months_{{ $index }}"
                                                                         name="items[{{ $index }}][warranty_months]"
                                                                         class="form-control warranty-months-input"
-                                                                        style="width: 130px" min="0" max="11"
-                                                                        step="1" placeholder="Months"
+                                                                        style="width: 130px" min="0"
+                                                                        max="11" step="1"
+                                                                        placeholder="Months"
                                                                         value="{{ old("items.$index.warranty_months", $oldItem['warranty_months'] ?? 0) }}"
                                                                         {{ $warrantyCoverEnabled ? 'required' : 'disabled' }}>
                                                                     <label class="visually-hidden"
@@ -304,8 +308,7 @@
                                                                         name="items[{{ $index }}][serial_mac]"
                                                                         class="form-control serial-mac-input"
                                                                         style="max-width: 280px"
-                                                                        placeholder="Device Serial / MAC"
-                                                                        maxlength="255"
+                                                                        placeholder="Device Serial / MAC" maxlength="255"
                                                                         value="{{ old("items.$index.serial_mac", $oldItem['serial_mac'] ?? '') }}"
                                                                         {{ $warrantyCoverEnabled ? 'required' : 'disabled' }}>
                                                                 </div>
@@ -421,7 +424,9 @@
                                         <label for="notes" class="form-label">Notes</label>
                                         <textarea name="notes" id="notes" rows="2" class="form-control">{{ old('notes', $editingInvoice?->notes) }}</textarea>
                                     </div>
-                                    <div class="mb-3">
+                                    <!--Terms & Conditions Create Invoice এ বন্ধ রাখার জন্য ও d-none ব্যবহার করা হয়েছে
+                                                    দেখতে চাইলে আবার d-none মুছে ফেললে হবে-->
+                                    <div class="mb-3 d-none">
                                         <label for="terms_conditions" class="form-label fw-semibold">Terms &
                                             Conditions</label>
                                         <textarea name="terms_conditions" id="terms_conditions" rows="5"

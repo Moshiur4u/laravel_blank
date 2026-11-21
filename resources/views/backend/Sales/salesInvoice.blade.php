@@ -210,7 +210,7 @@
                         <h6 class="mb-2 fw-bold text-dark">
                             <i class="bx bx-check-shield text-primary me-1"></i>Terms &amp; Conditions
                         </h6>
-                        {{-- শর্তাবলির লেখা বড় ও বামদিকে রেখে লাইনগুলোর মাঝে পড়ার উপযোগী ফাঁকা রাখা হয়। --}}
+                        <!--শর্তাবলির লেখা বড় ও বামদিকে রেখে লাইনগুলোর মাঝে পড়ার উপযোগী ফাঁকা রাখা হয়।-->
                         <div class="invoice-terms-content">{{ $termsConditions }}</div>
                     </div>
 
