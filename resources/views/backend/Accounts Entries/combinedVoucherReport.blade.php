@@ -30,6 +30,8 @@
                 </div>
                 <div class="card-body">
                     <form action="{{ route('voucher-report.combined') }}" method="GET" class="row g-3 align-items-end">
+                        {{--
+                        পুরোনো Daily/Monthly filter code reference হিসেবে রাখা হলো:
                         <div class="col-md-3">
                             <label for="period" class="form-label">Report period</label>
                             <select name="period" id="period" class="form-select">
@@ -46,6 +48,17 @@
                             <label for="month" class="form-label">Voucher month</label>
                             <input type="month" name="month" id="month" class="form-control"
                                 value="{{ $selectedMonth }}">
+                        </div>
+                        --}}
+                        <div class="col-md-3">
+                            <label for="from_date" class="form-label">From date</label>
+                            <input type="date" name="from_date" id="from_date" class="form-control"
+                                value="{{ $startDate }}">
+                        </div>
+                        <div class="col-md-3">
+                            <label for="to_date" class="form-label">To date</label>
+                            <input type="date" name="to_date" id="to_date" class="form-control"
+                                value="{{ $endDate }}">
                         </div>
                         <div class="col-md-3">
                             <label for="voucher" class="form-label">Voucher No.</label>
@@ -89,9 +102,9 @@
                         'reportTitle' => 'CashBook Report', // print header-এ CashBook name দেখায়।
                         'reportSubtitle' =>
                             'Period: ' .
-                            ($period === 'daily'
-                                ? \Illuminate\Support\Carbon::parse($startDate)->format('d M Y')
-                                : \Illuminate\Support\Carbon::parse($startDate)->format('F Y')),
+                            \Illuminate\Support\Carbon::parse($startDate)->format('d M Y') .
+                            ' - ' .
+                            \Illuminate\Support\Carbon::parse($endDate)->format('d M Y'),
                         'reportGeneratedAt' => now()->format('d M Y, h:i A'),
                     ])
                     <div class="mb-4 row align-items-start d-print-none">
@@ -100,16 +113,16 @@
                             <div class="text-muted">
                                 Period:
                                 <strong>
-                                    {{ $period === 'daily'
-                                        ? \Illuminate\Support\Carbon::parse($startDate)->format('d M Y')
-                                        : \Illuminate\Support\Carbon::parse($startDate)->format('F Y') }}
+                                    {{ \Illuminate\Support\Carbon::parse($startDate)->format('d M Y') }}
+                                    -
+                                    {{ \Illuminate\Support\Carbon::parse($endDate)->format('d M Y') }}
                                 </strong>
                             </div>
                         </div>
                         <div class="col-5 text-end d-print-none">
                             <h5 class="mb-1 fw-bold">Report Generated</h5>
                             <div>{{ now()->format('d M Y, h:i A') }}</div>
-                            <div class="text-muted">{{ ucfirst($period) }} voucher entries</div>
+                            <div class="text-muted">Voucher entries</div>
                         </div>
                     </div>
 
@@ -307,12 +320,8 @@
                                                             class="mt-2" style="min-width: 240px">
                                                             @csrf
                                                             @method('PUT')
-                                                            <input type="hidden" name="period"
-                                                                value="{{ $period }}">
-                                                            <input type="hidden" name="date"
-                                                                value="{{ $period === 'daily' ? $startDate : '' }}">
-                                                            <input type="hidden" name="month"
-                                                                value="{{ $period === 'monthly' ? $selectedMonth : '' }}">
+                                                            <input type="hidden" name="from_date" value="{{ $startDate }}">
+                                                            <input type="hidden" name="to_date" value="{{ $endDate }}">
                                                             <input type="hidden" name="voucher" value="{{ $voucherSearch }}">
                                                             <input type="hidden" name="created_by" value="{{ $selectedCreator }}">
                                                             <label class="mb-1 form-label small">Date</label>
@@ -369,11 +378,8 @@
                                                         data-delete-message="Delete this voucher? If it is linked to a sale invoice, the invoice will be voided and its stock, ledger, and payment entries will be reversed.">
                                                         @csrf
                                                         @method('DELETE')
-                                                        <input type="hidden" name="period" value="{{ $period }}">
-                                                        <input type="hidden" name="date"
-                                                            value="{{ $period === 'daily' ? $startDate : '' }}">
-                                                        <input type="hidden" name="month"
-                                                            value="{{ $period === 'monthly' ? $selectedMonth : '' }}">
+                                                        <input type="hidden" name="from_date" value="{{ $startDate }}">
+                                                        <input type="hidden" name="to_date" value="{{ $endDate }}">
                                                         <input type="hidden" name="voucher" value="{{ $voucherSearch }}">
                                                         <input type="hidden" name="created_by" value="{{ $selectedCreator }}">
                                                         <button type="submit"
@@ -408,13 +414,6 @@
     </div>
 
     <style>
-        #monthly-date-field {
-            display: {{ $period === 'monthly' ? 'block' : 'none' }};
-        }
-
-        #daily-date-field {
-            display: {{ $period === 'daily' ? 'block' : 'none' }};
-        }
 
         @media print {
             header,
@@ -501,13 +500,6 @@
         }
     </style>
 
-    <script>
-        document.getElementById('period').addEventListener('change', function() {
-            const isMonthly = this.value === 'monthly';
-            document.getElementById('daily-date-field').style.display = isMonthly ? 'none' : 'block';
-            document.getElementById('monthly-date-field').style.display = isMonthly ? 'block' : 'none';
-        });
-    </script>
     @include('backend.partials.reportPrintStyles') {{-- সব report-এর একই portrait print layout প্রয়োগ করে। --}}
 @endsection
 

@@ -1,4 +1,15 @@
-# Combined Voucher Report-এর অতিরিক্ত ফিল্টার
+# Combined Voucher Report: From date ও To date ফিল্টার
+
+## পরিবর্তনের উদ্দেশ্য
+
+Combined Voucher Report-এ আর Daily বা Monthly period dropdown থাকবে না। Report-টি শুধুমাত্র দুইটি date field দিয়ে filter হবে:
+
+- `From date`
+- `To date`
+
+নির্বাচিত range-এর মধ্যে voucher rows এবং summary totals দেখানো হবে।
+
+পুরোনো Daily/Monthly filter controls ও controller date-calculation logic মুছে না ফেলে Blade/PHP comment block-এর মধ্যে reference হিসেবে রাখা হয়েছে। এগুলো বর্তমানে execute বা render হয় না; সক্রিয় filter কেবল From date ও To date।
 
 ## Controller (Code and Explanation)
 
@@ -7,11 +18,33 @@
 ### Filter যাচাই ও রিপোর্টে প্রয়োগ
 
 ```php
+'from_date' => ['nullable', 'date'],
+'to_date' => ['nullable', 'date', 'after_or_equal:from_date'],
 'voucher' => ['nullable', 'string', 'max:100'],
 'created_by' => ['nullable', 'integer', 'exists:users,id'],
 ```
 
-`index()` এবং `export()`—দুই জায়গাতেই এই validation যোগ করা হয়েছে। Voucher No. আংশিক মিলিয়ে খোঁজা যায়; Created by-তে শুধু `users` টেবিলে থাকা ব্যবহারকারীর ID গ্রহণ করা হয়।
+- `from_date`: Valid date হলে report range-এর শুরু নির্ধারণ করে।
+- `to_date`: Valid date হতে হবে এবং `from_date`-এর আগে হলে validation error হবে।
+- `index()` ও `export()`—দুই method-এ একই validation রাখা হয়েছে।
+- `voucher`: Voucher number-এর আংশিক search।
+- `created_by`: `users` table-এ থাকা valid user ID।
+
+```php
+$startDate = $filters['from_date'] ?? today()->toDateString();
+$endDate = $filters['to_date'] ?? $startDate;
+$reportQuery = fn () => $this->combinedVoucherQuery(
+    $startDate,
+    $endDate,
+    $voucherSearch,
+    $createdBy
+);
+```
+
+- `$startDate`: `from_date` না থাকলে আজকের date।
+- `$endDate`: `to_date` না থাকলে শুরু date।
+- `combinedVoucherQuery(...)`: একই date range দিয়ে rows এবং totals হিসাব করে।
+- `voucherSearch` ও `createdBy`: Query filter হিসেবে একই data ব্যবহার করে।
 
 ```php
 $voucherSearch = $filters['voucher'] ?? null;
@@ -57,14 +90,12 @@ if ($createdBy !== null) {
 }
 ```
 
-Date filter-এর বর্তমান Daily/Monthly আচরণ অপরিবর্তিত রাখা হয়েছে।
-
-নতুন feature test-এ voucher number ও creator একসঙ্গে filter করলে শুধু মিলে যাওয়া voucher এবং তারই summary থাকে—তা যাচাই করা হয়েছে:
+From date ও To date, Voucher number এবং Creator filter একসঙ্গে প্রয়োগ করা যায়। নতুন feature test-এ voucher number ও creator একসঙ্গে filter করলে শুধু মিলে যাওয়া voucher এবং তারই summary থাকে—তা যাচাই করা হয়েছে:
 
 ```php
 ->get(route('voucher-report.combined', [
-    'period' => 'daily',
-    'date' => '2026-10-13',
+    'from_date' => '2026-10-13',
+    'to_date' => '2026-10-13',
     'voucher' => 'FILTER-MATCH',
     'created_by' => $creator->id,
 ]))
@@ -111,6 +142,14 @@ Route::get('/voucher-report/combined', [CombinedVoucherReportController::class, 
 ফাইল: `resources/views/backend/Accounts Entries/combinedVoucherReport.blade.php`
 
 ```blade
+<label for="from_date" class="form-label">From date</label>
+<input type="date" name="from_date" id="from_date" class="form-control"
+    value="{{ $startDate }}">
+
+<label for="to_date" class="form-label">To date</label>
+<input type="date" name="to_date" id="to_date" class="form-control"
+    value="{{ $endDate }}">
+
 <label for="voucher" class="form-label">Voucher No.</label>
 <input type="text" name="voucher" id="voucher" class="form-control" maxlength="100"
     value="{{ $voucherSearch }}" placeholder="Search voucher number">
@@ -126,4 +165,10 @@ Route::get('/voucher-report/combined', [CombinedVoucherReportController::class, 
 </select>
 ```
 
-আগের Date (Daily/Monthly) control রাখা হয়েছে। নতুন Voucher No. input আংশিক নম্বর দিয়ে খোঁজে, আর Created by dropdown নির্দিষ্ট ব্যবহারকারীর voucher দেখায়। Non-admin-দের dropdown-এ admin account দেখা যায় না; Admin সব account দেখতে পারে। Export link-এ বর্তমান query parameter আগে থেকেই পাঠানো হয়; edit/delete form-এও filter-এর মান লুকানো field হিসেবে রাখা হয়েছে, যাতে কাজ শেষে একই filter-সহ report ফিরে আসে।
+- `from_date`: Selected start date পাঠায়।
+- `to_date`: Selected end date পাঠায়।
+- Voucher No. input আংশিক নম্বর দিয়ে খোঁজে।
+- Created by dropdown নির্দিষ্ট ব্যবহারকারীর voucher দেখায়।
+- Non-admin-দের dropdown-এ admin account দেখা যায় না; Admin সব account দেখতে পারে।
+- Export link-এ বর্তমান date range ও অন্য query parameter পাঠানো হয়।
+- Edit/delete form-এও date range ও অন্য filter লুকানো field হিসেবে থাকে, যাতে কাজ শেষে একই filter-সহ report ফিরে আসে।

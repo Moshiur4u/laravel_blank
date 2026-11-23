@@ -32,13 +32,18 @@ class CombinedVoucherReportController extends Controller
     public function index(Request $request): View|RedirectResponse
     {
         $validator = Validator::make($request->query(), [
-            'period' => ['nullable', 'in:daily,monthly'],
-            'date' => ['nullable', 'required_if:period,daily', 'date'],
-            'month' => ['nullable', 'required_if:period,monthly', 'date_format:Y-m'],
+            'from_date' => ['nullable', 'date'],
+            'to_date' => ['nullable', 'date', 'after_or_equal:from_date'],
             'voucher' => ['nullable', 'string', 'max:100'],
             'created_by' => ['nullable', 'integer', 'exists:users,id'],
         ]);
 
+        /*
+         * পুরোনো Daily/Monthly validation reference হিসেবে রাখা হলো:
+         * 'period' => ['nullable', 'in:daily,monthly'],
+         * 'date' => ['nullable', 'required_if:period,daily', 'date'],
+         * 'month' => ['nullable', 'required_if:period,monthly', 'date_format:Y-m'],
+         */
         if ($validator->fails()) {
             return redirect()->route('voucher-report.combined')
                 ->withErrors($validator)
@@ -46,18 +51,23 @@ class CombinedVoucherReportController extends Controller
         }
 
         $filters = $validator->validated();
-        $period = $filters['period'] ?? 'daily';
-        if ($period === 'monthly') {
-            $selectedMonth = Carbon::createFromFormat('Y-m', $filters['month'] ?? today()->format('Y-m'));
-            $startDate = $selectedMonth->copy()->startOfMonth()->toDateString();
-            $endDate = $selectedMonth->copy()->endOfMonth()->toDateString();
-            $selectedMonth = $selectedMonth->format('Y-m');
-        } else {
-            $startDate = $filters['date'] ?? today()->toDateString();
-            $endDate = $startDate;
-            $selectedMonth = today()->format('Y-m');
-        }
+        $startDate = $filters['from_date'] ?? today()->toDateString();
+        $endDate = $filters['to_date'] ?? $startDate;
 
+        /*
+         * পুরোনো Daily/Monthly date calculation reference হিসেবে রাখা হলো:
+         * $period = $filters['period'] ?? 'daily';
+         * if ($period === 'monthly') {
+         *     $selectedMonth = Carbon::createFromFormat('Y-m', $filters['month'] ?? today()->format('Y-m'));
+         *     $startDate = $selectedMonth->copy()->startOfMonth()->toDateString();
+         *     $endDate = $selectedMonth->copy()->endOfMonth()->toDateString();
+         *     $selectedMonth = $selectedMonth->format('Y-m');
+         * } else {
+         *     $startDate = $filters['date'] ?? today()->toDateString();
+         *     $endDate = $startDate;
+         *     $selectedMonth = today()->format('Y-m');
+         * }
+         */
         $voucherSearch = $filters['voucher'] ?? null;
         $createdBy = isset($filters['created_by']) ? (int) $filters['created_by'] : null;
         $reportQuery = fn () => $this->combinedVoucherQuery($startDate, $endDate, $voucherSearch, $createdBy);
@@ -84,10 +94,8 @@ class CombinedVoucherReportController extends Controller
         $creatorsQuery = User::query()->visibleToCurrentUser(); // combined report-এ বর্তমান user-এর জন্য দৃশ্যমান creator-দের query করে।
 
         return view('backend.Accounts Entries.combinedVoucherReport', [
-            'period' => $period,
             'startDate' => $startDate,
             'endDate' => $endDate,
-            'selectedMonth' => $selectedMonth,
             'voucherSearch' => $voucherSearch,
             'selectedCreator' => $createdBy,
             'creators' => $creatorsQuery->orderBy('name')->get(['id', 'name']),
@@ -185,7 +193,7 @@ class CombinedVoucherReportController extends Controller
             });
         }
 
-        return redirect()->route('voucher-report.combined', $request->only(['period', 'date', 'month', 'voucher', 'created_by']))
+        return redirect()->route('voucher-report.combined', $request->only(['from_date', 'to_date', 'voucher', 'created_by']))
             ->with('success', 'Voucher updated successfully.');
     }
 
@@ -214,13 +222,13 @@ class CombinedVoucherReportController extends Controller
                 $voidService = app(SaleInvoiceVoidService::class);
                 $invoice = SaleInvoice::query()->findOrFail((int) $saleInvoiceId);
                 if (! $voidService->canVoid($invoice)) {
-                    return redirect()->route('voucher-report.combined', $request->only(['period', 'date', 'month', 'voucher', 'created_by']))
+                    return redirect()->route('voucher-report.combined', $request->only(['from_date', 'to_date', 'voucher', 'created_by']))
                         ->with('warning', 'You do not have permission to void this sale invoice, so the voucher was not deleted.');
                 }
 
                 $invoiceNo = $voidService->void((int) $saleInvoiceId);
 
-                return redirect()->route('voucher-report.combined', $request->only(['period', 'date', 'month', 'voucher', 'created_by']))
+                return redirect()->route('voucher-report.combined', $request->only(['from_date', 'to_date', 'voucher', 'created_by']))
                     ->with('success', "Invoice {$invoiceNo} was voided; its stock and payment entries were reversed.");
             }
 
@@ -250,7 +258,7 @@ class CombinedVoucherReportController extends Controller
             });
         }
 
-        return redirect()->route('voucher-report.combined', $request->only(['period', 'date', 'month', 'voucher', 'created_by']))
+        return redirect()->route('voucher-report.combined', $request->only(['from_date', 'to_date', 'voucher', 'created_by']))
             ->with('success', 'Voucher deleted successfully.');
     }
 
@@ -260,13 +268,18 @@ class CombinedVoucherReportController extends Controller
     public function export(Request $request): StreamedResponse|RedirectResponse
     {
         $validator = Validator::make($request->query(), [
-            'period' => ['nullable', 'in:daily,monthly'],
-            'date' => ['nullable', 'required_if:period,daily', 'date'],
-            'month' => ['nullable', 'required_if:period,monthly', 'date_format:Y-m'],
+            'from_date' => ['nullable', 'date'],
+            'to_date' => ['nullable', 'date', 'after_or_equal:from_date'],
             'voucher' => ['nullable', 'string', 'max:100'],
             'created_by' => ['nullable', 'integer', 'exists:users,id'],
         ]);
 
+        /*
+         * পুরোনো Daily/Monthly validation reference হিসেবে রাখা হলো:
+         * 'period' => ['nullable', 'in:daily,monthly'],
+         * 'date' => ['nullable', 'required_if:period,daily', 'date'],
+         * 'month' => ['nullable', 'required_if:period,monthly', 'date_format:Y-m'],
+         */
         if ($validator->fails()) {
             return redirect()->route('voucher-report.combined')
                 ->withErrors($validator)
@@ -274,18 +287,26 @@ class CombinedVoucherReportController extends Controller
         }
 
         $filters = $validator->validated();
-        $period = $filters['period'] ?? 'daily';
-        if ($period === 'monthly') {
-            $selectedMonth = Carbon::createFromFormat('Y-m', $filters['month'] ?? today()->format('Y-m'));
-            $startDate = $selectedMonth->copy()->startOfMonth()->toDateString();
-            $endDate = $selectedMonth->copy()->endOfMonth()->toDateString();
-            $periodLabel = $selectedMonth->format('F Y');
-        } else {
-            $startDate = $filters['date'] ?? today()->toDateString();
-            $endDate = $startDate;
-            $periodLabel = Carbon::parse($startDate)->format('d M Y');
-        }
+        $startDate = $filters['from_date'] ?? today()->toDateString();
+        $endDate = $filters['to_date'] ?? $startDate;
+        $periodLabel = Carbon::parse($startDate)->format('d M Y')
+            .' - '
+            .Carbon::parse($endDate)->format('d M Y');
 
+        /*
+         * পুরোনো Daily/Monthly date calculation reference হিসেবে রাখা হলো:
+         * $period = $filters['period'] ?? 'daily';
+         * if ($period === 'monthly') {
+         *     $selectedMonth = Carbon::createFromFormat('Y-m', $filters['month'] ?? today()->format('Y-m'));
+         *     $startDate = $selectedMonth->copy()->startOfMonth()->toDateString();
+         *     $endDate = $selectedMonth->copy()->endOfMonth()->toDateString();
+         *     $periodLabel = $selectedMonth->format('F Y');
+         * } else {
+         *     $startDate = $filters['date'] ?? today()->toDateString();
+         *     $endDate = $startDate;
+         *     $periodLabel = Carbon::parse($startDate)->format('d M Y');
+         * }
+         */
         $voucherSearch = $filters['voucher'] ?? null;
         $createdBy = isset($filters['created_by']) ? (int) $filters['created_by'] : null;
         $totals = $this->combinedVoucherQuery($startDate, $endDate, $voucherSearch, $createdBy)

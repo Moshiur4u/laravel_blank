@@ -53,7 +53,7 @@ test('combined voucher report shows employee debit and credit entries for a day'
     ]);
 
     $this->actingAs($creator)
-        ->get(route('voucher-report.combined', ['period' => 'daily', 'date' => '2026-10-13']))
+        ->get(route('voucher-report.combined', ['from_date' => '2026-10-13', 'to_date' => '2026-10-13']))
         ->assertOk()
         ->assertSee('EPV-COMBINED-001')
         ->assertSee('DBV-COMBINED-001')
@@ -69,7 +69,7 @@ test('combined voucher report shows employee debit and credit entries for a day'
         ->assertSee('৳-120.00');
 });
 
-test('combined voucher report can show a selected month', function () {
+test('combined voucher report can show a selected date range', function () {
     $creator = User::factory()->create();
 
     VoucherEntry::create([
@@ -83,7 +83,7 @@ test('combined voucher report can show a selected month', function () {
     ]);
 
     $this->actingAs($creator)
-        ->get(route('voucher-report.combined', ['period' => 'monthly', 'month' => '2026-10']))
+        ->get(route('voucher-report.combined', ['from_date' => '2026-10-01', 'to_date' => '2026-10-31']))
         ->assertOk()
         ->assertSee('DBV-COMBINED-MONTH-001')
         ->assertViewHas('startDate', '2026-10-01')
@@ -125,8 +125,8 @@ test('combined voucher report filters vouchers by voucher number and creator', f
 
     $this->actingAs($creator)
         ->get(route('voucher-report.combined', [
-            'period' => 'daily',
-            'date' => '2026-10-13',
+            'from_date' => '2026-10-13',
+            'to_date' => '2026-10-13',
             'voucher' => 'FILTER-MATCH',
             'created_by' => $creator->id,
         ]))
@@ -178,7 +178,7 @@ test('voucher viewers without delete permission see the confirmation and cannot 
     ]);
 
     $this->actingAs($viewer)
-        ->get(route('voucher-report.combined', ['period' => 'daily', 'date' => today()->toDateString()]))
+        ->get(route('voucher-report.combined', ['from_date' => today()->toDateString(), 'to_date' => today()->toDateString()]))
         ->assertOk()
         ->assertSee('data-voucher-delete-denied', false)
         ->assertSee('data-delete-message="Delete this voucher? If it is linked to a sale invoice', false)
@@ -221,8 +221,8 @@ test('deleting an old invoice voucher without void permission returns to the rep
         'voucherable_id' => $invoice->id,
     ]);
     $reportUrl = route('voucher-report.combined', [
-        'period' => 'daily',
-        'date' => today()->toDateString(),
+        'from_date' => today()->toDateString(),
+        'to_date' => today()->toDateString(),
     ]);
 
     $this->actingAs($viewer)
@@ -230,8 +230,8 @@ test('deleting an old invoice voucher without void permission returns to the rep
             'category' => 'credit',
             'voucherId' => $voucher->id,
         ]), [
-            'period' => 'daily',
-            'date' => today()->toDateString(),
+            'from_date' => today()->toDateString(),
+            'to_date' => today()->toDateString(),
         ])
         ->assertRedirect($reportUrl)
         ->assertSessionHas(
@@ -274,15 +274,15 @@ test('combined voucher report edits and deletes employee and standalone voucher 
 
     $this->actingAs($creator)
         ->put(route('voucher-report.combined.update', ['category' => 'employee', 'voucherId' => $employeeVoucher->id]), [
-            'period' => 'daily',
-            'date' => $date,
+            'from_date' => $date,
+            'to_date' => $date,
             'expense_type' => 'bonus',
             'payment_date' => $date,
             'amount' => '25.00',
             'reference' => 'EMP-REF',
             'notes' => 'Updated note',
         ])
-        ->assertRedirect(route('voucher-report.combined', ['period' => 'daily', 'date' => $date]));
+        ->assertRedirect(route('voucher-report.combined', ['from_date' => $date, 'to_date' => $date]));
 
     $this->assertDatabaseHas('employee_payment_vouchers', [
         'id' => $employeeVoucher->id,
@@ -294,15 +294,15 @@ test('combined voucher report edits and deletes employee and standalone voucher 
 
     $this->actingAs($creator)
         ->put(route('voucher-report.combined.update', ['category' => 'debit', 'voucherId' => $debitVoucher->id]), [
-            'period' => 'daily',
-            'date' => $date,
+            'from_date' => $date,
+            'to_date' => $date,
             'voucher_date' => $date,
             'expense_income_type' => 'Updated office expense',
             'amount' => '35.00',
             'reference' => 'DB-REF',
             'description' => 'Updated description',
         ])
-        ->assertRedirect(route('voucher-report.combined', ['period' => 'daily', 'date' => $date]));
+        ->assertRedirect(route('voucher-report.combined', ['from_date' => $date, 'to_date' => $date]));
 
     $this->assertDatabaseHas('voucher_entries', [
         'id' => $debitVoucher->id,
@@ -314,10 +314,10 @@ test('combined voucher report edits and deletes employee and standalone voucher 
 
     $this->actingAs($creator)
         ->delete(route('voucher-report.combined.destroy', ['category' => 'employee', 'voucherId' => $employeeVoucher->id]), [
-            'period' => 'daily',
-            'date' => $date,
+            'from_date' => $date,
+            'to_date' => $date,
         ])
-        ->assertRedirect(route('voucher-report.combined', ['period' => 'daily', 'date' => $date]));
+        ->assertRedirect(route('voucher-report.combined', ['from_date' => $date, 'to_date' => $date]));
     $this->assertDatabaseMissing('employee_payment_vouchers', ['id' => $employeeVoucher->id]);
 });
 
