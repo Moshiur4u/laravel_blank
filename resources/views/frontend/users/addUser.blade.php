@@ -31,10 +31,12 @@
 
             <div class="row justify-content-center">
                 <div class="col-lg-9 col-xl-8">
-                    <div class="card border-0 shadow-sm radius-10">
-                        <div class="card-header bg-transparent border-bottom py-3 d-flex align-items-center justify-content-between">
-                            <div class="d-flex align-items-center gap-2">
-                                <div class="widgets-icons-2 rounded-circle bg-light-primary text-primary" style="width: 40px; height: 40px; display: flex; align-items: center; justify-content: center;">
+                    <div class="border-0 shadow-sm card radius-10">
+                        <div
+                            class="py-3 bg-transparent card-header border-bottom d-flex align-items-center justify-content-between">
+                            <div class="gap-2 d-flex align-items-center">
+                                <div class="widgets-icons-2 rounded-circle bg-light-primary text-primary"
+                                    style="width: 40px; height: 40px; display: flex; align-items: center; justify-content: center;">
                                     <i class="bx bxs-user-plus fs-5"></i>
                                 </div>
                                 <div>
@@ -46,12 +48,12 @@
                                 <i class="bx bx-list-ul me-1"></i> All Employees
                             </a>
                         </div>
-                        <div class="card-body p-4">
+                        <div class="p-4 card-body">
                             <form action="{{ route('user.store') }}" method="POST" enctype="multipart/form-data">
                                 @csrf
 
                                 {{-- Name and Role --}}
-                                <div class="row g-3 mb-3">
+                                <div class="mb-3 row g-3">
                                     <div class="col-md-6">
                                         <label for="name" class="form-label fw-semibold">
                                             User Name <span class="text-danger">*</span>
@@ -60,39 +62,42 @@
                                             <span class="input-group-text bg-light"><i class="bx bx-user"></i></span>
                                             <input type="text" name="name" id="name"
                                                 class="form-control @error('name') is-invalid @enderror"
-                                                placeholder="Enter full name"
-                                                value="{{ old('name') }}" required>
+                                                placeholder="Enter full name" value="{{ old('name') }}" required>
                                         </div>
                                         @error('name')
-                                            <span class="text-danger small d-block mt-1">{{ $message }}</span>
+                                            <span class="mt-1 text-danger small d-block">{{ $message }}</span>
                                         @enderror
                                     </div>
-
                                     <div class="col-md-6">
                                         <label for="roles" class="form-label fw-semibold">
                                             Role <span class="text-danger">*</span>
                                         </label>
                                         <div class="input-group">
-                                            <span class="input-group-text bg-light"><i class="bx bx-shield-quarter"></i></span>
-                                            <select class="form-select @error('roles') is-invalid @enderror" name="roles" id="roles" required>
-                                                <option value="" selected disabled>-- Select Role --</option>
-                                                @foreach ($Roles as $role)
-                                                    <option value="{{ $role->name }}"
-                                                        {{ old('roles') == $role->name ? 'selected' : '' }}
-                                                        {{ in_array($role->name, $assignableRoleNames, true) ? '' : 'disabled' }}>
-                                                        {{ ucfirst($role->name) }}
-                                                    </option>
-                                                @endforeach
+                                            <span class="input-group-text bg-light"><i
+                                                    class="bx bx-shield-quarter"></i></span>
+
+                                            <select class="form-select @error('roles') is-invalid @enderror" name="roles"
+                                                id="roles" required>
+                                                @can('employee.role.assign')
+                                                    <option value="" selected disabled>-- Select Role --</option>
+                                                    @foreach ($Roles as $role)
+                                                        <option value="{{ $role->name }}"
+                                                            {{ old('roles') == $role->name ? 'selected' : '' }}
+                                                            {{ in_array($role->name, $assignableRoleNames, true) ? '' : 'disabled' }}>
+                                                            {{ ucfirst($role->name) }}
+                                                        </option>
+                                                    @endforeach
+                                                @endcan
                                             </select>
                                         </div>
                                         @error('roles')
-                                            <span class="text-danger small d-block mt-1">{{ $message }}</span>
+                                            <span class="mt-1 text-danger small d-block">{{ $message }}</span>
                                         @enderror
                                     </div>
                                 </div>
 
                                 {{-- Email, Password, Confirm Password --}}
-                                <div class="row g-3 mb-3">
+                                <div class="mb-3 row g-3">
                                     <div class="col-md-4">
                                         <label for="email" class="form-label fw-semibold">
                                             User Email <span class="text-danger">*</span>
@@ -101,11 +106,10 @@
                                             <span class="input-group-text bg-light"><i class="bx bx-envelope"></i></span>
                                             <input type="email" name="email" id="email"
                                                 class="form-control @error('email') is-invalid @enderror"
-                                                placeholder="user@example.com"
-                                                value="{{ old('email') }}" required>
+                                                placeholder="user@example.com" value="{{ old('email') }}" required>
                                         </div>
                                         @error('email')
-                                            <span class="text-danger small d-block mt-1">{{ $message }}</span>
+                                            <span class="mt-1 text-danger small d-block">{{ $message }}</span>
                                         @enderror
                                     </div>
 
@@ -120,7 +124,7 @@
                                                 placeholder="Enter password" required>
                                         </div>
                                         @error('password')
-                                            <span class="text-danger small d-block mt-1">{{ $message }}</span>
+                                            <span class="mt-1 text-danger small d-block">{{ $message }}</span>
                                         @enderror
                                     </div>
 
@@ -135,24 +139,23 @@
                                                 placeholder="Re-type password" required>
                                         </div>
                                         @error('confarmPassword')
-                                            <span class="text-danger small d-block mt-1">{{ $message }}</span>
+                                            <span class="mt-1 text-danger small d-block">{{ $message }}</span>
                                         @enderror
                                     </div>
                                 </div>
 
                                 {{-- বেতন এবং NID/Smart Card ঐচ্ছিকভাবে কর্মীর তথ্যের সঙ্গে জমা হয়। --}}
-                                <div class="row g-3 mb-3">
+                                <div class="mb-3 row g-3">
                                     <div class="col-md-6">
                                         <label for="phone" class="form-label fw-semibold">Phone</label>
                                         <div class="input-group">
                                             <span class="input-group-text bg-light"><i class="bx bx-phone"></i></span>
                                             <input type="text" name="phone" id="phone"
-                                                class="form-control @error('phone') is-invalid @enderror"
-                                                maxlength="30" placeholder="Enter employee phone"
-                                                value="{{ old('phone') }}">
+                                                class="form-control @error('phone') is-invalid @enderror" maxlength="30"
+                                                placeholder="Enter employee phone" value="{{ old('phone') }}">
                                         </div>
                                         @error('phone')
-                                            <span class="text-danger small d-block mt-1">{{ $message }}</span>
+                                            <span class="mt-1 text-danger small d-block">{{ $message }}</span>
                                         @enderror
                                     </div>
                                     <div class="col-md-6">
@@ -160,16 +163,17 @@
                                         <div class="input-group">
                                             <span class="input-group-text bg-light"><i class="bx bx-money"></i></span>
                                             <input type="number" name="salary" id="salary"
-                                                class="form-control @error('salary') is-invalid @enderror"
-                                                min="0" max="9999999999.99" step="0.01" placeholder="Enter salary"
+                                                class="form-control @error('salary') is-invalid @enderror" min="0"
+                                                max="9999999999.99" step="0.01" placeholder="Enter salary"
                                                 value="{{ old('salary') }}">
                                         </div>
                                         @error('salary')
-                                            <span class="text-danger small d-block mt-1">{{ $message }}</span>
+                                            <span class="mt-1 text-danger small d-block">{{ $message }}</span>
                                         @enderror
                                     </div>
                                     <div class="col-md-6">
-                                        <label for="nid_number" class="form-label fw-semibold">NID / Smart Card No.</label>
+                                        <label for="nid_number" class="form-label fw-semibold">NID / Smart Card
+                                            No.</label>
                                         <div class="input-group">
                                             <span class="input-group-text bg-light"><i class="bx bx-id-card"></i></span>
                                             <input type="text" name="nid_number" id="nid_number"
@@ -180,7 +184,7 @@
                                                 value="{{ old('nid_number') }}">
                                         </div>
                                         @error('nid_number')
-                                            <span class="text-danger small d-block mt-1">{{ $message }}</span>
+                                            <span class="mt-1 text-danger small d-block">{{ $message }}</span>
                                         @enderror
                                     </div>
                                 </div>
@@ -196,26 +200,27 @@
                                 <div class="mb-4">
                                     <label for="imageInput" class="form-label fw-semibold">Choose Photo</label>
                                     <input type="file" id="imageInput" name="image"
-                                        class="form-control @error('image') is-invalid @enderror"
-                                        accept="image/*">
-                                    <small class="text-muted d-block mt-1">Allowed formats: JPEG, PNG, JPG, GIF (Max: 1MB)</small>
+                                        class="form-control @error('image') is-invalid @enderror" accept="image/*">
+                                    <small class="mt-1 text-muted d-block">Allowed formats: JPEG, PNG, JPG, GIF (Max:
+                                        1MB)</small>
                                     @error('image')
-                                        <span class="text-danger small d-block mt-1">{{ $message }}</span>
+                                        <span class="mt-1 text-danger small d-block">{{ $message }}</span>
                                     @enderror
 
-                                    <div class="mt-3 text-center p-3 border rounded bg-light" id="previewContainer" style="display: none;">
-                                        <p class="small text-muted mb-2">Photo Preview</p>
+                                    <div class="p-3 mt-3 text-center border rounded bg-light" id="previewContainer"
+                                        style="display: none;">
+                                        <p class="mb-2 small text-muted">Photo Preview</p>
                                         <img id="preview" alt="User Preview"
                                             style="max-width: 140px; max-height: 140px; border-radius: 50%; object-fit: cover; border: 3px solid #0d6efd; box-shadow: 0 4px 6px rgba(0,0,0,0.08);" />
                                     </div>
                                 </div>
 
                                 {{-- Buttons --}}
-                                <div class="d-flex align-items-center gap-2 pt-2 border-top">
-                                    <button class="btn btn-primary px-4" type="submit">
+                                <div class="gap-2 pt-2 d-flex align-items-center border-top">
+                                    <button class="px-4 btn btn-primary" type="submit">
                                         <i class="bx bx-save me-1"></i> Save Employee
                                     </button>
-                                    <a href="{{ route('user.index') }}" class="btn btn-outline-secondary px-3">
+                                    <a href="{{ route('user.index') }}" class="px-3 btn btn-outline-secondary">
                                         Cancel
                                     </a>
                                 </div>

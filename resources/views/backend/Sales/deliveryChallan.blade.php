@@ -101,15 +101,18 @@
                     @endif
                     <div class="pt-4 mt-5 row">
                         <div class="col-6">
-                            <div class="pt-2 border-top">Customer Signature</div>
+                            <div class="pt-2 border-top">Authorized Signature</div>
                         </div>
-                        <div class="col-6 text-end">
-                            <div class="pt-2 border-top">Delivered by {{ $invoice->employee->name ?? 'N/A' }}</div>
+                        <div class="col-6 text-end d-flex justify-content-end">
+                            <div class="pt-2 text-center border-top w-75">
+                                <div class="fw-semibold text-dark">Customer Signature</div>
+                            </div>
                         </div>
                     </div>
                 </div>
             </div>
         </div>
+    </div>
     </div>
 
     <style>

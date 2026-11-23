@@ -80,7 +80,7 @@
                             <div class="text-muted">Invoice: <strong>{{ $invoice->invoice_no }}</strong></div>
                             <div class="text-muted">Date: {{ $invoice->invoice_date->format('d M Y') }}</div>
                         </div>
-                        <div class="col-5 text-end invoice-customer-info">
+                        <div class="col-5 text-end text-nowrap invoice-customer-info">
                             <h5 class="mb-1 fw-bold">Customer</h5>
                             <div><i class="bx bx-user me-1" aria-hidden="true"></i>Name:
                                 {{ $invoice->customer_name ?? ($invoice->customer?->name ?? 'Walk-in Customer') }}</div>
@@ -218,15 +218,15 @@
                     <div class="pt-5 mt-4 row">
                         <div class="col-6">
                             <div class="pt-2 text-center border-top w-75">
-                                <div class="fw-semibold text-dark">Customer Signature</div>
-                                <div class="small text-muted">Signature & Date</div>
+                                <div class="fw-semibold text-dark">Authorized Signature</div>
+                                <div class="small text-muted">Prepared by: {{ $quotation->user->name ?? 'Sales Officer' }}
+                                </div>
                             </div>
                         </div>
                         <div class="col-6 text-end d-flex justify-content-end">
                             <div class="pt-2 text-center border-top w-75">
-                                <div class="fw-semibold text-dark">Authorized Signature</div>
-                                <div class="small text-muted">Prepared by: {{ $quotation->user->name ?? 'Sales Officer' }}
-                                </div>
+                                <div class="fw-semibold text-dark">Customer Signature </div>
+                                <div class="small text-muted">Signature & Date </div>
                             </div>
                         </div>
                     </div>
