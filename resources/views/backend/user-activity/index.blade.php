@@ -61,12 +61,12 @@
 
     <div class="page-wrapper">
         <div class="page-content">
-            <div class="d-flex flex-wrap align-items-center justify-content-between gap-2 mb-3 no-print">
+            <div class="flex-wrap gap-2 mb-3 d-flex align-items-center justify-content-between no-print">
                 <div>
                     <h5 class="mb-1">User Activity Log</h5>
-                    <p class="text-muted mb-0">Login history and recorded system changes</p>
+                    <p class="mb-0 text-muted">Login history and recorded system changes</p>
                 </div>
-                <div class="d-flex flex-wrap gap-2">
+                <div class="flex-wrap gap-2 d-flex">
                     <button type="button" class="btn btn-outline-primary" onclick="window.print()">
                         <i class="bx bx-printer me-1"></i>Print
                     </button>
@@ -92,10 +92,10 @@
                 <div class="text-muted small">Generated: {{ now()->format('Y-m-d H:i:s') }}</div>
             </div>
 
-            <div class="card radius-10 shadow-sm border-0 no-print">
+            <div class="border-0 shadow-sm card radius-10 no-print">
                 <div class="card-body">
                     <form method="GET" action="{{ route('user-activity-logs.index') }}"
-                        class="row g-3 align-items-end mb-4">
+                        class="mb-4 row g-3 align-items-end">
                         <div class="col-12 col-sm-6 col-lg-2">
                             <label for="from" class="form-label">From date</label>
                             <input type="date" id="from" name="from" value="{{ $filters['from'] ?? '' }}"
@@ -127,7 +127,7 @@
                                 @endforeach
                             </select>
                         </div>
-                        <div class="col-12 col-lg-2 d-flex gap-2">
+                        <div class="gap-2 col-12 col-lg-2 d-flex">
                             <button type="submit" class="btn btn-primary flex-grow-1">Filter</button>
                             <a href="{{ route('user-activity-logs.index') }}" class="btn btn-outline-secondary">Reset</a>
                         </div>
@@ -135,16 +135,16 @@
                 </div>
             </div>
 
-            <div class="card radius-10 shadow-sm border-0 activity-report">
+            <div class="border-0 shadow-sm card radius-10 activity-report">
                 <div class="card-body">
                     <div class="table-responsive">
-                        <table class="table table-hover align-middle">
+                        <table class="table align-middle table-hover">
                             <thead class="table-light">
                                 <tr>
                                     <th>Date and time</th>
                                     <th>User</th>
                                     <th>Activity</th>
-                                    <th>Details</th>
+                                    <th>View recorded details</th>
                                     <th>IP address</th>
                                 </tr>
                             </thead>
@@ -154,9 +154,9 @@
                                         <td class="text-nowrap">{{ $log->created_at->format('Y-m-d H:i:s') }}</td>
                                         <td>
                                             <div class="fw-semibold">{{ $log->user_name }}</div>
-                                            <small class="text-muted">{{ $log->user_email }}</small>
+                                            <small class="text-muted text-wrap">{{ $log->user_email }}</small>
                                         </td>
-                                        <td><span class="badge bg-light text-dark border">{{ ucfirst($log->event) }}</span>
+                                        <td><span class="border badge bg-light text-dark">{{ ucfirst($log->event) }}</span>
                                         </td>
                                         <td>
                                             <div>{{ $log->description }}</div>
@@ -165,17 +165,36 @@
                                                     #{{ $log->subject_id }}</small>
                                             @endif
                                             @if ($log->properties)
-                                                <details class="mt-1">
-                                                    <summary class="small text-primary">View recorded details</summary>
-                                                    <pre class="small text-wrap mt-2 mb-0">{{ json_encode($log->properties, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE) }}</pre>
-                                                </details>
+                                                {{-- <div class="mt-1 small text-primary">details</div> --}}
+                                                <div class="mt-1 table-responsive">
+                                                    <table class="table mb-0 table-sm table-bordered">
+                                                        <tbody>
+                                                            @foreach ($log->properties as $field => $value)
+                                                                @continue(is_null($value) || $value === '' || $value === [])
+                                                                <tr>
+                                                                    <td class="text-break fw-semibold " style="width: 35%;">
+                                                                        {{ $field }}</td>
+                                                                    <td class="text-wrap">
+                                                                        @if (is_array($value))
+                                                                            {{ json_encode($value, JSON_UNESCAPED_UNICODE) }}
+                                                                        @elseif (is_bool($value))
+                                                                            {{ $value ? 'true' : 'false' }}
+                                                                        @else
+                                                                            {{ $value }}
+                                                                        @endif
+                                                                    </td>
+                                                                </tr>
+                                                            @endforeach
+                                                        </tbody>
+                                                    </table>
+                                                </div>
                                             @endif
                                         </td>
                                         <td>{{ $log->ip_address ?: '—' }}</td>
                                     </tr>
                                 @empty
                                     <tr>
-                                        <td colspan="5" class="text-center text-muted py-4">No activity found for these
+                                        <td colspan="5" class="py-4 text-center text-muted">No activity found for these
                                             filters.</td>
                                     </tr>
                                 @endforelse
@@ -183,7 +202,8 @@
                         </table>
                     </div>
 
-                    <div class="mt-3 activity-pagination">{{ $logs->links() }}</div>
+                    <div class="mt-3 activity-pagination">{{ $logs->onEachSide(1)->links('pagination::bootstrap-5') }}
+                    </div>
                 </div>
             </div>
         </div>

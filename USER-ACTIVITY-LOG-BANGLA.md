@@ -1,5 +1,132 @@
 # User Activity Log: বাংলা কারিগরি নথি
 
+## এই পরিবর্তনে যা যোগ করা হয়েছে
+
+`Details` কলামের `properties` JSON-কে একটি ছোট key/value table-এ সরাসরি দেখানো হয়। "View recorded details" text-এর নিচে field ও value পাশাপাশি থাকবে; আলাদা expand/collapse প্রয়োজন নেই। নিচে নতুন Blade code এবং প্রতিটি অংশের বাংলা ব্যাখ্যা দেওয়া হলো।
+
+## Blade Template (Code and Explanation)
+
+### Controller
+
+এই পরিবর্তনে কোনো Controller code যোগ বা পরিবর্তন করা হয়নি। বিদ্যমান `UserActivityLogController@index` `$logs` collection Blade view-এ পাঠায়। 
+
+```php
+return view(
+    'backend.user-activity.index',
+    compact('logs', 'users', 'filters', 'selectedUser')
+);
+```
+
+- `return view(...)`: `backend/user-activity/index.blade.php` Blade file-টি খুলে।
+- `'backend.user-activity.index'`: Blade-এর dot notation; এটি `resources/views/backend/user-activity/index.blade.php` নির্দেশ করে।
+- `compact(...)`: Controller-এর `$logs`, `$users`, `$filters` ও `$selectedUser` variable Blade-এ পাঠায়।
+
+### Migration
+
+এই পরিবর্তনে কোনো Migration যোগ বা পরিবর্তন করা হয়নি। বিদ্যমান migration `properties` কলামটি JSON হিসেবে সংরক্ষণ করে।
+
+```php
+$table->json('properties')->nullable();
+```
+
+- `$table->json(...)`: JSON-compatible ডেটা রাখার কলাম তৈরি করে।
+- `'properties'`: কলামের নাম।
+- `->nullable()`: কোন properties না থাকলে কলামটি `NULL` হতে পারে।
+
+### Route
+
+এই পরিবর্তনে Route যোগ বা পরিবর্তন করা হয়নি। বিদ্যমান route Activity page-টি প্রদর্শন করে।
+
+```php
+Route::get('/user-activity-logs', [UserActivityLogController::class, 'index'])
+    ->middleware('permission:user.activity.logs')
+    ->name('user-activity-logs.index');
+```
+
+- `Route::get(...)`: `/user-activity-logs` URL-এর জন্য GET request নির্ধারণ করে।
+- `[UserActivityLogController::class, 'index']`: Controller-এর `index` method চালায়।
+- `middleware(...)`: এই page দেখতে নির্দিষ্ট permission প্রয়োজন।
+- `name(...)`: Blade বা redirect-এ route-টি নাম দিয়ে ব্যবহারযোগ্য করে।
+
+### Model
+
+এই পরিবর্তনে Model code যোগ বা পরিবর্তন করা হয়নি। বিদ্যমান Model `properties` JSON-কে array-তে cast করে।
+
+```php
+protected function casts(): array
+{
+    return [
+        'properties' => 'array',
+    ];
+}
+```
+
+- `casts()`: Database value PHP value হিসেবে পাঠানোর cast rules দেয়।
+- `'properties' => 'array'`: JSON-কে associative PHP array-তে রূপান্তর করে।
+
+### Blade Template (পরিবর্তিত code)
+
+নিচের code মূল Blade-এর Details cell-এ nested key/value table দেখায়।
+
+```blade
+@if ($log->properties)
+    <div class="small text-primary mt-1">View recorded details</div>
+    <div class="table-responsive mt-1">
+        <table class="table table-sm table-bordered mb-0">
+            <tbody>
+                @foreach ($log->properties as $field => $value)
+                    @continue(is_null($value) || $value === '' || $value === [])
+                    <tr>
+                        <td class="text-break fw-semibold" style="width: 35%;">
+                            {{ $field }}
+                        </td>
+                        <td class="text-break">
+                            @if (is_array($value))
+                                {{ json_encode($value, JSON_UNESCAPED_UNICODE) }}
+                            @elseif (is_bool($value))
+                                {{ $value ? 'true' : 'false' }}
+                            @else
+                                {{ $value }}
+                            @endif
+                        </td>
+                    </tr>
+                @endforeach
+            </tbody>
+        </table>
+    </div>
+@endif
+```
+
+- `@if ($log->properties)`: properties খালি বা `null` না হলে Details link দেখায়।
+- `<div class="small text-primary mt-1">View recorded details</div>`: Details heading text সরাসরি দেখায়।
+- `table-responsive`: ছোট screen/table area-তে horizontal scroll করে।
+- `table table-sm table-bordered mb-0`: Bootstrap-এ ছোট, border-যুক্ত table তৈরি করে।
+- `<tbody>`: key/value rowগুলো table-এর body-তে রাখে।
+- `@foreach ($log->properties as $field => $value)`: properties array-এর প্রতিটি key/value একেক row-তে আনে।
+- `@continue(...)`: value `null`, empty string বা empty array হলে ওই field-এর row তৈরি না করে পরবর্তী field-এ যায়।
+- `<td class="text-break fw-semibold" style="width: 35%;">`: বাম কলামে properties-এর field/name bold করে দেখায়।
+- পরের `<td>`: একই row-এর ডান পাশে properties-এর value দেখায়।
+- `@if (is_array($value))`: value array হলে JSON string-এ রূপান্তর করে।
+- `json_encode(...)`: PHP array/object-কে JSON text-এ রূপান্তর করে।
+- `JSON_UNESCAPED_UNICODE`: বাংলা ও অন্যান্য Unicode character escape না করে।
+- `@elseif (is_bool($value))`: value boolean হলে আলাদা true/false text দেখায়।
+- `@else {{ $value }} @endif`: অন্যান্য scalar value সরাসরি দেখায়।
+
+### Pagination
+
+Activity Log-এর pagination-এ Laravel-এর Tailwind default view না ব্যবহার করে Bootstrap 5 view explicitভাবে ব্যবহার করা হয়েছে। এতে "Showing 1 to 25 of 82 results"-এর মতো unexpected summary text দেখানো হবে না।
+
+```blade
+<div class="mt-3 activity-pagination">
+    {{ $logs->onEachSide(1)->links('pagination::bootstrap-5') }}
+</div>
+```
+
+- `$logs`: Controller থেকে পাওয়া paginated log collection।
+- `onEachSide(1)`: বর্তমান page-এর দুই পাশে সর্বাধিক একটি করে nearby page number দেখায়।
+- `links('pagination::bootstrap-5')`: Laravel-এর Bootstrap 5 pagination markup ব্যবহার করে।
+- `activity-pagination`: Print CSS pagination section লুকাতে ব্যবহার করা হয়।
+
 ## উদ্দেশ্য ও অনুমতি
 
 User Activity Log-এ সফল login/logout, এবং সফল data create/update/delete request-এর actor, সময়, event, subject, request detail, IP address ও user agent রেকর্ড হয়। Activity history user মুছে ফেললেও টিকে থাকে।
