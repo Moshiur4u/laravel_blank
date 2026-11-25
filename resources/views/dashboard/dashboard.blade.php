@@ -163,6 +163,43 @@
             }
 
             .invoice-organization,
+            .invoice-organization *,
+            .quotation-organization,
+            .quotation-organization *,
+            .organization-report-header,
+            .organization-report-header * {
+                font-size: 12px !important;
+            }
+
+            .invoice-organization h4,
+            .quotation-organization h4,
+            .organization-report-header h2 {
+                font-size: 20px !important;
+                line-height: 1.25 !important;
+            }
+
+            .invoice-organization img,
+            .quotation-organization img,
+            .organization-report-header img {
+                max-width: 110px !important;
+                max-height: 80px !important;
+            }
+
+            .money-receipt .receipt-organization,
+            .money-receipt .receipt-organization * {
+                font-size: 8pt !important;
+            }
+
+            .money-receipt .receipt-organization h2 {
+                font-size: 11pt !important;
+            }
+
+            .money-receipt .receipt-organization img {
+                max-width: 18mm !important;
+                max-height: 14mm !important;
+            }
+
+            .invoice-organization,
             .quotation-organization,
             .organization-report-header {
                 /* position: fixed !important; */
@@ -233,6 +270,11 @@
                             @can('sales.create')
                                 <li>
                                     <a href="{{ route('sales.index') }}"><i class='bx bx-plus-medical'></i>Create Sale</a>
+                                </li>
+                            @endcan
+                            @can('product.return')
+                                <li>
+                                    <a href="{{ route('sales.salehistory') }}"><i class='bx bx-history'></i>SalesHistory</a>
                                 </li>
                             @endcan
                             @can('product.return')

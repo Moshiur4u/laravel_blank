@@ -27,10 +27,21 @@ class SaleController extends Controller
             ->whereRaw('CAST(unit AS DOUBLE) > 0')
             ->orderBy('productName')
             ->get();
-        $invoices = SaleInvoice::with('employee')->latest('invoice_date')->limit(10)->get();
+        $invoices = SaleInvoice::with('employee')->latest('invoice_date')->limit(5)->get();
         $defaultTerms = self::DEFAULT_TERMS;
 
         return view('backend.Sales.salesIndex', compact('products', 'invoices', 'defaultTerms'));
+    }
+    public function Salehistory()
+    {
+        $products = Product::query()
+            ->whereRaw('CAST(unit AS DOUBLE) > 0')
+            ->orderBy('productName')
+            ->get();
+        $invoices = SaleInvoice::with('employee')->latest('invoice_date')->get();
+        $defaultTerms = self::DEFAULT_TERMS;
+
+        return view('backend.Sales.salesHistory', compact('products', 'invoices', 'defaultTerms'));
     }
 
     public function blankInvoice()

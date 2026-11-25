@@ -264,7 +264,7 @@
                                                     @endphp
                                                     <tr class="warranty-row {{ $showWarrantyRow ? '' : 'd-none' }}">
                                                         <td colspan="7" class="pt-0">
-                                                            <div class="d-flex flex-wrap align-items-center gap-3">
+                                                            <div class="flex-wrap gap-3 d-flex align-items-center">
                                                                 <div class="form-check">
                                                                     <input type="checkbox"
                                                                         id="warranty_cover_{{ $index }}"
@@ -426,7 +426,7 @@
                                         <textarea name="notes" id="notes" rows="2" class="form-control">{{ old('notes', $editingInvoice?->notes) }}</textarea>
                                     </div>
                                     <!--Terms & Conditions Create Invoice এ বন্ধ রাখার জন্য ও d-none ব্যবহার করা হয়েছে
-                                                            দেখতে চাইলে আবার d-none মুছে ফেললে হবে-->
+                                                                                দেখতে চাইলে আবার d-none মুছে ফেললে হবে-->
                                     <div class="mb-3 d-none">
                                         <label for="terms_conditions" class="form-label fw-semibold">Terms &
                                             Conditions</label>
@@ -493,7 +493,7 @@
                                     <th>Employee</th>
                                     <th>Total</th>
                                     <th>Due</th>
-                                    <th></th>
+                                    <th>View/Print</th>
                                 </tr>
                             </thead>
                             <tbody>
@@ -501,7 +501,7 @@
                                     <tr data-recent-invoice-row>
                                         <td>{{ $invoice->invoice_no }}</td>
                                         <td>{{ $invoice->invoice_date->format('d M Y') }}</td>
-                                        <td>{{ $invoice->customer_phone }}</td>
+                                        <td>{{ $invoice->customer_name }}</td>
                                         <td>{{ $invoice->employee->name ?? 'N/A' }}</td>
                                         <td>৳{{ number_format($invoice->total_amount, 2) }}</td>
                                         <td>৳{{ number_format($invoice->due_amount, 2) }}</td>
@@ -509,11 +509,7 @@
                                             <a href="{{ route('sales.invoice', $invoice->id) }}"
                                                 class="btn btn-sm btn-outline-primary" title="View Invoice"
                                                 aria-label="View invoice {{ $invoice->invoice_no }}">
-                                                <i class="bx bx-show me-1"></i>Invoice
-                                            </a>
-                                            <a href="{{ route('sales.delivery-challan', $invoice->id) }}"
-                                                class="btn btn-sm btn-outline-success" title="Delivery Challan">
-                                                <i class="bx bx-package me-1"></i>Challan
+                                                <i class="bx bx-show me-1"></i>Invoice&Challan
                                             </a>
                                         </td>
                                     </tr>
