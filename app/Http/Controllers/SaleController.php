@@ -32,7 +32,7 @@ class SaleController extends Controller
 
         return view('backend.Sales.salesIndex', compact('products', 'invoices', 'defaultTerms'));
     }
-    public function Salehistory()
+    public function SalesRecord()
     {
         $products = Product::query()
             ->whereRaw('CAST(unit AS DOUBLE) > 0')

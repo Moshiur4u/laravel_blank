@@ -352,9 +352,9 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::get('/sales', [SaleController::class, 'index'])
         ->middleware('permission:sales.create|sales.view|Voide_today_Invoice|Voide_anyday_Invoice|Update_today_Invoice|Update_anyday_Invoice')
         ->name('sales.index');
-    Route::get('/salehistory', [SaleController::class, 'Salehistory'])
-        // ->middleware('permission:sales.create|sales.view|Voide_today_Invoice|Voide_anyday_Invoice|Update_today_Invoice|Update_anyday_Invoice')
-        ->name('sales.salehistory');
+    Route::get('/sales/record', [SaleController::class, 'SalesRecord']) // sales record দেখার নতুন route।
+        ->middleware('permission:sale.records') // sales record দেখার নতুন permission।
+        ->name('sales.record');
     Route::get('/sales/blank-invoice', [SaleController::class, 'blankInvoice'])
         ->middleware('permission:sales.create|sales.view')
         ->name('sales.blank-invoice');

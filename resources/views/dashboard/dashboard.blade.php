@@ -272,9 +272,10 @@
                                     <a href="{{ route('sales.index') }}"><i class='bx bx-plus-medical'></i>Create Sale</a>
                                 </li>
                             @endcan
-                            @can('product.return')
+                            @can('sale.records')
+                                {{-- sales record link-এর নতুন permission। --}}
                                 <li>
-                                    <a href="{{ route('sales.salehistory') }}"><i class='bx bx-history'></i>SalesHistory</a>
+                                    <a href="{{ route('sales.record') }}"><i class='bx bx-history'></i>SalesRecord</a>
                                 </li>
                             @endcan
                             @can('product.return')
